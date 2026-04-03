@@ -193,6 +193,12 @@ bool isLoaded = false;
 
 int DLLEXPORT HUD_VidInit( void )
 {
+
+	gEngfuncs.Con_Printf("HUD_VidInit: calling CounterStrikeViewport_IsVGUI2Available\n");
+	gEngfuncs.Con_Printf("HUD_VidInit: IsVGUI2Available=%d\n", CounterStrikeViewport_IsVGUI2Available());
+	gEngfuncs.Con_Printf("HUD_VidInit: calling CounterStrikeViewport_Create\n");
+	bool created = CounterStrikeViewport_Create();
+	gEngfuncs.Con_Printf("HUD_VidInit: Create returned %d, g_pViewport=%p\n", created, g_pViewport);
 	gHUD.VidInit();
 
 	if( CounterStrikeViewport_IsVGUI2Available() )
