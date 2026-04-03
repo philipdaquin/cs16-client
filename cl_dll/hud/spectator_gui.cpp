@@ -36,6 +36,7 @@ version.
 #include "vgui_parser.h"
 #include "triangleapi.h"
 #include "draw_util.h"
+#include "VGUI/vgui_int.h"
 
 /*
  * We will draw all elements inside a box. It's size 16x10.
@@ -164,6 +165,9 @@ static void DrawIconOnButton( int x1, int y1, int wide, int tall, int hTex, int 
 
 int CHudSpectatorGui::Draw( float flTime )
 {
+	if (VGui_IsSpectatorGUIVisible())
+		return 1;
+
 	if( !g_iUser1 )
 	{
 		if( m_menuFlags & ROOT_MENU )

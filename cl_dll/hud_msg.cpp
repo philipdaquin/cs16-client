@@ -31,6 +31,7 @@
 #include <cstring>
 
 #include "events.h"
+#include "VGUI/vgui_int.h"
 
 #define MAX_CLIENTS 32
 
@@ -40,6 +41,8 @@ extern float g_flRoundTime;
 
 int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
 {
+	VGui_Reset();
+
 	// clear all hud data
 	HUDLIST *pList = m_pHudList;
 

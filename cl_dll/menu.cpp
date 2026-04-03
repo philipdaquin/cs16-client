@@ -20,6 +20,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "VGUI/vgui_int.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -81,6 +82,9 @@ int CHudMenu :: VidInit( void )
 
 int CHudMenu :: Draw( float flTime )
 {
+	if (VGui_IsAnyPanelVisible())
+		return 1;
+
 	// check for if menu is set to disappear
 	if ( m_flShutoffTime > 0 )
 	{
@@ -128,6 +132,9 @@ int CHudMenu :: Draw( float flTime )
 // selects an item from the menu
 void CHudMenu :: SelectMenuItem( int menu_item )
 {
+	if (VGui_IsAnyPanelVisible())
+		return;
+
 	// if menu_item is in a valid slot,  send a menuselect command to the server
 	if ( (menu_item > 0) && (m_bitsValidSlots & (1 << (menu_item-1))) )
 	{
@@ -238,6 +245,12 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
+	if (VGui_IsPanelVisible(MENU_BUY))
+	{
+		VGui_HidePanel(MENU_BUY);
+		return 1;
+	}
+
 	Touch_CloseMenu();
 
 	return 1;
@@ -272,6 +285,25 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
+	switch (menuType)
+	{
+	case MENU_TEAM:
+	case MENU_CLASS_T:
+	case MENU_CLASS_CT:
+	case MENU_BUY:
+	case MENU_BUY_PISTOL:
+	case MENU_BUY_SHOTGUN:
+	case MENU_BUY_RIFLE:
+	case MENU_BUY_SUBMACHINEGUN:
+	case MENU_BUY_MACHINEGUN:
+	case MENU_BUY_ITEM:
+		VGui_ShowPanel(menuType, true);
+		m_fMenuDisplayed = 1;
+		return;
+	default:
+		break;
+	}
+
 	const char *szCmd;
 
 	switch(menuType)
