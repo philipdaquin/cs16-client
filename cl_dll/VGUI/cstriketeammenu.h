@@ -3,12 +3,12 @@
 #include "VGUI/counterstrikeviewport.h"
 #include <vgui_controls/Frame.h>
 
-class CClassMenuPanel : public vgui2::Frame, public IViewportPanel
+class CTeamMenuPanel : public vgui2::Frame, public IViewportPanel
 {
-	DECLARE_CLASS_SIMPLE(CClassMenuPanel, vgui2::Frame);
+	DECLARE_CLASS_SIMPLE(CTeamMenuPanel, vgui2::Frame);
 
 public:
-	CClassMenuPanel(vgui2::Panel *parent, const char *panelName, bool isCt);
+	CTeamMenuPanel(vgui2::Panel *parent, const char *panelName);
 
 	virtual const char *GetName();
 	virtual void SetData(KeyValues *data);
@@ -25,8 +25,10 @@ public:
 	virtual void OnKeyCodePressed(vgui2::KeyCode code);
 
 private:
+	void UpdateMapName();
+	void UpdateButtonStates();
 	void CenterInViewport();
 
-	bool m_bIsCt;
+	int m_iCurrentTeam;
 };
 

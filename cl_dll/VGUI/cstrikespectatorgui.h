@@ -1,14 +1,14 @@
 #pragma once
 
 #include "VGUI/counterstrikeviewport.h"
-#include <vgui_controls/Frame.h>
+#include <vgui_controls/EditablePanel.h>
 
-class CClassMenuPanel : public vgui2::Frame, public IViewportPanel
+class CSpectatorGUI : public vgui2::EditablePanel, public IViewportPanel
 {
-	DECLARE_CLASS_SIMPLE(CClassMenuPanel, vgui2::Frame);
+	DECLARE_CLASS_SIMPLE(CSpectatorGUI, vgui2::EditablePanel);
 
 public:
-	CClassMenuPanel(vgui2::Panel *parent, const char *panelName, bool isCt);
+	CSpectatorGUI(vgui2::Panel *parent, const char *panelName);
 
 	virtual const char *GetName();
 	virtual void SetData(KeyValues *data);
@@ -21,12 +21,8 @@ public:
 	virtual bool IsVisible();
 	virtual void SetParent(vgui2::VPANEL parent);
 
-	virtual void OnCommand(const char *command);
-	virtual void OnKeyCodePressed(vgui2::KeyCode code);
-
 private:
-	void CenterInViewport();
-
-	bool m_bIsCt;
+	void UpdateLabelText(const char *controlName, const char *text);
+	void UpdateScoreLabels();
+	void UpdateTimerLabel();
 };
-
