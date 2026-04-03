@@ -33,6 +33,10 @@ if(VITA)
 	add_compile_options(-fno-use-cxa-atexit)
 endif()
 
+if(BUILD_CLIENT AND NOT APPLE)
+	add_subdirectory(../hl1_source_sdk ${CMAKE_CURRENT_BINARY_DIR}/hl1_source_sdk)
+endif()
+
 if(BUILD_CLIENT)
 	add_subdirectory(cl_dll)
 endif()

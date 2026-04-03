@@ -8,6 +8,7 @@ file(GLOB CS_EV_SRC "events/*.cpp")
 file(GLOB CS_WPN_SRC "cs_wpn/*.cpp")
 file(GLOB CS_WPNSH_SRC "../dlls/wpn_shared/*.cpp")
 file(GLOB CS_HUD_SRC "hud/*.cpp")
+file(GLOB CS_VGUI_SRC "VGUI/*.cpp")
 file(GLOB CS_STUDIO_SRC "studio/*.cpp")
 file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
@@ -25,6 +26,7 @@ list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPNSH_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_HUD_SRC})
+list(APPEND CS_CLIENT_SRC ${CS_VGUI_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_STUDIO_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_PM_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_INPUT_SRC})
@@ -49,7 +51,15 @@ include_directories(
 	../3rdparty/mainui_cpp/menus
 	../3rdparty/mainui_cpp/miniutl)
 
+if(NOT APPLE)
+	include_directories(${SOURCE_SDK_INCLUDE_PATHS})
+endif()
+
 add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint>)
+
+if(NOT APPLE)
+	add_definitions(${SOURCE_SDK_DEFINES})
+endif()
 
 if(NOT MSVC)
 	add_definitions(-DLINUX -D_LINUX)
@@ -65,6 +75,10 @@ if(XASH_EMSCRIPTEN)
 	set_target_properties(${CLIENT_LIB} PROPERTIES SUFFIX ".wasm")
 else()
 	add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})
+endif()
+
+if(NOT APPLE)
+	target_link_libraries(${CLIENT_LIB} PRIVATE ${SOURCE_SDK_LIBS})
 endif()
 
 set_target_postfix(${CLIENT_LIB})

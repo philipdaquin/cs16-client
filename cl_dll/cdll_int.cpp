@@ -31,6 +31,14 @@
 #include "mobility_int.h"
 #include "vgui_parser.h"
 
+class CCounterStrikeViewport;
+
+extern CCounterStrikeViewport *g_pViewport;
+
+bool CounterStrikeViewport_Create( void );
+void CounterStrikeViewport_Destroy( void );
+bool CounterStrikeViewport_IsVGUI2Available( void );
+
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
 mobile_engfuncs_t	gMobileAPI = { };
@@ -74,6 +82,7 @@ HUD_Shutdown
 void DLLEXPORT HUD_Shutdown( void )
 {
 	gHUD.Shutdown();
+	CounterStrikeViewport_Destroy();
 	Input_Shutdown();
 	Localize_Free();
 }
@@ -191,6 +200,11 @@ int DLLEXPORT HUD_VidInit( void )
 	bool created = CounterStrikeViewport_Create();
 	gEngfuncs.Con_Printf("HUD_VidInit: Create returned %d, g_pViewport=%p\n", created, g_pViewport);
 	gHUD.VidInit();
+
+	if( CounterStrikeViewport_IsVGUI2Available() )
+		CounterStrikeViewport_Create();
+	else
+		CounterStrikeViewport_Destroy();
 
 	isLoaded = true;
 
@@ -533,4 +547,3 @@ public:
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION)
-

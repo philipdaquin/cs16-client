@@ -27,6 +27,16 @@
 
 //#include "vgui_TeamFortressViewport.h"
 
+class CCounterStrikeViewport
+{
+public:
+	void ShowPanel( int menuType, bool show );
+	void HidePanel( int menuType );
+	bool IsAnyPanelVisible() const;
+};
+
+extern CCounterStrikeViewport *g_pViewport;
+
 #define MAX_MENU_STRING	512
 
 char g_szMenuString[MAX_MENU_STRING];
@@ -164,6 +174,9 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 	if ( !m_bitsValidSlots )
 	{
+		if( g_pViewport )
+			g_pViewport->HidePanel( -1 );
+
 		UserCmd_OldStyleMenuClose(); // no valid slots means that the menu should be turned off
 		return 1;
 	}
@@ -193,6 +206,17 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		else ShowVGUIMenu(MENU_NUMERICAL_MENU);
 	}
 	else ShowVGUIMenu(MENU_NUMERICAL_MENU);
+
+	if( g_pViewport && g_pViewport->IsAnyPanelVisible() )
+	{
+		g_szPrelocalisedMenuString[0] = '\0';
+		g_szMenuString[0] = '\0';
+		m_fMenuDisplayed = 0;
+		m_bitsValidSlots = 0;
+		m_iFlags &= ~HUD_DRAW;
+		m_fWaitingForMore = FALSE;
+		return 1;
+	}
 
 	if ( !m_fWaitingForMore ) // this is the start of a new menu
 	{
@@ -233,16 +257,21 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 	m_bitsValidSlots = reader.ReadShort(); // is ignored
 
 	ShowVGUIMenu(menuType);
+
+	if( g_pViewport && g_pViewport->IsAnyPanelVisible() )
+	{
+		m_fMenuDisplayed = 0;
+		m_bitsValidSlots = 0;
+		m_iFlags &= ~HUD_DRAW;
+	}
+
 	return 1;
 }
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
 	if( g_pViewport )
-	{
-		g_pViewport->ShowPanel( MENU_BUY, false );
-		return 1;
-	}
+		g_pViewport->HidePanel( -1 );
 
 	Touch_CloseMenu();
 
@@ -278,10 +307,6 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
-
-
-	gEngfuncs.Con_Printf("ShowVGUIMenu: menuType=%d, g_pViewport=%p\n", menuType, g_pViewport);
-
 	if( g_pViewport )
 	{
 		g_pViewport->ShowPanel( menuType, true );
