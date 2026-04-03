@@ -238,6 +238,12 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 int CHudMenu::MsgFunc_BuyClose(const char *pszName, int iSize, void *pbuf)
 {
+	if( g_pViewport )
+	{
+		g_pViewport->ShowPanel( MENU_BUY, false );
+		return 1;
+	}
+
 	Touch_CloseMenu();
 
 	return 1;
@@ -272,6 +278,16 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
+
+
+	gEngfuncs.Con_Printf("ShowVGUIMenu: menuType=%d, g_pViewport=%p\n", menuType, g_pViewport);
+
+	if( g_pViewport )
+	{
+		g_pViewport->ShowPanel( menuType, true );
+		return;
+	}
+
 	const char *szCmd;
 
 	switch(menuType)
