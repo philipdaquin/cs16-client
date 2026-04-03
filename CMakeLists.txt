@@ -6,6 +6,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 include(LibraryNaming)
 # include(ExternalProject)
 
+add_subdirectory(../hl1_source_sdk ${CMAKE_CURRENT_BINARY_DIR}/hl1_source_sdk)
+
 # for extras packaging
 find_package(Python COMPONENTS Interpreter REQUIRED)
 
