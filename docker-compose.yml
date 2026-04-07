@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  build-wasm:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    image: cs16-client-wasm:latest
+    container_name: cs16-wasm-test

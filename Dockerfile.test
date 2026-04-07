@@ -1,0 +1,5 @@
+FROM emscripten/emsdk:4.0.17
+
+WORKDIR /cs
+COPY cs-client/cs16-client .
+RUN emcmake cmake -S . -B build && cmake --build build --config Release
