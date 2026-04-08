@@ -6,12 +6,12 @@
 
 #include <vgui_controls/EditablePanel.h>
 
-class CBuyPresetListBox : public vgui2::EditablePanel
+class CBuyPresetPanel : public vgui2::EditablePanel
 {
-	DECLARE_CLASS_SIMPLE(CBuyPresetListBox, vgui2::EditablePanel);
+	DECLARE_CLASS_SIMPLE(CBuyPresetPanel, vgui2::EditablePanel);
 
 public:
-	CBuyPresetListBox(vgui2::Panel *parent, const char *panelName);
+	CBuyPresetPanel(vgui2::Panel *parent, const char *panelName);
 
 	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
 	virtual void Paint() override;

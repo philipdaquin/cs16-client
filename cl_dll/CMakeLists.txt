@@ -5,6 +5,7 @@ set(CLIENT_LIB client)
 
 file(GLOB CS_CLIENT_SRC "*.cpp")
 file(GLOB CS_EV_SRC "events/*.cpp")
+file(GLOB CS_VGUI_SRC "VGUI/*.cpp")
 file(GLOB CS_WPN_SRC "cs_wpn/*.cpp")
 file(GLOB CS_WPNSH_SRC "../dlls/wpn_shared/*.cpp")
 file(GLOB CS_HUD_SRC "hud/*.cpp")
@@ -30,6 +31,7 @@ list(APPEND CS_CLIENT_SRC ${CS_STUDIO_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_PM_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_INPUT_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_GAMSH_SRC})
+list(APPEND CS_CLIENT_SRC ${CS_VGUI_SRC})
 list(APPEND CS_CLIENT_SRC ${MINIUTL_SRC})
 
 include_directories(

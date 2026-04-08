@@ -236,9 +236,8 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 
-	// TEMPORARY DIAGNOSTIC DISABLED - was spamming console
-	// FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
-	// gEngfuncs.Con_Printf("\n========== CLIENT HUD_Redraw HIT ==========\n");
+	// DIAGNOSTIC ORANGE BOX - top-left corner
+	FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
 
 	return 1;
 }

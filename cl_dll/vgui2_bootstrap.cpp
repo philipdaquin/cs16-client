@@ -28,6 +28,8 @@ static VGui2BootstrapState state = {};
 
 static cvar_t cl_vgui2_bootstrap = { "cl_vgui2_bootstrap", "1", 0 };
 static cvar_t cl_vgui2_testpanel = { "cl_vgui2_testpanel", "1", 0 };
+static cvar_t cl_vgui2_menus = { "cl_vgui2_menus", "1", 0 };
+static cvar_t cl_vgui2_debugpaint = { "cl_vgui2_debugpaint", "0", 0 };
 
 static const char *GetVGui2FactoryFuncName()
 {
@@ -128,6 +130,8 @@ static void RegisterCvars()
 {
 	gEngfuncs.pfnRegisterVariable("cl_vgui2_bootstrap", "1", 0);
 	gEngfuncs.pfnRegisterVariable("cl_vgui2_testpanel", "1", 0);
+	gEngfuncs.pfnRegisterVariable("cl_vgui2_menus", "1", 0);
+	gEngfuncs.pfnRegisterVariable("cl_vgui2_debugpaint", "0", 0);
 }
 
 bool VGUI2_IsReady()
@@ -142,8 +146,13 @@ bool VGUI2_HasScheme()
 
 bool VGUI2_Bootstrap()
 {
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() ENTRY attempted=%d\n", state.attempted);
+
 	if (state.attempted)
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() SKIP - already attempted, ready=%d\n", state.ready);
 		return state.ready;
+	}
 
 	state.attempted = true;
 
@@ -172,7 +181,7 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI interfaces initialized (STUB)\n");
 
 	state.ready = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap ready (STUB mode)\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap READY (STUB mode) ready=%d\n", state.ready);
 
 	state.schemeLoaded = false;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load skipped (ARM64 stub)\n");
@@ -234,6 +243,9 @@ bool VGUI2_Bootstrap()
 
 void VGUI2_OnShutdown()
 {
+#if !defined(VGUI2_STUB_MODE)
+	VGUI2_DestroyViewport();
+#endif
 	if (state.testPanelCreated)
 	{
 		VGUI2_DestroyTestPanel();
@@ -311,20 +323,34 @@ void VGUI2_DestroyTestPanel()
 
 void VGUI2_OnVidInit()
 {
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ENTRY\n");
+
 	if (!VGUI2_IsReady())
 	{
 		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - bootstrap not ready\n");
 		return;
 	}
 
-	if (cl_vgui2_testpanel.value == 0.0f)
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_testpanel is 0\n");
-		return;
-	}
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ready=%d, cl_vgui2_menus=%.1f\n",
+		state.ready, cl_vgui2_menus.value);
 
-	if (!state.testPanelCreated)
+#ifndef VGUI2_STUB_MODE
+	if (cl_vgui2_menus.value != 0.0f)
+	{
+		VGUI2_CreateViewport();
+	}
+	else
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_menus is 0\n");
+	}
+#else
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() STUB_MODE - viewport create skipped\n");
+#endif
+
+	if (cl_vgui2_testpanel.value != 0.0f && !state.testPanelCreated)
 	{
 		VGUI2_CreateTestPanel();
 	}
+
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() DONE\n");
 }

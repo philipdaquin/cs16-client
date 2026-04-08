@@ -1,0 +1,20 @@
+#pragma once
+
+#include <vgui2_stub_types.h>
+
+#if !defined(VGUI2_STUB_MODE)
+
+#include <vgui_controls/EditablePanel.h>
+
+class CClassMenu : public vgui2::EditablePanel
+{
+	DECLARE_CLASS_SIMPLE(CClassMenu, vgui2::EditablePanel);
+
+public:
+	CClassMenu(vgui2::Panel *parent, const char *panelName);
+
+	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
+	virtual void Paint() override;
+};
+
+#endif

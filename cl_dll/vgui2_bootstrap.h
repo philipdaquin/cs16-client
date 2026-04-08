@@ -7,3 +7,8 @@ bool VGUI2_HasScheme();
 void VGUI2_OnVidInit();
 void VGUI2_CreateTestPanel();
 void VGUI2_DestroyTestPanel();
+
+#if !defined(VGUI2_STUB_MODE)
+void VGUI2_CreateViewport();
+void VGUI2_DestroyViewport();
+#endif
