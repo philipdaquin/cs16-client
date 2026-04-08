@@ -110,9 +110,12 @@ static int BuildFactoryList(CreateInterfaceFn *outFactories, int maxFactories)
 	const char *moduleName = NULL;
 	CreateInterfaceFn factory = ResolveVGui2Factory(&moduleName);
 
+	gEngfuncs.Con_Printf(LOG_PREFIX "BuildFactoryList: factory=%s, module=%s\n",
+		factory ? "RESOLVED" : "NULL", moduleName);
+
 	if (!factory)
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "No factory available - VGUI2 bootstrap aborted\n");
+		gEngfuncs.Con_Printf(LOG_PREFIX "BuildFactoryList() returning 0 - NO FACTORY AVAILABLE\n");
 		return 0;
 	}
 
@@ -180,7 +183,7 @@ bool VGUI2_Bootstrap()
 	int count = BuildFactoryList(factories, ARRAYSIZE(factories));
 	if (count <= 0)
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "No factory available\n");
+		gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap FAILED - BuildFactoryList returned 0 factories\n");
 		return false;
 	}
 
@@ -237,11 +240,19 @@ void VGUI2_OnShutdown()
 
 void VGUI2_CreateTestPanel()
 {
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() ENTRY\n");
+
 	if (!state.ready)
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() SKIP - bootstrap not ready\n");
 		return;
+	}
 
 	if (state.testPanelCreated)
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() SKIP - already created\n");
 		return;
+	}
 
 #if !defined(VGUI2_STUB_MODE)
 	vgui2::ISurface *surface = g_pVGuiSurface;
@@ -271,6 +282,7 @@ void VGUI2_CreateTestPanel()
 	}
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel bounds: pos=(100,100) size=(200x150)\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel creation SUCCEEDED\n");
 #endif
 
 	state.testPanelCreated = true;
@@ -298,10 +310,16 @@ void VGUI2_DestroyTestPanel()
 void VGUI2_OnVidInit()
 {
 	if (!VGUI2_IsReady())
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - bootstrap not ready\n");
 		return;
+	}
 
 	if (cl_vgui2_testpanel.value == 0.0f)
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_testpanel is 0\n");
 		return;
+	}
 
 	if (!state.testPanelCreated)
 	{
