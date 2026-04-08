@@ -147,6 +147,8 @@ bool VGUI2_Bootstrap()
 
 	state.attempted = true;
 
+	gEngfuncs.Con_Printf("\n========== CLIENT VGUI2_Bootstrap HIT ==========\n");
+
 	RegisterCvars();
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap starting...\n");

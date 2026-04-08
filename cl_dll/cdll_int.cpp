@@ -58,6 +58,8 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	gEngfuncs = *pEnginefuncs;
 
+	gEngfuncs.Con_Printf("\n========== CLIENT Initialize HIT ==========\n");
+
 	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
 
 	Game_HookEvents();
@@ -188,6 +190,8 @@ bool isLoaded = false;
 
 int DLLEXPORT HUD_VidInit( void )
 {
+	gEngfuncs.Con_Printf("\n========== CLIENT HUD_VidInit HIT ==========\n");
+
 	gHUD.VidInit();
 
 	isLoaded = true;
@@ -211,6 +215,8 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+	gEngfuncs.Con_Printf("\n========== CLIENT HUD_Init HIT ==========\n");
+
 	InitInput();
 	gHUD.Init();
 	//Scheme_Init();
@@ -229,6 +235,10 @@ redraw the HUD.
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
+
+	FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
+
+	gEngfuncs.Con_Printf("\n========== CLIENT HUD_Redraw HIT ==========\n");
 
 	return 1;
 }
