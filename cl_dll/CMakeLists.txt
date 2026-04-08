@@ -20,6 +20,7 @@ list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/inputw32.cpp")
 list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cpp")
 list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
 list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
+list(APPEND CS_CLIENT_SRC vgui2_bootstrap.cpp vgui2_testpanel.cpp vgui2_stub_impl.cpp)
 
 list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})
@@ -47,9 +48,15 @@ include_directories(
 	../3rdparty/mainui_cpp
 	../3rdparty/mainui_cpp/controls
 	../3rdparty/mainui_cpp/menus
-	../3rdparty/mainui_cpp/miniutl)
+	../3rdparty/mainui_cpp/miniutl
+	../../hl1_source_sdk/public
+	../../hl1_source_sdk/public/tier1
+	../../hl1_source_sdk/public/tier2
+	../../hl1_source_sdk/public/vgui
+	../../hl1_source_sdk/public/vgui_controls
+	../../hl1_source_sdk/vgui2/vgui_controls)
 
-add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint>)
+add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint> -DARM64)
 
 if(NOT MSVC)
 	add_definitions(-DLINUX -D_LINUX)

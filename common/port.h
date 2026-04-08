@@ -26,7 +26,7 @@ GNU General Public License for more details.
 #endif
 
 #ifndef _WIN32
-	#if XASH_LINUX == 1
+	#if XASH_LINUX == 1 || defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
 	#include <limits.h>
 	#include <dlfcn.h>
 	#endif
