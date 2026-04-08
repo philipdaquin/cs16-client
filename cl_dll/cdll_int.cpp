@@ -30,6 +30,7 @@
 #include "render_api.h"
 #include "mobility_int.h"
 #include "vgui_parser.h"
+#include "vgui2_bootstrap.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -61,6 +62,8 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	Game_HookEvents();
 
+	VGUI2_Bootstrap();
+
 	return 1;
 }
 
@@ -76,6 +79,7 @@ void DLLEXPORT HUD_Shutdown( void )
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
+	VGUI2_OnShutdown();
 }
 
 
@@ -189,6 +193,8 @@ int DLLEXPORT HUD_VidInit( void )
 	isLoaded = true;
 
 	//VGui_Startup();
+
+	VGUI2_OnVidInit();
 
 	return 1;
 }
