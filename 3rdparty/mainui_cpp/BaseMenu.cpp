@@ -283,6 +283,9 @@ int UI_DrawString( HFont font, int x, int y, int w, int h,
 	if( !string || !string[0] )
 		return x;
 
+	if( charH <= 0 )
+		return x;
+
 	if( flags & ETF_SHADOW )
 	{
 		shadowModulate = PackAlpha( uiColorBlack, UnpackAlpha( color ));

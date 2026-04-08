@@ -236,9 +236,9 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 
-	FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
-
-	gEngfuncs.Con_Printf("\n========== CLIENT HUD_Redraw HIT ==========\n");
+	// TEMPORARY DIAGNOSTIC DISABLED - was spamming console
+	// FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
+	// gEngfuncs.Con_Printf("\n========== CLIENT HUD_Redraw HIT ==========\n");
 
 	return 1;
 }
