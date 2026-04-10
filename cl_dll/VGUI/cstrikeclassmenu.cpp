@@ -6,7 +6,8 @@
 #include <string.h>
 
 #include "VGUI/counterstrikeviewport.h"
-#include "include/tf_defs.h"
+#include "VGUI/counterstrikeviewport_interface.h"
+#include "../dlls/cdll_dll.h"
 
 CClassMenu::CClassMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
@@ -33,7 +34,7 @@ void CClassMenu::ReloadControlSettings()
 	LoadControlSettings(m_iMenuType == MENU_CLASS_CT ? "Resource/UI/Classmenu_CT.res" : "Resource/UI/Classmenu_TER.res");
 }
 
-void CClassMenu::ApplySchemeSettings(vgui2::HScheme scheme)
+void CClassMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(true);
@@ -59,7 +60,7 @@ void CClassMenu::OnCommand(const char *command)
 
 		char szCommand[64];
 		snprintf(szCommand, sizeof(szCommand), "%s\n", command);
-		ClientCmd(szCommand);
+		VGUI2_RunClientCommand(szCommand);
 		return;
 	}
 
@@ -68,7 +69,7 @@ void CClassMenu::OnCommand(const char *command)
 		if (m_pViewport)
 			m_pViewport->HideAllGameMenus();
 
-		ClientCmd("cancelselect\n");
+		VGUI2_RunClientCommand("cancelselect\n");
 		return;
 	}
 

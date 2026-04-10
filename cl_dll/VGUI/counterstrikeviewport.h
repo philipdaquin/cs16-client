@@ -48,7 +48,7 @@ public:
 	void ShowBuySubMenu(BuyMenuCategory_t category);
 	void HideAllGameMenus();
 
-	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
+	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
 
 	int GetSubMenuIndex(BuyMenuCategory_t category, bool isCT) const

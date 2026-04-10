@@ -2,6 +2,9 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
+typedef float vec_t;
+typedef vec_t vec3_t[3];
+
 #include "hud.h"
 #include "VGUI/buymenu.h"
 #include "VGUI/buysubmenu.h"
@@ -30,7 +33,7 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	SetMouseInputEnabled(false);
 	SetPaintBackgroundEnabled(false);
 	SetPaintBorderEnabled(false);
-	SetBounds(0, 0, ScreenWidth, ScreenHeight);
+	SetBounds(0, 0, gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
 
 	CreatePanels();
 }
@@ -196,7 +199,7 @@ void CCounterStrikeViewport::HideAllGameMenus()
 	}
 }
 
-void CCounterStrikeViewport::ApplySchemeSettings(vgui2::HScheme scheme)
+void CCounterStrikeViewport::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(false);

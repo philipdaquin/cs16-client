@@ -9,6 +9,7 @@ void VGUI2_ShowBuyMenu();
 void VGUI2_ShowBuySubMenu(int category);
 void VGUI2_HideAllGameMenus();
 int VGUI2_GetLocalPlayerTeam();
+void VGUI2_RunClientCommand(const char *command);
 
 enum VGUI2BuyMenuCategory
 {

@@ -31,12 +31,15 @@ typedef int	func_t;					//
 typedef int	string_t;				// from engine's pr_comp.h;
 typedef float vec_t;				// needed before including progdefs.h
 
+#if defined(CS16_USE_SOURCE_SDK_VECTOR2D)
+#include "mathlib/vector2d.h"
+#endif
+
 //=========================================================
 // 2DVector - used for many pathfinding and many other
 // operations that are treated as planar rather than 3d.
-// If the Source SDK Vector2D is already present, reuse it.
 //=========================================================
-#ifndef VECTOR2D_H
+#if !defined(CS16_USE_SOURCE_SDK_VECTOR2D)
 class Vector2D
 {
 public:
@@ -61,7 +64,7 @@ public:
 #endif
 
 inline float DotProduct(const Vector2D& a, const Vector2D& b) { return( a.x*b.x + a.y*b.y ); }
-#ifndef VECTOR2D_H
+#if !defined(CS16_USE_SOURCE_SDK_VECTOR2D)
 inline Vector2D operator*(float fl, const Vector2D& v)	{ return v * fl; }
 #endif
 

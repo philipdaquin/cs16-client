@@ -29,8 +29,9 @@
 #include "port.h"
 
 #include <string.h>
-#include "wrect.h" // need for cl_dll.h
-#include "cl_dll.h"
+typedef float vec_t;
+typedef vec_t vec3_t[3];
+#include "hud_iface.h"
 #include "vgui_parser.h"
 #include "unicode_strtools.h"
 
@@ -42,10 +43,16 @@
 // evil pasta hacks
 #define uint64 uint64_bruh
 #define int64 int64_bruh
+#define Construct miniutl_Construct_bruh
+#define CopyConstruct miniutl_CopyConstruct_bruh
+#define Destruct miniutl_Destruct_bruh
 #include "miniutl.h"
 #include "utlhashmap.h"
 #undef uint64
 #undef int64
+#undef Construct
+#undef CopyConstruct
+#undef Destruct
 
 static CUtlHashMap<const char *, const char *> hashed_cmds;
 

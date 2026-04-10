@@ -3,7 +3,7 @@
 #if !defined(VGUI2_STUB_MODE)
 
 #include <vgui_controls/MessageMap.h>
-#include <vgui2/ISurface.h>
+#include <vgui/ISurface.h>
 
 static vgui2::Panel *CreateMouseOverPanelButton()
 {

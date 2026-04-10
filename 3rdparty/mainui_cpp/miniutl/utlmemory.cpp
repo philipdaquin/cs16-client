@@ -6,7 +6,7 @@
 //
 //=============================================================================//
 
-#include <utlmemory.h>
+#include "utlmemory.h"
 
 CUtlMemoryBase::CUtlMemoryBase( int nSizeOfType, int nGrowSize, int nInitAllocationCount ) : m_pMemory(0), 
 m_nAllocationCount( nInitAllocationCount ), m_nGrowSize( nGrowSize ), m_unSizeOfElements( nSizeOfType )

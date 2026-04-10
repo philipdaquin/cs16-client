@@ -17,7 +17,7 @@ void RunClientCommand(const char *command)
 
 	char szCommand[64];
 	snprintf(szCommand, sizeof(szCommand), "%s%s", command, strchr(command, '\n') ? "" : "\n");
-	ClientCmd(szCommand);
+	VGUI2_RunClientCommand(szCommand);
 }
 
 bool CommandStartsWith(const char *command, const char *prefix)
@@ -43,7 +43,7 @@ void CBuyMenu::ReloadControlSettings()
 	LoadControlSettings("Resource/UI/MainBuyMenu.res");
 }
 
-void CBuyMenu::ApplySchemeSettings(vgui2::HScheme scheme)
+void CBuyMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(true);
@@ -86,7 +86,7 @@ void CBuyMenu::OnCommand(const char *command)
 	{
 		if (m_pViewport)
 			m_pViewport->HideAllGameMenus();
-		ClientCmd("cancelselect\n");
+		VGUI2_RunClientCommand("cancelselect\n");
 		return;
 	}
 

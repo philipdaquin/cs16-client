@@ -13,7 +13,7 @@ class CBuyPresetListBox : public vgui2::EditablePanel
 public:
 	CBuyPresetListBox(vgui2::Panel *parent, const char *panelName);
 
-	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
+	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
 };
 

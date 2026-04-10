@@ -13,8 +13,8 @@
 //=============================================================================
 
 #include <stdlib.h>
-#include <generichash.h>
-#include <strtools.h>
+#include "generichash.h"
+#include "strtools.h"
 #include "minbase_endian.h"
 
 #if defined(_MSC_VER) && _MSC_VER > 1200

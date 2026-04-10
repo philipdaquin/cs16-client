@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "VGUI/counterstrikeviewport.h"
+#include "VGUI/counterstrikeviewport_interface.h"
 
 CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
@@ -17,7 +18,7 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	LoadControlSettings("Resource/UI/Teammenu.res");
 }
 
-void CTeamMenu::ApplySchemeSettings(vgui2::HScheme scheme)
+void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(true);
@@ -53,7 +54,7 @@ void CTeamMenu::OnCommand(const char *command)
 
 		char szCommand[64];
 		snprintf(szCommand, sizeof(szCommand), "%s\n", command);
-		ClientCmd(szCommand);
+		VGUI2_RunClientCommand(szCommand);
 		return;
 	}
 
@@ -62,7 +63,7 @@ void CTeamMenu::OnCommand(const char *command)
 		if (m_pViewport)
 			m_pViewport->HideAllGameMenus();
 
-		ClientCmd("cancelselect\n");
+		VGUI2_RunClientCommand("cancelselect\n");
 		return;
 	}
 

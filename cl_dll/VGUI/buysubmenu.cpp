@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "VGUI/counterstrikeviewport.h"
+#include "VGUI/counterstrikeviewport_interface.h"
 
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
@@ -28,7 +29,7 @@ void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category
 	LoadControlSettings(GetResourceName());
 }
 
-void CBuySubMenu::ApplySchemeSettings(vgui2::HScheme scheme)
+void CBuySubMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(true);
@@ -70,7 +71,7 @@ void CBuySubMenu::OnCommand(const char *command)
 		if (m_pViewport)
 			m_pViewport->HideAllGameMenus();
 
-		ClientCmd("cancelselect\n");
+		VGUI2_RunClientCommand("cancelselect\n");
 		return;
 	}
 
@@ -79,7 +80,7 @@ void CBuySubMenu::OnCommand(const char *command)
 
 	char szCommand[64];
 	snprintf(szCommand, sizeof(szCommand), "%s\n", command);
-	ClientCmd(szCommand);
+	VGUI2_RunClientCommand(szCommand);
 }
 
 #endif

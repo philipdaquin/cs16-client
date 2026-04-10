@@ -10,7 +10,7 @@ CBuyPresetListBox::CBuyPresetListBox(vgui2::Panel *parent, const char *panelName
 	SetPaintBackgroundEnabled(true);
 }
 
-void CBuyPresetListBox::ApplySchemeSettings(vgui2::HScheme scheme)
+void CBuyPresetListBox::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(true);

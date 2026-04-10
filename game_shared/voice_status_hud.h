@@ -9,7 +9,7 @@
 #define VOICE_STATUS_HUD_H
 #pragma once
 
-#include <utlvector.h>
+#include "../public/tier1/UtlVector.h"
 // #include <vgui_controls/Panel.h>
 // #include <vgui_controls/Label.h>
 // #include <vgui_controls/ImagePanel.h>

@@ -17,7 +17,7 @@ public:
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void SetMenuType(int menuType);
 
-	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
+	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
 	virtual void OnCommand(const char *command) override;
 

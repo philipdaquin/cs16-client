@@ -17,8 +17,8 @@
 
 #include <limits.h>
 
-#include <utlbuffer.h>
-#include <bitstring.h>
+#include "utlbuffer.h"
+#include "bitstring.h"
 
 //-----------------------------------------------------------------------------
 // Init static vars
