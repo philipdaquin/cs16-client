@@ -1,19 +1,21 @@
 #pragma once
 
-#include <vgui2_stub_types.h>
-
-#if !defined(VGUI2_STUB_MODE)
-
-#include "counterstrikeviewport.h"
-
 void VGUI2_CreateViewport();
 void VGUI2_DestroyViewport();
-CCounterStrikeViewport *VGUI2_GetViewport();
+bool VGUI2_HasViewport();
 void VGUI2_ShowTeamMenu();
 void VGUI2_ShowClassMenu(int menuType);
 void VGUI2_ShowBuyMenu();
-void VGUI2_ShowBuySubMenu(CCounterStrikeViewport::BuyMenuCategory_t category);
+void VGUI2_ShowBuySubMenu(int category);
 void VGUI2_HideAllGameMenus();
 int VGUI2_GetLocalPlayerTeam();
 
-#endif
+enum VGUI2BuyMenuCategory
+{
+	VGUI2_BUYMENU_PISTOL = 0,
+	VGUI2_BUYMENU_SHOTGUN,
+	VGUI2_BUYMENU_SUBMACHINEGUN,
+	VGUI2_BUYMENU_RIFLE,
+	VGUI2_BUYMENU_MACHINEGUN,
+	VGUI2_BUYMENU_ITEM
+};

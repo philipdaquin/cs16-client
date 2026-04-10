@@ -4,7 +4,28 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
-extern cl_enginefunc_t gEngfuncs;
+#include <stdio.h>
+#include <string.h>
+
+namespace
+{
+
+void RunClientCommand(const char *command)
+{
+	if (!command || !command[0])
+		return;
+
+	char szCommand[64];
+	snprintf(szCommand, sizeof(szCommand), "%s%s", command, strchr(command, '\n') ? "" : "\n");
+	ClientCmd(szCommand);
+}
+
+bool CommandStartsWith(const char *command, const char *prefix)
+{
+	return !strnicmp(command, prefix, strlen(prefix));
+}
+
+}
 
 CBuyMenu::CBuyMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
@@ -13,6 +34,13 @@ CBuyMenu::CBuyMenu(vgui2::Panel *parent, const char *panelName)
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
 	m_pViewport = NULL;
+	ReloadControlSettings();
+}
+
+void CBuyMenu::ReloadControlSettings()
+{
+	LoadControlSettings("Resource/UI/BuyMenu.res");
+	LoadControlSettings("Resource/UI/MainBuyMenu.res");
 }
 
 void CBuyMenu::ApplySchemeSettings(vgui2::HScheme scheme)
@@ -28,55 +56,48 @@ void CBuyMenu::Paint()
 
 void CBuyMenu::OnCommand(const char *command)
 {
-	gEngfuncs.Con_Printf("[VGUI2-BUYMENU] OnCommand: %s\n", command);
-
 	if (!command || !command[0])
 	{
 		BaseClass::OnCommand(command);
 		return;
 	}
 
-	if (!strnicmp(command, "Resource/UI/", 12))
+	if (CommandStartsWith(command, "Resource/UI/"))
 	{
-		gEngfuncs.Con_Printf("[VGUI2-BUYMENU] Opening submenu: %s\n", command);
 		if (m_pViewport)
 		{
-			m_pViewport->HideAllGameMenus();
-			bool isCT = VGUI2_GetLocalPlayerTeam() == 2;
-			if (!strnicmp(command + 12, "BuyPistols", 10))
+			if (strstr(command, "BuyPistols"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::PISTOL);
-			else if (!strnicmp(command + 12, "BuyShotguns", 11))
+			else if (strstr(command, "BuyShotguns"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::SHOTGUN);
-			else if (!strnicmp(command + 12, "BuySubMachineguns", 16))
+			else if (strstr(command, "BuySubMachineguns") || strstr(command, "BuySubMachineGuns"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::SUBMACHINEGUN);
-			else if (!strnicmp(command + 12, "BuyRifles", 9))
+			else if (strstr(command, "BuyRifles"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::RIFLE);
-			else if (!strnicmp(command + 12, "BuyMachineguns", 14))
+			else if (strstr(command, "BuyMachineguns") || strstr(command, "BuyMachineGuns"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::MACHINEGUN);
-			else if (!strnicmp(command + 12, "BuyEquipment", 12))
+			else if (strstr(command, "BuyEquipment"))
 				m_pViewport->ShowBuySubMenu(CCounterStrikeViewport::ITEM);
 		}
+		return;
 	}
-	else if (!strnicmp(command, "vguicancel", 10))
+
+	if (!stricmp(command, "vguicancel"))
 	{
 		if (m_pViewport)
 			m_pViewport->HideAllGameMenus();
 		ClientCmd("cancelselect\n");
-	}
-	else if (!strnicmp(command, "autobuy", 7))
-	{
-		ClientCmd("autobuy\n");
-	}
-	else if (!strnicmp(command, "rebuy", 5))
-	{
-		ClientCmd("rebuy\n");
-	}
-	else
-	{
-		ClientCmd(command);
+		return;
 	}
 
-	BaseClass::OnCommand(command);
+	if (CommandStartsWith(command, "autobuy") || CommandStartsWith(command, "rebuy") ||
+		CommandStartsWith(command, "primammo") || CommandStartsWith(command, "secammo"))
+	{
+		RunClientCommand(command);
+		return;
+	}
+
+	RunClientCommand(command);
 }
 
 #endif

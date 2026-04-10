@@ -24,6 +24,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "draw_util.h"
+#include "vgui2_bootstrap.h"
+
+#include "VGUI/counterstrikeviewport_interface.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -272,6 +275,51 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
+	if (VGUI2_IsReady() && VGUI2_HasViewport())
+	{
+		switch (menuType)
+		{
+		case MENU_TEAM:
+			VGUI2_ShowTeamMenu();
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_CLASS_T:
+		case MENU_CLASS_CT:
+			VGUI2_ShowClassMenu(menuType);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY:
+			VGUI2_ShowBuyMenu();
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_PISTOL:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_PISTOL);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_SHOTGUN:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_SHOTGUN);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_RIFLE:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_RIFLE);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_SUBMACHINEGUN:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_SUBMACHINEGUN);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_MACHINEGUN:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_MACHINEGUN);
+			m_fMenuDisplayed = 1;
+			return;
+		case MENU_BUY_ITEM:
+			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_ITEM);
+			m_fMenuDisplayed = 1;
+			return;
+		default:
+			break;
+		}
+	}
 	const char *szCmd;
 
 	switch(menuType)

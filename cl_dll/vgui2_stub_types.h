@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(__arm64__) || defined(__aarch64__) || defined(__ARM64_ARCH_8__) || defined(ARM64)
+#if defined(CS16_CLIENT_VGUI2_STUB_MODE)
 
 #define VGUI2_STUB_MODE 1
 
@@ -52,7 +52,7 @@ bool Stub_VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *, i
 
 #else
 
-#include <vgui_controls/Controls.h>
+#include <vgui/VGUI2.h>
 #include <tier1/tier1.h>
 #include <tier2/tier2.h>
 

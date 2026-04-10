@@ -52,16 +52,17 @@ include_directories(
 	../3rdparty/mainui_cpp/menus
 	../3rdparty/mainui_cpp/miniutl
 	../../hl1_source_sdk/public
+	../../hl1_source_sdk/common
 	../../hl1_source_sdk/public/tier1
 	../../hl1_source_sdk/public/tier2
 	../../hl1_source_sdk/public/vgui
 	../../hl1_source_sdk/public/vgui_controls
 	../../hl1_source_sdk/vgui2/vgui_controls)
 
-add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint> -DARM64)
+add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint>)
 
 if(NOT MSVC)
-	add_definitions(-DLINUX -D_LINUX)
+	add_definitions(-DGNUC -DPOSIX -DLINUX -D_LINUX)
 	add_definitions(-Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -fms-extensions)
 else()
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)

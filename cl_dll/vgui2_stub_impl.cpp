@@ -1,10 +1,12 @@
 #include "vgui2_stub_types.h"
+
+#if defined(VGUI2_STUB_MODE)
+
 #include "hud.h"
 
 #include "cvardef.h"
 #include "interface.h"
-
-#if defined(VGUI2_STUB_MODE)
+#include "VGUI/counterstrikeviewport_interface.h"
 
 #define LOG_PREFIX "[VGUI2-STUB] "
 
@@ -36,5 +38,15 @@ bool Stub_VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *, i
 	gEngfuncs.Con_Printf(LOG_PREFIX "VGui_InitInterfacesList called (STUB)\n");
 	return true;
 }
+
+void VGUI2_CreateViewport() {}
+void VGUI2_DestroyViewport() {}
+bool VGUI2_HasViewport() { return false; }
+void VGUI2_ShowTeamMenu() {}
+void VGUI2_ShowClassMenu(int) {}
+void VGUI2_ShowBuyMenu() {}
+void VGUI2_ShowBuySubMenu(int) {}
+void VGUI2_HideAllGameMenus() {}
+int VGUI2_GetLocalPlayerTeam() { return 0; }
 
 #endif

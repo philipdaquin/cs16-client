@@ -1,11 +1,38 @@
+#if !defined(VGUI2_STUB_MODE)
+#define __INTERFACE_H__
+#include <tier1/interface.h>
+#include <vgui/ISurface.h>
+#include <vgui/IVGui.h>
+#include <vgui/IPanel.h>
+#include <vgui/IScheme.h>
+#include <vgui/ISystem.h>
+
+namespace vgui2
+{
+bool VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *factoryList, int numFactories);
+}
+#endif
+
 #include "hud.h"
 #include "cl_util.h"
 #include "vgui2_bootstrap.h"
 #include "vgui2_stub_types.h"
 
-#include "port.h"
 #include "cvardef.h"
-#include "interface.h"
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x) (int)(sizeof(x) / sizeof((x)[0]))
+#endif
+
+#ifndef CREATEINTERFACE_PROCNAME
+#define CREATEINTERFACE_PROCNAME "CreateInterface"
+#endif
 
 #define LOG_PREFIX "[VGUI2-BOOTSTRAP] "
 
@@ -20,7 +47,7 @@ struct VGui2BootstrapState
 	bool testPanelCreated;
 
 	vgui2::VPANEL embeddedPanel;
-	void *testPanel;
+	vgui2::VPANEL testPanel;
 	vgui2::HScheme clientScheme;
 };
 
@@ -34,6 +61,15 @@ static cvar_t cl_vgui2_debugpaint = { "cl_vgui2_debugpaint", "0", 0 };
 static const char *GetVGui2FactoryFuncName()
 {
 	return "VGui2_GetFactory";
+}
+
+static bool InitVGuiInterfacesList(const char *moduleName, CreateInterfaceFn *factories, int count)
+{
+#if defined(VGUI2_STUB_MODE)
+	return VGui_InitInterfacesList(moduleName, factories, count);
+#else
+	return vgui2::VGui_InitInterfacesList(moduleName, factories, count);
+#endif
 }
 
 static CreateInterfaceFn ResolveVGui2Factory(const char **outModuleName)
@@ -163,7 +199,7 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap starting...\n");
 
 #if defined(VGUI2_STUB_MODE)
-	gEngfuncs.Con_Printf(LOG_PREFIX "ARM64 stub mode - using runtime-resolved engine interfaces\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "Stub mode enabled - using stubbed VGUI2 client interfaces\n");
 	ConnectTier1Libraries(NULL, 0);
 	state.tier1Connected = true;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Tier1 connected (STUB)\n");
@@ -172,7 +208,7 @@ bool VGUI2_Bootstrap()
 	state.tier2Connected = true;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Tier2 connected (STUB)\n");
 
-	if (!VGui_InitInterfacesList("CLIENT", NULL, 0))
+	if (!InitVGuiInterfacesList("CLIENT", NULL, 0))
 	{
 		gEngfuncs.Con_Printf(LOG_PREFIX "VGui_InitInterfacesList failed\n");
 		return false;
@@ -184,7 +220,7 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap READY (STUB mode) ready=%d\n", state.ready);
 
 	state.schemeLoaded = false;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load skipped (ARM64 stub)\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load skipped (stub mode)\n");
 
 	return true;
 
@@ -209,7 +245,7 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Tier2 connected\n");
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Initializing VGUI interfaces...\n");
-	if (!VGui_InitInterfacesList("CLIENT", factories, count))
+	if (!InitVGuiInterfacesList("CLIENT", factories, count))
 	{
 		gEngfuncs.Con_Printf(LOG_PREFIX "VGui_InitInterfacesList failed\n");
 		return false;
@@ -279,6 +315,7 @@ void VGUI2_CreateTestPanel()
 
 	vgui2::VPANEL testVPanel = ivgui->AllocPanel();
 	gEngfuncs.Con_Printf(LOG_PREFIX "Allocated test panel: %u\n", (unsigned int)testVPanel);
+	state.testPanel = testVPanel;
 
 	ipan->Init(testVPanel, NULL);
 	ipan->SetPos(testVPanel, 100, 100);
@@ -308,15 +345,15 @@ void VGUI2_DestroyTestPanel()
 		return;
 
 #if !defined(VGUI2_STUB_MODE)
-	if (g_pVGui && state.embeddedPanel != 0)
+	if (g_pVGui && state.testPanel != 0)
 	{
-		g_pVGui->FreePanel(state.embeddedPanel);
+		g_pVGui->FreePanel(state.testPanel);
 	}
 #endif
 
 	state.testPanelCreated = false;
 	state.embeddedPanel = 0;
-	state.testPanel = NULL;
+	state.testPanel = 0;
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel destroyed\n");
 }

@@ -13,12 +13,17 @@ class CBuySubMenu : public vgui2::EditablePanel
 
 public:
 	CBuySubMenu(vgui2::Panel *parent, const char *panelName);
+	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category, bool isCT);
 
 	virtual void ApplySchemeSettings(vgui2::HScheme scheme) override;
 	virtual void Paint() override;
+	virtual void OnCommand(const char *command) override;
 
 private:
+	const char *GetResourceName() const;
+
+	CCounterStrikeViewport *m_pViewport;
 	CCounterStrikeViewport::BuyMenuCategory_t m_Category;
 	bool m_bIsCT;
 };
