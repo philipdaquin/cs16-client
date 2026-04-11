@@ -15,6 +15,9 @@ static CCounterStrikeViewport *g_pCounterStrikeViewport = NULL;
 
 void VGUI2_CreateViewport()
 {
+	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport ENTRY ready=%d surface=%p viewport=%p\n",
+		VGUI2_IsReady() ? 1 : 0, g_pVGuiSurface, g_pCounterStrikeViewport);
+
 	if (g_pCounterStrikeViewport || !VGUI2_IsReady() || !g_pVGuiSurface)
 	{
 		gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport skipped viewport=%p ready=%d surface=%p\n",
@@ -23,6 +26,7 @@ void VGUI2_CreateViewport()
 	}
 
 	vgui2::VPANEL root = g_pVGuiSurface->GetEmbeddedPanel();
+	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport root=%u\n", (unsigned int)root);
 	if (!root)
 	{
 		gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport failed: embedded/root panel is null\n");
@@ -30,9 +34,13 @@ void VGUI2_CreateViewport()
 	}
 
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport using embedded/root panel %u\n", (unsigned int)root);
+	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport about to execute new CCounterStrikeViewport(root=%u)\n",
+		(unsigned int)root);
 
 	g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
-	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] Viewport created: %p\n", g_pCounterStrikeViewport);
+	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport assignment result viewport=%p\n", g_pCounterStrikeViewport);
+	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] Viewport created: %p class=CCounterStrikeViewport kind=vgui2::EditablePanel root=%u\n",
+		g_pCounterStrikeViewport, (unsigned int)root);
 }
 
 void VGUI2_DestroyViewport()
@@ -46,26 +54,38 @@ bool VGUI2_HasViewport()
 	return g_pCounterStrikeViewport != NULL;
 }
 
+void *VGUI2_GetViewportPtr()
+{
+	return g_pCounterStrikeViewport;
+}
+
 void VGUI2_ShowTeamMenu()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI2_ShowTeamMenu viewport=%p target=CCounterStrikeViewport::ShowTeamMenu\n", g_pCounterStrikeViewport);
 	if (g_pCounterStrikeViewport)
 		g_pCounterStrikeViewport->ShowTeamMenu();
 }
 
 void VGUI2_ShowClassMenu(int menuType)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI2_ShowClassMenu viewport=%p target=CCounterStrikeViewport::ShowClassMenu type=%d\n",
+		g_pCounterStrikeViewport, menuType);
 	if (g_pCounterStrikeViewport)
 		g_pCounterStrikeViewport->ShowClassMenu(menuType);
 }
 
 void VGUI2_ShowBuyMenu()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI2_ShowBuyMenu viewport=%p target=CCounterStrikeViewport::ShowBuyMenu\n",
+		g_pCounterStrikeViewport);
 	if (g_pCounterStrikeViewport)
 		g_pCounterStrikeViewport->ShowBuyMenu();
 }
 
 void VGUI2_ShowBuySubMenu(int category)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI2_ShowBuySubMenu viewport=%p target=CCounterStrikeViewport::ShowBuySubMenu category=%d\n",
+		g_pCounterStrikeViewport, category);
 	if (g_pCounterStrikeViewport)
 		g_pCounterStrikeViewport->ShowBuySubMenu((CCounterStrikeViewport::BuyMenuCategory_t)category);
 }

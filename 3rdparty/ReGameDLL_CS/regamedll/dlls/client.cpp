@@ -417,6 +417,9 @@ void EXT_FUNC __API_HOOK(ShowVGUIMenu)(CBasePlayer *pPlayer, int MenuType, int B
 
 	if (pPlayer->m_bVGUIMenus || MenuType > VGUI_Menu_Buy_Item)
 	{
+		ALERT(at_console, "[VGUI2-SERVER] ShowVGUIMenu player=%s type=%d bitmask=0x%x old='%s' vgui=%d\n",
+			STRING(pPlayer->pev->netname), MenuType, BitMask, szOldMenu ? szOldMenu : "",
+			pPlayer->m_bVGUIMenus ? 1 : 0);
 		MESSAGE_BEGIN(MSG_ONE, gmsgVGUIMenu, nullptr, pPlayer->pev);
 			WRITE_BYTE(MenuType);
 			WRITE_SHORT(BitMask);
@@ -3152,6 +3155,10 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	}
 	else if (FStrEq(pcmd, "chooseteam"))
 	{
+		ALERT(at_console, "[VGUI2-SERVER] ClientCommand chooseteam player=%s menu=%d joining=%d team=%d dead=%d vgui=%d\n",
+			STRING(pPlayer->pev->netname), pPlayer->m_iMenu, pPlayer->m_iJoiningState, pPlayer->m_iTeam,
+			pPlayer->pev->deadflag, pPlayer->m_bVGUIMenus ? 1 : 0);
+
 		if (pPlayer->m_iMenu == Menu_ChooseAppearance)
 			return;
 

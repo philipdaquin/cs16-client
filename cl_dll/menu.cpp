@@ -37,6 +37,26 @@ char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
 int KB_ConvertString( char *in, char **ppout );
 
+static bool IsCsVgui2OwnedMenuType( int menuType )
+{
+	switch ( menuType )
+	{
+	case MENU_TEAM:
+	case MENU_CLASS_T:
+	case MENU_CLASS_CT:
+	case MENU_BUY:
+	case MENU_BUY_PISTOL:
+	case MENU_BUY_SHOTGUN:
+	case MENU_BUY_RIFLE:
+	case MENU_BUY_SUBMACHINEGUN:
+	case MENU_BUY_MACHINEGUN:
+	case MENU_BUY_ITEM:
+		return true;
+	default:
+		return false;
+	}
+}
+
 void Touch_CloseMenu()
 {
 	gMobileAPI.pfnTouchRemoveButton( "_menu_*" );
@@ -68,6 +88,9 @@ void CHudMenu :: InitHUDData( void )
 {
 	m_fMenuDisplayed = 0;
 	m_bitsValidSlots = 0;
+	m_bPendingVGUIMenu = false;
+	m_iPendingVGUIMenuType = 0;
+	m_iPendingVGUIBitMask = 0;
 	Reset();
 }
 
@@ -75,10 +98,15 @@ void CHudMenu :: Reset( void )
 {
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = FALSE;
+	m_bPendingVGUIMenu = false;
+	m_iPendingVGUIMenuType = 0;
+	m_iPendingVGUIBitMask = 0;
 }
 
 int CHudMenu :: VidInit( void )
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudMenu::VidInit ready=%d viewport=%p pending=%d\n",
+		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr(), m_bPendingVGUIMenu ? 1 : 0);
 	return 1;
 }
 
@@ -234,6 +262,18 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 
 	int menuType = reader.ReadByte();
 	m_bitsValidSlots = reader.ReadShort(); // is ignored
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] MsgFunc_VGUIMenu type=%d slots=0x%x ready=%d viewport=%d\n",
+		menuType, m_bitsValidSlots, VGUI2_IsReady() ? 1 : 0, VGUI2_HasViewport() ? 1 : 0);
+
+	if (!VGUI2_HasViewport())
+	{
+		m_bPendingVGUIMenu = true;
+		m_iPendingVGUIMenuType = menuType;
+		m_iPendingVGUIBitMask = m_bitsValidSlots;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] MsgFunc_VGUIMenu deferred type=%d slots=0x%x ready=%d viewport=%p\n",
+			menuType, m_bitsValidSlots, VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+		return 1;
+	}
 
 	ShowVGUIMenu(menuType);
 	return 1;
@@ -275,44 +315,63 @@ void CHudMenu::UserCmd_OldStyleMenuClose()
 
 void CHudMenu::ShowVGUIMenu( int menuType )
 {
-	if (VGUI2_IsReady() && VGUI2_HasViewport())
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu type=%d ready=%d viewport=%d\n",
+		menuType, VGUI2_IsReady() ? 1 : 0, VGUI2_HasViewport() ? 1 : 0);
+
+	if ( IsCsVgui2OwnedMenuType( menuType ) )
 	{
+		if ( !VGUI2_HasViewport() || !VGUI2_IsReady() )
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2-owned CS menu, but viewport not ready (ready=%d viewport=%p). legacy fallback disabled\n",
+				menuType, VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+			return;
+		}
+
 		switch (menuType)
 		{
 		case MENU_TEAM:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 TeamMenu via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowTeamMenu();
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_CLASS_T:
 		case MENU_CLASS_CT:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 ClassMenu via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowClassMenu(menuType);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuyMenu via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuyMenu();
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_PISTOL:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(Pistol) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_PISTOL);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_SHOTGUN:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(Shotgun) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_SHOTGUN);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_RIFLE:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(Rifle) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_RIFLE);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_SUBMACHINEGUN:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(SubMachineGun) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_SUBMACHINEGUN);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_MACHINEGUN:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(MachineGun) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_MACHINEGUN);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_BUY_ITEM:
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 BuySubMenu(Item) via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowBuySubMenu(VGUI2_BUYMENU_ITEM);
 			m_fMenuDisplayed = 1;
 			return;
@@ -320,6 +379,8 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 			break;
 		}
 	}
+
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to legacy/touch fallback menu path\n", menuType);
 	const char *szCmd;
 
 	switch(menuType)
@@ -407,4 +468,28 @@ void CHudMenu::UserCmd_ShowVGUIMenu()
 
 	int menuType = atoi(gEngfuncs.Cmd_Argv(1));
 	ShowVGUIMenu(menuType);
+}
+
+bool CHudMenu::FlushPendingVGUIMenu()
+{
+	if (!m_bPendingVGUIMenu)
+		return false;
+
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] FlushPendingVGUIMenu pending=1 type=%d slots=0x%x ready=%d viewport=%p\n",
+		m_iPendingVGUIMenuType, m_iPendingVGUIBitMask, VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+
+	if (!VGUI2_HasViewport())
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] FlushPendingVGUIMenu skipped: viewport still null\n");
+		return false;
+	}
+
+	const int menuType = m_iPendingVGUIMenuType;
+	m_bitsValidSlots = m_iPendingVGUIBitMask;
+	m_bPendingVGUIMenu = false;
+	m_iPendingVGUIMenuType = 0;
+	m_iPendingVGUIBitMask = 0;
+
+	ShowVGUIMenu(menuType);
+	return true;
 }

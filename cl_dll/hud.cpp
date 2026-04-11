@@ -35,6 +35,8 @@
 #include "camera.h"
 
 #include "draw_util.h"
+#include "vgui2_bootstrap.h"
+#include "VGUI/counterstrikeviewport_interface.h"
 
 #if __EMSCRIPTEN__
 #include <emscripten.h>
@@ -425,6 +427,8 @@ CHud :: ~CHud()
 void CHud :: VidInit( void )
 {
 	static bool firstinit = true;
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHud::VidInit ENTRY ready=%d viewport=%p\n",
+		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
 
@@ -548,6 +552,8 @@ void CHud :: VidInit( void )
 #endif
 
 	firstinit = false;
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHud::VidInit EXIT ready=%d viewport=%p\n",
+		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
 }
 
 void CHud::Shutdown( void )

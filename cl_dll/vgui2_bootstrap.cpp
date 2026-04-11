@@ -17,6 +17,7 @@ bool VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *factoryL
 #include "cl_util.h"
 #include "vgui2_bootstrap.h"
 #include "vgui2_stub_types.h"
+#include "VGUI/counterstrikeviewport_interface.h"
 
 #include "cvardef.h"
 
@@ -34,10 +35,19 @@ bool VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *factoryL
 #define CREATEINTERFACE_PROCNAME "CreateInterface"
 #endif
 
+#ifndef VGUI_INPUTINTERNAL_INTERFACE_VERSION
+#define VGUI_INPUTINTERNAL_INTERFACE_VERSION "VGUI_InputInternal001"
+#endif
+
+#ifndef VGUI_LOCALIZE_INTERFACE_VERSION
+#define VGUI_LOCALIZE_INTERFACE_VERSION "VGUI_Localize003"
+#endif
+
 #define LOG_PREFIX "[VGUI2-BOOTSTRAP] "
 
 struct VGui2BootstrapState
 {
+	bool inProgress;
 	bool attempted;
 	bool tier1Connected;
 	bool tier2Connected;
@@ -53,15 +63,44 @@ struct VGui2BootstrapState
 
 static VGui2BootstrapState state = {};
 
-static cvar_t cl_vgui2_bootstrap = { "cl_vgui2_bootstrap", "1", 0 };
-static cvar_t cl_vgui2_testpanel = { "cl_vgui2_testpanel", "1", 0 };
-static cvar_t cl_vgui2_menus = { "cl_vgui2_menus", "1", 0 };
-static cvar_t cl_vgui2_debugpaint = { "cl_vgui2_debugpaint", "0", 0 };
+static cvar_t *cl_vgui2_bootstrap = NULL;
+static cvar_t *cl_vgui2_testpanel = NULL;
+static cvar_t *cl_vgui2_menus = NULL;
+static cvar_t *cl_vgui2_debugpaint = NULL;
+
+static void ResetBootstrapAttemptState()
+{
+	state.inProgress = false;
+	state.attempted = false;
+	state.tier1Connected = false;
+	state.tier2Connected = false;
+	state.interfacesInitialized = false;
+	state.ready = false;
+	state.schemeLoaded = false;
+	state.clientScheme = 0;
+}
+
+static bool BootstrapFail(int step, const char *name, const char *version)
+{
+	gEngfuncs.Con_Printf(LOG_PREFIX "FAIL Step %d - %s ('%s') resolved to NULL\n",
+		step, name, version ? version : "<none>");
+	ResetBootstrapAttemptState();
+	return false;
+}
+
+static void BootstrapStepOk(int step, const char *name, const void *ptr)
+{
+	gEngfuncs.Con_Printf(LOG_PREFIX "Step %d OK - %s=%p\n", step, name, ptr);
+}
 
 static const char *GetVGui2FactoryFuncName()
 {
 	return "VGui2_GetFactory";
 }
+
+#if defined(__EMSCRIPTEN__)
+extern "C" CreateInterfaceFn VGui2_GetFactory(void);
+#endif
 
 static bool InitVGuiInterfacesList(const char *moduleName, CreateInterfaceFn *factories, int count)
 {
@@ -77,7 +116,18 @@ static CreateInterfaceFn ResolveVGui2Factory(const char **outModuleName)
 	*outModuleName = "unknown";
 	CreateInterfaceFn factory = NULL;
 
-#if defined(_WIN32)
+#if defined(__EMSCRIPTEN__)
+	gEngfuncs.Con_Printf(LOG_PREFIX "Emscripten: resolving VGui2_GetFactory via direct engine import\n");
+	factory = VGui2_GetFactory();
+	gEngfuncs.Con_Printf(LOG_PREFIX "Emscripten: VGui2_GetFactory() returned %p\n", factory);
+	if (factory)
+	{
+		*outModuleName = "engine main module (direct import)";
+		return factory;
+	}
+	gEngfuncs.Con_Printf(LOG_PREFIX "Emscripten: direct VGui2_GetFactory() returned NULL\n");
+	return NULL;
+#elif defined(_WIN32)
 	const char *modules[] = { "xash3d", "xash3d-fwgs", "hw", "sw" };
 	for (int i = 0; i < ARRAYSIZE(modules); ++i)
 	{
@@ -106,9 +156,15 @@ static CreateInterfaceFn ResolveVGui2Factory(const char **outModuleName)
 
 #elif defined(__APPLE__)
 	void *handle = dlopen(NULL, RTLD_NOW);
+	const char *openError = dlerror();
+	gEngfuncs.Con_Printf(LOG_PREFIX "macOS: dlopen(NULL) handle=%p error=%s\n",
+		handle, openError ? openError : "<none>");
 	if (handle)
 	{
 		factory = (CreateInterfaceFn)dlsym(handle, GetVGui2FactoryFuncName());
+		const char *symError = dlerror();
+		gEngfuncs.Con_Printf(LOG_PREFIX "macOS: dlsym('%s') -> %p error=%s\n",
+			GetVGui2FactoryFuncName(), factory, symError ? symError : "<none>");
 		if (factory)
 		{
 			*outModuleName = "main executable (dlopen NULL)";
@@ -123,9 +179,15 @@ static CreateInterfaceFn ResolveVGui2Factory(const char **outModuleName)
 
 #else
 	void *mainHandle = dlopen(NULL, RTLD_NOW);
+	const char *openError = dlerror();
+	gEngfuncs.Con_Printf(LOG_PREFIX "Linux: dlopen(NULL) handle=%p error=%s\n",
+		mainHandle, openError ? openError : "<none>");
 	if (mainHandle)
 	{
 		factory = (CreateInterfaceFn)dlsym(mainHandle, GetVGui2FactoryFuncName());
+		const char *symError = dlerror();
+		gEngfuncs.Con_Printf(LOG_PREFIX "Linux: dlsym('%s') -> %p error=%s\n",
+			GetVGui2FactoryFuncName(), factory, symError ? symError : "<none>");
 		if (factory)
 		{
 			*outModuleName = "main executable (dlopen NULL)";
@@ -164,10 +226,20 @@ static int BuildFactoryList(CreateInterfaceFn *outFactories, int maxFactories)
 
 static void RegisterCvars()
 {
-	gEngfuncs.pfnRegisterVariable("cl_vgui2_bootstrap", "1", 0);
-	gEngfuncs.pfnRegisterVariable("cl_vgui2_testpanel", "1", 0);
-	gEngfuncs.pfnRegisterVariable("cl_vgui2_menus", "1", 0);
-	gEngfuncs.pfnRegisterVariable("cl_vgui2_debugpaint", "0", 0);
+	if (!cl_vgui2_bootstrap)
+		cl_vgui2_bootstrap = gEngfuncs.pfnRegisterVariable("cl_vgui2_bootstrap", "1", 0);
+	if (!cl_vgui2_testpanel)
+		cl_vgui2_testpanel = gEngfuncs.pfnRegisterVariable("cl_vgui2_testpanel", "1", 0);
+	if (!cl_vgui2_menus)
+		cl_vgui2_menus = gEngfuncs.pfnRegisterVariable("cl_vgui2_menus", "1", 0);
+	if (!cl_vgui2_debugpaint)
+		cl_vgui2_debugpaint = gEngfuncs.pfnRegisterVariable("cl_vgui2_debugpaint", "0", 0);
+
+	gEngfuncs.Con_Printf(LOG_PREFIX "RegisterCvars bootstrap=%p(%.1f) testpanel=%p(%.1f) menus=%p(%.1f) debugpaint=%p(%.1f)\n",
+		cl_vgui2_bootstrap, cl_vgui2_bootstrap ? cl_vgui2_bootstrap->value : -1.0f,
+		cl_vgui2_testpanel, cl_vgui2_testpanel ? cl_vgui2_testpanel->value : -1.0f,
+		cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f,
+		cl_vgui2_debugpaint, cl_vgui2_debugpaint ? cl_vgui2_debugpaint->value : -1.0f);
 }
 
 bool VGUI2_IsReady()
@@ -182,15 +254,23 @@ bool VGUI2_HasScheme()
 
 bool VGUI2_Bootstrap()
 {
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() ENTRY attempted=%d\n", state.attempted);
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() ENTRY inProgress=%d attempted=%d ready=%d\n",
+		state.inProgress ? 1 : 0, state.attempted ? 1 : 0, state.ready ? 1 : 0);
 
-	if (state.attempted)
+	if (state.inProgress)
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() SKIP - already attempted, ready=%d\n", state.ready);
-		return state.ready;
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() SKIP - bootstrap already in progress\n");
+		return false;
 	}
 
-	state.attempted = true;
+	if (state.attempted && state.ready)
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_Bootstrap() SKIP - already attempted, ready=%d\n", state.ready);
+		return true;
+	}
+
+	ResetBootstrapAttemptState();
+	state.inProgress = true;
 
 	gEngfuncs.Con_Printf("\n========== CLIENT VGUI2_Bootstrap HIT ==========\n");
 
@@ -202,25 +282,32 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Stub mode enabled - using stubbed VGUI2 client interfaces\n");
 	ConnectTier1Libraries(NULL, 0);
 	state.tier1Connected = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Tier1 connected (STUB)\n");
+	BootstrapStepOk(1, "ConnectTier1Libraries(STUB)", (void *)1);
 
 	ConnectTier2Libraries(NULL, 0);
 	state.tier2Connected = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Tier2 connected (STUB)\n");
+	BootstrapStepOk(2, "ConnectTier2Libraries(STUB)", (void *)1);
 
 	if (!InitVGuiInterfacesList("CLIENT", NULL, 0))
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGui_InitInterfacesList failed\n");
+		gEngfuncs.Con_Printf(LOG_PREFIX "FAIL Step 3 - VGui_InitInterfacesList('CLIENT') returned false\n");
+		ResetBootstrapAttemptState();
 		return false;
 	}
 	state.interfacesInitialized = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI interfaces initialized (STUB)\n");
+	BootstrapStepOk(3, "VGui_InitInterfacesList(STUB)", (void *)1);
 
 	state.ready = true;
+	state.attempted = true;
+	state.inProgress = false;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap READY (STUB mode) ready=%d\n", state.ready);
 
 	state.schemeLoaded = false;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load skipped (stub mode)\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "COMPLETE ready=%d attempted=%d (IVGui=%p IPanel=%p ISurface=%p IInputInternal=%p ILocalize=%p ISchemeManager=%p ISystem=%p viewport=%p)\n",
+		state.ready ? 1 : 0, state.attempted ? 1 : 0,
+		g_pVGui, g_pVGuiPanel, g_pVGuiSurface, g_pVGuiInput, g_pVGuiLocalize,
+		g_pVGuiSchemeManager, g_pVGuiSystem, VGUI2_GetViewportPtr());
 
 	return true;
 
@@ -231,47 +318,72 @@ bool VGUI2_Bootstrap()
 	if (count <= 0)
 	{
 		gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap FAILED - BuildFactoryList returned 0 factories\n");
+		ResetBootstrapAttemptState();
 		return false;
 	}
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Connecting tier1 libraries...\n");
 	ConnectTier1Libraries(factories, count);
 	state.tier1Connected = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Tier1 connected\n");
+	BootstrapStepOk(1, "ConnectTier1Libraries", (void *)1);
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Connecting tier2 libraries...\n");
 	ConnectTier2Libraries(factories, count);
 	state.tier2Connected = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Tier2 connected\n");
+	BootstrapStepOk(2, "ConnectTier2Libraries", (void *)1);
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Initializing VGUI interfaces...\n");
 	if (!InitVGuiInterfacesList("CLIENT", factories, count))
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGui_InitInterfacesList failed\n");
+		gEngfuncs.Con_Printf(LOG_PREFIX "FAIL Step 3 - VGui_InitInterfacesList('CLIENT') returned false\n");
+		ResetBootstrapAttemptState();
 		return false;
 	}
 	state.interfacesInitialized = true;
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI interfaces initialized\n");
+	BootstrapStepOk(3, "VGui_InitInterfacesList", (void *)1);
 
-	gEngfuncs.Con_Printf(LOG_PREFIX "  g_pVGui: %s\n", g_pVGui ? "OK" : "NULL");
-	gEngfuncs.Con_Printf(LOG_PREFIX "  g_pVGuiPanel: %s\n", g_pVGuiPanel ? "OK" : "NULL");
-	gEngfuncs.Con_Printf(LOG_PREFIX "  g_pVGuiSurface: %s\n", g_pVGuiSurface ? "OK" : "NULL");
-	gEngfuncs.Con_Printf(LOG_PREFIX "  g_pVGuiSchemeManager: %s\n", g_pVGuiSchemeManager ? "OK" : "NULL");
-	gEngfuncs.Con_Printf(LOG_PREFIX "  g_pVGuiSystem: %s\n", g_pVGuiSystem ? "OK" : "NULL");
+	if (!g_pVGui)
+		return BootstrapFail(4, "IVGui", VGUI_IVGUI_INTERFACE_VERSION_GS);
+	BootstrapStepOk(4, "IVGui", g_pVGui);
 
-	if (!g_pVGui || !g_pVGuiPanel || !g_pVGuiSurface || !g_pVGuiSchemeManager || !g_pVGuiSystem)
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "Critical interfaces missing - bootstrap failed\n");
-		return false;
-	}
+	if (!g_pVGuiPanel)
+		return BootstrapFail(5, "IPanel", VGUI_PANEL_INTERFACE_VERSION_GS);
+	BootstrapStepOk(5, "IPanel", g_pVGuiPanel);
+
+	if (!g_pVGuiSurface)
+		return BootstrapFail(6, "ISurface", VGUI_SURFACE_INTERFACE_VERSION_GS);
+	BootstrapStepOk(6, "ISurface", g_pVGuiSurface);
+
+	if (!g_pVGuiInput)
+		return BootstrapFail(7, "IInputInternal", VGUI_INPUTINTERNAL_INTERFACE_VERSION);
+	BootstrapStepOk(7, "IInputInternal", g_pVGuiInput);
+
+	if (!g_pVGuiLocalize)
+		gEngfuncs.Con_Printf(LOG_PREFIX "WARN Step 8 - ILocalize ('%s') resolved to NULL\n", VGUI_LOCALIZE_INTERFACE_VERSION);
+	else
+		BootstrapStepOk(8, "ILocalize", g_pVGuiLocalize);
+
+	if (!g_pVGuiSchemeManager)
+		return BootstrapFail(9, "ISchemeManager", VGUI_SCHEME_INTERFACE_VERSION_GS);
+	BootstrapStepOk(9, "ISchemeManager", g_pVGuiSchemeManager);
+
+	if (!g_pVGuiSystem)
+		return BootstrapFail(10, "ISystem", VGUI_SYSTEM_INTERFACE_VERSION_GS);
+	BootstrapStepOk(10, "ISystem", g_pVGuiSystem);
 
 	state.ready = true;
+	state.attempted = true;
+	state.inProgress = false;
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap ready\n");
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Attempting scheme load...\n");
 	state.clientScheme = g_pVGuiSchemeManager->LoadSchemeFromFile("resource/ClientScheme.res", "clientscheme");
 	state.schemeLoaded = (state.clientScheme != 0);
 	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load: %s\n", state.schemeLoaded ? "OK" : "FAILED (non-fatal)");
+	gEngfuncs.Con_Printf(LOG_PREFIX "COMPLETE ready=%d attempted=%d (IVGui=%p IPanel=%p ISurface=%p IInputInternal=%p ILocalize=%p ISchemeManager=%p ISystem=%p viewport=%p scheme=%d)\n",
+		state.ready ? 1 : 0, state.attempted ? 1 : 0,
+		g_pVGui, g_pVGuiPanel, g_pVGuiSurface, g_pVGuiInput, g_pVGuiLocalize,
+		g_pVGuiSchemeManager, g_pVGuiSystem, VGUI2_GetViewportPtr(), state.schemeLoaded ? 1 : 0);
 
 	return true;
 #endif
@@ -360,34 +472,50 @@ void VGUI2_DestroyTestPanel()
 
 void VGUI2_OnVidInit()
 {
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ENTRY\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ENTRY ready=%d viewport=%p\n",
+		state.ready ? 1 : 0, VGUI2_GetViewportPtr());
 
 	if (!VGUI2_IsReady())
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - bootstrap not ready\n");
-		return;
+		const bool retried = VGUI2_Bootstrap();
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() retry bootstrap result=%d ready=%d attempted=%d viewport=%p\n",
+			retried ? 1 : 0, state.ready ? 1 : 0, state.attempted ? 1 : 0, VGUI2_GetViewportPtr());
+		if (!VGUI2_IsReady())
+		{
+			gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - bootstrap still not ready viewport=%p\n", VGUI2_GetViewportPtr());
+			return;
+		}
 	}
 
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ready=%d, cl_vgui2_menus=%.1f\n",
-		state.ready, cl_vgui2_menus.value);
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ready=%d, cl_vgui2_menus=%p(%.1f) cl_vgui2_testpanel=%p(%.1f)\n",
+		state.ready ? 1 : 0,
+		cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f,
+		cl_vgui2_testpanel, cl_vgui2_testpanel ? cl_vgui2_testpanel->value : -1.0f);
+
+	const bool hadViewport = VGUI2_HasViewport();
 
 #ifndef VGUI2_STUB_MODE
-	if (cl_vgui2_menus.value != 0.0f)
+	if (cl_vgui2_menus && cl_vgui2_menus->value != 0.0f)
 	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() calling VGUI2_CreateViewport() ready=%d viewport=%p\n",
+			state.ready ? 1 : 0, VGUI2_GetViewportPtr());
 		VGUI2_CreateViewport();
 	}
 	else
 	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_menus is 0\n");
+		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_menus disabled or unavailable ptr=%p value=%.1f\n",
+			cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f);
 	}
 #else
 	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() STUB_MODE - viewport create skipped\n");
 #endif
 
-	if (cl_vgui2_testpanel.value != 0.0f && !state.testPanelCreated)
+	if (cl_vgui2_testpanel && cl_vgui2_testpanel->value != 0.0f && !state.testPanelCreated)
 	{
 		VGUI2_CreateTestPanel();
 	}
 
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() DONE\n");
+	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() EXIT ready=%d viewport=%p created=%d testPanel=%d\n",
+		state.ready ? 1 : 0, VGUI2_GetViewportPtr(), (!hadViewport && VGUI2_HasViewport()) ? 1 : 0,
+		state.testPanelCreated ? 1 : 0);
 }

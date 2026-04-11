@@ -31,6 +31,7 @@
 #include "mobility_int.h"
 #include "vgui_parser.h"
 #include "vgui2_bootstrap.h"
+#include "VGUI/counterstrikeviewport_interface.h"
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -191,6 +192,15 @@ bool isLoaded = false;
 int DLLEXPORT HUD_VidInit( void )
 {
 	gEngfuncs.Con_Printf("\n========== CLIENT HUD_VidInit HIT ==========\n");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit ENTRY ready=%d viewport=%p\n",
+		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+
+	if (!VGUI2_IsReady())
+	{
+		const bool bootstrapped = VGUI2_Bootstrap();
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit bootstrap retry result=%d ready=%d viewport=%p\n",
+			bootstrapped ? 1 : 0, VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+	}
 
 	gHUD.VidInit();
 
@@ -199,6 +209,9 @@ int DLLEXPORT HUD_VidInit( void )
 	//VGui_Startup();
 
 	VGUI2_OnVidInit();
+	gHUD.m_Menu.FlushPendingVGUIMenu();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit EXIT ready=%d viewport=%p\n",
+		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
 
 	return 1;
 }
@@ -215,7 +228,7 @@ the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
-	gEngfuncs.Con_Printf("\n========== CLIENT HUD_Init HIT ==========\n");
+	gEngfuncs.Con_Printf("\n========== DLLEXPORT HUD_Init ==========\n");
 
 	InitInput();
 	gHUD.Init();
@@ -238,6 +251,9 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 
 	// DIAGNOSTIC ORANGE BOX - top-left corner
 	FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
+
+	gEngfuncs.Con_Printf("\n========== DLLEXPORT HUD_Redraw ==========\n");
+	// VGUI2_Bootstrap();
 
 	return 1;
 }
@@ -542,4 +558,3 @@ public:
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION)
-

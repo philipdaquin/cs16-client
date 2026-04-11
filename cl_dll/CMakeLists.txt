@@ -14,6 +14,10 @@ file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
 file(GLOB CS_GAMSH_SRC "../game_shared/*.cpp")
 file(GLOB MINIUTL_SRC "../3rdparty/mainui_cpp/miniutl/*.cpp")
+list(REMOVE_ITEM MINIUTL_SRC
+	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/strtools.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/utlbuffer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/utlstring.cpp")
 
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/ev_hldm.cpp")
 list(REMOVE_ITEM CS_INPUT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input/input_sdl.cpp")
@@ -24,8 +28,14 @@ list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
 list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
 list(APPEND CS_CLIENT_SRC vgui2_bootstrap.cpp vgui2_stub_impl.cpp)
 set(VGUI2_SDK_RUNTIME_SOURCES
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/KeyValues.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/mempool.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/strtools.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/tier1.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/utlbuffer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/utlstring.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/utlsymbol.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier2/KeyValuesCompat.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier2/tier2.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier2/steam_api.cpp"
 )

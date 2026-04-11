@@ -3,6 +3,7 @@
 void VGUI2_CreateViewport();
 void VGUI2_DestroyViewport();
 bool VGUI2_HasViewport();
+void *VGUI2_GetViewportPtr();
 void VGUI2_ShowTeamMenu();
 void VGUI2_ShowClassMenu(int menuType);
 void VGUI2_ShowBuyMenu();

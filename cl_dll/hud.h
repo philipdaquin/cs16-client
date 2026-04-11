@@ -526,6 +526,7 @@ public:
 	CHudUserCmd(ShowVGUIMenu);
 
 	void ShowVGUIMenu( int menuType ); // cs16client extension
+	bool FlushPendingVGUIMenu();
 
 	void SelectMenuItem( int menu_item );
 
@@ -535,6 +536,9 @@ public:
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
+	bool m_bPendingVGUIMenu;
+	int m_iPendingVGUIMenuType;
+	int m_iPendingVGUIBitMask;
 
 };
 

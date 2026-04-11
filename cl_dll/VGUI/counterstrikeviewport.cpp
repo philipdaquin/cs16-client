@@ -45,10 +45,14 @@ CCounterStrikeViewport::~CCounterStrikeViewport()
 
 void CCounterStrikeViewport::CreatePanels()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels ENTRY this=%p created=%d\n",
+		this, m_bPanelsCreated ? 1 : 0);
 	if (m_bPanelsCreated)
 		return;
 
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels before TeamMenu creation this=%p\n", this);
 	m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels after TeamMenu creation team=%p\n", m_pTeamMenu);
 	m_pTeamMenu->SetViewport(this);
 
 	m_pClassMenu = new CClassMenu(this, "ClassMenu");
@@ -70,6 +74,8 @@ void CCounterStrikeViewport::CreatePanels()
 
 	m_bPanelsCreated = true;
 	HideAllGameMenus();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels EXIT this=%p team=%p class=%p buy=%p\n",
+		this, m_pTeamMenu, m_pClassMenu, m_pBuyMenu);
 }
 
 void CCounterStrikeViewport::DestroyPanels()
@@ -97,6 +103,8 @@ void CCounterStrikeViewport::DestroyPanels()
 
 void CCounterStrikeViewport::ShowTeamMenu()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::ShowTeamMenu this=%p panels=%d team=%p wide=%d tall=%d\n",
+		this, m_bPanelsCreated ? 1 : 0, m_pTeamMenu, GetWide(), GetTall());
 	if (!m_bPanelsCreated)
 		CreatePanels();
 
@@ -112,6 +120,8 @@ void CCounterStrikeViewport::ShowTeamMenu()
 		m_pTeamMenu->SetVisible(true);
 		m_pTeamMenu->MoveToFront();
 		m_pTeamMenu->RequestFocus();
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] TeamMenu visible=1 focus requested allowSpec=%d\n",
+			gHUD.m_Menu.m_bAllowSpec ? 1 : 0);
 	}
 }
 

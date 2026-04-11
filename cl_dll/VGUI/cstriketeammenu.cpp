@@ -8,14 +8,33 @@
 #include "VGUI/counterstrikeviewport.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
+static const bool kTeamMenuEmptyDebug = false;
+
 CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
 	, m_pViewport(NULL)
 {
+	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu ENTRY this=%p parent=%p name='%s'\n",
+		this, parent, panelName ? panelName : "<null>");
+
 	SetProportional(false);
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
-	LoadControlSettings("Resource/UI/Teammenu.res");
+	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu before LoadControlSettings empty=%d\n",
+		kTeamMenuEmptyDebug ? 1 : 0);
+
+	if (!kTeamMenuEmptyDebug)
+	{
+		LoadControlSettings("Resource/UI/Teammenu.res");
+		printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu after LoadControlSettings panel=%p childSpec=%p\n",
+			this, FindChildByName("specbutton"));
+	}
+	else
+	{
+		printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu SKIP LoadControlSettings due to kTeamMenuEmptyDebug=1\n");
+	}
+
+	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu EXIT this=%p\n", this);
 }
 
 void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
