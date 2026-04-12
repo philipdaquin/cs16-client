@@ -13,11 +13,8 @@ typedef vec_t vec3_t[3];
 #include "VGUI/counterstrikeviewport_interface.h"
 
 
-// BaseClass(NULL, "CounterStrikeViewport")
-//** CURRENTLY BUGGY and is causing unreposnsive UI, if removed the game works just fine but without the VGUI2 we wanted */
 CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	: BaseClass(NULL, "CounterStrikeViewport")
-
 	, m_pTeamMenu(NULL)
 	, m_pClassMenu(NULL)
 	, m_pBuyMenu(NULL)
@@ -25,9 +22,8 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	, m_pBuyPresetListBox(NULL)
 	, m_bPanelsCreated(false)
 {
-
-
-    printf("CCounterStrikeViewport constructor ENTRY\n");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport ctor ENTRY this=%p parent=%u\n",
+		this, parent);
 
 	for (int i = 0; i < ARRAYSIZE(m_apBuySubMenus); ++i)
 	{
@@ -42,8 +38,7 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	SetPaintBackgroundEnabled(false);
 	SetPaintBorderEnabled(false);
 	SetBounds(0, 0, gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
-
-	CreatePanels();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport ctor EXIT this=%p\n", this);
 }
 CCounterStrikeViewport::~CCounterStrikeViewport()
 {
@@ -52,46 +47,52 @@ CCounterStrikeViewport::~CCounterStrikeViewport()
 
 void CCounterStrikeViewport::CreatePanels()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels ENTRY this=%p created=%d\n",
+		this, m_bPanelsCreated ? 1 : 0);
 
-	printf("CreatePanels ENTRY\n");
-    if (m_bPanelsCreated)
-        return;
+	if (m_bPanelsCreated)
+		return;
 
-    printf("CreatePanels BEFORE TeamMenu\n");
-    m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
-    printf("CreatePanels AFTER TeamMenu\n");
-    m_pTeamMenu->SetViewport(this);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating TeamMenu\n");
+	// m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created TeamMenu=%p\n", m_pTeamMenu);
+	// if (m_pTeamMenu)
+	// 	m_pTeamMenu->SetViewport(this);
 
-    printf("CreatePanels BEFORE ClassMenu\n");
-    m_pClassMenu = new CClassMenu(this, "ClassMenu");
-    printf("CreatePanels AFTER ClassMenu\n");
-    m_pClassMenu->SetViewport(this);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
+	// m_pClassMenu = new CClassMenu(this, "ClassMenu");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
+	// if (m_pClassMenu)
+	// 	m_pClassMenu->SetViewport(this);
 
-    printf("CreatePanels BEFORE BuyMenu\n");
-    m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
-    printf("CreatePanels AFTER BuyMenu\n");
-    m_pBuyMenu->SetViewport(this);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuyMenu\n");
+	m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuyMenu=%p\n", m_pBuyMenu);
+	if (m_pBuyMenu)
+		m_pBuyMenu->SetViewport(this);
 
-    printf("CreatePanels BEFORE BuySubMenus loop\n");
-    for (int category = 0; category < CATEGORY_COUNT; ++category)
-    {
-        for (int side = 0; side < SUBMENU_COUNT; ++side)
-        {
-            printf("CreatePanels BuySubMenu category=%d side=%d\n", category, side);
-            const int index = GetSubMenuIndex((BuyMenuCategory_t)category, side == SUBMENU_CT);
-            m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
-            printf("CreatePanels AFTER BuySubMenu category=%d side=%d\n", category, side);
-            m_apBuySubMenus[index]->SetViewport(this);
-            m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, side == SUBMENU_CT);
-        }
-    }
+	for (int category = 0; category < CATEGORY_COUNT; ++category)
+	{
+		for (int side = 0; side < SUBMENU_COUNT; ++side)
+		{
+			const bool isCT = side == SUBMENU_CT;
+			const int index = GetSubMenuIndex((BuyMenuCategory_t)category, isCT);
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuySubMenu category=%d isCT=%d\n",
+				category, isCT ? 1 : 0);
+			m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuySubMenu=%p category=%d isCT=%d\n",
+				m_apBuySubMenus[index], category, isCT ? 1 : 0);
+			if (m_apBuySubMenus[index])
+			{
+				m_apBuySubMenus[index]->SetViewport(this);
+				m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, isCT);
+			}
+		}
+	}
 
-    printf("CreatePanels BEFORE HideAllGameMenus\n");
-    m_bPanelsCreated = true;
-    HideAllGameMenus();
-    printf("CreatePanels EXIT\n");
-
-
+	m_bPanelsCreated = true;
+	HideAllGameMenus();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels EXIT this=%p\n", this);
 }
 
 void CCounterStrikeViewport::DestroyPanels()
@@ -131,6 +132,7 @@ void CCounterStrikeViewport::ShowTeamMenu()
 
 	if (m_pTeamMenu)
 	{
+		m_pTeamMenu->EnsureControlSettingsLoaded();
 		m_pTeamMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pTeamMenu->SetSpectateVisible(gHUD.m_Menu.m_bAllowSpec);
 		m_pTeamMenu->SetVisible(true);
@@ -154,6 +156,7 @@ void CCounterStrikeViewport::ShowClassMenu(int menuType)
 	if (m_pClassMenu)
 	{
 		m_pClassMenu->SetMenuType(menuType);
+		m_pClassMenu->EnsureControlSettingsLoaded();
 		m_pClassMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pClassMenu->SetVisible(true);
 		m_pClassMenu->MoveToFront();
@@ -173,6 +176,7 @@ void CCounterStrikeViewport::ShowBuyMenu()
 
 	if (m_pBuyMenu)
 	{
+		m_pBuyMenu->EnsureControlSettingsLoaded();
 		m_pBuyMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pBuyMenu->SetVisible(true);
 		m_pBuyMenu->MoveToFront();
@@ -197,6 +201,7 @@ void CCounterStrikeViewport::ShowBuySubMenu(BuyMenuCategory_t category)
 	SetMouseInputEnabled(true);
 
 	m_apBuySubMenus[index]->SetCategory(category, bIsCT);
+	m_apBuySubMenus[index]->EnsureControlSettingsLoaded();
 	m_apBuySubMenus[index]->SetBounds(0, 0, GetWide(), GetTall());
 	m_apBuySubMenus[index]->SetVisible(true);
 	m_apBuySubMenus[index]->MoveToFront();

@@ -16,6 +16,7 @@ public:
 	CClassMenu(vgui2::Panel *parent, const char *panelName);
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void SetMenuType(int menuType);
+	void EnsureControlSettingsLoaded();
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
@@ -26,6 +27,7 @@ private:
 
 	CCounterStrikeViewport *m_pViewport;
 	int m_iMenuType;
+	bool m_bControlSettingsLoaded;
 };
 
 #endif

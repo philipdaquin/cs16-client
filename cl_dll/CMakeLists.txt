@@ -26,7 +26,7 @@ list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/vgui2_testpanel.cpp"
 list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cpp")
 list(APPEND CS_CLIENT_SRC ../common/interface.cpp)
 list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
-list(APPEND CS_CLIENT_SRC vgui2_bootstrap.cpp vgui2_stub_impl.cpp)
+list(APPEND CS_CLIENT_SRC vgui2_bootstrap.cpp vgui2_stub_impl.cpp vgui2_client_runtime.cpp)
 set(VGUI2_SDK_RUNTIME_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/KeyValues.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/tier1/mempool.cpp"

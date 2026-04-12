@@ -29,12 +29,26 @@ bool CommandStartsWith(const char *command, const char *prefix)
 
 CBuyMenu::CBuyMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
+	, m_bControlSettingsLoaded(false)
 {
+	printf("[VGUI2-CLIENT] CBuyMenu ctor ENTRY this=%p parent=%p name='%s'\n",
+		this, parent, panelName ? panelName : "<null>");
 	SetProportional(false);
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
 	m_pViewport = NULL;
+	printf("[VGUI2-CLIENT] CBuyMenu ctor EXIT this=%p loaded=%d\n",
+		this, m_bControlSettingsLoaded ? 1 : 0);
+}
+
+void CBuyMenu::EnsureControlSettingsLoaded()
+{
+	if (m_bControlSettingsLoaded)
+		return;
+
+	printf("[VGUI2-CLIENT] CBuyMenu loading control settings\n");
 	ReloadControlSettings();
+	m_bControlSettingsLoaded = true;
 }
 
 void CBuyMenu::ReloadControlSettings()

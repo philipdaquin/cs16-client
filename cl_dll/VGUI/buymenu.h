@@ -15,6 +15,7 @@ class CBuyMenu : public vgui2::EditablePanel
 public:
 	CBuyMenu(vgui2::Panel *parent, const char *panelName);
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
+	void EnsureControlSettingsLoaded();
 	void ReloadControlSettings();
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
@@ -23,6 +24,7 @@ public:
 
 private:
 	CCounterStrikeViewport *m_pViewport;
+	bool m_bControlSettingsLoaded;
 };
 
 #endif

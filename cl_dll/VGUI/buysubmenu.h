@@ -15,6 +15,7 @@ public:
 	CBuySubMenu(vgui2::Panel *parent, const char *panelName);
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category, bool isCT);
+	void EnsureControlSettingsLoaded();
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
@@ -26,6 +27,7 @@ private:
 	CCounterStrikeViewport *m_pViewport;
 	CCounterStrikeViewport::BuyMenuCategory_t m_Category;
 	bool m_bIsCT;
+	bool m_bControlSettingsLoaded;
 };
 
 #endif

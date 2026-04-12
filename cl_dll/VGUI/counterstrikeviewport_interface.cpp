@@ -20,16 +20,13 @@ extern vgui2::IPanel *g_pVGuiPanel;
 
 void VGUI2_CreateViewport()
 {
+	gEngfuncs.Con_Printf("PRE-VIEWPORT g_pVGui=%p g_pVGuiPanel=%p\n", g_pVGui, g_pVGuiPanel);
 
-
-	 // ADD THESE:
-    gEngfuncs.Con_Printf("PRE-VIEWPORT g_pVGui=%p g_pVGuiPanel=%p\n", g_pVGui, g_pVGuiPanel);
-    
-    if (!g_pVGui || !g_pVGuiPanel)
-    {
-        gEngfuncs.Con_Printf("PRE-VIEWPORT ABORTING - null interfaces!\n");
-        return;
-    }
+	if (!g_pVGui || !g_pVGuiPanel)
+	{
+		gEngfuncs.Con_Printf("PRE-VIEWPORT ABORTING - null interfaces!\n");
+		return;
+	}
 
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport ENTRY ready=%d surface=%p viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, g_pVGuiSurface, g_pCounterStrikeViewport);
@@ -55,22 +52,10 @@ void VGUI2_CreateViewport()
 	gEngfuncs.Con_Printf("PRE-VIEWPORT g_pVGui=%p g_pVGuiPanel=%p g_pVGuiSurface=%p root=%u\n",
 		g_pVGui, g_pVGuiPanel, g_pVGuiSurface, (unsigned int)root);
 
-
-	// BUGGY and needs rework 
-	printf("BEFORE new CCounterStrikeViewport root=%u\n", (unsigned int)root);
-	// g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
-
-    printf("Set fake viewport\n");
-    g_pCounterStrikeViewport = NULL;
-
-
-	printf("AFTER new CCounterStrikeViewport ptr=%p\n", g_pCounterStrikeViewport);
+	g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport assignment result viewport=%p\n", g_pCounterStrikeViewport);
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] Viewport created: %p class=CCounterStrikeViewport kind=vgui2::EditablePanel root=%u\n",
 		g_pCounterStrikeViewport, (unsigned int)root);
-
-
-	printf("VGUI2_CreateViewport RETURNING\n");
 }
 
 void VGUI2_DestroyViewport()
@@ -124,6 +109,11 @@ void VGUI2_HideAllGameMenus()
 {
 	if (g_pCounterStrikeViewport)
 		g_pCounterStrikeViewport->HideAllGameMenus();
+}
+
+bool VGUI2_ShouldCaptureInput()
+{
+	return g_pCounterStrikeViewport && g_pCounterStrikeViewport->IsVisible();
 }
 
 int VGUI2_GetLocalPlayerTeam()

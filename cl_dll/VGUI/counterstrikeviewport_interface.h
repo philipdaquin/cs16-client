@@ -9,6 +9,7 @@ void VGUI2_ShowClassMenu(int menuType);
 void VGUI2_ShowBuyMenu();
 void VGUI2_ShowBuySubMenu(int category);
 void VGUI2_HideAllGameMenus();
+bool VGUI2_ShouldCaptureInput();
 int VGUI2_GetLocalPlayerTeam();
 void VGUI2_RunClientCommand(const char *command);
 

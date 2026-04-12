@@ -196,34 +196,18 @@ int DLLEXPORT HUD_VidInit( void )
 	gEngfuncs.Con_Printf("\n========== CLIENT HUD_VidInit HIT ==========\n");
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit ENTRY ready=%d viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit bootstrap/viewport path TEMP DISABLED for isolation\n");
-
-	// if (!VGUI2_IsReady())
-	// {
-	// 	const bool bootstrapped = VGUI2_Bootstrap();
-	// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit bootstrap retry result=%d ready=%d viewport=%p\n",
-	// 		bootstrapped ? 1 : 0, VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
-	// }
 
 	gHUD.VidInit();
 
 	isLoaded = true;
 
-	//VGui_Startup();
-	VGUI2_Bootstrap();
-	printf("BEFORE VGUI2_OnVidInit\n");
+	if (!VGUI2_IsReady())
+		VGUI2_Bootstrap();
 
-	// TEMP isolation: disable all VGUI2 vid-init work so we can prove whether
-	// the startup regression still happens without the viewport/menu path.
 	VGUI2_OnVidInit();
-
-
-	// gHUD.m_Menu.FlushPendingVGUIMenu();
+	gHUD.m_Menu.FlushPendingVGUIMenu();
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit EXIT ready=%d viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
-
-	printf("AFTER VGUI2_OnVidInit\n");
-
 
 	return 1;
 }
@@ -260,12 +244,7 @@ redraw the HUD.
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
-
-	// DIAGNOSTIC ORANGE BOX - top-left corner
-	// FillRGBA( 10, 10, 100, 100, 255, 128, 0, 255 );
-
-	// gEngfuncs.Con_Printf("\n========== DLLEXPORT HUD_Redraw ==========\n");
-	// VGUI2_Bootstrap();
+	VGUI2_RunFrame();
 
 	return 1;
 }

@@ -11,12 +11,17 @@
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
 	, m_pViewport(NULL)
-	{
+	, m_bControlSettingsLoaded(false)
+{
+	printf("[VGUI2-CLIENT] CBuySubMenu ctor ENTRY this=%p parent=%p name='%s'\n",
+		this, parent, panelName ? panelName : "<null>");
 	SetProportional(false);
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
 	m_Category = CCounterStrikeViewport::CATEGORY_COUNT;
 	m_bIsCT = false;
+	printf("[VGUI2-CLIENT] CBuySubMenu ctor EXIT this=%p loaded=%d\n",
+		this, m_bControlSettingsLoaded ? 1 : 0);
 }
 
 void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category, bool isCT)
@@ -26,7 +31,18 @@ void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category
 
 	m_Category = category;
 	m_bIsCT = isCT;
+	m_bControlSettingsLoaded = false;
+}
+
+void CBuySubMenu::EnsureControlSettingsLoaded()
+{
+	if (m_bControlSettingsLoaded)
+		return;
+
+	printf("[VGUI2-CLIENT] CBuySubMenu loading control settings category=%d isCT=%d\n",
+		(int)m_Category, m_bIsCT ? 1 : 0);
 	LoadControlSettings(GetResourceName());
+	m_bControlSettingsLoaded = true;
 }
 
 void CBuySubMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
