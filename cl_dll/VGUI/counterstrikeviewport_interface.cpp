@@ -4,6 +4,7 @@
 
 #include "counterstrikeviewport.h"
 #include <vgui/ISurface.h>
+#include <tier2/tier2.h>
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];
@@ -13,8 +14,23 @@ typedef vec_t vec3_t[3];
 
 static CCounterStrikeViewport *g_pCounterStrikeViewport = NULL;
 
+
+extern vgui2::IVGui *g_pVGui;
+extern vgui2::IPanel *g_pVGuiPanel;
+
 void VGUI2_CreateViewport()
 {
+
+
+	 // ADD THESE:
+    gEngfuncs.Con_Printf("PRE-VIEWPORT g_pVGui=%p g_pVGuiPanel=%p\n", g_pVGui, g_pVGuiPanel);
+    
+    if (!g_pVGui || !g_pVGuiPanel)
+    {
+        gEngfuncs.Con_Printf("PRE-VIEWPORT ABORTING - null interfaces!\n");
+        return;
+    }
+
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport ENTRY ready=%d surface=%p viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, g_pVGuiSurface, g_pCounterStrikeViewport);
 
@@ -36,11 +52,25 @@ void VGUI2_CreateViewport()
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport using embedded/root panel %u\n", (unsigned int)root);
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport about to execute new CCounterStrikeViewport(root=%u)\n",
 		(unsigned int)root);
+	gEngfuncs.Con_Printf("PRE-VIEWPORT g_pVGui=%p g_pVGuiPanel=%p g_pVGuiSurface=%p root=%u\n",
+		g_pVGui, g_pVGuiPanel, g_pVGuiSurface, (unsigned int)root);
 
-	g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
+
+	// BUGGY and needs rework 
+	printf("BEFORE new CCounterStrikeViewport root=%u\n", (unsigned int)root);
+	// g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
+
+    printf("Set fake viewport\n");
+    g_pCounterStrikeViewport = NULL;
+
+
+	printf("AFTER new CCounterStrikeViewport ptr=%p\n", g_pCounterStrikeViewport);
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] CreateViewport assignment result viewport=%p\n", g_pCounterStrikeViewport);
 	gEngfuncs.Con_Printf("[VGUI2-VIEWPORT] Viewport created: %p class=CCounterStrikeViewport kind=vgui2::EditablePanel root=%u\n",
 		g_pCounterStrikeViewport, (unsigned int)root);
+
+
+	printf("VGUI2_CreateViewport RETURNING\n");
 }
 
 void VGUI2_DestroyViewport()

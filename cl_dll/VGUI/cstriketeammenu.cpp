@@ -17,9 +17,18 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu ENTRY this=%p parent=%p name='%s'\n",
 		this, parent, panelName ? panelName : "<null>");
 
+	printf("BEFORE SetProportional\n");
 	SetProportional(false);
+	printf("AFTER SetProportional\n");
+
 	SetVisible(false);
+	printf("AFTER SetVisible\n");
+
 	SetPaintBackgroundEnabled(true);
+	printf("AFTER SetPaintBackgroundEnabled\n");
+
+	printf("BEFORE kTeamMenuEmptyDebug check\n");
+
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu before LoadControlSettings empty=%d\n",
 		kTeamMenuEmptyDebug ? 1 : 0);
 

@@ -14,10 +14,15 @@ CClassMenu::CClassMenu(vgui2::Panel *parent, const char *panelName)
 	, m_pViewport(NULL)
 	, m_iMenuType(MENU_CLASS_T)
 {
+
+	printf("CClassMenu AFTER BaseClass\n");
+
 	SetProportional(false);
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
-	ReloadControlSettings();
+	// ReloadControlSettings();
+	printf("CClassMenu AFTER LoadControlSettings\n");
+
 }
 
 void CClassMenu::SetMenuType(int menuType)

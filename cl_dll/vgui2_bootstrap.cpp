@@ -488,11 +488,20 @@ void VGUI2_OnVidInit()
     gEngfuncs.Con_Printf(LOG_PREFIX "STEP 4 - about to check cl_vgui2_menus\n");
     if (cl_vgui2_menus && cl_vgui2_menus->value != 0.0f)
     {
+		printf("BEFORE VGUI2_CreateViewport\n");
+
         gEngfuncs.Con_Printf(LOG_PREFIX "STEP 5 - about to call VGUI2_CreateViewport\n");
         VGUI2_CreateViewport();
         gEngfuncs.Con_Printf(LOG_PREFIX "STEP 6 - VGUI2_CreateViewport returned\n");
+		printf("AFTER VGUI2_CreateViewport\n");
+
     }
 #endif
 
     gEngfuncs.Con_Printf(LOG_PREFIX "STEP 7 - checking testpanel\n");
+
+
+	printf("return VGUI2_OnVidInit\n");
+
+
 }

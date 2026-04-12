@@ -12,8 +12,12 @@ typedef vec_t vec3_t[3];
 #include "VGUI/cstriketeammenu.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
+
+// BaseClass(NULL, "CounterStrikeViewport")
+//** CURRENTLY BUGGY and is causing unreposnsive UI, if removed the game works just fine but without the VGUI2 we wanted */
 CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	: BaseClass(NULL, "CounterStrikeViewport")
+
 	, m_pTeamMenu(NULL)
 	, m_pClassMenu(NULL)
 	, m_pBuyMenu(NULL)
@@ -21,8 +25,10 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	, m_pBuyPresetListBox(NULL)
 	, m_bPanelsCreated(false)
 {
-	gEngfuncs.Con_Printf("[VIEWPORT] bare Panel constructor entry this=%p parent=%u\n",
-		this, (unsigned int)parent);
+
+
+    printf("CCounterStrikeViewport constructor ENTRY\n");
+
 	for (int i = 0; i < ARRAYSIZE(m_apBuySubMenus); ++i)
 	{
 		m_apBuySubMenus[i] = NULL;
@@ -36,12 +42,9 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	SetPaintBackgroundEnabled(false);
 	SetPaintBorderEnabled(false);
 	SetBounds(0, 0, gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
-	gEngfuncs.Con_Printf("[VIEWPORT] bare Panel constructor exit this=%p parent=%u\n",
-		this, (unsigned int)parent);
 
 	CreatePanels();
 }
-
 CCounterStrikeViewport::~CCounterStrikeViewport()
 {
 	DestroyPanels();
@@ -49,37 +52,46 @@ CCounterStrikeViewport::~CCounterStrikeViewport()
 
 void CCounterStrikeViewport::CreatePanels()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels ENTRY this=%p created=%d\n",
-		this, m_bPanelsCreated ? 1 : 0);
-	if (m_bPanelsCreated)
-		return;
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels before TeamMenu creation this=%p\n", this);
-	m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels after TeamMenu creation team=%p\n", m_pTeamMenu);
-	m_pTeamMenu->SetViewport(this);
+	printf("CreatePanels ENTRY\n");
+    if (m_bPanelsCreated)
+        return;
 
-	m_pClassMenu = new CClassMenu(this, "ClassMenu");
-	m_pClassMenu->SetViewport(this);
+    printf("CreatePanels BEFORE TeamMenu\n");
+    m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
+    printf("CreatePanels AFTER TeamMenu\n");
+    m_pTeamMenu->SetViewport(this);
 
-	m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
-	m_pBuyMenu->SetViewport(this);
+    printf("CreatePanels BEFORE ClassMenu\n");
+    m_pClassMenu = new CClassMenu(this, "ClassMenu");
+    printf("CreatePanels AFTER ClassMenu\n");
+    m_pClassMenu->SetViewport(this);
 
-	for (int category = 0; category < CATEGORY_COUNT; ++category)
-	{
-		for (int side = 0; side < SUBMENU_COUNT; ++side)
-		{
-			const int index = GetSubMenuIndex((BuyMenuCategory_t)category, side == SUBMENU_CT);
-			m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
-			m_apBuySubMenus[index]->SetViewport(this);
-			m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, side == SUBMENU_CT);
-		}
-	}
+    printf("CreatePanels BEFORE BuyMenu\n");
+    m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
+    printf("CreatePanels AFTER BuyMenu\n");
+    m_pBuyMenu->SetViewport(this);
 
-	m_bPanelsCreated = true;
-	HideAllGameMenus();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels EXIT this=%p team=%p class=%p buy=%p\n",
-		this, m_pTeamMenu, m_pClassMenu, m_pBuyMenu);
+    printf("CreatePanels BEFORE BuySubMenus loop\n");
+    for (int category = 0; category < CATEGORY_COUNT; ++category)
+    {
+        for (int side = 0; side < SUBMENU_COUNT; ++side)
+        {
+            printf("CreatePanels BuySubMenu category=%d side=%d\n", category, side);
+            const int index = GetSubMenuIndex((BuyMenuCategory_t)category, side == SUBMENU_CT);
+            m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
+            printf("CreatePanels AFTER BuySubMenu category=%d side=%d\n", category, side);
+            m_apBuySubMenus[index]->SetViewport(this);
+            m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, side == SUBMENU_CT);
+        }
+    }
+
+    printf("CreatePanels BEFORE HideAllGameMenus\n");
+    m_bPanelsCreated = true;
+    HideAllGameMenus();
+    printf("CreatePanels EXIT\n");
+
+
 }
 
 void CCounterStrikeViewport::DestroyPanels()

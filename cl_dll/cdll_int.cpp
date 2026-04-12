@@ -211,13 +211,19 @@ int DLLEXPORT HUD_VidInit( void )
 
 	//VGui_Startup();
 	VGUI2_Bootstrap();
+	printf("BEFORE VGUI2_OnVidInit\n");
 
 	// TEMP isolation: disable all VGUI2 vid-init work so we can prove whether
 	// the startup regression still happens without the viewport/menu path.
 	VGUI2_OnVidInit();
+
+
 	// gHUD.m_Menu.FlushPendingVGUIMenu();
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit EXIT ready=%d viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
+
+	printf("AFTER VGUI2_OnVidInit\n");
+
 
 	return 1;
 }
@@ -308,10 +314,14 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
+
+    printf("HUD_Frame ENTRY\n");
+
+
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
-
+ printf("HUD_Frame EXIT\n");
 	GetClientVoice()->Frame( time );
 }
 
