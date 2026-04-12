@@ -8,7 +8,7 @@
 #include "VGUI/counterstrikeviewport.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
-static const bool kTeamMenuEmptyDebug = false;
+static const bool kTeamMenuEmptyDebug = true;
 
 CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)

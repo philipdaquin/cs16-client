@@ -312,6 +312,7 @@ bool VGUI2_Bootstrap()
 	return true;
 
 #else
+	gEngfuncs.Con_Printf(LOG_PREFIX "Stub mode DISABLED - using stubbed VGUI2 client interfaces\n");
 
 	CreateInterfaceFn factories[8];
 	int count = BuildFactoryList(factories, ARRAYSIZE(factories));
@@ -472,50 +473,26 @@ void VGUI2_DestroyTestPanel()
 
 void VGUI2_OnVidInit()
 {
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ENTRY ready=%d viewport=%p\n",
-		state.ready ? 1 : 0, VGUI2_GetViewportPtr());
+    gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ENTRY ready=%d viewport=%p\n",
+        state.ready ? 1 : 0, VGUI2_GetViewportPtr());
 
-	if (!VGUI2_IsReady())
-	{
-		const bool retried = VGUI2_Bootstrap();
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() retry bootstrap result=%d ready=%d attempted=%d viewport=%p\n",
-			retried ? 1 : 0, state.ready ? 1 : 0, state.attempted ? 1 : 0, VGUI2_GetViewportPtr());
-		if (!VGUI2_IsReady())
-		{
-			gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - bootstrap still not ready viewport=%p\n", VGUI2_GetViewportPtr());
-			return;
-		}
-	}
+    gEngfuncs.Con_Printf(LOG_PREFIX "STEP 1 - checking ready state\n");
+    
+    gEngfuncs.Con_Printf(LOG_PREFIX "STEP 2 - cl_vgui2_menus=%p(%.1f)\n",
+        cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f);
 
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() ready=%d, cl_vgui2_menus=%p(%.1f) cl_vgui2_testpanel=%p(%.1f)\n",
-		state.ready ? 1 : 0,
-		cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f,
-		cl_vgui2_testpanel, cl_vgui2_testpanel ? cl_vgui2_testpanel->value : -1.0f);
-
-	const bool hadViewport = VGUI2_HasViewport();
+    const bool hadViewport = VGUI2_HasViewport();
+    gEngfuncs.Con_Printf(LOG_PREFIX "STEP 3 - hadViewport=%d\n", hadViewport ? 1 : 0);
 
 #ifndef VGUI2_STUB_MODE
-	if (cl_vgui2_menus && cl_vgui2_menus->value != 0.0f)
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() calling VGUI2_CreateViewport() ready=%d viewport=%p\n",
-			state.ready ? 1 : 0, VGUI2_GetViewportPtr());
-		VGUI2_CreateViewport();
-	}
-	else
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() SKIP - cl_vgui2_menus disabled or unavailable ptr=%p value=%.1f\n",
-			cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f);
-	}
-#else
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() STUB_MODE - viewport create skipped\n");
+    gEngfuncs.Con_Printf(LOG_PREFIX "STEP 4 - about to check cl_vgui2_menus\n");
+    if (cl_vgui2_menus && cl_vgui2_menus->value != 0.0f)
+    {
+        gEngfuncs.Con_Printf(LOG_PREFIX "STEP 5 - about to call VGUI2_CreateViewport\n");
+        VGUI2_CreateViewport();
+        gEngfuncs.Con_Printf(LOG_PREFIX "STEP 6 - VGUI2_CreateViewport returned\n");
+    }
 #endif
 
-	if (cl_vgui2_testpanel && cl_vgui2_testpanel->value != 0.0f && !state.testPanelCreated)
-	{
-		VGUI2_CreateTestPanel();
-	}
-
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_OnVidInit() EXIT ready=%d viewport=%p created=%d testPanel=%d\n",
-		state.ready ? 1 : 0, VGUI2_GetViewportPtr(), (!hadViewport && VGUI2_HasViewport()) ? 1 : 0,
-		state.testPanelCreated ? 1 : 0);
+    gEngfuncs.Con_Printf(LOG_PREFIX "STEP 7 - checking testpanel\n");
 }

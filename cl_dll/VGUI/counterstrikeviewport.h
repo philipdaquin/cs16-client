@@ -4,7 +4,7 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
-#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/Panel.h>
 
 class CTeamMenu;
 class CClassMenu;
@@ -13,9 +13,9 @@ class CBuySubMenu;
 class CBuyPresetPanel;
 class CBuyPresetListBox;
 
-class CCounterStrikeViewport : public vgui2::EditablePanel
+class CCounterStrikeViewport : public vgui2::Panel
 {
-	DECLARE_CLASS_SIMPLE(CCounterStrikeViewport, vgui2::EditablePanel);
+	DECLARE_CLASS_SIMPLE(CCounterStrikeViewport, vgui2::Panel);
 
 public:
 	CCounterStrikeViewport(vgui2::VPANEL parent);

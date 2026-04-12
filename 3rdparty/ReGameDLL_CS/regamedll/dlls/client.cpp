@@ -1,5 +1,6 @@
 #include "precompiled.h"
 
+
 int gmsgWeapPickup = 0;
 int gmsgHudText = 0;
 int gmsgHudTextPro = 0;

@@ -21,6 +21,8 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	, m_pBuyPresetListBox(NULL)
 	, m_bPanelsCreated(false)
 {
+	gEngfuncs.Con_Printf("[VIEWPORT] bare Panel constructor entry this=%p parent=%u\n",
+		this, (unsigned int)parent);
 	for (int i = 0; i < ARRAYSIZE(m_apBuySubMenus); ++i)
 	{
 		m_apBuySubMenus[i] = NULL;
@@ -34,6 +36,8 @@ CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
 	SetPaintBackgroundEnabled(false);
 	SetPaintBorderEnabled(false);
 	SetBounds(0, 0, gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
+	gEngfuncs.Con_Printf("[VIEWPORT] bare Panel constructor exit this=%p parent=%u\n",
+		this, (unsigned int)parent);
 
 	CreatePanels();
 }
