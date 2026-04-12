@@ -26,7 +26,11 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 		this, IsVisible() ? 1 : 0);
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background begin this=%p\n", this);
-	SetPaintBackgroundEnabled(true);
+	// TEMPORARY ISOLATION:
+	// Disable TeamMenu background fill so we can confirm the fullscreen green overlay
+	// is coming from panel background painting rather than parser/control creation.
+	// SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background end this=%p\n", this);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP constructor-final-state this=%p vpanel=%u parent=%p\n",
 		this, (unsigned int)GetVPanel(), GetParent());
@@ -51,7 +55,16 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	LoadControlSettings("Resource/UI/Teammenu.res");
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
+	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
+	if (pRootFrame)
+	{
+		printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded disabling root frame paint root=%p\n",
+			pRootFrame);
+		pRootFrame->SetPaintBackgroundEnabled(false);
+		pRootFrame->SetPaintBorderEnabled(false);
+	}
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP child lookup terbutton=%p ctbutton=%p specbutton=%p mapinfo=%p sysmenu=%p\n",
+		pRootFrame,
 		FindChildByName("terbutton"),
 		FindChildByName("ctbutton"),
 		FindChildByName("specbutton"),
@@ -66,7 +79,11 @@ void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings ENTRY this=%p scheme=%p\n", this, scheme);
 	BaseClass::ApplySchemeSettings(scheme);
-	SetPaintBackgroundEnabled(true);
+	// TEMPORARY ISOLATION:
+	// Keep background painting disabled after scheme application too, otherwise the
+	// scheme pass can re-enable the same fullscreen fill we are isolating.
+	// SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings EXIT this=%p\n", this);
 }
 

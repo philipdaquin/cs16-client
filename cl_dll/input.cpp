@@ -27,7 +27,6 @@
 #include "vgui_parser.h"
 #include "com_weapons.h"
 #include "vgui2_bootstrap.h"
-#include "vgui2_client_runtime.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
 extern int g_weaponselect;
@@ -368,9 +367,6 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
-	if (VGUI2_IsReady() && VGUI2_ShouldCaptureInput() && VGUI2_ClientRuntimeHandleKeyEvent(down, keynum))
-		return 0;
-
 	return 1;
 }
 

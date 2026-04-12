@@ -53,17 +53,19 @@ void CCounterStrikeViewport::CreatePanels()
 	if (m_bPanelsCreated)
 		return;
 
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating TeamMenu\n");
-	// m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created TeamMenu=%p\n", m_pTeamMenu);
-	// if (m_pTeamMenu)
-	// 	m_pTeamMenu->SetViewport(this);
 
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
-	// m_pClassMenu = new CClassMenu(this, "ClassMenu");
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
-	// if (m_pClassMenu)
-	// 	m_pClassMenu->SetViewport(this);
+	// TEMP disbaled due to *.res files parsing issuews
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating TeamMenu\n");
+	m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created TeamMenu=%p\n", m_pTeamMenu);
+	if (m_pTeamMenu)
+		m_pTeamMenu->SetViewport(this);
+
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
+	m_pClassMenu = new CClassMenu(this, "ClassMenu");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
+	if (m_pClassMenu)
+		m_pClassMenu->SetViewport(this);
 
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuyMenu\n");
 	m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
