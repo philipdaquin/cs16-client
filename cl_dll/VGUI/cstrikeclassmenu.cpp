@@ -98,10 +98,10 @@ void CClassMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 
 void CClassMenu::Paint()
 {
-	printf("[VGUI2-CLIENT] CClassMenu::Paint ENTRY this=%p visible=%d menuType=%d\n",
-		this, IsVisible() ? 1 : 0, m_iMenuType);
+	// printf("[VGUI2-CLIENT] CClassMenu::Paint ENTRY this=%p visible=%d menuType=%d\n",
+		// this, IsVisible() ? 1 : 0, m_iMenuType);
 	BaseClass::Paint();
-	printf("[VGUI2-CLIENT] CClassMenu::Paint EXIT this=%p\n", this);
+	// printf("[VGUI2-CLIENT] CClassMenu::Paint EXIT this=%p\n", this);
 }
 
 void CClassMenu::OnCommand(const char *command)

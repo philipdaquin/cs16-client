@@ -5,8 +5,38 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <vgui/ISurface.h>
+#include <vgui_controls/Controls.h>
+
 #include "VGUI/counterstrikeviewport.h"
 #include "VGUI/counterstrikeviewport_interface.h"
+
+namespace
+{
+
+void DumpPanelTree(vgui2::Panel *panel, int depth)
+{
+	if (!panel || depth > 3)
+		return;
+
+	int x = 0, y = 0, w = 0, h = 0;
+	panel->GetBounds(x, y, w, h);
+	printf("[VGUI2-CLIENT] TeamMenuTree depth=%d panel=%p name='%s' visible=%d enabled=%d bounds=(%d,%d %dx%d) children=%d\n",
+		depth,
+		panel,
+		panel->GetName() ? panel->GetName() : "<null>",
+		panel->IsVisible() ? 1 : 0,
+		panel->IsEnabled() ? 1 : 0,
+		x, y, w, h,
+		panel->GetChildCount());
+
+	for (int i = 0; i < panel->GetChildCount(); ++i)
+	{
+		DumpPanelTree(panel->GetChild(i), depth + 1);
+	}
+}
+
+}
 
 CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
@@ -29,8 +59,8 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	// TEMPORARY ISOLATION:
 	// Disable TeamMenu background fill so we can confirm the fullscreen green overlay
 	// is coming from panel background painting rather than parser/control creation.
-	// SetPaintBackgroundEnabled(true);
 	SetPaintBackgroundEnabled(false);
+	// SetPaintBackgroundEnabled(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background end this=%p\n", this);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP constructor-final-state this=%p vpanel=%u parent=%p\n",
 		this, (unsigned int)GetVPanel(), GetParent());
@@ -52,7 +82,11 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP before-LoadControlSettings this=%p\n",
 		this);
-	LoadControlSettings("Resource/UI/Teammenu.res");
+
+	printf("[TEAMTRACE] calling EditablePanel::LoadControlSettings this=%p resource='%s'\n",
+		this, "Resource/UI/Teammenu.res");
+	BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
+	printf("[TEAMTRACE] returned EditablePanel::LoadControlSettings this=%p\n", this);
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
 	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
@@ -63,7 +97,9 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 		pRootFrame->SetPaintBackgroundEnabled(false);
 		pRootFrame->SetPaintBorderEnabled(false);
 	}
-	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP child lookup terbutton=%p ctbutton=%p specbutton=%p mapinfo=%p sysmenu=%p\n",
+	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded dumping panel tree this=%p\n", this);
+	DumpPanelTree(this, 0);
+	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP child lookup rootframe=%p terbutton=%p ctbutton=%p specbutton=%p mapinfo=%p sysmenu=%p\n",
 		pRootFrame,
 		FindChildByName("terbutton"),
 		FindChildByName("ctbutton"),
@@ -89,9 +125,7 @@ void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 
 void CTeamMenu::Paint()
 {
-	printf("[VGUI2-CLIENT] CTeamMenu::Paint ENTRY this=%p visible=%d\n", this, IsVisible() ? 1 : 0);
 	BaseClass::Paint();
-	printf("[VGUI2-CLIENT] CTeamMenu::Paint EXIT this=%p\n", this);
 }
 
 void CTeamMenu::SetSpectateVisible(bool bVisible)

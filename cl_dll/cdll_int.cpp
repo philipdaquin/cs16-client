@@ -294,13 +294,13 @@ Called by engine every frame that client .dll is loaded
 void DLLEXPORT HUD_Frame( double time )
 {
 
-    printf("HUD_Frame ENTRY\n");
+    // printf("HUD_Frame ENTRY\n");
 
 
 #ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
- printf("HUD_Frame EXIT\n");
+//  printf("HUD_Frame EXIT\n");
 	GetClientVoice()->Frame( time );
 }
 
