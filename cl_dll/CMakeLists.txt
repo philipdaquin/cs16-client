@@ -157,6 +157,7 @@ include_directories(
 	../game_shared
 	../public/
 	../public/cl_dll
+	../third_party/ValveFileVDF
 	../../hl1_source_sdk/public
 	../../hl1_source_sdk/common
 	../../hl1_source_sdk/public/tier1

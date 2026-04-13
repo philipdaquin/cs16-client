@@ -61,38 +61,43 @@ void CCounterStrikeViewport::CreatePanels()
 	if (m_pTeamMenu)
 		gEngfuncs.Con_Printf("SETTING m_pTeamMenu=%p to the VIEWPORT", m_pTeamMenu);
 
+	if (m_pTeamMenu)
 		m_pTeamMenu->SetViewport(this);
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
-	m_pClassMenu = new CClassMenu(this, "ClassMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
-	if (m_pClassMenu)
-		m_pClassMenu->SetViewport(this);
-
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuyMenu\n");
-	m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuyMenu=%p\n", m_pBuyMenu);
-	if (m_pBuyMenu)
-		m_pBuyMenu->SetViewport(this);
-
-	for (int category = 0; category < CATEGORY_COUNT; ++category)
-	{
-		for (int side = 0; side < SUBMENU_COUNT; ++side)
-		{
-			const bool isCT = side == SUBMENU_CT;
-			const int index = GetSubMenuIndex((BuyMenuCategory_t)category, isCT);
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuySubMenu category=%d isCT=%d\n",
-				category, isCT ? 1 : 0);
-			m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuySubMenu=%p category=%d isCT=%d\n",
-				m_apBuySubMenus[index], category, isCT ? 1 : 0);
-			if (m_apBuySubMenus[index])
-			{
-				m_apBuySubMenus[index]->SetViewport(this);
-				m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, isCT);
-			}
-		}
-	}
+	// TEMPORARY TEAMMENU-ONLY ISOLATION:
+	// Keep the rest of the menu graph commented out while we validate the
+	// TeamMenu VDF path and on-screen rendering.
+	//
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
+	// m_pClassMenu = new CClassMenu(this, "ClassMenu");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
+	// if (m_pClassMenu)
+	// 	m_pClassMenu->SetViewport(this);
+	//
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuyMenu\n");
+	// m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuyMenu=%p\n", m_pBuyMenu);
+	// if (m_pBuyMenu)
+	// 	m_pBuyMenu->SetViewport(this);
+	//
+	// for (int category = 0; category < CATEGORY_COUNT; ++category)
+	// {
+	// 	for (int side = 0; side < SUBMENU_COUNT; ++side)
+	// 	{
+	// 		const bool isCT = side == SUBMENU_CT;
+	// 		const int index = GetSubMenuIndex((BuyMenuCategory_t)category, isCT);
+	// 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuySubMenu category=%d isCT=%d\n",
+	// 			category, isCT ? 1 : 0);
+	// 		m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
+	// 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuySubMenu=%p category=%d isCT=%d\n",
+	// 			m_apBuySubMenus[index], category, isCT ? 1 : 0);
+	// 		if (m_apBuySubMenus[index])
+	// 		{
+	// 			m_apBuySubMenus[index]->SetViewport(this);
+	// 			m_apBuySubMenus[index]->SetCategory((BuyMenuCategory_t)category, isCT);
+	// 		}
+	// 	}
+	// }
 
 	m_bPanelsCreated = true;
 	HideAllGameMenus();
@@ -151,67 +156,22 @@ void CCounterStrikeViewport::ShowTeamMenu()
 
 void CCounterStrikeViewport::ShowClassMenu(int menuType)
 {
-	if (!m_bPanelsCreated)
-		CreatePanels();
-
-	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
-
-	if (m_pClassMenu)
-	{
-		m_pClassMenu->SetMenuType(menuType);
-		m_pClassMenu->EnsureControlSettingsLoaded();
-		m_pClassMenu->SetBounds(0, 0, GetWide(), GetTall());
-		m_pClassMenu->SetVisible(true);
-		m_pClassMenu->MoveToFront();
-		m_pClassMenu->RequestFocus();
-	}
+	// TEMPORARY TEAMMENU-ONLY ISOLATION:
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowClassMenu TEMP DISABLED type=%d this=%p\n",
+		menuType, this);
 }
 
 void CCounterStrikeViewport::ShowBuyMenu()
 {
-	if (!m_bPanelsCreated)
-		CreatePanels();
-
-	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
-
-	if (m_pBuyMenu)
-	{
-		m_pBuyMenu->EnsureControlSettingsLoaded();
-		m_pBuyMenu->SetBounds(0, 0, GetWide(), GetTall());
-		m_pBuyMenu->SetVisible(true);
-		m_pBuyMenu->MoveToFront();
-		m_pBuyMenu->RequestFocus();
-	}
+	// TEMPORARY TEAMMENU-ONLY ISOLATION:
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowBuyMenu TEMP DISABLED this=%p\n", this);
 }
 
 void CCounterStrikeViewport::ShowBuySubMenu(BuyMenuCategory_t category)
 {
-	if (!m_bPanelsCreated)
-		CreatePanels();
-
-	const bool bIsCT = VGUI2_GetLocalPlayerTeam() == TEAM_CT;
-	const int index = GetSubMenuIndex(category, bIsCT);
-
-	if (index < 0 || index >= ARRAYSIZE(m_apBuySubMenus) || !m_apBuySubMenus[index])
-		return;
-
-	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
-
-	m_apBuySubMenus[index]->SetCategory(category, bIsCT);
-	m_apBuySubMenus[index]->EnsureControlSettingsLoaded();
-	m_apBuySubMenus[index]->SetBounds(0, 0, GetWide(), GetTall());
-	m_apBuySubMenus[index]->SetVisible(true);
-	m_apBuySubMenus[index]->MoveToFront();
-	m_apBuySubMenus[index]->RequestFocus();
+	// TEMPORARY TEAMMENU-ONLY ISOLATION:
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowBuySubMenu TEMP DISABLED category=%d this=%p\n",
+		(int)category, this);
 }
 
 void CCounterStrikeViewport::HideAllGameMenus()
