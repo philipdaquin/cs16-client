@@ -318,6 +318,15 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu type=%d ready=%d viewport=%d\n",
 		menuType, VGUI2_IsReady() ? 1 : 0, VGUI2_HasViewport() ? 1 : 0);
 
+	if (menuType == MENU_TEAM && VGUI2_ShouldCaptureInput())
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] toggling MENU_TEAM off because VGUI2 menu is already visible\n");
+		VGUI2_HideAllGameMenus();
+		m_fMenuDisplayed = 0;
+		Touch_CloseMenu();
+		return;
+	}
+
 	if ( IsCsVgui2OwnedMenuType( menuType ) )
 	{
 		if ( !VGUI2_HasViewport() || !VGUI2_IsReady() )

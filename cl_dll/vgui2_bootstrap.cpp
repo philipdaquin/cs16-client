@@ -6,6 +6,7 @@
 #include <vgui/IPanel.h>
 #include <vgui/IScheme.h>
 #include <vgui/ISystem.h>
+#include <vgui_controls/Controls.h>
 
 namespace vgui2
 {
@@ -378,9 +379,9 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap ready\n");
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Attempting scheme load...\n");
-	// state.clientScheme = g_pVGuiSchemeManager->LoadSchemeFromFile("resource/ClientScheme.res", "clientscheme");
-	// state.schemeLoaded = (state.clientScheme != 0);
-	// gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load: %s\n", state.schemeLoaded ? "OK" : "FAILED (non-fatal)");
+	state.clientScheme = vgui2::scheme()->LoadSchemeFromFilePath("resource/ClientScheme.res", NULL, "clientscheme");
+	state.schemeLoaded = (state.clientScheme != 0);
+	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load: %s\n", state.schemeLoaded ? "OK" : "FAILED (non-fatal)");
 	gEngfuncs.Con_Printf(LOG_PREFIX "COMPLETE ready=%d attempted=%d (IVGui=%p IPanel=%p ISurface=%p IInputInternal=%p ILocalize=%p ISchemeManager=%p ISystem=%p viewport=%p scheme=%d)\n",
 		state.ready ? 1 : 0, state.attempted ? 1 : 0,
 		g_pVGui, g_pVGuiPanel, g_pVGuiSurface, g_pVGuiInput, g_pVGuiLocalize,

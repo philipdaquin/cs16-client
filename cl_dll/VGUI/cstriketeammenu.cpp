@@ -129,7 +129,7 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 		this, parent, panelName ? panelName : "<null>");
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional begin this=%p\n", this);
-	SetProportional(false);
+	SetProportional(true);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional end this=%p\n", this);
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-visible begin this=%p\n", this);
@@ -139,6 +139,10 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background begin this=%p\n", this);
 	SetPaintBackgroundEnabled(true);
+	SetMoveable(false);
+	SetSizeable(false);
+	SetTitleBarVisible(false);   // .res has no titlebar, Frame would paint one by default
+	SetClipToParent(false);      // don't let viewport clip the menu
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background end this=%p\n", this);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP constructor-final-state this=%p vpanel=%u parent=%p\n",
 		this, (unsigned int)GetVPanel(), GetParent());
@@ -161,45 +165,28 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP before-LoadControlSettings this=%p\n",
 		this);
 
-	// vgui2::HScheme clientScheme = 0;
-	// if (vgui2::scheme())
-	// {
-	// 	clientScheme = vgui2::scheme()->LoadSchemeFromFile("resource/ClientScheme.res", "clientscheme");
-	// 	if (clientScheme)
-	// 	{
-	// 		SetScheme(clientScheme);
-	// 		printf("[VGUI_RES] Bound scheme: resource/ClientScheme.res tag='clientscheme' panel=%p scheme=%lu\n",
-	// 			this, (unsigned long)clientScheme);
-	// 	}
-	// 	else
-	// 	{
-	// 		printf("[VGUI_RES] Scheme load failed: resource/ClientScheme.res tag='clientscheme' panel=%p\n",
-	// 			this);
-	// 	}
-	// }
-	// else
-	// {
-	// 	printf("[VGUI_RES] Scheme manager unavailable before TeamMenu load panel=%p\n", this);
-	// }
-
-	KeyValues *preloaded = LoadKeyValuesWithVdfParser("Resource/UI/Teammenu.res");
-	if (preloaded)
+	vgui2::HScheme clientScheme = 0;
+	if (vgui2::scheme())
 	{
-		printf("[TEAMTRACE] calling EditablePanel::LoadControlSettings with preloaded KV this=%p kv=%p name='%s' firstSubKey='%s'\n",
-			this,
-			(void *)preloaded,
-			preloaded->GetName() ? preloaded->GetName() : "<null>",
-			(preloaded->GetFirstSubKey() && preloaded->GetFirstSubKey()->GetName()) ? preloaded->GetFirstSubKey()->GetName() : "<null>");
-		BaseClass::LoadControlSettings("Resource/UI/Teammenu.res", NULL, preloaded, NULL);
-		printf("[TEAMTRACE] returned EditablePanel::LoadControlSettings with preloaded KV this=%p\n", this);
+		clientScheme = vgui2::scheme()->LoadSchemeFromFilePath("resource/ClientScheme.res", NULL, "clientscheme");
+		if (clientScheme)
+		{
+			SetScheme(clientScheme);
+			printf("[VGUI_RES] Bound scheme: resource/ClientScheme.res tag='clientscheme' panel=%p scheme=%lu\n",
+				this, (unsigned long)clientScheme);
+		}
+		else
+		{
+			printf("[VGUI_RES] Scheme load failed: resource/ClientScheme.res tag='clientscheme' panel=%p\n",
+				this);
+		}
 	}
 	else
 	{
-		printf("[TEAMTRACE] falling back to SDK parser this=%p resource='%s'\n",
-			this, "Resource/UI/Teammenu.res");
-		BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
-		printf("[TEAMTRACE] returned EditablePanel::LoadControlSettings fallback this=%p\n", this);
+		printf("[VGUI_RES] Scheme manager unavailable before TeamMenu load panel=%p\n", this);
 	}
+
+	BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
 	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
