@@ -144,6 +144,10 @@ set_source_files_properties(${VGUI2_SDK_CONTROLS_SOURCES}
 	PROPERTIES COMPILE_OPTIONS
 	"-I${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/public")
 
+set_source_files_properties(
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/vgui2/vgui_controls/Label.cpp"
+	PROPERTIES COMPILE_OPTIONS "-O1")
+
 include_directories(
 	include
 	include/hud
@@ -183,7 +187,7 @@ endif()
 if(XASH_EMSCRIPTEN)
 	add_executable(${CLIENT_LIB} ${CS_CLIENT_SRC})
 	target_compile_options(${CLIENT_LIB} PRIVATE -fPIC -Oz)
-	target_link_options(${CLIENT_LIB} PRIVATE -sSIDE_MODULE=1 -Oz)
+	target_link_options(${CLIENT_LIB} PRIVATE -sSIDE_MODULE=1 -Oz -sASSERTIONS=2)
 	set_target_properties(${CLIENT_LIB} PROPERTIES SUFFIX ".wasm")
 else()
 	add_library(${CLIENT_LIB} SHARED ${CS_CLIENT_SRC})

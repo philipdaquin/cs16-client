@@ -142,8 +142,8 @@ void CCounterStrikeViewport::ShowTeamMenu()
 	if (m_pTeamMenu)
 	{
 		printf("ShowTeamMenu calling EnsureControlSettingsLoaded\n");
-        m_pTeamMenu->EnsureControlSettingsLoaded();
-        printf("ShowTeamMenu after EnsureControlSettingsLoaded childCount=%d\n", m_pTeamMenu->GetChildCount());
+	        m_pTeamMenu->EnsureControlSettingsLoaded();
+	        printf("ShowTeamMenu after EnsureControlSettingsLoaded childCount=%d\n", m_pTeamMenu->GetChildCount());
 		m_pTeamMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pTeamMenu->SetSpectateVisible(gHUD.m_Menu.m_bAllowSpec);
 		m_pTeamMenu->SetVisible(true);

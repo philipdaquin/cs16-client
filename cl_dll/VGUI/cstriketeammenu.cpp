@@ -10,6 +10,7 @@
 #include <FileSystem.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/Controls.h>
+#include <vgui_controls/Button.h>
 #include <tier1/KeyValues.h>
 #include <tier2/tier2.h>
 
@@ -137,11 +138,7 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 		this, IsVisible() ? 1 : 0);
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background begin this=%p\n", this);
-	// TEMPORARY ISOLATION:
-	// Disable TeamMenu background fill so we can confirm the fullscreen green overlay
-	// is coming from panel background painting rather than parser/control creation.
-	SetPaintBackgroundEnabled(false);
-	// SetPaintBackgroundEnabled(false);
+	SetPaintBackgroundEnabled(true);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background end this=%p\n", this);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP constructor-final-state this=%p vpanel=%u parent=%p\n",
 		this, (unsigned int)GetVPanel(), GetParent());
@@ -163,6 +160,27 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP before-LoadControlSettings this=%p\n",
 		this);
+
+	// vgui2::HScheme clientScheme = 0;
+	// if (vgui2::scheme())
+	// {
+	// 	clientScheme = vgui2::scheme()->LoadSchemeFromFile("resource/ClientScheme.res", "clientscheme");
+	// 	if (clientScheme)
+	// 	{
+	// 		SetScheme(clientScheme);
+	// 		printf("[VGUI_RES] Bound scheme: resource/ClientScheme.res tag='clientscheme' panel=%p scheme=%lu\n",
+	// 			this, (unsigned long)clientScheme);
+	// 	}
+	// 	else
+	// 	{
+	// 		printf("[VGUI_RES] Scheme load failed: resource/ClientScheme.res tag='clientscheme' panel=%p\n",
+	// 			this);
+	// 	}
+	// }
+	// else
+	// {
+	// 	printf("[VGUI_RES] Scheme manager unavailable before TeamMenu load panel=%p\n", this);
+	// }
 
 	KeyValues *preloaded = LoadKeyValuesWithVdfParser("Resource/UI/Teammenu.res");
 	if (preloaded)
@@ -187,18 +205,16 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
 	if (pRootFrame)
 	{
-		printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded disabling root frame paint root=%p\n",
+		printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded keeping root frame paint enabled root=%p\n",
 			pRootFrame);
-		pRootFrame->SetPaintBackgroundEnabled(false);
-		pRootFrame->SetPaintBorderEnabled(false);
 	}
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded dumping panel tree this=%p\n", this);
 	DumpPanelTree(this, 0);
-	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP child lookup rootframe=%p terbutton=%p ctbutton=%p specbutton=%p mapinfo=%p sysmenu=%p\n",
+	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP child lookup rootframe=%p terbutton=%p ctbutton=%p specbottom=%p mapinfo=%p sysmenu=%p\n",
 		pRootFrame,
 		FindChildByName("terbutton"),
 		FindChildByName("ctbutton"),
-		FindChildByName("specbutton"),
+		FindChildByName("spec-bottom"),
 		FindChildByName("MapInfo"),
 		FindChildByName("SysMenu"));
 	m_bControlSettingsLoaded = true;
@@ -210,11 +226,7 @@ void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings ENTRY this=%p scheme=%p\n", this, scheme);
 	BaseClass::ApplySchemeSettings(scheme);
-	// TEMPORARY ISOLATION:
-	// Keep background painting disabled after scheme application too, otherwise the
-	// scheme pass can re-enable the same fullscreen fill we are isolating.
-	// SetPaintBackgroundEnabled(true);
-	SetPaintBackgroundEnabled(false);
+	SetPaintBackgroundEnabled(true);
 	printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings EXIT this=%p\n", this);
 }
 
@@ -227,10 +239,10 @@ void CTeamMenu::SetSpectateVisible(bool bVisible)
 {
 	printf("[VGUI2-CLIENT] CTeamMenu::SetSpectateVisible ENTRY this=%p visible=%d\n",
 		this, bVisible ? 1 : 0);
-	vgui2::Panel *pSpectateButton = FindChildByName("specbutton");
+	vgui2::Panel *pSpectateButton = FindChildByName("spec-bottom");
 	if (!pSpectateButton)
 	{
-		printf("[VGUI2-CLIENT] CTeamMenu::SetSpectateVisible missing specbutton this=%p\n", this);
+		printf("[VGUI2-CLIENT] CTeamMenu::SetSpectateVisible missing spec-bottom this=%p\n", this);
 		return;
 	}
 
