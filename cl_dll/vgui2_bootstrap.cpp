@@ -494,18 +494,19 @@ void VGUI2_OnVidInit()
 
 void VGUI2_RunFrame()
 {
-#if !defined(VGUI2_STUB_MODE)
-	if (state.ready)
-	{
-		vgui2::VPANEL root = g_pVGuiSurface ? g_pVGuiSurface->GetEmbeddedPanel() : 0;
+// #if !defined(VGUI2_STUB_MODE)
+// 	if (state.ready)
+// 	{
+// 		vgui2::VPANEL root = g_pVGuiSurface ? g_pVGuiSurface->GetEmbeddedPanel() : 0;
 
-		g_pVGui->RunFrame();
+// 		g_pVGui->RunFrame();
 
-		if (g_pVGuiSurface && root != 0)
-		{
-			g_pVGuiSurface->SolveTraverse(root, false);
-			g_pVGuiSurface->PaintTraverse(root);
-		}
-	}
-#endif
+// 		if (g_pVGuiSurface && root != 0)
+// 		{
+// 			g_pVGuiSurface->SolveTraverse(root, false);
+// 			g_pVGuiSurface->PaintTraverse(root);
+// 		}
+// 	}
+// #endif
+VGUI2_ClientRuntimeRunFrame();
 }

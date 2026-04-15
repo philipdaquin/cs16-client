@@ -189,9 +189,9 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	}
 
 	BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
-	// vgui2::ipanel()->PerformApplySchemeSettings(GetVPanel());
-	// InvalidateLayout(true, true);
-	// Repaint();
+	vgui2::ipanel()->PerformApplySchemeSettings(GetVPanel());
+	InvalidateLayout(true, true);
+	Repaint();
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
 	// InvalidateLayout(true, true);
