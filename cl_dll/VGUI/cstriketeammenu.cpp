@@ -129,7 +129,9 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 		this, parent, panelName ? panelName : "<null>");
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional begin this=%p\n", this);
-	SetProportional(true);
+	// TeamMenu is authored at a fixed 552x448 layout in the .res file.
+	// Keep it in authored pixel coordinates and let the viewport center it.
+	SetProportional(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional end this=%p\n", this);
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-visible begin this=%p\n", this);
@@ -189,8 +191,8 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
-	InvalidateLayout(true, true);
-	Repaint();
+	// InvalidateLayout(true, true);
+	// Repaint();
 	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
 	if (pRootFrame)
 	{
