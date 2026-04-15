@@ -189,6 +189,8 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	BaseClass::LoadControlSettings("Resource/UI/Teammenu.res");
 	printf("[VGUI2-CLIENT] CTeamMenu::EnsureControlSettingsLoaded STEP after-LoadControlSettings this=%p\n",
 		this);
+	InvalidateLayout(true, true);
+	Repaint();
 	vgui2::Panel *pRootFrame = FindChildByName("TeamMenu");
 	if (pRootFrame)
 	{

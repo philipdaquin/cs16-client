@@ -139,6 +139,9 @@ void CCounterStrikeViewport::ShowTeamMenu()
 	{
 		m_pTeamMenu->EnsureControlSettingsLoaded();
 		m_pTeamMenu->SetSpectateVisible(gHUD.m_Menu.m_bAllowSpec);
+		m_pTeamMenu->MoveToCenterOfScreen();
+		m_pTeamMenu->InvalidateLayout(true, true);
+		m_pTeamMenu->Repaint();
 		m_pTeamMenu->SetVisible(true);
 		m_pTeamMenu->MoveToFront();
 		m_pTeamMenu->RequestFocus();
