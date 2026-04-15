@@ -143,8 +143,11 @@ void CCounterStrikeViewport::ShowTeamMenu()
 		m_pTeamMenu->InvalidateLayout(true, true);
 		m_pTeamMenu->Repaint();
 		m_pTeamMenu->SetVisible(true);
+		// m_pTeamMenu->InvalidateLayout(true, true);
+		// m_pTeamMenu->Repaint();
 		m_pTeamMenu->MoveToFront();
 		m_pTeamMenu->RequestFocus();
+		
 	}
 }
 
