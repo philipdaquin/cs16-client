@@ -131,8 +131,7 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional begin this=%p\n", this);
 	// TeamMenu uses authored frame coordinates directly; do not proportional-scale it
 	// into the full-screen viewport like the other menu roots.
-	// SetProportional(true);
-	SetProportional(true);
+	SetProportional(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional end this=%p\n", this);
 	SetScheme( "ClientScheme" );
 

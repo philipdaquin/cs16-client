@@ -139,16 +139,18 @@ void CCounterStrikeViewport::ShowTeamMenu()
 	{
 		m_pTeamMenu->EnsureControlSettingsLoaded();
 		m_pTeamMenu->SetSpectateVisible(gHUD.m_Menu.m_bAllowSpec);
-		m_pTeamMenu->MoveToCenterOfScreen();
+
+		int screenW = gHUD.m_scrinfo.iWidth;
+		int screenH = gHUD.m_scrinfo.iHeight;
+		int menuW = 0, menuH = 0;
+		m_pTeamMenu->GetSize(menuW, menuH);
+		m_pTeamMenu->SetPos((screenW - menuW) / 2, (screenH - menuH) / 2);
+
 		m_pTeamMenu->InvalidateLayout(true, true);
-		m_pTeamMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pTeamMenu->Repaint();
 		m_pTeamMenu->SetVisible(true);
-		// m_pTeamMenu->InvalidateLayout(true, true);
-		// m_pTeamMenu->Repaint();
 		m_pTeamMenu->MoveToFront();
 		m_pTeamMenu->RequestFocus();
-		
 	}
 }
 
@@ -166,7 +168,6 @@ void CCounterStrikeViewport::ShowClassMenu(int menuType)
 	{
 		m_pClassMenu->SetMenuType(menuType);
 		m_pClassMenu->EnsureControlSettingsLoaded();
-		m_pClassMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pClassMenu->SetVisible(true);
 		m_pClassMenu->MoveToFront();
 		m_pClassMenu->RequestFocus();
@@ -186,7 +187,6 @@ void CCounterStrikeViewport::ShowBuyMenu()
 	if (m_pBuyMenu)
 	{
 		m_pBuyMenu->EnsureControlSettingsLoaded();
-		m_pBuyMenu->SetBounds(0, 0, GetWide(), GetTall());
 		m_pBuyMenu->SetVisible(true);
 		m_pBuyMenu->MoveToFront();
 		m_pBuyMenu->RequestFocus();
@@ -211,7 +211,6 @@ void CCounterStrikeViewport::ShowBuySubMenu(BuyMenuCategory_t category)
 
 	m_apBuySubMenus[index]->SetCategory(category, bIsCT);
 	m_apBuySubMenus[index]->EnsureControlSettingsLoaded();
-	m_apBuySubMenus[index]->SetBounds(0, 0, GetWide(), GetTall());
 	m_apBuySubMenus[index]->SetVisible(true);
 	m_apBuySubMenus[index]->MoveToFront();
 	m_apBuySubMenus[index]->RequestFocus();
