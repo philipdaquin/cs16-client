@@ -131,14 +131,18 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional begin this=%p\n", this);
 	// TeamMenu uses authored frame coordinates directly; do not proportional-scale it
 	// into the full-screen viewport like the other menu roots.
-	SetProportional(false);
+	// SetProportional(true);
+	SetProportional(true);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-proportional end this=%p\n", this);
+	SetScheme( "ClientScheme" );
 
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-visible begin this=%p\n", this);
 	SetVisible(false);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-visible end this=%p visible=%d\n",
 		this, IsVisible() ? 1 : 0);
 
+	// initialize dialog
+	SetTitle("", true);
 	printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu STEP set-paint-background begin this=%p\n", this);
 	SetPaintBackgroundEnabled(true);
 	SetMoveable(false);
@@ -170,6 +174,7 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	vgui2::HScheme clientScheme = 0;
 	if (vgui2::scheme())
 	{
+
 		clientScheme = vgui2::scheme()->LoadSchemeFromFilePath("resource/ClientScheme.res", NULL, "clientscheme");
 		if (clientScheme)
 		{
@@ -226,11 +231,11 @@ void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 
 void CTeamMenu::Paint()
 {
-	printf("[VGUI2-CLIENT] CTeamMenu::Paint ENTER this=%p name='%s'\n",
-		this, GetName() ? GetName() : "<null>");
+	// printf("[VGUI2-CLIENT] CTeamMenu::Paint ENTER this=%p name='%s'\n",
+	// 	this, GetName() ? GetName() : "<null>");
 	BaseClass::Paint();
-	printf("[VGUI2-CLIENT] CTeamMenu::Paint EXIT this=%p name='%s'\n",
-		this, GetName() ? GetName() : "<null>");
+	// printf("[VGUI2-CLIENT] CTeamMenu::Paint EXIT this=%p name='%s'\n",
+	// 	this, GetName() ? GetName() : "<null>");
 }
 
 void CTeamMenu::SetSpectateVisible(bool bVisible)

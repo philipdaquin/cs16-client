@@ -5,7 +5,8 @@
 #if !defined(VGUI2_STUB_MODE)
 
 #include <vgui_controls/Frame.h>
-
+#include <vgui/KeyCode.h>
+#include <utlvector.h>
 class CCounterStrikeViewport;
 
 class CTeamMenu : public vgui2::Frame
