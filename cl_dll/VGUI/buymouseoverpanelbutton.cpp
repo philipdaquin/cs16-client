@@ -2,6 +2,7 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
+#include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/MessageMap.h>
 #include <vgui/ISurface.h>
 
@@ -14,12 +15,32 @@ DECLARE_BUILD_FACTORY_CUSTOM_ALIAS(vgui2::MouseOverPanelButton, MouseOverPanelBu
 
 vgui2::MouseOverPanelButton::MouseOverPanelButton(Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget, const char *pCmd)
 	: BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
+	, m_pPage(NULL)
 {
 }
 
 vgui2::MouseOverPanelButton::MouseOverPanelButton(Panel *parent, const char *panelName, const wchar_t *text, Panel *pActionSignalTarget, const char *pCmd)
 	: BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
+	, m_pPage(NULL)
 {
+}
+
+vgui2::MouseOverPanelButton::MouseOverPanelButton(Panel *parent, const char *panelName, EditablePanel *panel)
+	: BaseClass(parent, panelName, "")
+	, m_pPage(panel)
+{
+}
+
+void vgui2::MouseOverPanelButton::ShowPage()
+{
+	if (m_pPage)
+		m_pPage->SetVisible(true);
+}
+
+void vgui2::MouseOverPanelButton::HidePage()
+{
+	if (m_pPage)
+		m_pPage->SetVisible(false);
 }
 
 void vgui2::MouseOverPanelButton::OnMousePressed(MouseCode code)

@@ -17,6 +17,7 @@ public:
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void SetMenuType(int menuType);
 	void EnsureControlSettingsLoaded();
+	void ShowPanel(bool bShow);
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;

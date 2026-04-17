@@ -17,7 +17,7 @@ CTeamMenu::CTeamMenu(vgui2::Panel *parent, const char *panelName)
 	SetProportional(true);
 	SetVisible(false);
 	SetTitle("", true);
-	SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 	SetMoveable(false);
 	SetSizeable(false);
 	SetTitleBarVisible(false);
@@ -34,11 +34,18 @@ void CTeamMenu::EnsureControlSettingsLoaded()
 	m_bControlSettingsLoaded = true;
 }
 
+void CTeamMenu::ShowPanel(bool bShow)
+{
+	SetVisible(bShow);
+	SetMouseInputEnabled(bShow);
+	if (bShow)
+		RequestFocus();
+}
+
 void CTeamMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
-	SetBgColor(scheme->GetColor("BgColor", Color(0, 0, 0, 0)));
-	SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 }
 
 void CTeamMenu::Paint()

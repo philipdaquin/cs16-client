@@ -17,6 +17,7 @@ public:
 	CTeamMenu(vgui2::Panel *parent, const char *panelName);
 	void SetViewport(CCounterStrikeViewport *pViewport) { m_pViewport = pViewport; }
 	void EnsureControlSettingsLoaded();
+	void ShowPanel(bool bShow);
 	void SetSpectateVisible(bool bVisible);
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;

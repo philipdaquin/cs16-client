@@ -5,9 +5,9 @@
 #if !defined(VGUI2_STUB_MODE)
 
 #include <vgui_controls/WizardPanel.h>
-#include "buysubmenu.h"
 
 class CCounterStrikeViewport;
+class CBuySubMenu;
 
 class CBuyMenu : public vgui2::WizardPanel
 {
@@ -24,13 +24,9 @@ public:
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
 	virtual void Paint() override;
-	virtual void OnKeyCodePressed(vgui2::KeyCode code) override;
-	virtual void OnKeyCodeTyped(vgui2::KeyCode code) override;
 	virtual void OnCommand(const char *command) override;
 
 private:
-	void CreateMainMenu();
-
 	CCounterStrikeViewport *m_pViewport;
 	CBuySubMenu *m_pMainMenu;
 	bool m_bControlSettingsLoaded;

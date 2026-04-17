@@ -36,11 +36,7 @@ CCSBasePanel::CCSBasePanel(vgui2::Panel *parent, const char *panelName, int x, i
 
 CCSBasePanel::~CCSBasePanel()
 {
-	if (vgui2::surface() && m_nBackgroundMaterial != -1)
-	{
-		vgui2::surface()->DestroyTextureID(m_nBackgroundMaterial);
-		m_nBackgroundMaterial = -1;
-	}
+	m_nBackgroundMaterial = -1;
 }
 
 void CCSBasePanel::PaintBackground()

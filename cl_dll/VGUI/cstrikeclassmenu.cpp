@@ -18,7 +18,7 @@ CClassMenu::CClassMenu(vgui2::Panel *parent, const char *panelName)
 	SetScheme("ClientScheme");
 	SetProportional(true);
 	SetVisible(false);
-	SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 	SetPaintBorderEnabled(true);
 	SetMoveable(false);
 	SetSizeable(false);
@@ -48,6 +48,14 @@ void CClassMenu::EnsureControlSettingsLoaded()
 	m_bControlSettingsLoaded = true;
 }
 
+void CClassMenu::ShowPanel(bool bShow)
+{
+	SetVisible(bShow);
+	SetMouseInputEnabled(bShow);
+	if (bShow)
+		RequestFocus();
+}
+
 void CClassMenu::ReloadControlSettings()
 {
 	const char *pszResource = m_iMenuType == MENU_CLASS_CT ? "Resource/UI/Classmenu_CT.res" : "Resource/UI/Classmenu_TER.res";
@@ -58,8 +66,7 @@ void CClassMenu::ReloadControlSettings()
 void CClassMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
-	SetBgColor(scheme->GetColor("BgColor", Color(0, 0, 0, 0)));
-	SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 }
 
 void CClassMenu::Paint()

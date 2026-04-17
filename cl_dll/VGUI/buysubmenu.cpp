@@ -5,75 +5,35 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "VGUI/counterstrikeviewport.h"
-#include "VGUI/counterstrikeviewport_interface.h"
-#include "mouseoverpanelbutton.h"
+#include <KeyValues.h>
+#include <vgui_controls/WizardPanel.h>
 
-CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *panelName)
-	: BaseClass(parent, panelName)
+#include "buymouseoverpanelbutton.h"
+#include "VGUI/counterstrikeviewport_interface.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
+using namespace vgui2;
+
+CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *name)
+	: BaseClass(parent, name)
 	, m_pViewport(NULL)
-	, m_Category(CCounterStrikeViewport::CATEGORY_COUNT)
-	, m_bIsCT(false)
-	, m_bControlSettingsLoaded(false)
 	, m_pPanel(NULL)
 	, m_pFirstButton(NULL)
 	, m_NextPanel(NULL)
+	, m_Category(CCounterStrikeViewport::CATEGORY_COUNT)
+	, m_bIsCT(false)
+	, m_bControlSettingsLoaded(false)
 {
-	SetScheme("ClientScheme");
 	SetProportional(true);
-	SetVisible(false);
-	SetPaintBackgroundEnabled(true);
 
-	m_pPanel = new vgui2::EditablePanel(this, "ItemInfo");
+	m_pPanel = new EditablePanel(this, "ItemInfo");
 	m_pPanel->SetProportional(true);
 }
 
 CBuySubMenu::~CBuySubMenu()
 {
-}
-
-vgui2::Panel *CBuySubMenu::CreateControlByName(const char *controlName)
-{
-	if (!Q_stricmp("MouseOverPanelButton", controlName))
-	{
-		MouseOverPanelButton *newButton = CreateNewMouseOverPanelButton(m_pPanel);
-
-		if (!m_pFirstButton)
-			m_pFirstButton = newButton;
-
-		return newButton;
-	}
-
-	return BaseClass::CreateControlByName(controlName);
-}
-
-void CBuySubMenu::SetVisible(bool state)
-{
-	BaseClass::SetVisible(state);
-
-	for (int i = 0; i < GetChildCount(); i++)
-	{
-		MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
-		if (buyButton)
-		{
-			if (buyButton == m_pFirstButton && state)
-				buyButton->ShowPage();
-			else
-				buyButton->HidePage();
-
-			buyButton->InvalidateLayout();
-		}
-	}
-}
-
-CBuySubMenu *CBuySubMenu::CreateNewSubMenu()
-{
-	return new CBuySubMenu(this);
-}
-
-MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(vgui2::EditablePanel *panel)
-{
-	return new MouseOverPanelButton(this, "MouseOverPanelButton", panel);
 }
 
 void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category, bool isCT)
@@ -86,6 +46,29 @@ void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category
 	m_bControlSettingsLoaded = false;
 }
 
+Panel *CBuySubMenu::CreateControlByName(const char *controlName)
+{
+	if (!Q_stricmp("MouseOverPanelButton", controlName))
+	{
+		MouseOverPanelButton *newButton = CreateNewMouseOverPanelButton(m_pPanel);
+		if (!m_pFirstButton)
+			m_pFirstButton = newButton;
+		return newButton;
+	}
+
+	return BaseClass::CreateControlByName(controlName);
+}
+
+MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
+{
+	return new MouseOverPanelButton(this, "MouseOverPanelButton", panel);
+}
+
+CBuySubMenu *CBuySubMenu::CreateNewSubMenu()
+{
+	return new CBuySubMenu(this, "BuySubMenu");
+}
+
 void CBuySubMenu::EnsureControlSettingsLoaded()
 {
 	if (m_bControlSettingsLoaded)
@@ -94,6 +77,38 @@ void CBuySubMenu::EnsureControlSettingsLoaded()
 	LoadControlSettings(GetResourceName());
 	InvalidateLayout(true, true);
 	m_bControlSettingsLoaded = true;
+}
+
+void CBuySubMenu::ShowPanel(bool bShow)
+{
+	SetVisible(bShow);
+	SetMouseInputEnabled(bShow);
+	SetKeyBoardInputEnabled(bShow);
+
+	if (bShow)
+	{
+		EnsureControlSettingsLoaded();
+		InvalidateLayout(true, true);
+	}
+}
+
+void CBuySubMenu::SetVisible(bool state)
+{
+	BaseClass::SetVisible(state);
+
+	for (int i = 0; i < GetChildCount(); ++i)
+	{
+		MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
+		if (!buyButton)
+			continue;
+
+		if (buyButton == m_pFirstButton && state)
+			buyButton->ShowPage();
+		else
+			buyButton->HidePage();
+
+		buyButton->InvalidateLayout();
+	}
 }
 
 void CBuySubMenu::DeleteSubPanels()
@@ -107,24 +122,6 @@ void CBuySubMenu::DeleteSubPanels()
 	m_pFirstButton = NULL;
 }
 
-void CBuySubMenu::ShowPanel(bool bShow)
-{
-	if (bShow)
-	{
-		SetVisible(true);
-		SetMouseInputEnabled(true);
-		Activate();
-	}
-	else
-	{
-		SetVisible(false);
-		SetMouseInputEnabled(false);
-	}
-
-	if (m_pViewport)
-		m_pViewport->ShowBackGround(bShow);
-}
-
 vgui2::WizardSubPanel *CBuySubMenu::GetNextSubPanel()
 {
 	return m_NextPanel;
@@ -133,8 +130,7 @@ vgui2::WizardSubPanel *CBuySubMenu::GetNextSubPanel()
 void CBuySubMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
-	SetBgColor(scheme->GetColor("BgColor", Color(0, 0, 0, 0)));
-	SetPaintBackgroundEnabled(true);
+	SetPaintBackgroundEnabled(false);
 }
 
 void CBuySubMenu::Paint()
@@ -171,7 +167,7 @@ void CBuySubMenu::OnCommand(const char *command)
 	if (Q_strstr(command, ".res"))
 	{
 		int i;
-		for (i = 0; i < m_SubMenus.Count(); i++)
+		for (i = 0; i < m_SubMenus.Count(); ++i)
 		{
 			if (!Q_stricmp(m_SubMenus[i].filename, command))
 			{
@@ -185,7 +181,7 @@ void CBuySubMenu::OnCommand(const char *command)
 		if (i == m_SubMenus.Count())
 		{
 			SubMenuEntry_t newEntry;
-			memset(&newEntry, 0x0, sizeof(newEntry));
+			memset(&newEntry, 0, sizeof(newEntry));
 
 			CBuySubMenu *newMenu = CreateNewSubMenu();
 			newMenu->LoadControlSettings(command);
@@ -199,17 +195,12 @@ void CBuySubMenu::OnCommand(const char *command)
 		return;
 	}
 
+	GetWizardPanel()->Close();
+	if (m_pViewport)
+		m_pViewport->ShowBackGround(false);
+
 	if (Q_stricmp(command, "vguicancel") != 0)
-	{
-		if (m_pViewport)
-			m_pViewport->HideAllGameMenus();
 		VGUI2_RunClientCommand(command);
-	}
-	else if (m_pViewport)
-	{
-		m_pViewport->HideAllGameMenus();
-		VGUI2_RunClientCommand("cancelselect\n");
-	}
 
 	BaseClass::OnCommand(command);
 }
