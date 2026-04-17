@@ -21,6 +21,7 @@
 #include <vgui/IVGui.h>
 #include <vgui_controls/Panel.h>
 #include <tier2/tier2.h>
+#include "triangleapi.h"
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];
@@ -49,6 +50,22 @@ struct FontData
 	FontData()
 		: valid(false), tall(13), weight(0), blur(0), scanlines(0), flags(0),
 		  lowRange(0), highRange(255), charWidth(8)
+	{
+	}
+};
+
+struct TextureData
+{
+	bool allocated;
+	bool valid;
+	int glTexnum;
+	int wide;
+	int tall;
+	std::string name;
+	std::vector<unsigned char> pixels;
+
+	TextureData()
+		: allocated(false), valid(false), glTexnum(0), wide(0), tall(0)
 	{
 	}
 };
@@ -95,10 +112,17 @@ struct ClipRect
 	int y1;
 };
 
+struct OriginPoint
+{
+	int x;
+	int y;
+};
+
 static std::vector<PanelData> s_panels;
 static std::vector<vgui2::VPANEL> s_deleteQueue;
 static std::vector<ClipRect> s_clipStack;
 static std::map<int, FontData> s_fonts;
+static std::map<int, TextureData> s_textures;
 static vgui2::VPANEL s_embeddedPanel = vgui2::INVALID_PANEL;
 static vgui2::VPANEL s_modalPanel = vgui2::INVALID_PANEL;
 static vgui2::VPANEL s_topmostPopup = vgui2::INVALID_PANEL;
@@ -112,6 +136,9 @@ static int s_nextTextureId = 1;
 static int s_nextFontId = 1;
 static int s_screenWide = 640;
 static int s_screenTall = 480;
+static int s_currentOrigin[2] = { 0, 0 };
+static std::vector<OriginPoint> s_originStack;
+static int s_currentTexture = 0;
 static int s_textColor[4] = { 255, 255, 255, 255 };
 static int s_drawColor[4] = { 255, 255, 255, 255 };
 static int s_textPos[2] = { 0, 0 };
@@ -165,6 +192,122 @@ static PanelData *GetPanelData(vgui2::VPANEL panel)
 static const PanelData *GetPanelDataConst(vgui2::VPANEL panel)
 {
 	return GetPanelData(panel);
+}
+
+static TextureData *GetTextureData(int textureId)
+{
+	if (textureId <= 0)
+		return NULL;
+
+	std::map<int, TextureData>::iterator it = s_textures.find(textureId);
+	return it != s_textures.end() ? &it->second : NULL;
+}
+
+static const TextureData *GetTextureDataConst(int textureId)
+{
+	return GetTextureData(textureId);
+}
+
+static void MarkTextureDirty(TextureData &tex)
+{
+	if (tex.glTexnum)
+	{
+		gRenderAPI.GL_FreeTexture(tex.glTexnum);
+		tex.glTexnum = 0;
+	}
+
+	tex.valid = false;
+}
+
+static void ConvertBGRAtoRGBA(std::vector<unsigned char> &dst, const unsigned char *src, int pixelCount)
+{
+	dst.resize((size_t)pixelCount * 4);
+	for (int i = 0; i < pixelCount; ++i)
+	{
+		const int srcIndex = i * 4;
+		const int dstIndex = i * 4;
+		dst[dstIndex + 0] = src[srcIndex + 2];
+		dst[dstIndex + 1] = src[srcIndex + 1];
+		dst[dstIndex + 2] = src[srcIndex + 0];
+		dst[dstIndex + 3] = src[srcIndex + 3];
+	}
+}
+
+static bool UploadTexture(TextureData &tex)
+{
+	if (tex.name.empty() || tex.wide <= 0 || tex.tall <= 0 || tex.pixels.empty())
+		return false;
+
+	MarkTextureDirty(tex);
+	tex.glTexnum = gRenderAPI.GL_CreateTexture(tex.name.c_str(), tex.wide, tex.tall, tex.pixels.data(), (texFlags_t)(TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA));
+	tex.valid = tex.glTexnum != 0;
+	return tex.valid;
+}
+
+static void DrawTexturedQuad(float x0, float y0, float x1, float y1)
+{
+	if (!gEngfuncs.pTriAPI)
+		return;
+
+	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
+	gEngfuncs.pTriAPI->TexCoord2f(0.0f, 0.0f);
+	gEngfuncs.pTriAPI->Vertex3f(x0, y0, 0.0f);
+	gEngfuncs.pTriAPI->TexCoord2f(0.0f, 1.0f);
+	gEngfuncs.pTriAPI->Vertex3f(x0, y1, 0.0f);
+	gEngfuncs.pTriAPI->TexCoord2f(1.0f, 1.0f);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y1, 0.0f);
+	gEngfuncs.pTriAPI->TexCoord2f(1.0f, 0.0f);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y0, 0.0f);
+	gEngfuncs.pTriAPI->End();
+}
+
+static bool EnsureTextureLoaded(TextureData &tex)
+{
+	if (tex.glTexnum)
+		return true;
+
+	if (!tex.allocated)
+		return false;
+
+	if (!tex.pixels.empty())
+		return UploadTexture(tex);
+
+	if (tex.name.empty())
+		return false;
+
+	tex.glTexnum = gRenderAPI.GL_LoadTexture(tex.name.c_str(), NULL, 0, TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA);
+	if (!tex.glTexnum)
+	{
+		char withTga[160];
+		Q_snprintf(withTga, sizeof(withTga), "%s.tga", tex.name.c_str());
+		tex.glTexnum = gRenderAPI.GL_LoadTexture(withTga, NULL, 0, TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA);
+		if (tex.glTexnum)
+			tex.name = withTga;
+	}
+
+	if (!tex.glTexnum)
+		return false;
+
+	if (tex.wide <= 0 || tex.tall <= 0)
+	{
+		tex.wide = (int)gRenderAPI.RenderGetParm(PARM_TEX_WIDTH, tex.glTexnum);
+		tex.tall = (int)gRenderAPI.RenderGetParm(PARM_TEX_HEIGHT, tex.glTexnum);
+	}
+
+	tex.valid = true;
+	return true;
+}
+
+static void ClipRectToCurrent(int &x0, int &y0, int &x1, int &y1)
+{
+	if (!s_clipStack.empty())
+	{
+		const ClipRect &clip = s_clipStack.back();
+		x0 = std::max(x0, clip.x0);
+		y0 = std::max(y0, clip.y0);
+		x1 = std::min(x1, clip.x1);
+		y1 = std::min(y1, clip.y1);
+	}
 }
 
 static vgui2::VPANEL AllocPanelHandle()
@@ -221,6 +364,13 @@ static void SolvePanelRecursive(vgui2::VPANEL panel)
 	{
 		data->absPos[0] = data->pos[0];
 		data->absPos[1] = data->pos[1];
+	}
+
+	if (data->clientPanel)
+	{
+		// TF2-style behavior: scheme/resource application happens during solve,
+		// not only during paint traversal.
+		data->clientPanel->PerformApplySchemeSettings();
 	}
 
 	data->needsSolve = false;
@@ -1115,9 +1265,16 @@ public:
 		if (data->needsSolve)
 			g_pVGuiPanel->Solve(panel);
 
+		OriginPoint origin;
+		origin.x = data->absPos[0] + (useInsets ? data->inset[0] : 0);
+		origin.y = data->absPos[1] + (useInsets ? data->inset[1] : 0);
+		s_originStack.push_back(origin);
+		s_currentOrigin[0] = origin.x;
+		s_currentOrigin[1] = origin.y;
+
 		ClipRect clip;
-		clip.x0 = data->absPos[0] + (useInsets ? data->inset[0] : 0);
-		clip.y0 = data->absPos[1] + (useInsets ? data->inset[1] : 0);
+		clip.x0 = origin.x;
+		clip.y0 = origin.y;
 		clip.x1 = data->absPos[0] + data->size[0] - (useInsets ? data->inset[2] : 0);
 		clip.y1 = data->absPos[1] + data->size[1] - (useInsets ? data->inset[3] : 0);
 		s_clipStack.push_back(clip);
@@ -1126,6 +1283,20 @@ public:
 
 	void PopMakeCurrent(vgui2::VPANEL) override
 	{
+		if (!s_originStack.empty())
+			s_originStack.pop_back();
+
+		if (!s_originStack.empty())
+		{
+			s_currentOrigin[0] = s_originStack.back().x;
+			s_currentOrigin[1] = s_originStack.back().y;
+		}
+		else
+		{
+			s_currentOrigin[0] = 0;
+			s_currentOrigin[1] = 0;
+		}
+
 		if (!s_clipStack.empty())
 			s_clipStack.pop_back();
 		s_currentPanel = vgui2::INVALID_PANEL;
@@ -1146,7 +1317,16 @@ public:
 
 	void DrawFilledRect(int x0, int y0, int x1, int y1) override
 	{
-		gEngfuncs.pfnFillRGBA(x0, y0, x1 - x0, y1 - y0,
+		int absX0 = x0 + s_currentOrigin[0];
+		int absY0 = y0 + s_currentOrigin[1];
+		int absX1 = x1 + s_currentOrigin[0];
+		int absY1 = y1 + s_currentOrigin[1];
+
+		ClipRectToCurrent(absX0, absY0, absX1, absY1);
+		if (absX0 >= absX1 || absY0 >= absY1)
+			return;
+
+		gEngfuncs.pfnFillRGBA(absX0, absY0, absX1 - absX0, absY1 - absY0,
 			s_drawColor[0], s_drawColor[1], s_drawColor[2], s_drawColor[3]);
 	}
 
@@ -1212,7 +1392,7 @@ public:
 		int width = 0;
 		int height = 0;
 		gEngfuncs.pfnDrawConsoleStringLen(ansi.c_str(), &width, &height);
-		gEngfuncs.pfnDrawConsoleString(s_textPos[0], s_textPos[1], (char *)ansi.c_str());
+		gEngfuncs.pfnDrawConsoleString(s_textPos[0] + s_currentOrigin[0], s_textPos[1] + s_currentOrigin[1], (char *)ansi.c_str());
 		s_textPos[0] += width;
 	}
 
@@ -1230,13 +1410,139 @@ public:
 	vgui2::IHTML *CreateHTMLWindow(vgui2::IHTMLEvents *, vgui2::VPANEL) override { return NULL; }
 	void PaintHTMLWindow(vgui2::IHTML *) override {}
 	void DeleteHTMLWindow(vgui2::IHTML *) override {}
-	void DrawSetTextureFile(int, const char *, int, bool) override {}
-	void DrawSetTextureRGBA(int, const unsigned char *, int, int, int, bool) override {}
-	void DrawSetTexture(int) override {}
-	void DrawGetTextureSize(int, int &wide, int &tall) override { wide = tall = 0; }
-	void DrawTexturedRect(int x0, int y0, int x1, int y1) override { DrawFilledRect(x0, y0, x1, y1); }
-	bool IsTextureIDValid(int id) override { return id > 0 && id < s_nextTextureId; }
-	int CreateNewTextureID(bool = false) override { return s_nextTextureId++; }
+	void DrawSetTextureFile(int id, const char *filename, int, bool forceReload) override
+	{
+		if (id <= 0 || !filename || !filename[0])
+			return;
+
+		TextureData &tex = s_textures[id];
+		tex.allocated = true;
+
+		if (!forceReload && tex.valid && tex.name == filename)
+			return;
+
+		MarkTextureDirty(tex);
+		tex.name = filename;
+		tex.pixels.clear();
+		tex.wide = 0;
+		tex.tall = 0;
+
+		tex.glTexnum = gRenderAPI.GL_LoadTexture(filename, NULL, 0, TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA);
+		if (!tex.glTexnum)
+		{
+			char withTga[160];
+			Q_snprintf(withTga, sizeof(withTga), "%s.tga", filename);
+			tex.glTexnum = gRenderAPI.GL_LoadTexture(withTga, NULL, 0, TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA);
+			if (tex.glTexnum)
+				tex.name = withTga;
+		}
+
+		if (tex.glTexnum)
+		{
+			tex.wide = (int)gRenderAPI.RenderGetParm(PARM_TEX_WIDTH, tex.glTexnum);
+			tex.tall = (int)gRenderAPI.RenderGetParm(PARM_TEX_HEIGHT, tex.glTexnum);
+			tex.valid = true;
+		}
+	}
+
+	void DrawSetTextureRGBA(int id, const unsigned char *rgba, int wide, int tall, int, bool forceReload) override
+	{
+		if (id <= 0 || !rgba || wide <= 0 || tall <= 0)
+			return;
+
+		TextureData &tex = s_textures[id];
+		tex.allocated = true;
+		if (!forceReload && tex.valid && tex.name == "*rgba" && tex.wide == wide && tex.tall == tall)
+			return;
+
+		MarkTextureDirty(tex);
+		tex.name = "*rgba";
+		tex.wide = wide;
+		tex.tall = tall;
+		tex.pixels.assign(rgba, rgba + (size_t)wide * tall * 4);
+		tex.glTexnum = gRenderAPI.GL_CreateTexture(tex.name.c_str(), wide, tall, tex.pixels.data(), (texFlags_t)(TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA));
+		tex.valid = tex.glTexnum != 0;
+	}
+
+	void DrawSetTexture(int id) override
+	{
+		s_currentTexture = IsTextureIDValid(id) ? id : 0;
+	}
+
+	void DrawGetTextureSize(int id, int &wide, int &tall) override
+	{
+		const TextureData *tex = GetTextureDataConst(id);
+		if (!tex || !tex->allocated)
+		{
+			wide = 0;
+			tall = 0;
+			return;
+		}
+
+		TextureData *mutableTex = GetTextureData(id);
+		if (mutableTex && !EnsureTextureLoaded(*mutableTex))
+		{
+			wide = 0;
+			tall = 0;
+			return;
+		}
+
+		if (tex->wide <= 0 || tex->tall <= 0)
+		{
+			if (tex->glTexnum)
+			{
+				wide = (int)gRenderAPI.RenderGetParm(PARM_TEX_WIDTH, tex->glTexnum);
+				tall = (int)gRenderAPI.RenderGetParm(PARM_TEX_HEIGHT, tex->glTexnum);
+				return;
+			}
+		}
+
+		wide = tex->wide;
+		tall = tex->tall;
+	}
+
+	void DrawTexturedRect(int x0, int y0, int x1, int y1) override
+	{
+		TextureData *tex = GetTextureData(s_currentTexture);
+		if (!tex || !tex->allocated || !EnsureTextureLoaded(*tex))
+			return;
+
+		int absX0 = x0 + s_currentOrigin[0];
+		int absY0 = y0 + s_currentOrigin[1];
+		int absX1 = x1 + s_currentOrigin[0];
+		int absY1 = y1 + s_currentOrigin[1];
+		ClipRectToCurrent(absX0, absY0, absX1, absY1);
+		if (absX0 >= absX1 || absY0 >= absY1)
+			return;
+
+		if (!gEngfuncs.pTriAPI)
+			return;
+
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
+		gEngfuncs.pTriAPI->Color4ub((unsigned char)s_drawColor[0], (unsigned char)s_drawColor[1], (unsigned char)s_drawColor[2], (unsigned char)s_drawColor[3]);
+		gRenderAPI.GL_Bind(0, tex->glTexnum);
+		DrawTexturedQuad((float)absX0, (float)absY0, (float)absX1, (float)absY1);
+	}
+
+	bool IsTextureIDValid(int id) override
+	{
+		const TextureData *tex = GetTextureDataConst(id);
+		return tex && tex->allocated;
+	}
+
+	int CreateNewTextureID(bool = false) override
+	{
+		const int id = s_nextTextureId++;
+		TextureData &tex = s_textures[id];
+		tex.allocated = true;
+		tex.valid = false;
+		tex.glTexnum = 0;
+		tex.wide = 0;
+		tex.tall = 0;
+		tex.name.clear();
+		tex.pixels.clear();
+		return id;
+	}
 
 	void GetScreenSize(int &wide, int &tall) override
 	{
@@ -1395,13 +1701,98 @@ public:
 	void SetAllowHTMLJavaScript(bool) override {}
 	void SetLanguage(const char *pchLang) override { m_language = pchLang ? pchLang : "english"; }
 	const char *GetLanguage() override { return m_language.c_str(); }
-	bool DeleteTextureByID(int) override { return false; }
-	void DrawUpdateRegionTextureBGRA(int, int, int, const unsigned char *, int, int) override {}
-	void DrawSetTextureBGRA(int, const unsigned char *, int, int) override {}
+	bool DeleteTextureByID(int id) override
+	{
+		std::map<int, TextureData>::iterator it = s_textures.find(id);
+		if (it == s_textures.end())
+			return false;
+
+		TextureData &tex = it->second;
+		if (tex.glTexnum)
+			gRenderAPI.GL_FreeTexture(tex.glTexnum);
+
+		if (s_currentTexture == id)
+			s_currentTexture = 0;
+
+		s_textures.erase(it);
+		return true;
+	}
+
+	void DrawUpdateRegionTextureBGRA(int id, int x, int y, const unsigned char *pchData, int wide, int tall) override
+	{
+		if (id <= 0 || !pchData || wide <= 0 || tall <= 0)
+			return;
+
+		TextureData *tex = GetTextureData(id);
+		if (!tex || !tex->allocated)
+			return;
+
+		if (tex->pixels.empty())
+		{
+			if (x == 0 && y == 0)
+				DrawSetTextureBGRA(id, pchData, wide, tall);
+			return;
+		}
+
+		if (x < 0 || y < 0 || x + wide > tex->wide || y + tall > tex->tall)
+			return;
+
+		for (int row = 0; row < tall; ++row)
+		{
+			for (int col = 0; col < wide; ++col)
+			{
+				const int srcIndex = (row * wide + col) * 4;
+				const int dstIndex = ((y + row) * tex->wide + (x + col)) * 4;
+				tex->pixels[dstIndex + 0] = pchData[srcIndex + 2];
+				tex->pixels[dstIndex + 1] = pchData[srcIndex + 1];
+				tex->pixels[dstIndex + 2] = pchData[srcIndex + 0];
+				tex->pixels[dstIndex + 3] = pchData[srcIndex + 3];
+			}
+		}
+
+		UploadTexture(*tex);
+	}
+
+	void DrawSetTextureBGRA(int id, const unsigned char *pchData, int wide, int tall) override
+	{
+		if (id <= 0 || !pchData || wide <= 0 || tall <= 0)
+			return;
+
+		TextureData &tex = s_textures[id];
+		tex.allocated = true;
+		MarkTextureDirty(tex);
+		tex.name = "*bgra";
+		tex.wide = wide;
+		tex.tall = tall;
+		ConvertBGRAtoRGBA(tex.pixels, pchData, wide * tall);
+		tex.glTexnum = gRenderAPI.GL_CreateTexture(tex.name.c_str(), wide, tall, tex.pixels.data(), (texFlags_t)(TF_NOMIPMAP | TF_CLAMP | TF_HAS_ALPHA));
+		tex.valid = tex.glTexnum != 0;
+	}
 	void CreateBrowser(vgui2::VPANEL, IHTMLResponses *, bool, const char *) override {}
 	void RemoveBrowser(vgui2::VPANEL, IHTMLResponses *) override {}
 	IHTMLChromeController *AccessChromeHTMLController() override { return NULL; }
-	void DrawTexturedRectAdd(int x0, int y0, int x1, int y1) override { DrawTexturedRect(x0, y0, x1, y1); }
+	void DrawTexturedRectAdd(int x0, int y0, int x1, int y1) override
+	{
+		TextureData *tex = GetTextureData(s_currentTexture);
+		if (!tex || !tex->allocated || !EnsureTextureLoaded(*tex))
+			return;
+
+		int absX0 = x0 + s_currentOrigin[0];
+		int absY0 = y0 + s_currentOrigin[1];
+		int absX1 = x1 + s_currentOrigin[0];
+		int absY1 = y1 + s_currentOrigin[1];
+		ClipRectToCurrent(absX0, absY0, absX1, absY1);
+		if (absX0 >= absX1 || absY0 >= absY1)
+			return;
+
+		if (!gEngfuncs.pTriAPI)
+			return;
+
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+		gEngfuncs.pTriAPI->Color4ub((unsigned char)s_drawColor[0], (unsigned char)s_drawColor[1], (unsigned char)s_drawColor[2], (unsigned char)s_drawColor[3]);
+		gRenderAPI.GL_Bind(0, tex->glTexnum);
+		DrawTexturedQuad((float)absX0, (float)absY0, (float)absX1, (float)absY1);
+	}
 	void SetSupportsEsc(bool) override {}
 	int GetFontBlur(vgui2::HFont font) override
 	{
@@ -1433,6 +1824,7 @@ extern vgui2::ISurface *g_pVGuiSurface;
 extern vgui2::IInputInternal *g_pVGuiInput;
 extern vgui2::IVGui *g_pVGui;
 extern vgui2::IPanel *g_pVGuiPanel;
+extern vgui2::VPANEL VGUI2_GetClientRootPanel();
 
 bool VGUI2_ClientRuntimeInstall()
 {
@@ -1453,8 +1845,16 @@ bool VGUI2_ClientRuntimeInstall()
 
 void VGUI2_ClientRuntimeShutdown()
 {
+	for (std::map<int, TextureData>::iterator it = s_textures.begin(); it != s_textures.end(); ++it)
+	{
+		if (it->second.glTexnum)
+			gRenderAPI.GL_FreeTexture(it->second.glTexnum);
+	}
+
+	s_textures.clear();
 	s_deleteQueue.clear();
 	s_clipStack.clear();
+	s_originStack.clear();
 	s_fonts.clear();
 	s_panels.clear();
 	s_embeddedPanel = vgui2::INVALID_PANEL;
@@ -1465,6 +1865,9 @@ void VGUI2_ClientRuntimeShutdown()
 	s_keyFocus = vgui2::INVALID_PANEL;
 	s_appModal = vgui2::INVALID_PANEL;
 	s_currentPanel = vgui2::INVALID_PANEL;
+	s_currentTexture = 0;
+	s_currentOrigin[0] = 0;
+	s_currentOrigin[1] = 0;
 	s_runtimeInstalled = false;
 }
 
@@ -1472,6 +1875,28 @@ void VGUI2_ClientRuntimeOnVidInit(int width, int height)
 {
 	s_screenWide = width > 0 ? width : 640;
 	s_screenTall = height > 0 ? height : 480;
+	s_currentOrigin[0] = 0;
+	s_currentOrigin[1] = 0;
+	s_currentTexture = 0;
+	s_originStack.clear();
+	s_clipStack.clear();
+
+	for (std::map<int, TextureData>::iterator it = s_textures.begin(); it != s_textures.end(); ++it)
+	{
+		it->second.valid = false;
+		it->second.glTexnum = 0;
+	}
+
+	vgui2::VPANEL existingRoot = VGUI2_GetClientRootPanel();
+	if (existingRoot != vgui2::INVALID_PANEL && existingRoot != 0)
+	{
+		s_embeddedPanel = existingRoot;
+		s_panel.SetPos(s_embeddedPanel, 0, 0);
+		s_panel.SetSize(s_embeddedPanel, s_screenWide, s_screenTall);
+		s_panel.SetVisible(s_embeddedPanel, true);
+		s_surface.SetEmbeddedPanel(s_embeddedPanel);
+		return;
+	}
 
 	if (s_embeddedPanel == vgui2::INVALID_PANEL || s_embeddedPanel == 0)
 	{

@@ -2,6 +2,13 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
+#include <tier2/tier2.h>
+#include <IEngineVGui.h>
+#include <vgui/IPanel.h>
+#include <vgui/IScheme.h>
+#include <vgui/ISurface.h>
+#include <vgui_controls/Frame.h>
+
 typedef float vec_t;
 typedef vec_t vec3_t[3];
 
@@ -12,66 +19,91 @@ typedef vec_t vec3_t[3];
 #include "VGUI/cstriketeammenu.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
+namespace
+{
+
+class CCSViewportBackground : public vgui2::Frame
+{
+	DECLARE_CLASS_SIMPLE(CCSViewportBackground, vgui2::Frame);
+
+public:
+	explicit CCSViewportBackground(vgui2::Panel *parent)
+		: BaseClass(parent, "ViewPortBackground")
+	{
+		SetScheme("ClientScheme");
+		SetTitle("", true);
+		SetTitleBarVisible(false);
+		SetMoveable(false);
+		SetSizeable(false);
+		SetProportional(true);
+		SetVisible(false);
+		SetMouseInputEnabled(false);
+		SetKeyBoardInputEnabled(false);
+	}
+
+	void ApplySchemeSettings(vgui2::IScheme *scheme) override
+	{
+		BaseClass::ApplySchemeSettings(scheme);
+		SetBgColor(scheme->GetColor("ViewportBG", Color(0, 0, 0, 0)));
+	}
+};
+
+static void CenterPanelInViewport(vgui2::Panel *panel, vgui2::Panel *viewport)
+{
+	if (!panel || !viewport)
+		return;
+
+	int menuW = 0, menuH = 0;
+	int wide = 0, tall = 0;
+	panel->GetSize(menuW, menuH);
+	viewport->GetSize(wide, tall);
+	panel->SetPos((wide - menuW) / 2, (tall - menuH) / 2);
+}
+
+}
 
 CCounterStrikeViewport::CCounterStrikeViewport(vgui2::VPANEL parent)
-	: BaseClass(NULL, "CounterStrikeViewport")
+	: BaseClass(parent, "CounterStrikeViewport")
 	, m_pTeamMenu(NULL)
 	, m_pClassMenu(NULL)
 	, m_pBuyMenu(NULL)
 	, m_pBuyPresetPanel(NULL)
 	, m_pBuyPresetListBox(NULL)
+	, m_pBackGround(NULL)
 	, m_bPanelsCreated(false)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport ctor ENTRY this=%p parent=%u\n",
-		this, parent);
-
 	for (int i = 0; i < ARRAYSIZE(m_apBuySubMenus); ++i)
 	{
 		m_apBuySubMenus[i] = NULL;
 	}
 
-	SetParent(parent);
-	SetProportional(false);
-	SetVisible(false);
-	SetKeyBoardInputEnabled(false);
-	SetMouseInputEnabled(false);
-	SetPaintBackgroundEnabled(false);
-	SetPaintBorderEnabled(false);
 	SetBounds(0, 0, gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport ctor EXIT this=%p\n", this);
+
+	m_pBackGround = new CCSViewportBackground(this);
+	vgui2::ipanel()->MoveToBack(m_pBackGround->GetVPanel());
+
+	ReloadScheme();
 }
 CCounterStrikeViewport::~CCounterStrikeViewport()
 {
 	DestroyPanels();
+	delete m_pBackGround;
+	m_pBackGround = NULL;
 }
 
 void CCounterStrikeViewport::CreatePanels()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels ENTRY this=%p created=%d\n",
-		this, m_bPanelsCreated ? 1 : 0);
-
 	if (m_bPanelsCreated)
 		return;
-
-
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating TeamMenu\n");
 	m_pTeamMenu = new CTeamMenu(this, "TeamMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created TeamMenu=%p\n", m_pTeamMenu);
-	if (m_pTeamMenu)
-		gEngfuncs.Con_Printf("SETTING m_pTeamMenu=%p to the VIEWPORT", m_pTeamMenu);
-
 	if (m_pTeamMenu)
 		m_pTeamMenu->SetViewport(this);
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating ClassMenu\n");
 	m_pClassMenu = new CClassMenu(this, "ClassMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created ClassMenu=%p\n", m_pClassMenu);
 	if (m_pClassMenu)
 		m_pClassMenu->SetViewport(this);
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuyMenu\n");
 	m_pBuyMenu = new CBuyMenu(this, "BuyMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuyMenu=%p\n", m_pBuyMenu);
 	if (m_pBuyMenu)
 		m_pBuyMenu->SetViewport(this);
 
@@ -81,11 +113,7 @@ void CCounterStrikeViewport::CreatePanels()
 		{
 			const bool isCT = side == SUBMENU_CT;
 			const int index = GetSubMenuIndex((BuyMenuCategory_t)category, isCT);
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels creating BuySubMenu category=%d isCT=%d\n",
-				category, isCT ? 1 : 0);
 			m_apBuySubMenus[index] = new CBuySubMenu(this, "BuySubMenu");
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreatePanels created BuySubMenu=%p category=%d isCT=%d\n",
-				m_apBuySubMenus[index], category, isCT ? 1 : 0);
 			if (m_apBuySubMenus[index])
 			{
 				m_apBuySubMenus[index]->SetViewport(this);
@@ -96,7 +124,6 @@ void CCounterStrikeViewport::CreatePanels()
 
 	m_bPanelsCreated = true;
 	HideAllGameMenus();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::CreatePanels EXIT this=%p\n", this);
 }
 
 void CCounterStrikeViewport::DestroyPanels()
@@ -124,31 +151,20 @@ void CCounterStrikeViewport::DestroyPanels()
 
 void CCounterStrikeViewport::ShowTeamMenu()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCounterStrikeViewport::ShowTeamMenu this=%p panels=%d team=%p wide=%d tall=%d\n",
-		this, m_bPanelsCreated ? 1 : 0, m_pTeamMenu, GetWide(), GetTall());
-	if (!m_bPanelsCreated) {
+	if (!m_bPanelsCreated)
 		CreatePanels();
-	}
 
 	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
+	ShowPanel(true);
 
 	if (m_pTeamMenu)
 	{
 		m_pTeamMenu->EnsureControlSettingsLoaded();
 		m_pTeamMenu->SetSpectateVisible(gHUD.m_Menu.m_bAllowSpec);
-
-		int screenW = gHUD.m_scrinfo.iWidth;
-		int screenH = gHUD.m_scrinfo.iHeight;
-		int menuW = 0, menuH = 0;
-		m_pTeamMenu->GetSize(menuW, menuH);
-		m_pTeamMenu->SetPos((screenW - menuW) / 2, (screenH - menuH) / 2);
-
 		m_pTeamMenu->InvalidateLayout(true, true);
+		m_pTeamMenu->MoveToCenterOfScreen();
 		m_pTeamMenu->Repaint();
-		m_pTeamMenu->SetVisible(true);
+		m_pTeamMenu->ShowPanel(true);
 		m_pTeamMenu->MoveToFront();
 		m_pTeamMenu->RequestFocus();
 	}
@@ -160,15 +176,15 @@ void CCounterStrikeViewport::ShowClassMenu(int menuType)
 		CreatePanels();
 
 	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
+	ShowPanel(true);
 
 	if (m_pClassMenu)
 	{
 		m_pClassMenu->SetMenuType(menuType);
 		m_pClassMenu->EnsureControlSettingsLoaded();
-		m_pClassMenu->SetVisible(true);
+		m_pClassMenu->InvalidateLayout(true, true);
+		CenterPanelInViewport(m_pClassMenu, this);
+		m_pClassMenu->ShowPanel(true);
 		m_pClassMenu->MoveToFront();
 		m_pClassMenu->RequestFocus();
 	}
@@ -180,14 +196,13 @@ void CCounterStrikeViewport::ShowBuyMenu()
 		CreatePanels();
 
 	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
+	ShowPanel(true);
 
 	if (m_pBuyMenu)
 	{
 		m_pBuyMenu->EnsureControlSettingsLoaded();
-		m_pBuyMenu->SetVisible(true);
+		CenterPanelInViewport(m_pBuyMenu, this);
+		m_pBuyMenu->ShowPanel(true);
 		m_pBuyMenu->MoveToFront();
 		m_pBuyMenu->RequestFocus();
 	}
@@ -205,43 +220,70 @@ void CCounterStrikeViewport::ShowBuySubMenu(BuyMenuCategory_t category)
 		return;
 
 	HideAllGameMenus();
-	SetVisible(true);
-	SetKeyBoardInputEnabled(true);
-	SetMouseInputEnabled(true);
+	ShowPanel(true);
 
 	m_apBuySubMenus[index]->SetCategory(category, bIsCT);
 	m_apBuySubMenus[index]->EnsureControlSettingsLoaded();
-	m_apBuySubMenus[index]->SetVisible(true);
+	m_apBuySubMenus[index]->InvalidateLayout(true, true);
+	CenterPanelInViewport(m_apBuySubMenus[index], this);
+	m_apBuySubMenus[index]->ShowPanel(true);
 	m_apBuySubMenus[index]->MoveToFront();
 	m_apBuySubMenus[index]->RequestFocus();
 }
 
 void CCounterStrikeViewport::HideAllGameMenus()
 {
-	SetVisible(false);
-	SetKeyBoardInputEnabled(false);
-	SetMouseInputEnabled(false);
+	ShowPanel(false);
+	ShowBackGround(false);
 
 	if (m_pTeamMenu)
-		m_pTeamMenu->SetVisible(false);
+		m_pTeamMenu->ShowPanel(false);
 
 	if (m_pClassMenu)
-		m_pClassMenu->SetVisible(false);
+		m_pClassMenu->ShowPanel(false);
 
 	if (m_pBuyMenu)
-		m_pBuyMenu->SetVisible(false);
+		m_pBuyMenu->ShowPanel(false);
 
 	for (int i = 0; i < ARRAYSIZE(m_apBuySubMenus); ++i)
 	{
 		if (m_apBuySubMenus[i])
-			m_apBuySubMenus[i]->SetVisible(false);
+			m_apBuySubMenus[i]->ShowPanel(false);
 	}
+}
+
+void CCounterStrikeViewport::ShowBackGround(bool bShow)
+{
+	if (m_pBackGround)
+		m_pBackGround->SetVisible(bShow);
+}
+
+void CCounterStrikeViewport::ReloadScheme(const char *fromFile)
+{
+	BaseClass::ReloadScheme(fromFile);
+	if (m_pBackGround)
+		m_pBackGround->SetScheme("ClientScheme");
 }
 
 void CCounterStrikeViewport::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
 	SetPaintBackgroundEnabled(false);
+}
+
+void CCounterStrikeViewport::PerformLayout()
+{
+	int wide = gHUD.m_scrinfo.iWidth;
+	int tall = gHUD.m_scrinfo.iHeight;
+
+	if (GetVParent())
+		vgui2::ipanel()->GetSize(GetVParent(), wide, tall);
+
+	SetBounds(0, 0, wide, tall);
+	if (m_pBackGround)
+		m_pBackGround->SetBounds(0, 0, wide, tall);
+
+	BaseClass::PerformLayout();
 }
 
 void CCounterStrikeViewport::Paint()

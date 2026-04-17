@@ -228,7 +228,7 @@ void DLLEXPORT HUD_Init( void )
 
 	InitInput();
 	gHUD.Init();
-	//Scheme_Init();
+	// Scheme_Init();
 }
 
 
@@ -245,6 +245,7 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 	VGUI2_RunFrame();
+	VGUI2_RenderFrame();
 
 	return 1;
 }

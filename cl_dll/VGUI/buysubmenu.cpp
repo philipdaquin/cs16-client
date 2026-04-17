@@ -7,21 +7,73 @@
 
 #include "VGUI/counterstrikeviewport.h"
 #include "VGUI/counterstrikeviewport_interface.h"
+#include "mouseoverpanelbutton.h"
 
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *panelName)
 	: BaseClass(parent, panelName)
 	, m_pViewport(NULL)
+	, m_Category(CCounterStrikeViewport::CATEGORY_COUNT)
+	, m_bIsCT(false)
 	, m_bControlSettingsLoaded(false)
+	, m_pPanel(NULL)
+	, m_pFirstButton(NULL)
+	, m_NextPanel(NULL)
 {
-	printf("[VGUI2-CLIENT] CBuySubMenu ctor ENTRY this=%p parent=%p name='%s'\n",
-		this, parent, panelName ? panelName : "<null>");
-	SetProportional(false);
+	SetScheme("ClientScheme");
+	SetProportional(true);
 	SetVisible(false);
 	SetPaintBackgroundEnabled(true);
-	m_Category = CCounterStrikeViewport::CATEGORY_COUNT;
-	m_bIsCT = false;
-	printf("[VGUI2-CLIENT] CBuySubMenu ctor EXIT this=%p loaded=%d\n",
-		this, m_bControlSettingsLoaded ? 1 : 0);
+
+	m_pPanel = new vgui2::EditablePanel(this, "ItemInfo");
+	m_pPanel->SetProportional(true);
+}
+
+CBuySubMenu::~CBuySubMenu()
+{
+}
+
+vgui2::Panel *CBuySubMenu::CreateControlByName(const char *controlName)
+{
+	if (!Q_stricmp("MouseOverPanelButton", controlName))
+	{
+		MouseOverPanelButton *newButton = CreateNewMouseOverPanelButton(m_pPanel);
+
+		if (!m_pFirstButton)
+			m_pFirstButton = newButton;
+
+		return newButton;
+	}
+
+	return BaseClass::CreateControlByName(controlName);
+}
+
+void CBuySubMenu::SetVisible(bool state)
+{
+	BaseClass::SetVisible(state);
+
+	for (int i = 0; i < GetChildCount(); i++)
+	{
+		MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
+		if (buyButton)
+		{
+			if (buyButton == m_pFirstButton && state)
+				buyButton->ShowPage();
+			else
+				buyButton->HidePage();
+
+			buyButton->InvalidateLayout();
+		}
+	}
+}
+
+CBuySubMenu *CBuySubMenu::CreateNewSubMenu()
+{
+	return new CBuySubMenu(this);
+}
+
+MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(vgui2::EditablePanel *panel)
+{
+	return new MouseOverPanelButton(this, "MouseOverPanelButton", panel);
 }
 
 void CBuySubMenu::SetCategory(CCounterStrikeViewport::BuyMenuCategory_t category, bool isCT)
@@ -39,15 +91,49 @@ void CBuySubMenu::EnsureControlSettingsLoaded()
 	if (m_bControlSettingsLoaded)
 		return;
 
-	printf("[VGUI2-CLIENT] CBuySubMenu loading control settings category=%d isCT=%d\n",
-		(int)m_Category, m_bIsCT ? 1 : 0);
 	LoadControlSettings(GetResourceName());
+	InvalidateLayout(true, true);
 	m_bControlSettingsLoaded = true;
+}
+
+void CBuySubMenu::DeleteSubPanels()
+{
+	if (m_NextPanel)
+	{
+		m_NextPanel->SetVisible(false);
+		m_NextPanel = NULL;
+	}
+
+	m_pFirstButton = NULL;
+}
+
+void CBuySubMenu::ShowPanel(bool bShow)
+{
+	if (bShow)
+	{
+		SetVisible(true);
+		SetMouseInputEnabled(true);
+		Activate();
+	}
+	else
+	{
+		SetVisible(false);
+		SetMouseInputEnabled(false);
+	}
+
+	if (m_pViewport)
+		m_pViewport->ShowBackGround(bShow);
+}
+
+vgui2::WizardSubPanel *CBuySubMenu::GetNextSubPanel()
+{
+	return m_NextPanel;
 }
 
 void CBuySubMenu::ApplySchemeSettings(vgui2::IScheme *scheme)
 {
 	BaseClass::ApplySchemeSettings(scheme);
+	SetBgColor(scheme->GetColor("BgColor", Color(0, 0, 0, 0)));
 	SetPaintBackgroundEnabled(true);
 }
 
@@ -82,21 +168,50 @@ void CBuySubMenu::OnCommand(const char *command)
 		return;
 	}
 
-	if (!stricmp(command, "vguicancel"))
+	if (Q_strstr(command, ".res"))
 	{
-		if (m_pViewport)
-			m_pViewport->HideAllGameMenus();
+		int i;
+		for (i = 0; i < m_SubMenus.Count(); i++)
+		{
+			if (!Q_stricmp(m_SubMenus[i].filename, command))
+			{
+				m_NextPanel = m_SubMenus[i].panel;
+				Assert(m_NextPanel);
+				m_NextPanel->InvalidateLayout();
+				break;
+			}
+		}
 
-		VGUI2_RunClientCommand("cancelselect\n");
+		if (i == m_SubMenus.Count())
+		{
+			SubMenuEntry_t newEntry;
+			memset(&newEntry, 0x0, sizeof(newEntry));
+
+			CBuySubMenu *newMenu = CreateNewSubMenu();
+			newMenu->LoadControlSettings(command);
+			m_NextPanel = newMenu;
+			Q_strncpy(newEntry.filename, command, sizeof(newEntry.filename));
+			newEntry.panel = newMenu;
+			m_SubMenus.AddToTail(newEntry);
+		}
+
+		GetWizardPanel()->OnNextButton();
 		return;
 	}
 
-	if (m_pViewport)
+	if (Q_stricmp(command, "vguicancel") != 0)
+	{
+		if (m_pViewport)
+			m_pViewport->HideAllGameMenus();
+		VGUI2_RunClientCommand(command);
+	}
+	else if (m_pViewport)
+	{
 		m_pViewport->HideAllGameMenus();
+		VGUI2_RunClientCommand("cancelselect\n");
+	}
 
-	char szCommand[64];
-	snprintf(szCommand, sizeof(szCommand), "%s\n", command);
-	VGUI2_RunClientCommand(szCommand);
+	BaseClass::OnCommand(command);
 }
 
 #endif

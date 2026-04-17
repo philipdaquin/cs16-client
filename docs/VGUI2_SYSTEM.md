@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the VGUI2 system integration in the CS16 client, which bridges Valve's Source SDK VGUI2 panel system with the GoldSrc (HL1) engine. It enables Source-style in-game menus, HUD elements, and UI panels to render within the classic Half-Life engine.
+This document describes the VGUI2 system integration in the CS16 client, which keeps the panel tree and paint recursion on the client side while using the GoldSrc (HL1) host as the windowing and rendering backend.
 
 ---
 
@@ -262,21 +262,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[HUD_Redraw<br/>cdll_int.cpp:247] --> B[VGUI2_RunFrame<br/>vgui2_bootstrap.cpp:495]
-    B --> C[g_pVGui->RunFrame<br/>Updates input state]
-    C --> D[ISurface::GetEmbeddedPanel<br/>Returns root panel]
-    D --> E[ISurface::SolveTraverse root<br/>Layout calculation]
-    E --> F[Recursively computes<br/>absPos for all panels]
-    F --> G[ISurface::PaintTraverse root<br/>DRAWING]
-    G --> H[PushMakeCurrent<br/>Sets clip rect to panel bounds]
-    H --> I[Panel PaintTraverse<br/>Draws children]
-    I --> J[ISurface Draw methods]
-    J --> K[DrawFilledRect<br/>gEngfuncs.pfnFillRGBA]
-    J --> L[DrawPrintText<br/>gEngfuncs.pfnDrawConsoleString]
-    J --> M[DrawSetTextColor<br/>gEngfuncs.pfnDrawSetTextColor]
-    K --> N[PopMakeCurrent<br/>Restores clip stack]
-    N --> O[Next panel]
-    O --> H
+    A[HUD_Redraw<br/>cdll_int.cpp] --> B[VGUI2_RunFrame<br/>bootstrap prep]
+    B --> C[VGUI2_PreRender<br/>sizes host/root panels]
+    C --> D[VGUI2_RenderFrame<br/>client runtime paint]
+    D --> E[g_pVGui->RunFrame<br/>updates focus/input]
+    E --> F[ClientSurface::SolveTraverse<br/>layout calculation]
+    F --> G[ClientSurface::PaintTraverse<br/>DRAWING]
+    G --> H[ClientPanel::PaintTraverse<br/>recurses children]
+    H --> I[ISurface draw methods]
+    I --> J[DrawFilledRect<br/>gEngfuncs.pfnFillRGBA]
+    I --> K[DrawPrintText<br/>gEngfuncs.pfnDrawConsoleString]
+    I --> L[DrawSetTextColor<br/>gEngfuncs.pfnDrawSetTextColor]
 ```
 
 ### 6.2 ISurface Drawing Bridge
@@ -296,15 +292,17 @@ flowchart TD
 ```
 HUD_Redraw()
     └── VGUI2_RunFrame()
-            ├── g_pVGui->RunFrame()
-            │       └── UpdateMouseFocus()
-            │
-            ├── ISurface::GetEmbeddedPanel() → root
-            │
-            ├── SolveTraverse(root)
+            └── VGUI2_PreRender()
+                    ├── size PANEL_CLIENTDLL / client root
+                    └── update viewport bounds
+
+HUD_Redraw()
+    └── VGUI2_RenderFrame()
+            ├── ClientVGui::RunFrame()
+            ├── ClientInputInternal::RunFrame()
+            ├── ClientSurface::SolveTraverse(root)
             │       └── ClientPanel::Solve() → absPos = parent.absPos + offset
-            │
-            └── PaintTraverse(root)
+            └── ClientSurface::PaintTraverse(root)
                     └── ClientPanel::PaintTraverse()
                             └── vgui2::Frame::PaintTraverse()
                                     ├── Paint background (DrawFilledRect)
@@ -323,7 +321,8 @@ HUD_Redraw()
 ```mermaid
 sequenceDiagram
     participant HUD as HUD_Redraw<br/>cdll_int.cpp
-    participant Runtime as VGUI2_RunFrame<br/>vgui2_bootstrap.cpp
+    participant Prep as VGUI2_RunFrame<br/>bootstrap prep
+    participant Render as VGUI2_RenderFrame<br/>vgui2_bootstrap.cpp
     participant Surface as ClientSurface<br/>vgui2_client_runtime.cpp
     participant Panel as ClientPanel
     participant Frame as vgui2::Frame
@@ -331,10 +330,12 @@ sequenceDiagram
     participant ISurface as ISurface
     participant Engine as GoldSrc Engine
 
-    HUD->>Runtime: Every frame
-    Runtime->>Surface: RunFrame()
-    Runtime->>Surface: SolveTraverse(root)
-    Runtime->>Surface: PaintTraverse(root)
+    HUD->>Prep: Prep frame
+    Prep->>Prep: size root / viewport
+    HUD->>Render: Paint frame
+    Render->>Surface: RunFrame()
+    Render->>Surface: SolveTraverse(root)
+    Render->>Surface: PaintTraverse(root)
     Surface->>Panel: PaintTraverse(panel)
     Panel->>Frame: PaintTraverse(vgui2::Frame)
     Frame->>TeamMenu: CTeamMenu::Paint()
@@ -368,7 +369,7 @@ graph TD
 | `cstriketeammenu.cpp` | 219-225 | ApplySchemeSettings |
 | `cstriketeammenu.cpp` | 227-234 | Paint() |
 | `counterstrikeviewport.cpp` | 125-153 | ShowTeamMenu |
-| `vgui2_bootstrap.cpp` | 495-511 | VGUI2_RunFrame |
+| `vgui2_bootstrap.cpp` | 495-511 | VGUI2_RunFrame / VGUI2_RenderFrame |
 | `vgui2_client_runtime.cpp` | 1147-1151 | DrawFilledRect |
 | `vgui2_client_runtime.cpp` | 1202-1217 | DrawPrintText |
 
@@ -432,7 +433,7 @@ g_pVGuiSurface = &s_surface;
 g_pVGuiInput = &s_input;
 ```
 
-Uses GoldSrc `gEngfuncs` for all drawing, bypassing engine VGUI.
+`VGUI2_RenderFrame()` now hands the active frame to this runtime, so the client owns the paint recursion and the engine only hosts the panel tree.
 
 ---
 
@@ -488,11 +489,11 @@ flowchart TD
 
     subgraph Render["RENDER LOOP - EVERY FRAME"]
         A4[HUD_Redraw] --> B5[VGUI2_RunFrame]
-        B5 --> C4[g_pVGui->RunFrame]
-        C4 --> D4[UpdateMouseFocus]
-        D4 --> E4[SolveTraverse root]
-        E4 --> F4[PaintTraverse root]
-        F4 --> G4[PushMakeCurrent<br/>Set clip to panel bounds]
+        B5 --> C4[VGUI2_PreRender]
+        C4 --> D4[VGUI2_RenderFrame]
+        D4 --> E4[ClientVGui::RunFrame]
+        E4 --> F4[ClientSurface::SolveTraverse root]
+        F4 --> G4[ClientSurface::PaintTraverse root]
         G4 --> H4[Panel PaintTraverse]
         H4 --> I4[Draw methods: FillRect<br/>PrintText Line OutlinedRect]
         I4 --> J4[gEngfuncs.pfnFillRGBA<br/>pfnDrawConsoleString]

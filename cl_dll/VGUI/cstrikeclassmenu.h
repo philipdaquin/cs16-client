@@ -4,13 +4,13 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
-#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/Frame.h>
 
 class CCounterStrikeViewport;
 
-class CClassMenu : public vgui2::EditablePanel
+class CClassMenu : public vgui2::Frame
 {
-	DECLARE_CLASS_SIMPLE(CClassMenu, vgui2::EditablePanel);
+	DECLARE_CLASS_SIMPLE(CClassMenu, vgui2::Frame);
 
 public:
 	CClassMenu(vgui2::Panel *parent, const char *panelName);

@@ -7,6 +7,7 @@
 #include <vgui/IScheme.h>
 #include <vgui/ISystem.h>
 #include <vgui_controls/Controls.h>
+#include <IEngineVGui.h>
 
 namespace vgui2
 {
@@ -18,6 +19,8 @@ bool VGui_InitInterfacesList(const char *moduleName, CreateInterfaceFn *factoryL
 #include "cl_util.h"
 #include "vgui2_bootstrap.h"
 #include "vgui2_stub_types.h"
+#include "vgui2_client_runtime.h"
+#include "VGUI/cs_rootpanel.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
 #include "cvardef.h"
@@ -55,19 +58,56 @@ struct VGui2BootstrapState
 	bool interfacesInitialized;
 	bool ready;
 	bool schemeLoaded;
-	bool testPanelCreated;
-
-	vgui2::VPANEL embeddedPanel;
-	vgui2::VPANEL testPanel;
 	vgui2::HScheme clientScheme;
 };
 
 static VGui2BootstrapState state = {};
 
 static cvar_t *cl_vgui2_bootstrap = NULL;
-static cvar_t *cl_vgui2_testpanel = NULL;
 static cvar_t *cl_vgui2_menus = NULL;
-static cvar_t *cl_vgui2_debugpaint = NULL;
+
+#if !defined(VGUI2_STUB_MODE)
+static void VGUI2_PreRender()
+{
+	if (!state.ready || !g_pVGuiPanel)
+		return;
+
+	int wide = gHUD.m_scrinfo.iWidth;
+	int tall = gHUD.m_scrinfo.iHeight;
+	if (wide <= 0 || tall <= 0)
+	{
+		wide = ScreenWidth;
+		tall = ScreenHeight;
+	}
+
+	if (wide <= 0 || tall <= 0)
+	{
+		if (g_pVGuiSurface)
+			g_pVGuiSurface->GetScreenSize(wide, tall);
+	}
+
+	if (wide <= 0)
+		wide = 640;
+	if (tall <= 0)
+		tall = 480;
+
+	if (g_pEngineVGui)
+	{
+		vgui2::VPANEL rootHost = g_pEngineVGui->GetPanel(PANEL_CLIENTDLL);
+		if (rootHost)
+			g_pVGuiPanel->SetSize(rootHost, wide, tall);
+	}
+
+	VGUI2_UpdateClientRootPanelBounds();
+
+	vgui2::VPANEL root = VGUI2_GetClientRootPanel();
+	if (root)
+	{
+		g_pVGuiPanel->SetPos(root, 0, 0);
+		g_pVGuiPanel->SetSize(root, wide, tall);
+	}
+}
+#endif
 
 static void ResetBootstrapAttemptState()
 {
@@ -229,18 +269,12 @@ static void RegisterCvars()
 {
 	if (!cl_vgui2_bootstrap)
 		cl_vgui2_bootstrap = gEngfuncs.pfnRegisterVariable("cl_vgui2_bootstrap", "1", 0);
-	if (!cl_vgui2_testpanel)
-		cl_vgui2_testpanel = gEngfuncs.pfnRegisterVariable("cl_vgui2_testpanel", "1", 0);
 	if (!cl_vgui2_menus)
 		cl_vgui2_menus = gEngfuncs.pfnRegisterVariable("cl_vgui2_menus", "1", 0);
-	if (!cl_vgui2_debugpaint)
-		cl_vgui2_debugpaint = gEngfuncs.pfnRegisterVariable("cl_vgui2_debugpaint", "0", 0);
 
-	gEngfuncs.Con_Printf(LOG_PREFIX "RegisterCvars bootstrap=%p(%.1f) testpanel=%p(%.1f) menus=%p(%.1f) debugpaint=%p(%.1f)\n",
+	gEngfuncs.Con_Printf(LOG_PREFIX "RegisterCvars bootstrap=%p(%.1f) menus=%p(%.1f)\n",
 		cl_vgui2_bootstrap, cl_vgui2_bootstrap ? cl_vgui2_bootstrap->value : -1.0f,
-		cl_vgui2_testpanel, cl_vgui2_testpanel ? cl_vgui2_testpanel->value : -1.0f,
-		cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f,
-		cl_vgui2_debugpaint, cl_vgui2_debugpaint ? cl_vgui2_debugpaint->value : -1.0f);
+		cl_vgui2_menus, cl_vgui2_menus ? cl_vgui2_menus->value : -1.0f);
 }
 
 bool VGUI2_IsReady()
@@ -344,6 +378,14 @@ bool VGUI2_Bootstrap()
 	state.interfacesInitialized = true;
 	BootstrapStepOk(3, "VGui_InitInterfacesList", (void *)1);
 
+	if (!VGUI2_ClientRuntimeInstall())
+	{
+		gEngfuncs.Con_Printf(LOG_PREFIX "FAIL Step 3.5 - VGUI2_ClientRuntimeInstall() returned false\n");
+		ResetBootstrapAttemptState();
+		return false;
+	}
+	BootstrapStepOk(3, "VGUI2_ClientRuntimeInstall", (void *)1);
+
 	if (!g_pVGui)
 		return BootstrapFail(4, "IVGui", VGUI_IVGUI_INTERFACE_VERSION_GS);
 	BootstrapStepOk(4, "IVGui", g_pVGui);
@@ -379,8 +421,9 @@ bool VGUI2_Bootstrap()
 	gEngfuncs.Con_Printf(LOG_PREFIX "Bootstrap ready\n");
 
 	gEngfuncs.Con_Printf(LOG_PREFIX "Attempting scheme load...\n");
-	state.clientScheme = vgui2::scheme()->LoadSchemeFromFilePath("resource/ClientScheme.res", NULL, "clientscheme");
+	state.clientScheme = vgui2::scheme()->LoadSchemeFromFilePath("resource/ClientScheme.res", NULL, "ClientScheme");
 	state.schemeLoaded = (state.clientScheme != 0);
+	VGUI2_CreateClientRootPanel();
 	gEngfuncs.Con_Printf(LOG_PREFIX "Scheme load: %s\n", state.schemeLoaded ? "OK" : "FAILED (non-fatal)");
 	gEngfuncs.Con_Printf(LOG_PREFIX "COMPLETE ready=%d attempted=%d (IVGui=%p IPanel=%p ISurface=%p IInputInternal=%p ILocalize=%p ISchemeManager=%p ISystem=%p viewport=%p scheme=%d)\n",
 		state.ready ? 1 : 0, state.attempted ? 1 : 0,
@@ -394,82 +437,10 @@ bool VGUI2_Bootstrap()
 void VGUI2_OnShutdown()
 {
 #if !defined(VGUI2_STUB_MODE)
+	VGUI2_ClientRuntimeShutdown();
 	VGUI2_DestroyViewport();
+	VGUI2_DestroyClientRootPanel();
 #endif
-	if (state.testPanelCreated)
-	{
-		VGUI2_DestroyTestPanel();
-	}
-}
-
-void VGUI2_CreateTestPanel()
-{
-	gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() ENTRY\n");
-
-	if (!state.ready)
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() SKIP - bootstrap not ready\n");
-		return;
-	}
-
-	if (state.testPanelCreated)
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "VGUI2_CreateTestPanel() SKIP - already created\n");
-		return;
-	}
-
-#if !defined(VGUI2_STUB_MODE)
-	vgui2::ISurface *surface = g_pVGuiSurface;
-	vgui2::IVGui *ivgui = g_pVGui;
-	vgui2::IPanel *ipan = g_pVGuiPanel;
-
-	vgui2::VPANEL root = surface->GetEmbeddedPanel();
-	state.embeddedPanel = root;
-	gEngfuncs.Con_Printf(LOG_PREFIX "Embedded panel handle: %u\n", (unsigned int)root);
-
-	vgui2::VPANEL testVPanel = ivgui->AllocPanel();
-	gEngfuncs.Con_Printf(LOG_PREFIX "Allocated test panel: %u\n", (unsigned int)testVPanel);
-	state.testPanel = testVPanel;
-
-	ipan->Init(testVPanel, NULL);
-	ipan->SetPos(testVPanel, 100, 100);
-	ipan->SetSize(testVPanel, 200, 150);
-	ipan->SetVisible(testVPanel, true);
-
-	if (root != 0)
-	{
-		ipan->SetParent(testVPanel, root);
-		gEngfuncs.Con_Printf(LOG_PREFIX "Test panel parent set to embedded (root)\n");
-	}
-	else
-	{
-		gEngfuncs.Con_Printf(LOG_PREFIX "Warning: root embedded panel is 0, test panel has no parent\n");
-	}
-
-	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel bounds: pos=(100,100) size=(200x150)\n");
-	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel creation SUCCEEDED\n");
-#endif
-
-	state.testPanelCreated = true;
-}
-
-void VGUI2_DestroyTestPanel()
-{
-	if (!state.testPanelCreated)
-		return;
-
-#if !defined(VGUI2_STUB_MODE)
-	if (g_pVGui && state.testPanel != 0)
-	{
-		g_pVGui->FreePanel(state.testPanel);
-	}
-#endif
-
-	state.testPanelCreated = false;
-	state.embeddedPanel = 0;
-	state.testPanel = 0;
-
-	gEngfuncs.Con_Printf(LOG_PREFIX "Test panel destroyed\n");
 }
 
 void VGUI2_OnVidInit()
@@ -484,6 +455,8 @@ void VGUI2_OnVidInit()
 	}
 
 #if !defined(VGUI2_STUB_MODE)
+	VGUI2_UpdateClientRootPanelBounds();
+	VGUI2_ClientRuntimeOnVidInit(gHUD.m_scrinfo.iWidth, gHUD.m_scrinfo.iHeight);
 	if (cl_vgui2_menus && cl_vgui2_menus->value != 0.0f)
 		VGUI2_CreateViewport();
 #endif
@@ -497,16 +470,17 @@ void VGUI2_RunFrame()
 #if !defined(VGUI2_STUB_MODE)
 	if (state.ready)
 	{
-		vgui2::VPANEL root = g_pVGuiSurface ? g_pVGuiSurface->GetEmbeddedPanel() : 0;
-
-		g_pVGui->RunFrame();
-
-		if (g_pVGuiSurface && root != 0)
-		{
-			g_pVGuiSurface->SolveTraverse(root, false);
-			g_pVGuiSurface->PaintTraverse(root);
-		}
+		VGUI2_PreRender();
 	}
 #endif
-// VGUI2_ ClientRuntimeRunFrame();
+}
+
+void VGUI2_RenderFrame()
+{
+#if !defined(VGUI2_STUB_MODE)
+	if (!state.ready)
+		return;
+
+	VGUI2_ClientRuntimeRunFrame();
+#endif
 }

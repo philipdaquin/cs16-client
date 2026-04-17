@@ -4,7 +4,8 @@
 
 #if !defined(VGUI2_STUB_MODE)
 
-#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/Frame.h>
+#include "VGUI/cs_baseviewport.h"
 
 class CTeamMenu;
 class CClassMenu;
@@ -13,9 +14,9 @@ class CBuySubMenu;
 class CBuyPresetPanel;
 class CBuyPresetListBox;
 
-class CCounterStrikeViewport : public vgui2::EditablePanel
+class CCounterStrikeViewport : public CCSBaseViewport
 {
-	DECLARE_CLASS_SIMPLE(CCounterStrikeViewport, vgui2::EditablePanel);
+	DECLARE_CLASS_SIMPLE(CCounterStrikeViewport, CCSBaseViewport);
 
 public:
 	CCounterStrikeViewport(vgui2::VPANEL parent);
@@ -47,8 +48,11 @@ public:
 	void ShowBuyMenu();
 	void ShowBuySubMenu(BuyMenuCategory_t category);
 	void HideAllGameMenus();
+	void ShowBackGround(bool bShow);
+	void ReloadScheme(const char *fromFile = "resource/ClientScheme.res");
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *scheme) override;
+	virtual void PerformLayout() override;
 	virtual void Paint() override;
 
 	int GetSubMenuIndex(BuyMenuCategory_t category, bool isCT) const
@@ -63,6 +67,7 @@ private:
 	CBuySubMenu *m_apBuySubMenus[CATEGORY_COUNT * SUBMENU_COUNT];
 	CBuyPresetPanel *m_pBuyPresetPanel;
 	CBuyPresetListBox *m_pBuyPresetListBox;
+	vgui2::Frame *m_pBackGround;
 
 	bool m_bPanelsCreated;
 };
