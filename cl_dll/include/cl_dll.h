@@ -36,6 +36,8 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include <stdint.h>
 
+#include "wrect.h"
+#include "../../common/xash3d_types.h"
 #include "util_vector.h"
 
 #include "../engine/cdll_int.h"

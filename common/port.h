@@ -86,6 +86,7 @@ GNU General Public License for more details.
 	#define min(a, b)  (((a) < (b)) ? (a) : (b))
 	#define tell(a)						lseek(a, 0, SEEK_CUR)
 
+#ifndef PLATFORM_H
     typedef unsigned char   BYTE;
     typedef unsigned char   byte;
     typedef short int	    WORD;
@@ -98,6 +99,7 @@ GNU General Public License for more details.
     typedef void* HANDLE;
     typedef void* HMODULE;
     typedef void* HINSTANCE;
+#endif
 
     typedef char* LPSTR;
 

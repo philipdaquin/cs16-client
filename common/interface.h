@@ -47,12 +47,14 @@ public:
 typedef IBaseInterface *( *CreateInterfaceFn )( const char *pName, int *pReturnCode );
 
 typedef IBaseInterface *( *InstantiateInterfaceFn )();
+typedef void *( *InstantiateInterfaceFnEx )();
 
 // Used internally to register classes.
 class InterfaceReg
 {
 public:
 	InterfaceReg( InstantiateInterfaceFn fn, const char *pName );
+	InterfaceReg( InstantiateInterfaceFnEx fn, const char *pName );
 
 public:
 	InstantiateInterfaceFn m_CreateFn;

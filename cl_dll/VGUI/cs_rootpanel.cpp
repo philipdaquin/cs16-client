@@ -40,8 +40,8 @@ public:
 
 		if (wide <= 0 || tall <= 0)
 		{
-			if (g_pVGuiSurface)
-				g_pVGuiSurface->GetScreenSize(wide, tall);
+			if (vgui2::surface())
+				vgui2::surface()->GetScreenSize(wide, tall);
 		}
 
 		if (wide <= 0)
@@ -65,29 +65,29 @@ static vgui2::VPANEL ResolveRootParent()
 			return enginePanel;
 	}
 
-	return g_pVGuiSurface ? g_pVGuiSurface->GetEmbeddedPanel() : 0;
+	return vgui2::surface() ? vgui2::surface()->GetEmbeddedPanel() : 0;
 }
 
 }
 
 void VGUI2_CreateClientRootPanel()
 {
-	if (g_pCSRootPanel || !g_pVGuiSurface)
+	if (g_pCSRootPanel || !vgui2::surface())
 		return;
 
-	g_OriginalEmbeddedPanel = g_pVGuiSurface->GetEmbeddedPanel();
+	g_OriginalEmbeddedPanel = vgui2::surface()->GetEmbeddedPanel();
 	vgui2::VPANEL parent = ResolveRootParent();
 	if (!parent)
 		return;
 
 	g_pCSRootPanel = new CCSRootPanel(parent);
-	g_pVGuiSurface->SetEmbeddedPanel(g_pCSRootPanel->GetVPanel());
+	vgui2::surface()->SetEmbeddedPanel(g_pCSRootPanel->GetVPanel());
 }
 
 void VGUI2_DestroyClientRootPanel()
 {
-	if (g_pVGuiSurface && g_OriginalEmbeddedPanel)
-		g_pVGuiSurface->SetEmbeddedPanel(g_OriginalEmbeddedPanel);
+	if (vgui2::surface() && g_OriginalEmbeddedPanel)
+		vgui2::surface()->SetEmbeddedPanel(g_OriginalEmbeddedPanel);
 
 	delete g_pCSRootPanel;
 	g_pCSRootPanel = NULL;

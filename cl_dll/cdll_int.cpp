@@ -63,11 +63,8 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
 
-	Game_HookEvents();
-	gEngfuncs.Con_Printf("\n========== VGUI2_BootstrapHIT ==========\n");
-
-	// Disbaled temporarily for debugging 
 	VGUI2_Bootstrap();
+	Game_HookEvents();
 
 	return 1;
 }
@@ -81,10 +78,10 @@ HUD_Shutdown
 */
 void DLLEXPORT HUD_Shutdown( void )
 {
+	VGUI2_OnShutdown();
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
-	VGUI2_OnShutdown();
 }
 
 
@@ -197,17 +194,11 @@ int DLLEXPORT HUD_VidInit( void )
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit ENTRY ready=%d viewport=%p\n",
 		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
 
+	VGUI2_Bootstrap();
+	VGUI2_OnVidInit();
 	gHUD.VidInit();
 
 	isLoaded = true;
-
-	if (!VGUI2_IsReady())
-		VGUI2_Bootstrap();
-
-	VGUI2_OnVidInit();
-	gHUD.m_Menu.FlushPendingVGUIMenu();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] HUD_VidInit EXIT ready=%d viewport=%p\n",
-		VGUI2_IsReady() ? 1 : 0, VGUI2_GetViewportPtr());
 
 	return 1;
 }
@@ -244,8 +235,7 @@ redraw the HUD.
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
-	VGUI2_RunFrame();
-	VGUI2_RenderFrame();
+
 
 	return 1;
 }

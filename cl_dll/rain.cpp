@@ -553,7 +553,7 @@ void DrawRain( void )
 			Vector2D toPlayer, shift(Drip->Delta * DRIP_SPRITE_HALFHEIGHT / DRIPSPEED);
 			toPlayer.x = (player->origin.x - Drip->origin.x) * DRIP_SPRITE_HALFWIDTH;
 			toPlayer.y = (player->origin.y - Drip->origin.y) * DRIP_SPRITE_HALFWIDTH;
-			toPlayer = toPlayer.Normalize();
+			toPlayer.NormalizeInPlace();
 
 			// --- draw triangle --------------------------
 			gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, Drip->alpha );

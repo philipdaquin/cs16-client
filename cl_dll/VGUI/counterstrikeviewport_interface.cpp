@@ -1,90 +1,75 @@
 #include "counterstrikeviewport_interface.h"
 
-#if !defined(VGUI2_STUB_MODE)
-
-#include "counterstrikeviewport.h"
-#include "cs_rootpanel.h"
-#include <vgui/ISurface.h>
-#include <tier2/tier2.h>
-
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-
+#include "../vgui2/CHudViewPort.h"
+#include "../vgui2/CBaseViewport.h"
 #include "hud.h"
-#include "vgui2_bootstrap.h"
-
-static CCounterStrikeViewport *g_pCounterStrikeViewport = NULL;
-
-
-extern vgui2::IVGui *g_pVGui;
-extern vgui2::IPanel *g_pVGuiPanel;
-
-void VGUI2_CreateViewport()
-{
-	if (!g_pVGui || !g_pVGuiPanel)
-		return;
-
-	if (g_pCounterStrikeViewport || !VGUI2_IsReady() || !g_pVGuiSurface)
-		return;
-
-	vgui2::VPANEL root = VGUI2_GetClientRootPanel();
-	if (!root)
-		root = g_pVGuiSurface->GetEmbeddedPanel();
-	if (!root)
-		return;
-
-	g_pCounterStrikeViewport = new CCounterStrikeViewport(root);
-}
-
-void VGUI2_DestroyViewport()
-{
-	delete g_pCounterStrikeViewport;
-	g_pCounterStrikeViewport = NULL;
-}
 
 bool VGUI2_HasViewport()
 {
-	return g_pCounterStrikeViewport != NULL;
+	return g_pViewport != nullptr;
 }
 
 void *VGUI2_GetViewportPtr()
 {
-	return g_pCounterStrikeViewport;
+	return g_pViewport;
+}
+
+void VGUI2_CreateViewport()
+{
+}
+
+void VGUI2_DestroyViewport()
+{
 }
 
 void VGUI2_ShowTeamMenu()
 {
-	if (g_pCounterStrikeViewport)
-		g_pCounterStrikeViewport->ShowTeamMenu();
+	if (g_pViewport)
+		static_cast<CHudViewport *>(g_pViewport)->ShowVGUIMenu(MENU_TEAM);
 }
 
 void VGUI2_ShowClassMenu(int menuType)
 {
-	if (g_pCounterStrikeViewport)
-		g_pCounterStrikeViewport->ShowClassMenu(menuType);
+	if (g_pViewport)
+		static_cast<CHudViewport *>(g_pViewport)->ShowVGUIMenu(menuType);
 }
 
 void VGUI2_ShowBuyMenu()
 {
-	if (g_pCounterStrikeViewport)
-		g_pCounterStrikeViewport->ShowBuyMenu();
+	if (g_pViewport)
+		static_cast<CHudViewport *>(g_pViewport)->ShowVGUIMenu(MENU_BUY);
 }
 
 void VGUI2_ShowBuySubMenu(int category)
 {
-	if (g_pCounterStrikeViewport)
-		g_pCounterStrikeViewport->ShowBuySubMenu((CCounterStrikeViewport::BuyMenuCategory_t)category);
+	if (!g_pViewport)
+		return;
+
+	static const int kMenuTypes[] =
+	{
+		MENU_BUY_PISTOL,
+		MENU_BUY_SHOTGUN,
+		MENU_BUY_SUBMACHINEGUN,
+		MENU_BUY_RIFLE,
+		MENU_BUY_MACHINEGUN,
+		MENU_BUY_ITEM
+	};
+
+	if (category < 0 || category >= static_cast<int>(sizeof(kMenuTypes) / sizeof(kMenuTypes[0])))
+		return;
+
+	static_cast<CHudViewport *>(g_pViewport)->ShowVGUIMenu(kMenuTypes[category]);
 }
 
 void VGUI2_HideAllGameMenus()
 {
-	if (g_pCounterStrikeViewport)
-		g_pCounterStrikeViewport->HideAllGameMenus();
+	if (g_pViewport)
+		g_pViewport->HideAllVGUIMenu();
 }
 
 bool VGUI2_ShouldCaptureInput()
 {
-	return g_pCounterStrikeViewport && g_pCounterStrikeViewport->IsVisible();
+	return g_pViewport && g_pViewport->GetActivePanel() != nullptr;
 }
 
 int VGUI2_GetLocalPlayerTeam()
@@ -99,5 +84,3 @@ void VGUI2_RunClientCommand(const char *command)
 
 	gEngfuncs.pfnClientCmd((char *)command);
 }
-
-#endif

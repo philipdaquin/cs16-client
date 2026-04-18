@@ -5,7 +5,7 @@
 #if !defined(VGUI2_STUB_MODE)
 
 #include <vgui_controls/WizardSubPanel.h>
-#include <utlvector.h>
+#include "../../SourceSDK/public/tier1/utlvector.h"
 #include "buymouseoverpanelbutton.h"
 #include "VGUI/counterstrikeviewport.h"
 

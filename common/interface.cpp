@@ -67,6 +67,14 @@ InterfaceReg::InterfaceReg( InstantiateInterfaceFn fn, const char *pName ) :
 	s_pInterfaceRegs = this;
 }
 
+InterfaceReg::InterfaceReg( InstantiateInterfaceFnEx fn, const char *pName ) :
+	m_pName( pName )
+{
+	m_CreateFn = reinterpret_cast<InstantiateInterfaceFn>( fn );
+	m_pNext = s_pInterfaceRegs;
+	s_pInterfaceRegs = this;
+}
+
 // ------------------------------------------------------------------------------------ //
 // CreateInterface.
 // ------------------------------------------------------------------------------------ //

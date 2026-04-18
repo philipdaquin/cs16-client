@@ -6,7 +6,7 @@
 
 #include <vgui_controls/Frame.h>
 #include <vgui/KeyCode.h>
-#include <utlvector.h>
+#include "../../SourceSDK/public/tier1/utlvector.h"
 class CCounterStrikeViewport;
 
 class CTeamMenu : public vgui2::Frame

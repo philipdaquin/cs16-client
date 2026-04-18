@@ -35,21 +35,15 @@ inline void Construct( T* pMemory )
 	::new( pMemory ) T;
 }
 
+#ifndef PLATFORM_H
 template <class T> 
 inline void CopyConstruct( T* pMemory, T const& src )
 {
 	::new( pMemory ) T(src);
 }
-
-template <class T> 
-inline void Destruct( T* pMemory )
-{
-	pMemory->~T();
-
-#ifdef _DEBUG
-	memset( pMemory, 0xDD, sizeof(T) );
 #endif
-}
+
+// Destruct is supplied by the SourceSDK tier0 layer in this build.
 
 
 
