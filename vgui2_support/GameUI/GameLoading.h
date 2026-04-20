@@ -3,7 +3,7 @@
 #include <vgui_controls/PHandle.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/Label.h>
-#include <vgui_controls/Progressbar.h>
+#include <vgui_controls/ProgressBar.h>
 
 class CGameLoading : public vgui2::Panel
 {

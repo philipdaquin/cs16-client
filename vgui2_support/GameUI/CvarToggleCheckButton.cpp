@@ -6,6 +6,7 @@
 
 #include <tier0/memdbgon.h>
 
+
 vgui2::Panel *CvarToggleCheckButton_Factory(void)
 {
 	return new CCvarToggleCheckButton(NULL, NULL, "CvarToggleCheckButton", NULL);

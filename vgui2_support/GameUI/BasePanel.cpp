@@ -14,7 +14,7 @@
 #include "GameConsole.h"
 #include "GameUI_Interface.h"
 
-#include "IGameuiFuncs.h"
+#include "IGameUIFuncs.h"
 
 #include "vgui_controls/AnimationController.h"
 #include "vgui_controls/ImagePanel.h"
@@ -28,12 +28,15 @@
 #include "vgui_controls/KeyRepeat.h"
 #include "MoeLogin.h"
 #include "ModInfo.h"
-#include "MoEBulletIn.h"
 #include "LoadingDialog.h"
 #include "BackgroundMenuButton.h"
 #include "OptionsDialog.h"
 #include "CreateMultiplayerGameDialog.h"
 #include "MoeSettings.h"
+
+#ifndef __EMSCRIPTEN__
+#include "MoEBulletIn.h"
+#endif
 
 #include "ToolBar.h"
 #include <keydefs.h>
@@ -632,7 +635,7 @@ void CBasePanel::DrawBackgroundImage(void)
 	int wide, tall;
 	GetSize(wide, tall);
 
-	float frametime = engine->pfnSys_FloatTime();
+	float frametime = engine->GetClientTime();
 	int alpha = 255;
 
 	if (m_bRenderingBackgroundTransition)
@@ -791,7 +794,7 @@ void CBasePanel::RunFrame(void)
 	if (vgui2::surface()->GetModalPanel())
 		vgui2::surface()->PaintTraverse(GetVPanel());
 
-	vgui2::GetAnimationController()->UpdateAnimations(engine->pfnSys_FloatTime());
+	vgui2::GetAnimationController()->UpdateAnimations(engine->GetClientTime());
 	UpdateBackgroundState();
 }
 
@@ -1026,7 +1029,9 @@ void CBasePanel::RunMenuCommand(const char *command)
 	else if (!Q_stricmp(command, "OpenCSBTEBulletin"))
 	{
 		//OpenCSBTEBulletin();
+#ifndef __EMSCRIPTEN__
 		OnOpenSubDialog<CCSBTEBulletin>();
+#endif
 	}
 
 	else

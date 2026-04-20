@@ -2,6 +2,9 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
+#ifndef _format
+#define _format(x)
+#endif
 #include "EngineInterface.h"
 
 #include <tier0/dbg.h>
@@ -49,9 +52,6 @@ namespace ui {
 	extern ui_enginefuncs_t engfuncs;
 }
 
-namespace vgui2 {
-extern cl_enginefunc_t gEngfuncs;
-}
 using namespace vgui2;
 cl_enginefunc_t* engine = &gEngfuncs;
 

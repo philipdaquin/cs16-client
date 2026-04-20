@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include <VGUI/IScheme.h>
+#include <vgui/IScheme.h>
 #include <vgui_controls/ImagePanel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Frame.h>

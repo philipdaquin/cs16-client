@@ -17,12 +17,17 @@
 #include <assert.h>
 #include "port.h"
 #include "xash3d_types.h"
+#include "wrect.h"
 
 #include "vgui_api.h"
+#ifndef pfnUserMsgHook
+typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
+#endif
 #include "cdll_int.h"
 #include "cvardef.h"
 
 // engine interface singleton accessor
+extern cl_enginefunc_t gEngfuncs;
 extern cl_enginefunc_t *engine;
 extern class IGameUIFuncs *gameuifuncs;
 

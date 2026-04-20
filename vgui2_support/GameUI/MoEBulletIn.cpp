@@ -7,7 +7,7 @@
 #include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 #include <vgui/IScheme.h>
-#include <VGUI/ILocalize.h>
+#include <vgui/ILocalize.h>
 #include "vgui/ISystem.h"
 
 #include "FileSystem.h"
