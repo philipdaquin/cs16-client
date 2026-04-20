@@ -14,6 +14,7 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #include "BaseUISurface.h"
 #include "GameUI/IGameConsole.h"
 #include "IBaseUI.h"
+#include "CBaseUI.h"
 
 #include "winsani_out.h"
 
@@ -35,6 +36,7 @@ extern vguiapi_t *g_api;
 class CBaseViewport;
 extern CBaseViewport *g_pViewport;
 extern BaseUISurface* staticSurface;
+extern CBaseUI g_BaseUI;
 extern void RegisterInterface();
 extern void RegisterControls();
 
@@ -82,8 +84,8 @@ extern "C" int DLLEXPORT VGui2_VidInit()
 
 extern "C" void DLLEXPORT VGui2_Paint()
 {
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
-        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    // gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        // (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Paint();
 }
 
@@ -106,7 +108,11 @@ void VGuiWrap2_Startup()
 
     CreateInterfaceFn pEngineFactory = Sys_GetFactoryThis();
     gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup engineFactory=%p\n", (void *)pEngineFactory);
+#ifdef XASH_STATIC_GAMELIB
+    staticUIFuncs = &g_BaseUI;
+#else
     staticUIFuncs = (IBaseUI *)pEngineFactory(BASEUI_INTERFACE_VERSION, NULL);
+#endif
     gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup IBaseUI=%p\n", (void *)staticUIFuncs);
     if (!staticUIFuncs)
     {
@@ -133,10 +139,10 @@ void VGuiWrap2_Shutdown()
 }
 
 void VGuiWrap2_Paint() {
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
-        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    // gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
+    //     (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     if (!staticUIFuncs) {
-        gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint skipped: staticUIFuncs missing\n");
+        // gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint skipped: staticUIFuncs missing\n");
         return;
     }
 
