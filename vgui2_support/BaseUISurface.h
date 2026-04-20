@@ -259,4 +259,6 @@ private:
     static constexpr auto MAX_BATCHED_CHAR_VERTS = 4096;
 };
 
+BaseUISurface *BaseUISurfaceSingleton();
+
 #endif // BASEUISURFACE_H

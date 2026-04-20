@@ -11,6 +11,13 @@
 
 using vgui2::IPanel;
 
+static VPanelWrapper g_PanelWrapper;
+
+vgui2::IPanel *VPanelInterfaceSingleton()
+{
+	return &g_PanelWrapper;
+}
+
 
 void VPanelWrapper::Init(vgui2::VPANEL vguiPanel, vgui2::IClientPanel *panel)
 {

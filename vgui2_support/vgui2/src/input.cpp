@@ -33,6 +33,11 @@ namespace vgui2
 
 static CInputWin32 g_Input;
 
+vgui2::IInputInternal *InputInternalSingleton()
+{
+	return &g_Input;
+}
+
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CInputWin32, IInput, VGUI_INPUT_INTERFACE_VERSION, g_Input);
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CInputWin32, IInputInternal, VGUI_INPUTINTERNAL_INTERFACE_VERSION, g_Input);
 

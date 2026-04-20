@@ -3,6 +3,13 @@
 
 #include "VGuiKeyValues.h"
 
+static CVGuiKeyValues g_VGuiKeyValues;
+
+IKeyValues *VGuiKeyValuesSingleton()
+{
+	return &g_VGuiKeyValues;
+}
+
 
 bool CVGuiKeyValues::MemoryLeakTrackerLessFunc( const MemoryLeakTracker_t& lhs, const MemoryLeakTracker_t& rhs )
 {

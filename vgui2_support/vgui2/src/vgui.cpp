@@ -27,6 +27,13 @@ namespace vgui2
 
 using vgui2::IVGui;
 
+static CVGui g_VGui;
+
+vgui2::IVGui *VGuiInterfaceSingleton()
+{
+	return &g_VGui;
+}
+
 
 bool PriorityQueueComp( const MessageItem_t& lhs, const MessageItem_t& rhs )
 {

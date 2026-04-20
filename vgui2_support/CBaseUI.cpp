@@ -30,6 +30,8 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #include "GameUI/IGameUI.h"
 #include "GameUI/IGameConsole.h"
 #include "GameUI/ICareerUI.h"
+#include "GameUI/GameUI_Interface.h"
+#include "GameUI/GameConsole.h"
 
 namespace ui
 {
@@ -61,6 +63,11 @@ CEnginePanel *staticGameUIPanel;
 }
 BaseUISurface *staticSurface;
 using namespace vgui2;
+
+extern vgui2::IInputInternal *InputInternalSingleton();
+extern IClientVGUI* clientVGUIInterface();
+
+CBaseUI g_BaseUI;
 
 class CEnginePanel : public vgui2::Panel {
 public:
@@ -155,17 +162,27 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 
 	if (gameUIFactory)
 	{
+#ifdef XASH_STATIC_GAMELIB
+		staticGameUIFuncs = &GameUI();
+		staticGameConsole = &GameConsole();
+		staticCareerUI = nullptr;
+#else
 		staticGameUIFuncs = static_cast<IGameUI*>(gameUIFactory(GAMEUI_INTERFACE_VERSION, nullptr));
 		staticGameConsole = static_cast<IGameConsole*>(gameUIFactory(GAMECONSOLE_INTERFACE_VERSION, nullptr));
 		staticCareerUI = static_cast<ICareerUI*>(gameUIFactory(CAREERUI_INTERFACE_VERSION, nullptr));
+#endif
 
 		++m_iNumFactories;
 	}
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize gameui=%p console=%p career=%p\n",
 		(void *)staticGameUIFuncs, (void *)staticGameConsole, (void *)staticCareerUI);
 	
-		g_pInputInternal = (vgui2::IInputInternal *)m_FactoryList[1](VGUI_INPUTINTERNAL_INTERFACE_VERSION, NULL);
-		g_pVGuiInput = g_pInputInternal;
+#ifdef XASH_STATIC_GAMELIB
+	g_pInputInternal = InputInternalSingleton();
+#else
+	g_pInputInternal = (vgui2::IInputInternal *)m_FactoryList[1](VGUI_INPUTINTERNAL_INTERFACE_VERSION, NULL);
+#endif
+	g_pVGuiInput = g_pInputInternal;
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize inputInternal=%p vguiInput=%p\n",
 		(void *)g_pInputInternal, (void *)g_pVGuiInput);
 
@@ -174,7 +191,11 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	//m_hClientModule = Sys_LoadModule(szClientDLLPath);
 	m_FactoryList[4] = Sys_GetFactoryThis(); // Sys_GetFactory(m_hClientModule);
 	m_iNumFactories = 5;
+#ifdef XASH_STATIC_GAMELIB
+	staticClient = clientVGUIInterface();
+#else
 	staticClient = (IClientVGUI *)m_FactoryList[4](CLIENTVGUI_INTERFACE_VERSION, NULL);
+#endif
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize staticClient=%p numFactories=%d\n",
 		(void *)staticClient, m_iNumFactories);
 	//gClDllFuncs.pfnInitialize(&gEngfuncs, CLDLL_INTERFACE_VERSION);
@@ -206,9 +227,13 @@ void CBaseUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) 
 	staticPanel->SetVisible(true);
 	staticPanel->SetZPos(0);
 
-		staticSurface = (BaseUISurface *)m_FactoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
-		g_pVGui = vgui2::ivgui();
-		g_pVGuiSystem = vgui2::system();
+#ifdef XASH_STATIC_GAMELIB
+	staticSurface = BaseUISurfaceSingleton();
+#else
+	staticSurface = (BaseUISurface *)m_FactoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
+#endif
+	g_pVGui = vgui2::ivgui();
+	g_pVGuiSystem = vgui2::system();
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface=%p ivgui=%p system=%p\n",
 		(void *)staticSurface, (void *)g_pVGui, (void *)g_pVGuiSystem);
 	IHTMLChromeController *chromeController = nullptr;
@@ -513,3 +538,5 @@ void CEngineVGui::SetEngineVisible(bool state)
 	}
 #endif
 }
+
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CBaseUI, IBaseUI, BASEUI_INTERFACE_VERSION, g_BaseUI );

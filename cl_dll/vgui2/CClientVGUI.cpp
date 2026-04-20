@@ -42,6 +42,11 @@ CClientVGUI* clientVGUI()
 	return &g_ClientVGUI;
 }
 
+IClientVGUI* clientVGUIInterface()
+{
+	return &g_ClientVGUI;
+}
+
 IGameUIFuncs* gameUIFuncs()
 {
 	return g_GameUIFuncs;

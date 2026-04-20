@@ -71,6 +71,13 @@ extern int	g_iBoundTexture;
 
 using namespace vgui2;
 
+static BaseUISurface g_BaseUISurface;
+
+BaseUISurface *BaseUISurfaceSingleton()
+{
+	return &g_BaseUISurface;
+}
+
 // TODO: implement vgui2::Dar
 std::vector<vgui2::VPANEL> staticPopupList;
 

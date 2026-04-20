@@ -153,6 +153,11 @@ namespace vgui2
 vgui2::ISystem *g_pSystem = &g_System;
 }
 
+vgui2::ISystem *SystemInterfaceSingleton()
+{
+	return &g_System;
+}
+
 #define REGISTRY_NAME "cfg/registry.vdf"
 #define REGISTRY_SAVE_INTERVAL 30
 

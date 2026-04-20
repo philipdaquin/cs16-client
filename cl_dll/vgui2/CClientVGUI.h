@@ -58,6 +58,7 @@ private:
 *	Global accessor for the client VGUI.
 */
 CClientVGUI* clientVGUI();
+IClientVGUI* clientVGUIInterface();
 
 /**
 *	Global accessor for game UI funcs.

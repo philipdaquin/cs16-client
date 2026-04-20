@@ -24,6 +24,11 @@ static LessCtx_t g_LessCtx;
 
 static CLocalizedStringTable g_StringTable;
 
+vgui2::ILocalize *LocalizeInterfaceSingleton()
+{
+	return &g_StringTable;
+}
+
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(
 	CLocalizedStringTable, ILocalize,
 	VGUI_LOCALIZE_INTERFACE_VERSION, g_StringTable

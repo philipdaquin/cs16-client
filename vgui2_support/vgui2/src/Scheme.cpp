@@ -202,6 +202,11 @@ bool CSchemeManager::BitmapHandleSearchFunc(const CachedBitmapHandle_t &lhs, con
 CSchemeManager g_Scheme;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CSchemeManager, ISchemeManager, VGUI_SCHEME_INTERFACE_VERSION, g_Scheme);
 
+vgui2::ISchemeManager *SchemeInterfaceSingleton()
+{
+	return &g_Scheme;
+}
+
  
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
