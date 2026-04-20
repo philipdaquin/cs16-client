@@ -20,7 +20,9 @@ void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 void CHudViewport::Start()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 	BaseClass::Start();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::Start after BaseClass::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 
 	static CHudViewport *const s_pHudViewPort = this;
 
@@ -37,6 +39,8 @@ void CHudViewport::Start()
 
 int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::MsgFunc_MOTD this=%p size=%d viewport=%p\n",
+		this, iSize, (void *)g_pViewport);
 	if (m_bGotAllMOTD)
 		m_szMOTD.clear();
 
@@ -69,6 +73,7 @@ void CHudViewport::HideClientUI()
 
 void CHudViewport::CreateDefaultPanels()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateDefaultPanels this=%p viewport=%p\n", this, (void *)g_pViewport);
 	AddNewPanel(CreatePanelByName("ClientMOTD"));
 	AddNewPanel(CreatePanelByName(PANEL_TEAM));
 	AddNewPanel(CreatePanelByName(PANEL_CLASS));
@@ -79,6 +84,8 @@ void CHudViewport::CreateDefaultPanels()
 
 IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreatePanelByName this=%p name='%s' viewport=%p\n",
+		this, pszName ? pszName : "<null>", (void *)g_pViewport);
 	IViewportPanel *pPanel = nullptr;
 
 	if (Q_strcmp("ClientMOTD", pszName) == 0)
@@ -119,6 +126,8 @@ IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 
 bool CHudViewport::ShowVGUIMenu(int iMenu)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
+		this, iMenu, (void *)g_pViewport, (void *)m_pTeamMenu, (void *)m_pClassMenu, (void *)m_pBuyMenu);
 	IViewportPanel *panel = nullptr;
 
 	switch (iMenu)
@@ -153,14 +162,20 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 	}
 
 	if (!panel)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu no panel for menu=%d\n", iMenu);
 		return false;
+	}
 
 	ShowPanel(panel, true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p\n", iMenu, (void *)panel);
 	return true;
 }
 
 bool CHudViewport::HideVGUIMenu(int iMenu)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu this=%p menu=%d viewport=%p\n",
+		this, iMenu, (void *)g_pViewport);
 	IViewportPanel *panel = nullptr;
 
 	switch (iMenu)
@@ -189,9 +204,13 @@ bool CHudViewport::HideVGUIMenu(int iMenu)
 	}
 
 	if (!panel)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu no panel for menu=%d\n", iMenu);
 		return false;
+	}
 
 	ShowPanel(panel, false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu hidden menu=%d panel=%p\n", iMenu, (void *)panel);
 	return true;
 }
 

@@ -20,7 +20,9 @@ CBaseViewport* g_pViewport = nullptr;
 CBaseViewport::CBaseViewport()
 	: BaseClass( nullptr, "CBaseViewport" )
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport ctor this=%p before g_pViewport=%p\n", this, (void *)g_pViewport);
 	g_pViewport = this;
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport ctor assigned g_pViewport=%p\n", (void *)g_pViewport);
 
 	SetKeyBoardInputEnabled( false );
 	SetMouseInputEnabled( false );
@@ -55,26 +57,35 @@ CBaseViewport::~CBaseViewport()
 
 void CBaseViewport::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Initialize this=%p factories=%p count=%d viewport=%p\n",
+		this, (void *)pFactories, iNumFactories, (void *)g_pViewport);
 	ReloadScheme();
 }
 
 void CBaseViewport::Start()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start this=%p viewport=%p panels=%d gamePanels=%d\n",
+		this, (void *)g_pViewport, m_Panels.Count(), m_GameUIPanels.Count());
 	// recreate all the default panels
 	RemoveAllPanels();
 
 	m_pBackGround = new CBackGroundPanel( nullptr );
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start background=%p\n", (void *)m_pBackGround);
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );
 
 	CreateDefaultPanels();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start default panels created panels=%d gamePanels=%d active=%p\n",
+		m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel);
 
 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
 }
 
 void CBaseViewport::Init()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Init this=%p viewport=%p panels=%d\n",
+		this, (void *)g_pViewport, m_Panels.Count());
 	for (int i = 0; i < m_Panels.Count(); i++)
 		m_Panels[i]->Init();
 
@@ -83,6 +94,8 @@ void CBaseViewport::Init()
 
 void CBaseViewport::VidInit()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::VidInit this=%p viewport=%p panels=%d\n",
+		this, (void *)g_pViewport, m_Panels.Count());
 	for (int i = 0; i < m_Panels.Count(); i++)
 		m_Panels[i]->VidInit();
 
@@ -92,6 +105,8 @@ void CBaseViewport::VidInit()
 void CBaseViewport::SetParent( vgui2::VPANEL parent )
 {
 	const bool bIsProportional = IsProportional();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent this=%p parent=%p viewport=%p panels=%d\n",
+		this, (void *)parent, (void *)g_pViewport, m_Panels.Count());
 
 	BaseClass::SetParent( parent );
 
@@ -111,6 +126,7 @@ void CBaseViewport::SetParent( vgui2::VPANEL parent )
 
 	SetKeyBoardInputEnabled(false);
 	SetMouseInputEnabled(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent done this=%p parent=%p\n", this, (void *)parent);
 }
 
 bool CBaseViewport::UseVGUI1()
@@ -346,6 +362,8 @@ void CBaseViewport::ShowPanel( const char* pszName, bool bState )
 
 void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel this=%p panel=%p state=%d active=%p last=%p viewport=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)g_pViewport);
 	if( bState )
 	{
 		// if this is an 'active' panel, deactivate old active panel

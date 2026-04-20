@@ -50,8 +50,6 @@ USING_BUILD_FACTORY( URLLabel );
 
 int g_nYou_Must_Add_Public_Vgui_Controls_Vgui_ControlsCpp_To_Your_Project = 0;
 
-#ifdef XASH_STATIC_GAMELIB
-
 #define REGISTER_BUILD_FACTORY( className ) \
     extern vgui2::Panel *Create_##className( void ); \
     new vgui2::CBuildFactoryHelper( #className, Create_##className );
@@ -70,9 +68,10 @@ int g_nYou_Must_Add_Public_Vgui_Controls_Vgui_ControlsCpp_To_Your_Project = 0;
 void RegisterControls()
 {
 
-REGISTER_BUILD_FACTORY_CUSTOM(CCvarToggleCheckButton, CvarToggleCheckButton_Factory);
-REGISTER_BUILD_FACTORY(CFooterPanel);
-REGISTER_BUILD_FACTORY(CCvarSlider);
+// GameUI/mod shell factories are disabled for the vanilla VGUI2 build.
+// REGISTER_BUILD_FACTORY_CUSTOM(CCvarToggleCheckButton, CvarToggleCheckButton_Factory);
+// REGISTER_BUILD_FACTORY(CFooterPanel);
+// REGISTER_BUILD_FACTORY(CCvarSlider);
 //REGISTER_BUILD_FACTORY_DEFAULT_TEXT(URLButton, URLButton);
 REGISTER_BUILD_FACTORY( AnimatingImagePanel );
 REGISTER_BUILD_FACTORY_DEFAULT_TEXT( CBitmapImagePanel, BitmapImagePanel );
@@ -110,5 +109,3 @@ REGISTER_BUILD_FACTORY( CTreeViewListControl );
 REGISTER_BUILD_FACTORY_CUSTOM( URLLabel, URLLabel_Factory );
     
 }
-
-#endif

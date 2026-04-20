@@ -14,7 +14,7 @@
 static vgui2::HFont _consoleFont = NULL_HANDLE;
 extern rgba_t g_color_table[8];
 
-void VGUI2_Draw_Init()
+extern "C" void EXPORT VGUI2_Draw_Init()
 {
     if (_consoleFont != NULL_HANDLE)
         return;

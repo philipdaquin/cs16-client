@@ -34,9 +34,9 @@ public:
 
 	void Start() override;
 
-	void Init() override;
+	void Init();
 
-	void VidInit() override;
+	void VidInit();
 
 	void SetParent( vgui2::VPANEL parent ) override;
 

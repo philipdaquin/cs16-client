@@ -2,6 +2,7 @@
 #include "wrect.h"
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #include "cdll_int.h"
+#include "exportdef.h"
 
 #include "winsani_in.h"
 
@@ -31,6 +32,8 @@ extern IGameConsole* staticGameConsole;
 extern IBaseUI *staticUIFuncs;
 extern vguiapi_t *g_api;
 }
+class CBaseViewport;
+extern CBaseViewport *g_pViewport;
 extern BaseUISurface* staticSurface;
 extern void RegisterInterface();
 extern void RegisterControls();
@@ -53,50 +56,75 @@ void VGui2_pfnDrawSetTextColor(float r, float g, float b) {
     gEngfuncs.pfnDrawSetTextColor(r, g, b);
 }
 
-int VGui2_Initialize(cl_enginefunc_t *pEnginefuncs) {
+extern "C" int DLLEXPORT VGui2_Initialize(cl_enginefunc_t *pEnginefuncs) {
     gEngfuncs = *pEnginefuncs;
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Initialize engine=%p\n", (void *)pEnginefuncs);
 
 	return 0;
 }
 
-void VGui2_Startup()
+extern "C" void DLLEXPORT VGui2_Startup()
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Startup();
 }
 
-int VGui2_VidInit()
+extern "C" int DLLEXPORT VGui2_VidInit()
 {
-    extern void VGUI2_Draw_Init();
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_VidInit entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    void VGUI2_Draw_Init();
     VGUI2_Draw_Init();
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_VidInit done font init\n");
 	return 0;
 }
 
-void VGui2_Paint()
+extern "C" void DLLEXPORT VGui2_Paint()
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Paint();
 }
 
-int VGui2_Shutdown()
+extern "C" int DLLEXPORT VGui2_Shutdown()
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Shutdown entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Shutdown();
     return 0;
 }
 
 void VGuiWrap2_Startup()
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     if( staticUIFuncs )
         return;
     RegisterInterface();
     RegisterControls();
 
     CreateInterfaceFn pEngineFactory = Sys_GetFactoryThis();
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup engineFactory=%p\n", (void *)pEngineFactory);
     staticUIFuncs = (IBaseUI *)pEngineFactory(BASEUI_INTERFACE_VERSION, NULL);
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup IBaseUI=%p\n", (void *)staticUIFuncs);
+    if (!staticUIFuncs)
+    {
+        gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup failed: IBaseUI missing\n");
+        return;
+    }
     staticUIFuncs->Initialize(&pEngineFactory, 1);
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup after Initialize staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     staticUIFuncs->Start(NULL, 0);
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup after Start staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
 }
 
 void VGuiWrap2_Shutdown()
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Shutdown entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     if( staticUIFuncs )
     {
         staticUIFuncs->Shutdown();
@@ -105,7 +133,10 @@ void VGuiWrap2_Shutdown()
 }
 
 void VGuiWrap2_Paint() {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     if (!staticUIFuncs) {
+        gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Paint skipped: staticUIFuncs missing\n");
         return;
     }
 

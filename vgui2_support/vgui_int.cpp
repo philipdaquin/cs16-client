@@ -32,6 +32,8 @@ extern cl_enginefunc_t gEngfuncs;
 extern vgui2::IInputInternal *g_pInputInternal;
 
 void VGui_Startup(int width, int height) {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_Startup width=%d height=%d\n", width, height);
 	if (gEngfuncs.pfnGetGameDirectory == NULL) {
 		return;
 	}
@@ -39,19 +41,27 @@ void VGui_Startup(int width, int height) {
 }
 
 void VGui_Shutdown() {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_Shutdown\n");
     VGuiWrap2_Shutdown();
     g_api->DrawShutdown();
 }
 
 void *VGui_GetPanel() {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_GetPanel surface=%p\n", (void *)staticSurface);
 	return staticSurface ? reinterpret_cast<void *>(static_cast<uintptr_t>(staticSurface->GetEmbeddedPanel())) : NULL;
 }
 
 void VGui_Paint() {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_Paint\n");
     VGuiWrap2_Paint();
 }
 
 void VGUI_Mouse(enum VGUI_MouseAction action, int code) {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI_Mouse action=%d code=%d input=%p\n", (int)action, code, (void *)g_pInputInternal);
 	if (!g_pInputInternal) {
 		return;
 	}
@@ -72,6 +82,8 @@ void VGUI_Mouse(enum VGUI_MouseAction action, int code) {
 }
 
 void VGUI_Key(enum VGUI_KeyAction action, enum VGUI_KeyCode code) {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI_Key action=%d code=%d input=%p\n", (int)action, (int)code, (void *)g_pInputInternal);
 	if (!g_pInputInternal) {
 		return;
 	}
@@ -134,6 +146,8 @@ void VGUI_Key(enum VGUI_KeyAction action, enum VGUI_KeyCode code) {
 }
 
 void VGUI_MouseMove(int x, int y) {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGUI_MouseMove x=%d y=%d input=%p\n", x, y, (void *)g_pInputInternal);
 	if (!g_pInputInternal) {
 		return;
 	}
@@ -141,6 +155,8 @@ void VGUI_MouseMove(int x, int y) {
 }
 
 extern "C" void EXPORT InitAPI(vguiapi_t * api) {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitAPI api=%p\n", (void *)api);
 	g_api = api;
 	g_api->Startup = VGui_Startup;
 	g_api->Shutdown = VGui_Shutdown;
@@ -153,6 +169,8 @@ extern "C" void EXPORT InitAPI(vguiapi_t * api) {
 
 extern "C" void EXPORT InitVGUISupportAPI(vguiapi_t *api)
 {
+	if (gEngfuncs.Con_Printf)
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitVGUISupportAPI api=%p\n", (void *)api);
 	InitAPI(api);
 }
 
