@@ -86,6 +86,10 @@ set(VGUI2_SUPPORT_ALL_SOURCES
 	${VGUI2_SUPPORT_CSO_CONTROL_SOURCES})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SDK_RUNTIME_SOURCES})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SUPPORT_ALL_SOURCES})
+## Temporary disable: GameUI shell sources are kept here for easy re-enable.
+# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/BasePanel.cpp)
+# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/CvarToggleCheckButton.cpp)
+# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/GameUI_Interface.cpp)
 
 list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})
@@ -177,6 +181,7 @@ else()
 endif()
 
 if(XASH_EMSCRIPTEN)
+	add_definitions(-DXASH_STATIC_GAMELIB)
 	add_executable(${CLIENT_LIB} ${CS_CLIENT_SRC})
 	target_compile_options(${CLIENT_LIB} PRIVATE -fPIC -Oz -sUSE_FREETYPE=1)
 	target_link_options(${CLIENT_LIB} PRIVATE -sSIDE_MODULE=1 -Oz -sASSERTIONS=2 -sUSE_FREETYPE=1)

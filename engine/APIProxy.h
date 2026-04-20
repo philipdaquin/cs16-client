@@ -69,6 +69,11 @@ typedef int (*HUD_GETPLAYERTEAM)(int iplayer);
 typedef void *(*CLIENTFACTORY)(); // this should be CreateInterfaceFn but that means including interface.h
 									// which is a C++ file and some of the client files a C only... 
 									// so we return a void * which we then do a typecast on later.
+typedef int (*VGUI2_INITIALIZE_FUNC)( struct cl_enginefuncs_s *pEnginefuncs );
+typedef void (*VGUI2_STARTUP_FUNC)( void );
+typedef int (*VGUI2_VIDINIT_FUNC)( void );
+typedef void (*VGUI2_PAINT_FUNC)( void );
+typedef int (*VGUI2_SHUTDOWN_FUNC)( void );
 
 
 // Pointers to the exported client functions themselves
@@ -117,6 +122,11 @@ typedef struct
 	HUD_CHATINPUTPOSITION_FUNC			pChatInputPosition;	// Not used by all clients
 	HUD_GETPLAYERTEAM					pGetPlayerTeam; // Not used by all clients
 	CLIENTFACTORY						pClientFactory;
+	VGUI2_INITIALIZE_FUNC				pVGui2_Initialize;
+	VGUI2_STARTUP_FUNC					pVGui2_Startup;
+	VGUI2_VIDINIT_FUNC					pVGui2_VidInit;
+	VGUI2_PAINT_FUNC					pVGui2_Paint;
+	VGUI2_SHUTDOWN_FUNC					pVGui2_Shutdown;
 } cldll_func_t;
 
 // Function type declarations for client destination functions

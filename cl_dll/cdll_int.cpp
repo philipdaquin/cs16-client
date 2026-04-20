@@ -33,6 +33,12 @@
 #include "vgui2_bootstrap.h"
 #include "VGUI/counterstrikeviewport_interface.h"
 
+extern "C" int VGui2_Initialize( struct cl_enginefuncs_s *pEnginefuncs );
+extern "C" void VGui2_Startup( void );
+extern "C" int VGui2_VidInit( void );
+extern "C" void VGui2_Paint( void );
+extern "C" int VGui2_Shutdown( void );
+
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
 mobile_engfuncs_t	gMobileAPI = { };
@@ -63,7 +69,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
 
-	VGUI2_Bootstrap();
+	// VGUI2_Bootstrap();
 	Game_HookEvents();
 
 	return 1;
@@ -78,7 +84,7 @@ HUD_Shutdown
 */
 void DLLEXPORT HUD_Shutdown( void )
 {
-	VGUI2_OnShutdown();
+	// VGUI2_OnShutdown();
 	gHUD.Shutdown();
 	Input_Shutdown();
 	Localize_Free();
@@ -498,6 +504,12 @@ extern "C" void DLLEXPORT F(void *pv)
 	HUD_ChatInputPosition,
 	HUD_GetPlayerTeam,
 	NULL
+	,
+	VGui2_Initialize,
+	VGui2_Startup,
+	VGui2_VidInit,
+	VGui2_Paint,
+	VGui2_Shutdown
 	};
 
 	*pcldll_func = cldll_func;
