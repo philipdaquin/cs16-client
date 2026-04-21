@@ -42,10 +42,9 @@ CFontManager::CFontManager()
 	m_Win32Fonts.EnsureCapacity( MAX_INITIAL_FONTS );
 
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
-	FT_Error error = FT_Init_FreeType( &library ); 
-	if ( error )
-		Error( "Unable to initalize freetype library, is it installed?" );
+	library = nullptr;
 	m_pFontDataHelper = NULL;
+	m_bFreeTypeInitialized = false;
 #endif
 
 	// setup our text locale
@@ -71,9 +70,30 @@ CFontManager::~CFontManager()
 	ClearAllFonts();
 	m_FontAmalgams.RemoveAll();
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
-	FT_Done_FreeType( library );
+	if ( m_bFreeTypeInitialized && library )
+		FT_Done_FreeType( library );
 #endif
 }
+
+#if defined(LINUX) || defined(OSX) || defined(_WIN32)
+void CFontManager::EnsureFreeTypeInitialized()
+{
+	if ( m_bFreeTypeInitialized )
+		return;
+
+	FT_Error error = FT_Init_FreeType( &library );
+	if ( error )
+		Error( "Unable to initalize freetype library, is it installed?" );
+
+	m_bFreeTypeInitialized = true;
+}
+
+FT_Library CFontManager::GetFontLibraryHandle()
+{
+	EnsureFreeTypeInitialized();
+	return library;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: frees the fonts
@@ -714,4 +734,3 @@ void CFontManager::Validate( CValidator &validator, char *pchName )
 	validator.Pop();
 }
 #endif // DBGFLAG_VALIDATE
-

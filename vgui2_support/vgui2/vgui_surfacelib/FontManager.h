@@ -64,7 +64,7 @@ public:
 	bool IsBitmapFont(HFont font );
 
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
-	FT_Library GetFontLibraryHandle() { return library; }
+	FT_Library GetFontLibraryHandle();
 	void SetFontDataHelper( FontDataHelper helper ) { m_pFontDataHelper = helper; }
 #endif
 
@@ -93,8 +93,10 @@ private:
 	CUtlVector<font_t *> m_Win32Fonts;
 
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
+	void EnsureFreeTypeInitialized();
 	FT_Library library; 
 	FontDataHelper m_pFontDataHelper;
+	bool m_bFreeTypeInitialized;
 #endif
 	char m_szLanguage[64];
 
