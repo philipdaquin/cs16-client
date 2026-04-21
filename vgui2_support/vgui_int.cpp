@@ -22,6 +22,7 @@ extern BaseUISurface *staticSurface;
 void VGuiWrap2_Startup();
 void VGuiWrap2_Shutdown();
 void VGuiWrap2_Paint();
+extern "C" void EXPORT VGui_Startup(int width, int height);
 namespace vgui2 {
 
 vguiapi_t *g_api;
@@ -31,7 +32,7 @@ IBaseUI *staticUIFuncs;
 extern cl_enginefunc_t gEngfuncs;
 extern vgui2::IInputInternal *g_pInputInternal;
 
-void VGui_Startup(int width, int height) {
+static void VGui_StartupImpl(int width, int height) {
 	if (gEngfuncs.Con_Printf)
 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_Startup width=%d height=%d\n", width, height);
 	if (gEngfuncs.pfnGetGameDirectory == NULL) {
@@ -156,12 +157,12 @@ void VGUI_MouseMove(int x, int y) {
 
 extern "C" void EXPORT InitAPI(vguiapi_t * api) {
 	if (gEngfuncs.Con_Printf)
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitAPI api=%p\n", (void *)api);
-	g_api = api;
-	g_api->Startup = VGui_Startup;
-	g_api->Shutdown = VGui_Shutdown;
-	g_api->GetPanel = VGui_GetPanel;
-	g_api->Paint = VGui_Paint;
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitAPI api=%p\n", (void *)api);
+		g_api = api;
+		g_api->Startup = VGui_Startup;
+		g_api->Shutdown = VGui_Shutdown;
+		g_api->GetPanel = VGui_GetPanel;
+		g_api->Paint = VGui_Paint;
 	g_api->Mouse = VGUI_Mouse;
 	g_api->Key = VGUI_Key;
 	g_api->MouseMove = VGUI_MouseMove;
@@ -181,10 +182,11 @@ extern "C" void EXPORT InitVGUISupportAPI(vguiapi_t *api)
         void *func;
     } dllexport_t;
 
-    static dllexport_t switch_vgui_exports[] = {
-            { "InitAPI", (void*)InitAPI },
-            { NULL, NULL }
-    };
+	static dllexport_t switch_vgui_exports[] = {
+			{ "InitAPI", (void*)InitAPI },
+			{ "VGui_Startup", (void*)::VGui_Startup },
+			{ NULL, NULL }
+	};
 
     extern "C" int dll_register( const char *name, dllexport_t *exports );
 
@@ -194,6 +196,11 @@ extern "C" void EXPORT InitVGUISupportAPI(vguiapi_t *api)
     }
 #endif
 
+}
+
+extern "C" void EXPORT VGui_Startup(int width, int height)
+{
+	vgui2::VGui_StartupImpl( width, height );
 }
 
 extern "C" vgui2::ISurface *g_pVGuiSurface = nullptr;

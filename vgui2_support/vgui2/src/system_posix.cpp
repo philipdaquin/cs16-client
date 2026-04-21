@@ -28,6 +28,22 @@
 #include "vgui_key_translation.h"
 #include "filesystem.h"
 
+// Some wasm/client link paths do not export the platform command line symbol.
+// Return an empty command line in that case so command-line probes degrade
+// safely instead of aborting the whole startup sequence.
+const tchar *Plat_GetCommandLine() __attribute__((weak));
+const tchar *Plat_GetCommandLine()
+{
+	static const tchar kEmptyCmdLine[] = "";
+	return kEmptyCmdLine;
+}
+
+const char *Plat_GetCommandLineA() __attribute__((weak));
+const char *Plat_GetCommandLineA()
+{
+	return "";
+}
+
 #if defined(OSX) && !defined(IOS)
 #include <Carbon/Carbon.h>
 #include <sys/param.h>
