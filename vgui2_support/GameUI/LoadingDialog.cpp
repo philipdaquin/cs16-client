@@ -1,6 +1,6 @@
 #include "EngineInterface.h"
 #include "LoadingDialog.h"
-#include "IGameuiFuncs.h"
+#include "IGameUIFuncs.h"
 
 #include <vgui/IInput.h>
 #include <vgui/ISurface.h>

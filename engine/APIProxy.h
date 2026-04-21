@@ -74,6 +74,7 @@ typedef void (*VGUI2_STARTUP_FUNC)( void );
 typedef int (*VGUI2_VIDINIT_FUNC)( void );
 typedef void (*VGUI2_PAINT_FUNC)( void );
 typedef int (*VGUI2_SHUTDOWN_FUNC)( void );
+typedef void (*VGUI_STARTUP_FUNC)( int width, int height );
 
 
 // Pointers to the exported client functions themselves
@@ -122,6 +123,7 @@ typedef struct
 	HUD_CHATINPUTPOSITION_FUNC			pChatInputPosition;	// Not used by all clients
 	HUD_GETPLAYERTEAM					pGetPlayerTeam; // Not used by all clients
 	CLIENTFACTORY						pClientFactory;
+	VGUI_STARTUP_FUNC					pVGuiStartup;
 	VGUI2_INITIALIZE_FUNC				pVGui2_Initialize;
 	VGUI2_STARTUP_FUNC					pVGui2_Startup;
 	VGUI2_VIDINIT_FUNC					pVGui2_VidInit;

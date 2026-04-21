@@ -38,6 +38,7 @@ extern "C" void VGui2_Startup( void );
 extern "C" int VGui2_VidInit( void );
 extern "C" void VGui2_Paint( void );
 extern "C" int VGui2_Shutdown( void );
+extern "C" void VGui_Startup( int width, int height );
 
 cl_enginefunc_t		gEngfuncs  = { };
 render_api_t		gRenderAPI = { };
@@ -226,6 +227,7 @@ void DLLEXPORT HUD_Init( void )
 	InitInput();
 	gHUD.Init();
 	// Scheme_Init();
+	// VGui2_Startup();
 }
 
 
@@ -505,6 +507,7 @@ extern "C" void DLLEXPORT F(void *pv)
 	HUD_GetPlayerTeam,
 	NULL
 	,
+	VGui_Startup,
 	VGui2_Initialize,
 	VGui2_Startup,
 	VGui2_VidInit,

@@ -57,13 +57,12 @@ set(VGUI2_SDK_MATHLIB_WASM_SOURCES
 file(GLOB VGUI2_SUPPORT_ROOT_SOURCES "../vgui2_support/*.cpp")
 file(GLOB VGUI2_SUPPORT_VGUI2_SOURCES "../vgui2_support/vgui2/src/*.cpp")
 file(GLOB VGUI2_SUPPORT_CONTROL_SOURCES "../vgui2_support/vgui_controls/*.cpp")
+file(GLOB VGUI2_SUPPORT_GAMEUI_SOURCES "../vgui2_support/GameUI/*.cpp")
 file(GLOB VGUI2_SUPPORT_DEAD_SOURCES "../vgui2_support/dead_wrapper/*.cpp")
 file(GLOB VGUI2_SUPPORT_SURFACELIB_SOURCES "../vgui2_support/vgui2/vgui_surfacelib/*.cpp")
 file(GLOB VGUI2_SUPPORT_MATSURFACE_SOURCES "../vgui2_support/vguimatsurface/*.cpp")
 file(GLOB VGUI2_SUPPORT_CSO_CONTROL_SOURCES "../vgui2_support/cso_controls/*.cpp")
 
-list(REMOVE_ITEM VGUI2_SUPPORT_ROOT_SOURCES
-	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/filesystem_xash.cpp")
 list(REMOVE_ITEM VGUI2_SUPPORT_CONTROL_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui_controls/AnalogBar.cpp")
 
@@ -86,10 +85,50 @@ set(VGUI2_SUPPORT_ALL_SOURCES
 	${VGUI2_SUPPORT_CSO_CONTROL_SOURCES})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SDK_RUNTIME_SOURCES})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SUPPORT_ALL_SOURCES})
-## Temporary disable: GameUI shell sources are kept here for easy re-enable.
-# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/BasePanel.cpp)
-# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/CvarToggleCheckButton.cpp)
-# list(APPEND CS_CLIENT_SRC ../vgui2_support/GameUI/GameUI_Interface.cpp)
+list(APPEND CS_CLIENT_SRC ${VGUI2_SUPPORT_GAMEUI_SOURCES})
+
+# The create-game dialog family still assumes the older VGUI control wiring
+# and does not build cleanly in the static wasm client yet.
+list(REMOVE_ITEM VGUI2_SUPPORT_GAMEUI_SOURCES
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameBotPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameGameplayPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameServerPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/GameConsoleDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/LogoFile.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoeLogin.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoeSettings.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoEBulletIn.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubAdvanced.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubAudio.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubButtonSettings.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubKeyboard.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubMouse.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubMultiplayer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubTouch.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubVideo.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubVoice.cpp")
+list(REMOVE_ITEM CS_CLIENT_SRC
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameBotPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameGameplayPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/CreateMultiplayerGameServerPage.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/GameConsoleDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/LogoFile.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoeLogin.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoeSettings.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/MoEBulletIn.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsDialog.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubAdvanced.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubAudio.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubButtonSettings.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubKeyboard.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubMouse.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubMultiplayer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubTouch.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubVideo.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/GameUI/OptionsSubVoice.cpp")
 
 list(APPEND CS_CLIENT_SRC ${CS_EV_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_WPN_SRC})

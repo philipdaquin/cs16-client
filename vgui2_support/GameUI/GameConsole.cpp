@@ -54,6 +54,11 @@ CGameConsole::~CGameConsole()
 //-----------------------------------------------------------------------------
 void CGameConsole::Initialize()
 {
+#ifdef XASH_STATIC_GAMELIB
+	m_bInitialized = true;
+	engine->pfnAddCommand("condump", CGameConsole::OnCmdCondump);
+	return;
+#else
 	m_pConsole = vgui2::SETUP_PANEL( new CGameConsoleDialog() ); // we add text before displaying this so set it up now!
 		int swide, stall;
 	//m_pConsole->SetParent(g_pTaskbar->GetVPanel());
@@ -66,6 +71,7 @@ void CGameConsole::Initialize()
 	m_bInitialized = true;
 
 	engine->pfnAddCommand("condump", CGameConsole::OnCmdCondump);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -76,11 +82,15 @@ void CGameConsole::Activate()
 	if (!m_bInitialized)
 		return;
 
+#ifdef XASH_STATIC_GAMELIB
+	return;
+#else
 	if ( LoadingDialog() )
 		return;
 
 	vgui2::surface()->RestrictPaintToSinglePanel(NULL);
 	m_pConsole->Activate();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +101,9 @@ void CGameConsole::Hide()
 	if (!m_bInitialized)
 		return;
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->Hide();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +114,9 @@ void CGameConsole::Clear()
 	if (!m_bInitialized)
 		return;
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->Clear();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -121,7 +135,11 @@ void CGameConsole::Printf(const char *format, ...)
 	msg[sizeof(msg) - 1] = 0;
 	va_end(argptr);
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->Print(msg);
+#else
+	engine->Con_Printf("%s", msg);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -140,7 +158,11 @@ void CGameConsole::DPrintf(const char *format, ...)
 	msg[sizeof(msg) - 1] = 0;
 	va_end(argptr);
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->DPrint(msg);
+#else
+	engine->Con_DPrintf("%s", msg);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -151,7 +173,11 @@ bool CGameConsole::IsConsoleVisible()
 	if (!m_bInitialized)
 		return false;
 	
+#ifdef XASH_STATIC_GAMELIB
+	return false;
+#else
 	return m_pConsole->IsVisible();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -162,7 +188,9 @@ void CGameConsole::ActivateDelayed(float time)
 	if (!m_bInitialized)
 		return;
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->PostMessage(m_pConsole, new KeyValues("Activate"), time);
+#endif
 }
 
 void CGameConsole::SetParent( uintp parent )
@@ -170,7 +198,9 @@ void CGameConsole::SetParent( uintp parent )
 	if (!m_bInitialized)
 		return;
 
+#ifndef XASH_STATIC_GAMELIB
 	m_pConsole->SetParent( static_cast<vgui2::VPANEL>( parent ));
+#endif
 }
 
 //-----------------------------------------------------------------------------

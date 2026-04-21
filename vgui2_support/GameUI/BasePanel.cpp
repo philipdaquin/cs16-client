@@ -31,7 +31,9 @@
 #include "LoadingDialog.h"
 #include "BackgroundMenuButton.h"
 #include "OptionsDialog.h"
+#ifndef XASH_STATIC_GAMELIB
 #include "CreateMultiplayerGameDialog.h"
+#endif
 #include "MoeSettings.h"
 
 #ifndef __EMSCRIPTEN__
@@ -423,14 +425,20 @@ CBasePanel::~CBasePanel(void)
 
 void CBasePanel::PaintBackground(void)
 {
+#ifndef XASH_STATIC_GAMELIB
 	if (!m_hOptionsDialog.Get())
 	{
 		m_hOptionsDialog = new COptionsDialog(this);
+#ifndef XASH_STATIC_GAMELIB
 		m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
 
 		PositionDialog(m_hOptionsDialog);
 		PositionDialog(m_hCreateMultiplayerGameDialog);
+#else
+		PositionDialog(m_hOptionsDialog);
+#endif
 	}
+#endif
 
 	if (!GameUI().IsInLevel() || g_hLoadingDialog.Get())
 	{
@@ -1112,6 +1120,9 @@ void CBasePanel::OnOpenServerBrowser(void)
 
 void CBasePanel::OnOpenOptionsDialog(void)
 {
+#ifdef XASH_STATIC_GAMELIB
+	return;
+#else
 	if (!m_hOptionsDialog.Get())
 	{
 		m_hOptionsDialog = new COptionsDialog(this);
@@ -1119,10 +1130,15 @@ void CBasePanel::OnOpenOptionsDialog(void)
 	}
 
 	m_hOptionsDialog->Activate();
+#endif
 }
 
 void CBasePanel::OnOpenCreateMultiplayerGameDialog(void)
 {
+#ifdef XASH_STATIC_GAMELIB
+	// The static wasm build does not ship the create-game dialog family yet.
+	return;
+#else
 	if (!m_hCreateMultiplayerGameDialog.Get())
 	{
 		m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
@@ -1130,10 +1146,14 @@ void CBasePanel::OnOpenCreateMultiplayerGameDialog(void)
 	}
 
 	m_hCreateMultiplayerGameDialog->Activate();
+#endif
 }
 
 void CBasePanel::OnOpenMoeSettings(void)
 {
+#ifdef XASH_STATIC_GAMELIB
+	return;
+#else
 	if (!m_hMoeSettings.Get())
 	{
 		m_hMoeSettings = new CMoeSettings(this);
@@ -1141,10 +1161,14 @@ void CBasePanel::OnOpenMoeSettings(void)
 	}
 
 	m_hMoeSettings->Activate();
+#endif
 }
 
 void CBasePanel::OnOpenMoeLogin(void)
 {
+#ifdef XASH_STATIC_GAMELIB
+	return;
+#else
 	if (!m_hMoeLogin.Get())
 	{
 		m_hMoeLogin = new MoeLogIn();
@@ -1152,15 +1176,20 @@ void CBasePanel::OnOpenMoeLogin(void)
 	}
 
 	m_hMoeLogin->Activate();
+#endif
 }
 void CBasePanel::OpenCSBTEBulletin(void)
 {
+#ifdef XASH_STATIC_GAMELIB
+	return;
+#else
 	if (!m_hCSBteBulletIn.Get())
 	{
 		PositionDialog(m_hCSBteBulletIn);
 	}
 
 	m_hCSBteBulletIn->Activate();
+#endif
 }
 
 void CBasePanel::PositionDialog(vgui2::PHandle dlg)
