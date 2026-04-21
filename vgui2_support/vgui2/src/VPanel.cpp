@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <vgui/IClientPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/Controls.h>
@@ -8,6 +10,8 @@ namespace vgui2
 {
 	VPanel::VPanel()
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::VPanel this=%p popup=%d parent=%p client=%p listEntry=%u\n",
+			(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
 	}
 
 	VPanel::~VPanel()
@@ -16,7 +20,11 @@ namespace vgui2
 
 	void VPanel::Init(IClientPanel* attachedClientPanel)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init this=%p attachedClientPanel=%p oldClient=%p popup=%d parent=%p listEntry=%u\n",
+			(void *)this, (void *)attachedClientPanel, (void *)_clientPanel, _popup, (void *)_parent, _listEntry);
 		_clientPanel = attachedClientPanel;
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init after this=%p client=%p\n",
+			(void *)this, (void *)_clientPanel);
 	}
 
 	SurfacePlat* VPanel::Plat()
@@ -31,21 +39,29 @@ namespace vgui2
 
 	HPanelList VPanel::GetListEntry()
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetListEntry this=%p listEntry=%u\n",
+			(void *)this, _listEntry);
 		return _listEntry;
 	}
 
 	void VPanel::SetListEntry(HPanelList listEntry)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetListEntry this=%p old=%u new=%u\n",
+			(void *)this, _listEntry, listEntry);
 		_listEntry = listEntry;
 	}
 
 	bool VPanel::IsPopup()
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::IsPopup this=%p popup=%d parent=%p client=%p listEntry=%u\n",
+			(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
 		return _popup;
 	}
 
 	void VPanel::SetPopup(bool state)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPopup this=%p old=%d new=%d parent=%p client=%p\n",
+			(void *)this, _popup, state, (void *)_parent, (void *)_clientPanel);
 		_popup = state;
 	}
 
@@ -61,6 +77,8 @@ namespace vgui2
 
 	void VPanel::SetPos(int x, int y)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPos this=%p x=%d y=%d\n",
+			(void *)this, x, y);
 		_pos[0] = x;
 		_pos[1] = y;
 	}
@@ -73,6 +91,8 @@ namespace vgui2
 
 	void VPanel::SetSize(int wide, int tall)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize this=%p wide=%d tall=%d client=%p\n",
+			(void *)this, wide, tall, (void *)_clientPanel);
 		if (wide < _minimumSize[0])
 			wide = _minimumSize[0];
 
@@ -212,6 +232,8 @@ namespace vgui2
 
 	void VPanel::Solve()
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Solve enter this=%p parent=%p popup=%d embedded=%p\n",
+			(void *)this, (void *)_parent, _popup, (void *)vgui2::surface()->GetEmbeddedPanel());
 		_absPos[0] = _pos[0];
 		_absPos[1] = _pos[1];
 
@@ -274,6 +296,8 @@ namespace vgui2
 
 	void VPanel::SetVisible(bool state)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetVisible this=%p state=%d popup=%d parent=%p\n",
+			(void *)this, state, _popup, (void *)_parent);
 		if (_visible != state)
 		{
 			vgui2::surface()->SetPanelVisible(reinterpret_cast<VPANEL>(this), state);
@@ -302,6 +326,8 @@ namespace vgui2
 
 	void VPanel::SetParent(VPanel* newParent)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent enter this=%p newParent=%p oldParent=%p client=%p popup=%d listEntry=%u\n",
+			(void *)this, (void *)newParent, (void *)_parent, (void *)_clientPanel, _popup, _listEntry);
 		if (this == newParent ||
 			_parent == newParent)
 			return;
@@ -328,6 +354,8 @@ namespace vgui2
 				_parent->Client()->OnChildAdded(reinterpret_cast<VPANEL>(this));
 			}
 		}
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent exit this=%p parent=%p childCount=%d\n",
+			(void *)this, (void *)_parent, _parent ? _parent->GetChildCount() : -1);
 	}
 
 	int VPanel::GetChildCount()
@@ -345,6 +373,8 @@ namespace vgui2
 
 	VPanel* VPanel::GetParent()
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetParent this=%p parent=%p\n",
+			(void *)this, (void *)_parent);
 		return _parent;
 	}
 

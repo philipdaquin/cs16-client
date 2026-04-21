@@ -142,7 +142,11 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize before VGuiControls_Init factories=%p count=%d\n",
 		(void *)m_FactoryList[0], m_iNumFactories);
-	vgui2::VGuiControls_Init("BaseUI", m_FactoryList, m_iNumFactories);
+	if (!vgui2::VGuiControls_Init("BaseUI", m_FactoryList, m_iNumFactories))
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize failed: VGuiControls_Init returned false\n");
+		return;
+	}
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize after VGuiControls_Init staticSurface=%p staticClient=%p\n",
 		(void *)staticSurface, (void *)staticClient);
 
@@ -201,68 +205,73 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	//gClDllFuncs.pfnInitialize(&gEngfuncs, CLDLL_INTERFACE_VERSION);
 }
 
-void CBaseUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start this=%p engineFuncs=%p interfaceVersion=%d staticClient=%p surface=%p viewport=%p\n",
-		this, (void *)engineFuncs, interfaceVersion, (void *)staticClient, (void *)staticSurface, (void *)g_pViewport);
-	staticPanel = new CStaticPanel();
-	VPANEL staticPanelVPanel = staticPanel ? staticPanel->GetVPanel() : 0;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start staticPanel=%p vpanel=%p\n", (void *)staticPanel, (void *)(uintptr_t)staticPanelVPanel);
+	void CBaseUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) {
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start this=%p engineFuncs=%p interfaceVersion=%d staticClient=%p surface=%p viewport=%p\n",
+			this, (void *)engineFuncs, interfaceVersion, (void *)staticClient, (void *)staticSurface, (void *)g_pViewport);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start pre-panel ivgui=%p ipanel=%p surface=%p\n",
+			(void *)vgui2::ivgui(), (void *)vgui2::ipanel(), (void *)vgui2::surface());
+	#ifdef XASH_STATIC_GAMELIB
+		staticSurface = BaseUISurfaceSingleton();
+	#else
+		staticSurface = (BaseUISurface *)m_FactoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
+	#endif
+		g_pVGui = vgui2::ivgui();
+		g_pVGuiSystem = vgui2::system();
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface=%p ivgui=%p system=%p\n",
+			(void *)staticSurface, (void *)g_pVGui, (void *)g_pVGuiSystem);
+		IHTMLChromeController *chromeController = nullptr;
+		if(m_FactoryList[3])
+			chromeController = (IHTMLChromeController *)m_FactoryList[3](HTML_CHROME_CONTROLLER_INTERFACE_VERSION, NULL);
+		vgui2::ivgui()->Start();
+		vgui2::ivgui()->SetSleep(false);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start ivgui started staticSurface=%p viewport=%p\n",
+			(void *)staticSurface, (void *)g_pViewport);
+
+		staticPanel = new CStaticPanel();
+		VPANEL staticPanelVPanel = staticPanel ? staticPanel->GetVPanel() : 0;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start staticPanel=%p vpanel=%p\n", (void *)staticPanel, (void *)(uintptr_t)staticPanelVPanel);
 		g_pVGuiPanel = g_pPanelInterface;
-	staticPanel->SetCursor(vgui2::dc_none);
+		staticPanel->SetCursor(vgui2::dc_none);
 
-	{
-		const auto color = staticPanel->GetBgColor();
+		{
+			const auto color = staticPanel->GetBgColor();
 
-		//Set alpha to maximum.
-		staticPanel->SetBgColor(Color(color.r(), color.g(), color.b(), 0xFF));
-	}
+			//Set alpha to maximum.
+			staticPanel->SetBgColor(Color(color.r(), color.g(), color.b(), 0xFF));
+		}
 
-	//staticPanel->SetBounds(0, 0, 40, 30);
+		//staticPanel->SetBounds(0, 0, 40, 30);
 
-	staticPanel->SetPaintBorderEnabled(false);
-	staticPanel->SetPaintBackgroundEnabled(false);
-	staticPanel->SetPaintEnabled(false);
+		staticPanel->SetPaintBorderEnabled(false);
+		staticPanel->SetPaintBackgroundEnabled(false);
+		staticPanel->SetPaintEnabled(false);
 
-	staticPanel->SetCursor(vgui2::dc_none);
-	staticPanel->SetVisible(true);
-	staticPanel->SetZPos(0);
+		staticPanel->SetCursor(vgui2::dc_none);
+		staticPanel->SetVisible(true);
+		staticPanel->SetZPos(0);
 
-#ifdef XASH_STATIC_GAMELIB
-	staticSurface = BaseUISurfaceSingleton();
-#else
-	staticSurface = (BaseUISurface *)m_FactoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
-#endif
-	g_pVGui = vgui2::ivgui();
-	g_pVGuiSystem = vgui2::system();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface=%p ivgui=%p system=%p\n",
-		(void *)staticSurface, (void *)g_pVGui, (void *)g_pVGuiSystem);
-	IHTMLChromeController *chromeController = nullptr;
-	if(m_FactoryList[3])
-		chromeController = (IHTMLChromeController *)m_FactoryList[3](HTML_CHROME_CONTROLLER_INTERFACE_VERSION, NULL);
-	staticSurface->Init(staticPanel->GetVPanel(), chromeController);
-	g_pVGuiSurface = staticSurface;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface init embedded=%p\n",
-		(void *)staticSurface->GetEmbeddedPanel());
-	staticSurface->SetLanguage("schinese");
-	staticSurface->IgnoreMouseVisibility(true);
+		staticSurface->Init(staticPanel->GetVPanel(), chromeController);
+		g_pVGuiSurface = staticSurface;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface init embedded=%p\n",
+			(void *)staticSurface->GetEmbeddedPanel());
+		staticSurface->SetLanguage("schinese");
+		staticSurface->IgnoreMouseVisibility(true);
 
-	vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/tracker_%language%.txt");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
+			// Old path:
+			vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
+			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/tracker_%language%.txt");
+			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
+			// vgui2::scheme()->LoadSchemeFromFile("valve/resource/TrackerScheme.res", "BaseUI");
+			// vgui2::localize()->AddFile(vgui2::filesystem(), "valve/resource/valve_%language%.txt");
 
-	const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
+		const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
 
-	if (strcmp(szGameDir, "valve")) {
-		char szModLocalizeFile[_MAX_PATH];
-		snprintf(szModLocalizeFile, _MAX_PATH, "resource/%s_%%language%%.txt", szGameDir);
-	}
+		if (strcmp(szGameDir, "valve")) {
+			char szModLocalizeFile[_MAX_PATH];
+			snprintf(szModLocalizeFile, _MAX_PATH, "resource/%s_%%language%%.txt", szGameDir);
+		}
 
-	vgui2::ivgui()->Start();
-	vgui2::ivgui()->SetSleep(false);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start ivgui started staticSurface=%p viewport=%p\n",
-		(void *)staticSurface, (void *)g_pViewport);
-
-	staticClientDLLPanel = new CEnginePanel(staticPanel, "BaseClientPanel");
+		staticClientDLLPanel = new CEnginePanel(staticPanel, "BaseClientPanel");
 
 	{
 		Color color = staticClientDLLPanel->GetBgColor();

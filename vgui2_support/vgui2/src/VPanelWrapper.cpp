@@ -15,12 +15,15 @@ static VPanelWrapper g_PanelWrapper;
 
 vgui2::IPanel *VPanelInterfaceSingleton()
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelInterfaceSingleton wrapper=%p\n", (void *)&g_PanelWrapper);
 	return &g_PanelWrapper;
 }
 
 
 void VPanelWrapper::Init(vgui2::VPANEL vguiPanel, vgui2::IClientPanel *panel)
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Init vguiPanel=%p panel=%p\n",
+		(void *)vguiPanel, (void *)panel);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->Init(panel);
 }
 
@@ -36,6 +39,8 @@ void VPanelWrapper::GetPos(vgui2::VPANEL vguiPanel, int &x, int &y)
 
 void VPanelWrapper::SetSize(vgui2::VPANEL vguiPanel, int wide, int tall)
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetSize vguiPanel=%p wide=%d tall=%d\n",
+		(void *)vguiPanel, wide, tall);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetSize(wide, tall);
 }
 
@@ -96,6 +101,8 @@ bool VPanelWrapper::IsVisible(vgui2::VPANEL vguiPanel)
 
 void VPanelWrapper::SetParent(vgui2::VPANEL vguiPanel, vgui2::VPANEL newParent)
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetParent vguiPanel=%p newParent=%p\n",
+		(void *)vguiPanel, (void *)newParent);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetParent(reinterpret_cast<vgui2::VPanel*>(newParent));
 }
 
@@ -134,11 +141,15 @@ bool VPanelWrapper::HasParent(vgui2::VPANEL vguiPanel, vgui2::VPANEL potentialPa
 
 bool VPanelWrapper::IsPopup(vgui2::VPANEL vguiPanel)
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsPopup vguiPanel=%p\n",
+		(void *)vguiPanel);
 	return reinterpret_cast<vgui2::VPanel*>(vguiPanel)->IsPopup();
 }
 
 void VPanelWrapper::SetPopup(vgui2::VPANEL vguiPanel, bool state)
 {
+	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetPopup vguiPanel=%p state=%d\n",
+		(void *)vguiPanel, state);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetPopup(state);
 }
 

@@ -99,6 +99,7 @@ inline std::basic_string<uchar32> UnicodeToUTF32(std::wstring in) {
 
 BaseUISurface::BaseUISurface() {
 	_restrictedPanel = 0;
+	_embeddedPanel = 0;
 	m_hCurrentFont = 0;
 	_cursorLocked = 0;
 	m_iCurrentTexture = 0;
@@ -127,7 +128,11 @@ BaseUISurface::~BaseUISurface() {
 }
 
 void BaseUISurface::Init(vgui2::VPANEL embeddedPanel, IHTMLChromeController *pChromeController) {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::Init embeddedPanel=%p currentEmbedded=%p chrome=%p\n",
+        (void *)embeddedPanel, (void *)GetEmbeddedPanel(), (void *)pChromeController);
 	SetEmbeddedPanel(embeddedPanel);
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::Init after SetEmbeddedPanel embedded=%p\n",
+        (void *)GetEmbeddedPanel());
 
     AddCustomFontFile( "resource/marlett.ttf" );
 #ifndef DISABLE_MOE_VGUI2_EXT
@@ -166,10 +171,14 @@ void BaseUISurface::RunFrame() {
 }
 
 vgui2::VPANEL BaseUISurface::GetEmbeddedPanel() {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::GetEmbeddedPanel this=%p embedded=%p\n",
+        (void *)this, (void *)_embeddedPanel);
 	return _embeddedPanel;
 }
 
 void BaseUISurface::SetEmbeddedPanel(vgui2::VPANEL panel) {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetEmbeddedPanel this=%p old=%p new=%p\n",
+        (void *)this, (void *)_embeddedPanel, (void *)panel);
 	_embeddedPanel = panel;
 }
 
@@ -675,6 +684,13 @@ void BaseUISurface::SetAsToolBar(vgui2::VPANEL, bool) {
 }
 
 void BaseUISurface::CreatePopup(vgui2::VPANEL panel, bool minimised, bool showTaskbarIcon, bool disabled, bool mouseInput, bool kbInput) {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::CreatePopup enter panel=%p embedded=%p parent=%p popup=%d mouse=%d kb=%d\n",
+        (void *)panel,
+        (void *)GetEmbeddedPanel(),
+        (void *)vgui2::ipanel()->GetParent(panel),
+        vgui2::ipanel()->IsPopup(panel),
+        mouseInput,
+        kbInput);
 	if (!vgui2::ipanel()->GetParent(panel)) {
 		vgui2::ipanel()->SetParent(panel, GetEmbeddedPanel());
 	}
@@ -682,6 +698,10 @@ void BaseUISurface::CreatePopup(vgui2::VPANEL panel, bool minimised, bool showTa
 	vgui2::ipanel()->SetPopup(panel, true);
 	vgui2::ipanel()->SetKeyBoardInputEnabled(panel, kbInput);
 	vgui2::ipanel()->SetMouseInputEnabled(panel, mouseInput);
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::CreatePopup after setup panel=%p parent=%p popup=%d\n",
+        (void *)panel,
+        (void *)vgui2::ipanel()->GetParent(panel),
+        vgui2::ipanel()->IsPopup(panel));
 
 	// TODO: implement vgui2::Dar
     std::vector<vgui2::VPANEL>::iterator it = std::find(staticPopupList.begin(), staticPopupList.end(), panel);
@@ -866,12 +886,23 @@ bool BaseUISurface::RecreateContext(vgui2::VPANEL) {
 }
 
 void BaseUISurface::AddPanel(vgui2::VPANEL panel) {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::AddPanel panel=%p embedded=%p popup=%d parent=%p client=%p\n",
+        (void *)panel,
+        (void *)GetEmbeddedPanel(),
+        vgui2::ipanel()->IsPopup(panel),
+        (void *)vgui2::ipanel()->GetParent(panel),
+        (void *)vgui2::ipanel()->Client(panel));
 	if (vgui2::ipanel()->IsPopup(panel)) {
 		CreatePopup(panel, false, false, false, true, true);
 	}
 }
 
 void BaseUISurface::ReleasePanel(vgui2::VPANEL panel) {
+    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::ReleasePanel panel=%p embedded=%p popup=%d parent=%p\n",
+        (void *)panel,
+        (void *)GetEmbeddedPanel(),
+        vgui2::ipanel()->IsPopup(panel),
+        (void *)vgui2::ipanel()->GetParent(panel));
 	// TODO: implement vgui2::Dar
 	std::vector<vgui2::VPANEL>::iterator it = std::find(staticPopupList.begin(), staticPopupList.end(), panel);
 
@@ -1472,21 +1503,25 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
             }
         }
 
-        if ( !buffer )
-        {
-            Msg( "Failed to load custom font file '%s'\n", fontFileName );
-            return NULL;
-        }
+	        if ( !buffer )
+	        {
+	            // Old path:
+	            // Msg( "Failed to load custom font file '%s'\n", fontFileName );
+	            gEngfuncs.Con_Printf("[VGUI2-TRACE] Failed to load custom font file '%s'\n", fontFileName);
+	            return NULL;
+	        }
 
         FT_Face face;
         const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
 
-        if ( error  )
-        {
-            // FT_Err_Unknown_File_Format, etc.
-            Msg( "ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName );
+	        if ( error  )
+	        {
+	            // FT_Err_Unknown_File_Format, etc.
+	            // Old path:
+	            // Msg( "ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName );
+	            gEngfuncs.Con_Printf("[VGUI2-TRACE] ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName);
 
-            free(buffer);
+	            free(buffer);
 
             return NULL;
         }

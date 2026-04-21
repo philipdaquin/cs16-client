@@ -70,6 +70,8 @@ extern "C" void DLLEXPORT VGui2_Startup()
     gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Startup();
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Startup exit staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
 }
 
 extern "C" int DLLEXPORT VGui2_VidInit()

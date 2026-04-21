@@ -579,6 +579,7 @@ DECLARE_BUILD_FACTORY( Panel );
 //-----------------------------------------------------------------------------
 Panel::Panel()
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel() this=%p\n", (void *)this);
 	Init(0, 0, 64, 24);
 }
 
@@ -587,6 +588,7 @@ Panel::Panel()
 //-----------------------------------------------------------------------------
 Panel::Panel(Panel *parent)
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent) this=%p parent=%p\n", (void *)this, (void *)parent);
 	Init(0, 0, 64, 24);
 	SetParent(parent);
 }
@@ -596,6 +598,8 @@ Panel::Panel(Panel *parent)
 //-----------------------------------------------------------------------------
 Panel::Panel(Panel *parent, const char *panelName)
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent,name) this=%p parent=%p name=%s\n",
+		(void *)this, (void *)parent, panelName ? panelName : "(null)");
 	Init(0, 0, 64, 24);
 	SetName(panelName);
 	SetParent(parent);
@@ -607,6 +611,8 @@ Panel::Panel(Panel *parent, const char *panelName)
 //-----------------------------------------------------------------------------
 Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent,name,scheme) this=%p parent=%p name=%s scheme=%lu\n",
+		(void *)this, (void *)parent, panelName ? panelName : "(null)", (unsigned long)scheme);
 	Init(0, 0, 64, 24);
 	SetName(panelName);
 	SetParent(parent);
@@ -619,11 +625,33 @@ Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 //-----------------------------------------------------------------------------
 void Panel::Init( int x, int y, int wide, int tall )
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Init this=%p x=%d y=%d wide=%d tall=%d vpanel(before)=%p\n",
+		(void *)this, x, y, wide, tall, (void *)_vpanel);
 	_panelName = NULL;
 
 	// get ourselves an internal panel
 	_vpanel = ivgui()->AllocPanel();
-	ipanel()->Init(_vpanel, this);
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Init after AllocPanel this=%p vpanel=%p\n",
+		(void *)this, (void *)_vpanel);
+	auto panelInterface = ipanel();
+	fprintf(stderr, "[VGUI2-TRACE] Panel::Init before ipanel->Init this=%p vpanel=%p ipanel=%p\n",
+		(void *)this, (void *)_vpanel, (void *)panelInterface);
+	if (panelInterface)
+	{
+		// Old path:
+		// ipanel()->Init(_vpanel, this);
+		panelInterface->Init(_vpanel, this);
+		fprintf(stderr, "[VGUI2-TRACE] Panel::Init after ipanel->Init this=%p vpanel=%p\n",
+			(void *)this, (void *)_vpanel);
+	}
+	else
+	{
+		fprintf(stderr, "[VGUI2-TRACE] Panel::Init skipped ipanel->Init because ipanel is null this=%p vpanel=%p\n",
+			(void *)this, (void *)_vpanel);
+		// Without ipanel, SetPos/SetSize would dereference a null interface.
+		// Keep the panel object alive, but stop bootstrap here until the interface exists.
+		return;
+	}
 
 	SetPos(x, y);
 	SetSize(wide, tall);
@@ -808,6 +836,8 @@ void Panel::GetPos(int &x, int &y)
 //-----------------------------------------------------------------------------
 void Panel::SetSize(int wide, int tall)
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::SetSize this=%p wide=%d tall=%d vpanel=%p\n",
+		(void *)this, wide, tall, (void *)GetVPanel());
 	Assert( abs(wide) < 32768 && abs(tall) < 32768 );
 	ipanel()->SetSize(GetVPanel(), wide, tall);
 }
@@ -1283,6 +1313,8 @@ void Panel::OnChildAdded(VPANEL child)
 //-----------------------------------------------------------------------------
 void Panel::OnSizeChanged(int newWide, int newTall)
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::OnSizeChanged this=%p newWide=%d newTall=%d vpanel=%p\n",
+		(void *)this, newWide, newTall, (void *)GetVPanel());
 	InvalidateLayout(); // our size changed so force us to layout again
 }
 
