@@ -257,12 +257,9 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 		staticSurface->SetLanguage("schinese");
 		staticSurface->IgnoreMouseVisibility(true);
 
-			// Old path:
 			vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/tracker_%language%.txt");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
-			// vgui2::scheme()->LoadSchemeFromFile("valve/resource/TrackerScheme.res", "BaseUI");
-			// vgui2::localize()->AddFile(vgui2::filesystem(), "valve/resource/valve_%language%.txt");
 
 		const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
 
