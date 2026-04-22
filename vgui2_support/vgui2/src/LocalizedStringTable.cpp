@@ -24,6 +24,193 @@ static LessCtx_t g_LessCtx;
 
 static CLocalizedStringTable g_StringTable;
 
+static bool IsValidUTF32CodePoint( uchar32 uVal )
+{
+	return uVal <= 0x10ffffu && !( uVal >= 0xd800u && uVal <= 0xdfffu );
+}
+
+static int DecodeUTF8CodePoint( const char *pUTF8, uchar32 &uValueOut, bool &bErrorOut )
+{
+	const unsigned char *s = reinterpret_cast<const unsigned char *>( pUTF8 );
+	uValueOut = 0;
+	bErrorOut = false;
+
+	if( !s || !*s )
+		return 0;
+
+	unsigned char c0 = s[0];
+	if( c0 < 0x80 )
+	{
+		uValueOut = c0;
+		return 1;
+	}
+
+	uchar32 uValue = 0;
+	int nBytes = 0;
+	uchar32 uMinValue = 0;
+
+	if( ( c0 & 0xe0 ) == 0xc0 )
+	{
+		uValue = c0 & 0x1f;
+		nBytes = 2;
+		uMinValue = 0x80;
+	}
+	else if( ( c0 & 0xf0 ) == 0xe0 )
+	{
+		uValue = c0 & 0x0f;
+		nBytes = 3;
+		uMinValue = 0x800;
+	}
+	else if( ( c0 & 0xf8 ) == 0xf0 )
+	{
+		uValue = c0 & 0x07;
+		nBytes = 4;
+		uMinValue = 0x10000;
+	}
+	else
+	{
+		bErrorOut = true;
+		uValueOut = c0;
+		return 1;
+	}
+
+	for( int i = 1; i < nBytes; ++i )
+	{
+		unsigned char c = s[i];
+		if( !c || ( c & 0xc0 ) != 0x80 )
+		{
+			bErrorOut = true;
+			uValueOut = c0;
+			return 1;
+		}
+
+		uValue = ( uValue << 6 ) | ( c & 0x3f );
+	}
+
+	if( uValue < uMinValue || !IsValidUTF32CodePoint( uValue ) )
+	{
+		bErrorOut = true;
+		uValueOut = uValue;
+		return nBytes;
+	}
+
+	uValueOut = uValue;
+	return nBytes;
+}
+
+#if defined(__EMSCRIPTEN__)
+__attribute__((weak))
+#endif
+int Q_UTF8ToUChar32( const char *pUTF8_, uchar32 &uValueOut, bool &bErrorOut )
+{
+	return DecodeUTF8CodePoint( pUTF8_, uValueOut, bErrorOut );
+}
+
+#if defined(__EMSCRIPTEN__)
+__attribute__((weak))
+#endif
+int Q_UTF8ToUTF32( const char *pUTF8, uchar32 *pUTF32, int cubDestSizeInBytes, EStringConvertErrorPolicy ePolicy )
+{
+	if( !pUTF8 )
+		pUTF8 = "";
+
+	const int outCount = cubDestSizeInBytes > 0 ? cubDestSizeInBytes / (int)sizeof( uchar32 ) : 0;
+	if( !pUTF32 || outCount <= 0 )
+	{
+		int required = 1;
+		while( *pUTF8 )
+		{
+			uchar32 uVal = 0;
+			bool bErr = false;
+			int consumed = DecodeUTF8CodePoint( pUTF8, uVal, bErr );
+			if( consumed <= 0 )
+				break;
+			pUTF8 += consumed;
+			++required;
+		}
+		return required * (int)sizeof( uchar32 );
+	}
+
+	int out = 0;
+	const int maxOut = outCount - 1;
+	while( *pUTF8 && out < maxOut )
+	{
+		uchar32 uVal = 0;
+		bool bErr = false;
+		int consumed = DecodeUTF8CodePoint( pUTF8, uVal, bErr );
+		if( consumed <= 0 )
+			break;
+		pUTF8 += consumed;
+
+		if( bErr )
+		{
+			if( ePolicy & _STRINGCONVERTFLAG_FAIL )
+			{
+				pUTF32[0] = 0;
+				return 0;
+			}
+
+			if( ePolicy & _STRINGCONVERTFLAG_SKIP )
+				continue;
+
+			uVal = '?';
+		}
+
+		pUTF32[out++] = uVal;
+	}
+
+	pUTF32[out] = 0;
+	return (out + 1) * (int)sizeof( uchar32 );
+}
+
+#if defined(__EMSCRIPTEN__)
+__attribute__((weak))
+#endif
+int Q_UTF32ToUTF32( const wchar_t *pUTF32Source, uchar32 *pUTF32Dest, int cubDestSizeInBytes, EStringConvertErrorPolicy ePolicy )
+{
+	if( !pUTF32Source )
+		pUTF32Source = L"";
+
+	const int outCount = cubDestSizeInBytes > 0 ? cubDestSizeInBytes / (int)sizeof( uchar32 ) : 0;
+	if( !pUTF32Dest || outCount <= 0 )
+	{
+		int required = 1;
+		while( pUTF32Source[ required - 1 ] )
+			++required;
+		return required * (int)sizeof( uchar32 );
+	}
+
+	int out = 0;
+	const int maxOut = outCount - 1;
+	while( pUTF32Source[ out ] && out < maxOut )
+	{
+		uchar32 uVal = (uchar32)pUTF32Source[ out ];
+
+		if( !IsValidUTF32CodePoint( uVal ) )
+		{
+			if( ePolicy & _STRINGCONVERTFLAG_FAIL )
+			{
+				pUTF32Dest[0] = 0;
+				return 0;
+			}
+
+			if( ePolicy & _STRINGCONVERTFLAG_SKIP )
+			{
+				++out;
+				continue;
+			}
+
+			uVal = '?';
+		}
+
+		pUTF32Dest[out] = uVal;
+		++out;
+	}
+
+	pUTF32Dest[out] = 0;
+	return (out + 1) * (int)sizeof( uchar32 );
+}
+
 vgui2::ILocalize *LocalizeInterfaceSingleton()
 {
 	return &g_StringTable;

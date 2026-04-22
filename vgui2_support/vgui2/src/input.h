@@ -74,6 +74,40 @@ public:
 
 	void GetCursorPosition(int &x, int &y) override;
 
+	int GetIMELanguageList(vgui2::IInput::LanguageItem* dest, int destcount);
+	int GetIMEConversionModes(vgui2::IInput::ConversionModeItem* dest, int destcount);
+	int GetIMESentenceModes(vgui2::IInput::SentenceModeItem* dest, int destcount);
+
+	void OnChangeIME(bool forward);
+	int GetCurrentIMEHandle(void);
+	int GetEnglishIMEHandle(void);
+
+	void GetIMELanguageShortCode(wchar_t* buf, int unicodeBufferSizeInBytes);
+	void SetCandidateWindowPos(int x, int y);
+	bool GetShouldInvertCompositionString(void);
+
+	void OnChangeIMEByHandle(int handleValue);
+	void OnChangeIMEConversionModeByHandle(int handleValue);
+	void OnChangeIMESentenceModeByHandle(int handleValue);
+
+	int GetCandidateListCount(void);
+	void GetCandidate(int num, wchar_t* dest, int destSizeBytes);
+	int GetCandidateListSelectedItem(void);
+	int GetCandidateListPageSize(void);
+	int GetCandidateListPageStart(void);
+	bool CandidateListStartsAtOne(void);
+	void SetCandidateListPageStart(int start);
+	void ClearCompositionString(void);
+
+	void OnInputLanguageChanged(void);
+	void OnIMEStartComposition(void);
+	void OnIMEComposition(int flags);
+	void OnIMEEndComposition(void);
+	void OnIMEShowCandidates(void);
+	void OnIMEChangeCandidates(void);
+	void OnIMECloseCandidates(void);
+	void OnIMERecomputeModes(void);
+
 	void RunFrame() override;
 
 	void UpdateMouseFocus(int x, int y) override;

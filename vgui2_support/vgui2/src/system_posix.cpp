@@ -7,6 +7,7 @@
 
 
 #include <assert.h>
+#include <chrono>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -42,6 +43,31 @@ const char *Plat_GetCommandLineA() __attribute__((weak));
 const char *Plat_GetCommandLineA()
 {
 	return "";
+}
+
+namespace
+{
+	double LocalMonotonicSeconds()
+	{
+		using clock = std::chrono::steady_clock;
+		static const auto s_Start = clock::now();
+		return std::chrono::duration<double>(clock::now() - s_Start).count();
+	}
+}
+
+// Some wasm/client link paths do not export the platform time symbols.
+// Use a local monotonic clock fallback so early VGUI code can keep running
+// instead of aborting on missing platform exports.
+double Plat_FloatTime() __attribute__((weak));
+double Plat_FloatTime()
+{
+	return LocalMonotonicSeconds();
+}
+
+uint32 Plat_MSTime() __attribute__((weak));
+uint32 Plat_MSTime()
+{
+	return (uint32)(LocalMonotonicSeconds() * 1000.0);
 }
 
 #if defined(OSX) && !defined(IOS)
@@ -286,7 +312,8 @@ double CSystem::GetCurrentTime()
 //-----------------------------------------------------------------------------
 long CSystem::GetTimeMillis()
 {
-	return (long)(Plat_MSTime() );
+	// return (long)(Plat_MSTime() );
+	return (long)(Plat_MSTime());
 }
 
 //-----------------------------------------------------------------------------

@@ -9,6 +9,10 @@
 #include <vgui/KeyCode.h>
 #include <vgui_controls/Controls.h>
 
+#ifndef _format
+#define _format(x)
+#endif
+#include "menu_int.h"
 #include "input.h"
 #include "VPanel.h"
 
@@ -28,6 +32,20 @@ namespace vgui2
 	{
 		return (VPanel *)vguiPanel;
 	}
+}
+
+namespace ui
+{
+	extern ui_extendedfuncs_t textfuncs;
+}
+
+static void Key_EnableTextInput(qboolean enable, qboolean force)
+{
+	// extern void Key_EnableTextInput(qboolean enable, qboolean force);
+	std::fprintf(stderr, "[VGUI2-TRACE] Key_EnableTextInput compat enable=%d force=%d pfn=%p\n",
+		(int)enable, (int)force, (void *)ui::textfuncs.pfnEnableTextInput);
+	if (ui::textfuncs.pfnEnableTextInput)
+		ui::textfuncs.pfnEnableTextInput(enable);
 }
 
 
@@ -436,13 +454,26 @@ void CInputWin32::UpdateMouseFocus(int x, int y)
 			}
 		}
 
-		if (!topMost)
-		{
-			topMost = vgui2::VHandleToPanel(
-				vgui2::surface()->GetEmbeddedPanel()
-			)->Client()->IsWithinTraverse(x, y, false);
+			if (!topMost)
+			{
+				auto embeddedPanel = vgui2::surface()->GetEmbeddedPanel();
+				auto pEmbedded = vgui2::VHandleToPanel(embeddedPanel);
+				auto pEmbeddedClient = pEmbedded ? pEmbedded->Client() : nullptr;
+				std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus embeddedPanel=%p embeddedClient=%p x=%d y=%d\n",
+					(void *)embeddedPanel, (void *)pEmbeddedClient, x, y);
+				// topMost = vgui2::VHandleToPanel(
+				// 	vgui2::surface()->GetEmbeddedPanel()
+				// )->Client()->IsWithinTraverse(x, y, false);
+				if (!pEmbedded || !pEmbeddedClient)
+				{
+					std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus skipping embedded traverse because panel/client is null\n");
+					SetMouseFocus(NULL_HANDLE);
+					return;
+				}
+
+				topMost = pEmbeddedClient->IsWithinTraverse(x, y, false);
+			}
 		}
-	}
 
 	if (!topMost)
 	{
@@ -874,6 +905,137 @@ void CInputWin32::ActivateInputContext(vgui2::HInputContext context)
 vgui2::VPANEL CInputWin32::GetMouseCapture()
 {
 	return vgui2::VPanelToHandle(m_DefaultInputContext._mouseCapture);
+}
+
+int CInputWin32::GetIMELanguageList(vgui2::IInput::LanguageItem* dest, int destcount)
+{
+	return 0;
+}
+
+int CInputWin32::GetIMEConversionModes(vgui2::IInput::ConversionModeItem* dest, int destcount)
+{
+	return 0;
+}
+
+int CInputWin32::GetIMESentenceModes(vgui2::IInput::SentenceModeItem* dest, int destcount)
+{
+	return 0;
+}
+
+void CInputWin32::OnChangeIME(bool forward)
+{
+}
+
+int CInputWin32::GetCurrentIMEHandle(void)
+{
+	return 0;
+}
+
+int CInputWin32::GetEnglishIMEHandle(void)
+{
+	return 0;
+}
+
+void CInputWin32::GetIMELanguageShortCode(wchar_t* buf, int unicodeBufferSizeInBytes)
+{
+	if (!buf || unicodeBufferSizeInBytes <= 0)
+		return;
+
+	buf[0] = L'\0';
+}
+
+void CInputWin32::SetCandidateWindowPos(int x, int y)
+{
+}
+
+bool CInputWin32::GetShouldInvertCompositionString(void)
+{
+	return false;
+}
+
+void CInputWin32::OnChangeIMEByHandle(int handleValue)
+{
+}
+
+void CInputWin32::OnChangeIMEConversionModeByHandle(int handleValue)
+{
+}
+
+void CInputWin32::OnChangeIMESentenceModeByHandle(int handleValue)
+{
+}
+
+int CInputWin32::GetCandidateListCount(void)
+{
+	return 0;
+}
+
+void CInputWin32::GetCandidate(int num, wchar_t* dest, int destSizeBytes)
+{
+	if (!dest || destSizeBytes <= 0)
+		return;
+
+	dest[0] = L'\0';
+}
+
+int CInputWin32::GetCandidateListSelectedItem(void)
+{
+	return 0;
+}
+
+int CInputWin32::GetCandidateListPageSize(void)
+{
+	return 0;
+}
+
+int CInputWin32::GetCandidateListPageStart(void)
+{
+	return 0;
+}
+
+bool CInputWin32::CandidateListStartsAtOne(void)
+{
+	return false;
+}
+
+void CInputWin32::SetCandidateListPageStart(int start)
+{
+}
+
+void CInputWin32::ClearCompositionString(void)
+{
+}
+
+void CInputWin32::OnInputLanguageChanged(void)
+{
+}
+
+void CInputWin32::OnIMEStartComposition(void)
+{
+}
+
+void CInputWin32::OnIMEComposition(int flags)
+{
+}
+
+void CInputWin32::OnIMEEndComposition(void)
+{
+}
+
+void CInputWin32::OnIMEShowCandidates(void)
+{
+}
+
+void CInputWin32::OnIMEChangeCandidates(void)
+{
+}
+
+void CInputWin32::OnIMECloseCandidates(void)
+{
+}
+
+void CInputWin32::OnIMERecomputeModes(void)
+{
 }
 
 bool CInputWin32::IsChildOfModalPanel(vgui2::VPANEL panel)
