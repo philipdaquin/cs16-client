@@ -40,12 +40,12 @@ IKeyValues* keyvalues()
 void COM_TimestampedLog(char const *fmt, ...) __attribute__((weak));
 void COM_TimestampedLog(char const *fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
-	std::fprintf(stderr, "[VGUI2-TRACE] ");
-	std::vfprintf(stderr, fmt, args);
-	std::fprintf(stderr, "\n");
-	va_end(args);
+	//va_list args;
+	//va_start(args, fmt);
+	//std::fprintf(stderr, "[VGUI2-TRACE] ");
+	//std::vfprintf(stderr, fmt, args);
+	//std::fprintf(stderr, "\n");
+	//va_end(args);
 }
 
 // Fallback for wasm/client builds that do not link the engine dbg module.
@@ -78,9 +78,9 @@ namespace vgui2
 	}
 
 	vgui2::ISurface *surface() {
-		std::fprintf(stderr, "[VGUI2-TRACE] surface() &g_pSurfaceInterface=%p value=%p\n",
-			(void *)&g_pSurfaceInterface,
-			(void *)g_pSurfaceInterface);
+		//std::fprintf(stderr, "[VGUI2-TRACE] surface() &g_pSurfaceInterface=%p value=%p\n",
+		//	(void *)&g_pSurfaceInterface,
+		//	(void *)g_pSurfaceInterface);
 
 		return g_pSurfaceInterface;
 	}
@@ -90,9 +90,9 @@ namespace vgui2
 	}
 	
 	vgui2::IVGui *ivgui() {
-		std::fprintf(stderr, "[VGUI2-TRACE] ivgui() &g_pVGuiInterface=%p value=%p\n",
-			(void *)&g_pVGuiInterface,
-			(void *)g_pVGuiInterface);
+		//std::fprintf(stderr, "[VGUI2-TRACE] ivgui() &g_pVGuiInterface=%p value=%p\n",
+		//	(void *)&g_pVGuiInterface,
+		//	(void *)g_pVGuiInterface);
 		return g_pVGuiInterface;
 	}
 
@@ -108,9 +108,9 @@ namespace vgui2
 	}
 	
 	IFileSystem *filesystem() {
-		std::fprintf(stderr, "[VGUI2-TRACE] filesystem() &g_pFullFileSystem=%p value=%p\n",
-			(void *)&g_pFullFileSystem,
-			(void *)g_pFullFileSystem);
+		//std::fprintf(stderr, "[VGUI2-TRACE] filesystem() &g_pFullFileSystem=%p value=%p\n",
+		//	(void *)&g_pFullFileSystem,
+		//	(void *)g_pFullFileSystem);
 		return g_pFullFileSystem;
 	}
 
@@ -154,18 +154,18 @@ namespace vgui2
 
 		g_pKeyValuesInterface = static_cast<IKeyValues*>(InitializeInterface(KEYVALUES_INTERFACE_VERSION, factoryList, numFactories));
 
-		std::fprintf(stderr,
-			"[VGUI2-TRACE] VGuiControls_Init after factory lookup module=%s ivgui=%p panel=%p surface=%p scheme=%p system=%p input=%p localize=%p filesystem=%p keyvalues=%p\n",
-			moduleName,
-			(void *)g_pVGuiInterface,
-			(void *)::g_pPanelInterface,
-			(void *)g_pSurfaceInterface,
-			(void *)g_pSchemeInterface,
-			(void *)g_pSystemInterface,
-			(void *)g_pInputInterface,
-			(void *)g_pLocalizeInterface,
-			(void *)g_pFullFileSystem,
-			(void *)g_pKeyValuesInterface);
+		//std::fprintf(stderr,
+		//	"[VGUI2-TRACE] VGuiControls_Init after factory lookup module=%s ivgui=%p panel=%p surface=%p scheme=%p system=%p input=%p localize=%p filesystem=%p keyvalues=%p\n",
+		//	moduleName,
+		//	(void *)g_pVGuiInterface,
+		//	(void *)::g_pPanelInterface,
+		//	(void *)g_pSurfaceInterface,
+		//	(void *)g_pSchemeInterface,
+		//	(void *)g_pSystemInterface,
+		//	(void *)g_pInputInterface,
+		//	(void *)g_pLocalizeInterface,
+		//	(void *)g_pFullFileSystem,
+		//	(void *)g_pKeyValuesInterface);
 
 #ifdef XASH_STATIC_GAMELIB
 		if (!g_pVGuiInterface)
@@ -193,18 +193,18 @@ namespace vgui2
 		if (!::g_pPanelInterface)
 			::g_pPanelInterface = VPanelInterfaceSingleton();
 
-		std::fprintf(stderr,
-			"[VGUI2-TRACE] VGuiControls_Init after fallbacks module=%s ivgui=%p panel=%p surface=%p scheme=%p system=%p input=%p localize=%p filesystem=%p keyvalues=%p\n",
-			moduleName,
-			(void *)g_pVGuiInterface,
-			(void *)::g_pPanelInterface,
-			(void *)g_pSurfaceInterface,
-			(void *)g_pSchemeInterface,
-			(void *)g_pSystemInterface,
-			(void *)g_pInputInterface,
-			(void *)g_pLocalizeInterface,
-			(void *)g_pFullFileSystem,
-			(void *)g_pKeyValuesInterface);
+		//std::fprintf(stderr,
+		//	"[VGUI2-TRACE] VGuiControls_Init after fallbacks module=%s ivgui=%p panel=%p surface=%p scheme=%p system=%p input=%p localize=%p filesystem=%p keyvalues=%p\n",
+		//	moduleName,
+		//	(void *)g_pVGuiInterface,
+		//	(void *)::g_pPanelInterface,
+		//	(void *)g_pSurfaceInterface,
+		//	(void *)g_pSchemeInterface,
+		//	(void *)g_pSystemInterface,
+		//	(void *)g_pInputInterface,
+		//	(void *)g_pLocalizeInterface,
+		//	(void *)g_pFullFileSystem,
+		//	(void *)g_pKeyValuesInterface);
 		
 		if (!g_pVGuiInterface) {
 			return false;

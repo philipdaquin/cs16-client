@@ -15,15 +15,15 @@ static VPanelWrapper g_PanelWrapper;
 
 vgui2::IPanel *VPanelInterfaceSingleton()
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelInterfaceSingleton wrapper=%p\n", (void *)&g_PanelWrapper);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelInterfaceSingleton wrapper=%p\n", (void *)&g_PanelWrapper);
 	return &g_PanelWrapper;
 }
 
 
 void VPanelWrapper::Init(vgui2::VPANEL vguiPanel, vgui2::IClientPanel *panel)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Init vguiPanel=%p panel=%p\n",
-		(void *)vguiPanel, (void *)panel);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Init vguiPanel=%p panel=%p\n",
+	//	(void *)vguiPanel, (void *)panel);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->Init(panel);
 }
 
@@ -39,8 +39,8 @@ void VPanelWrapper::GetPos(vgui2::VPANEL vguiPanel, int &x, int &y)
 
 void VPanelWrapper::SetSize(vgui2::VPANEL vguiPanel, int wide, int tall)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetSize vguiPanel=%p wide=%d tall=%d\n",
-		(void *)vguiPanel, wide, tall);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetSize vguiPanel=%p wide=%d tall=%d\n",
+	//	(void *)vguiPanel, wide, tall);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetSize(wide, tall);
 }
 
@@ -101,8 +101,8 @@ bool VPanelWrapper::IsVisible(vgui2::VPANEL vguiPanel)
 
 void VPanelWrapper::SetParent(vgui2::VPANEL vguiPanel, vgui2::VPANEL newParent)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetParent vguiPanel=%p newParent=%p\n",
-		(void *)vguiPanel, (void *)newParent);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetParent vguiPanel=%p newParent=%p\n",
+	//	(void *)vguiPanel, (void *)newParent);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetParent(reinterpret_cast<vgui2::VPanel*>(newParent));
 }
 
@@ -149,15 +149,15 @@ bool VPanelWrapper::HasParent(vgui2::VPANEL vguiPanel, vgui2::VPANEL potentialPa
 
 bool VPanelWrapper::IsPopup(vgui2::VPANEL vguiPanel)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsPopup vguiPanel=%p\n",
-		(void *)vguiPanel);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsPopup vguiPanel=%p\n",
+	//	(void *)vguiPanel);
 	return reinterpret_cast<vgui2::VPanel*>(vguiPanel)->IsPopup();
 }
 
 void VPanelWrapper::SetPopup(vgui2::VPANEL vguiPanel, bool state)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetPopup vguiPanel=%p state=%d\n",
-		(void *)vguiPanel, state);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SetPopup vguiPanel=%p state=%d\n",
+	//	(void *)vguiPanel, state);
 	reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SetPopup(state);
 }
 
@@ -179,12 +179,12 @@ vgui2::HScheme VPanelWrapper::GetScheme(vgui2::VPANEL vguiPanel)
 bool VPanelWrapper::IsProportional(vgui2::VPANEL vguiPanel)
 {
 	vgui2::IClientPanel *client = Client(vguiPanel);
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsProportional vguiPanel=%p client=%p\n",
-		(void *)vguiPanel, (void *)client);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsProportional vguiPanel=%p client=%p\n",
+	//	(void *)vguiPanel, (void *)client);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsProportional null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsProportional null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return false;
 	}
 
@@ -196,8 +196,8 @@ bool VPanelWrapper::IsAutoDeleteSet(vgui2::VPANEL vguiPanel)
 	vgui2::IClientPanel *client = Client(vguiPanel);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsAutoDeleteSet null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::IsAutoDeleteSet null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return false;
 	}
 
@@ -209,8 +209,8 @@ void VPanelWrapper::DeletePanel(vgui2::VPANEL vguiPanel)
 	vgui2::IClientPanel *client = Client(vguiPanel);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::DeletePanel null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::DeletePanel null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return;
 	}
 
@@ -269,8 +269,8 @@ const char *VPanelWrapper::GetName(vgui2::VPANEL vguiPanel)
 	vgui2::IClientPanel *client = Client(vguiPanel);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetName null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetName null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return "";
 	}
 
@@ -282,8 +282,8 @@ const char *VPanelWrapper::GetClassName(vgui2::VPANEL vguiPanel)
 	vgui2::IClientPanel *client = Client(vguiPanel);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetClassName null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetClassName null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return "";
 	}
 
@@ -292,12 +292,12 @@ const char *VPanelWrapper::GetClassName(vgui2::VPANEL vguiPanel)
 
 void VPanelWrapper::SendMessage(vgui2::VPANEL vguiPanel, KeyValues *params, vgui2::VPANEL ifromPanel)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SendMessage vguiPanel=%p params=%p from=%p\n",
-		(void *)vguiPanel, (void *)params, (void *)ifromPanel);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SendMessage vguiPanel=%p params=%p from=%p\n",
+	//	(void *)vguiPanel, (void *)params, (void *)ifromPanel);
 	// reinterpret_cast<vgui2::VPanel*>(vguiPanel)->SendMessage(params, ifromPanel);
 	if (!vguiPanel)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SendMessage null panel\n");
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::SendMessage null panel\n");
 		return;
 	}
 
@@ -307,13 +307,13 @@ void VPanelWrapper::SendMessage(vgui2::VPANEL vguiPanel, KeyValues *params, vgui
 void VPanelWrapper::Think(vgui2::VPANEL vguiPanel)
 {
 	vgui2::IClientPanel *client = Client(vguiPanel);
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Think vguiPanel=%p client=%p\n",
-		(void *)vguiPanel, (void *)client);
+	////std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Think vguiPanel=%p client=%p\n",
+	////	(void *)vguiPanel, (void *)client);
 	// Client(vguiPanel)->Think();
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Think null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		////std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Think null client vguiPanel=%p\n",
+		////	(void *)vguiPanel);
 		return;
 	}
 
@@ -323,13 +323,13 @@ void VPanelWrapper::Think(vgui2::VPANEL vguiPanel)
 void VPanelWrapper::PerformApplySchemeSettings(vgui2::VPANEL vguiPanel)
 {
 	vgui2::IClientPanel *client = Client(vguiPanel);
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PerformApplySchemeSettings vguiPanel=%p client=%p\n",
-		(void *)vguiPanel, (void *)client);
+	////std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PerformApplySchemeSettings vguiPanel=%p client=%p\n",
+	////	(void *)vguiPanel, (void *)client);
 	// Client(vguiPanel)->PerformApplySchemeSettings();
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PerformApplySchemeSettings null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		////std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PerformApplySchemeSettings null client vguiPanel=%p\n",
+		////	(void *)vguiPanel);
 		return;
 	}
 
@@ -339,13 +339,13 @@ void VPanelWrapper::PerformApplySchemeSettings(vgui2::VPANEL vguiPanel)
 void VPanelWrapper::PaintTraverse(vgui2::VPANEL vguiPanel, bool forceRepaint, bool allowForce)
 {
 	vgui2::IClientPanel *client = Client(vguiPanel);
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PaintTraverse vguiPanel=%p client=%p forceRepaint=%d allowForce=%d\n",
-		(void *)vguiPanel, (void *)client, (int)forceRepaint, (int)allowForce);
+	//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PaintTraverse vguiPanel=%p client=%p forceRepaint=%d allowForce=%d\n",
+	//	(void *)vguiPanel, (void *)client, (int)forceRepaint, (int)allowForce);
 	// Client(vguiPanel)->PaintTraverse(forceRepaint, allowForce);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PaintTraverse null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::PaintTraverse null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return;
 	}
 
@@ -441,8 +441,8 @@ void VPanelWrapper::SetEnabled(vgui2::VPANEL vguiPanel, bool state)
 vgui2::IClientPanel* VPanelWrapper::Client(vgui2::VPANEL vguiPanel)
 {
 	auto *client = reinterpret_cast<vgui2::VPanel*>(vguiPanel)->Client();
-	std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Client vguiPanel=%p client=%p\n",
-		(void *)vguiPanel, (void *)client);
+	////std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::Client vguiPanel=%p client=%p\n",
+	////	(void *)vguiPanel, (void *)client);
 	return client;
 }
 
@@ -451,8 +451,8 @@ const char* VPanelWrapper::GetModuleName(vgui2::VPANEL vguiPanel)
 	vgui2::IClientPanel *client = Client(vguiPanel);
 	if (!client)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetModuleName null client vguiPanel=%p\n",
-			(void *)vguiPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanelWrapper::GetModuleName null client vguiPanel=%p\n",
+		//	(void *)vguiPanel);
 		return "";
 	}
 

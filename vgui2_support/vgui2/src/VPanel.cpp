@@ -10,8 +10,8 @@ namespace vgui2
 {
 	VPanel::VPanel()
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::VPanel this=%p popup=%d parent=%p client=%p listEntry=%u\n",
-			(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::VPanel this=%p popup=%d parent=%p client=%p listEntry=%u\n",
+		//	(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
 	}
 
 	VPanel::~VPanel()
@@ -20,11 +20,11 @@ namespace vgui2
 
 	void VPanel::Init(IClientPanel* attachedClientPanel)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init this=%p attachedClientPanel=%p oldClient=%p popup=%d parent=%p listEntry=%u\n",
-			(void *)this, (void *)attachedClientPanel, (void *)_clientPanel, _popup, (void *)_parent, _listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init this=%p attachedClientPanel=%p oldClient=%p popup=%d parent=%p listEntry=%u\n",
+		//	(void *)this, (void *)attachedClientPanel, (void *)_clientPanel, _popup, (void *)_parent, _listEntry);
 		_clientPanel = attachedClientPanel;
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init after this=%p client=%p\n",
-			(void *)this, (void *)_clientPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Init after this=%p client=%p\n",
+		//	(void *)this, (void *)_clientPanel);
 	}
 
 	SurfacePlat* VPanel::Plat()
@@ -39,29 +39,29 @@ namespace vgui2
 
 	HPanelList VPanel::GetListEntry()
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetListEntry this=%p listEntry=%u\n",
-			(void *)this, _listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetListEntry this=%p listEntry=%u\n",
+		//	(void *)this, _listEntry);
 		return _listEntry;
 	}
 
 	void VPanel::SetListEntry(HPanelList listEntry)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetListEntry this=%p old=%u new=%u\n",
-			(void *)this, _listEntry, listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetListEntry this=%p old=%u new=%u\n",
+		//	(void *)this, _listEntry, listEntry);
 		_listEntry = listEntry;
 	}
 
 	bool VPanel::IsPopup()
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::IsPopup this=%p popup=%d parent=%p client=%p listEntry=%u\n",
-			(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::IsPopup this=%p popup=%d parent=%p client=%p listEntry=%u\n",
+		//	(void *)this, _popup, (void *)_parent, (void *)_clientPanel, _listEntry);
 		return _popup;
 	}
 
 	void VPanel::SetPopup(bool state)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPopup this=%p old=%d new=%d parent=%p client=%p\n",
-			(void *)this, _popup, state, (void *)_parent, (void *)_clientPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPopup this=%p old=%d new=%d parent=%p client=%p\n",
+		//	(void *)this, _popup, state, (void *)_parent, (void *)_clientPanel);
 		_popup = state;
 	}
 
@@ -77,8 +77,8 @@ namespace vgui2
 
 	void VPanel::SetPos(int x, int y)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPos this=%p x=%d y=%d\n",
-			(void *)this, x, y);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetPos this=%p x=%d y=%d\n",
+		//	(void *)this, x, y);
 		_pos[0] = x;
 		_pos[1] = y;
 	}
@@ -91,8 +91,8 @@ namespace vgui2
 
 	void VPanel::SetSize(int wide, int tall)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize this=%p wide=%d tall=%d client=%p\n",
-			(void *)this, wide, tall, (void *)_clientPanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize this=%p wide=%d tall=%d client=%p\n",
+		//	(void *)this, wide, tall, (void *)_clientPanel);
 		if (wide < _minimumSize[0])
 			wide = _minimumSize[0];
 
@@ -104,8 +104,8 @@ namespace vgui2
 			_size[0] = wide;
 			_size[1] = tall;
 
-			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize skipping OnSizeChanged because client is null this=%p wide=%d tall=%d\n",
-				(void *)this, wide, tall);
+			//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize skipping OnSizeChanged because client is null this=%p wide=%d tall=%d\n",
+			//	(void *)this, wide, tall);
 			// Client()->OnSizeChanged(wide, tall);
 			if (Client())
 				Client()->OnSizeChanged(wide, tall);
@@ -236,8 +236,8 @@ namespace vgui2
 
 	void VPanel::Solve()
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Solve enter this=%p parent=%p popup=%d embedded=%p\n",
-			(void *)this, (void *)_parent, _popup, (void *)vgui2::surface()->GetEmbeddedPanel());
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::Solve enter this=%p parent=%p popup=%d embedded=%p\n",
+		//	(void *)this, (void *)_parent, _popup, (void *)vgui2::surface()->GetEmbeddedPanel());
 		_absPos[0] = _pos[0];
 		_absPos[1] = _pos[1];
 
@@ -300,8 +300,8 @@ namespace vgui2
 
 	void VPanel::SetVisible(bool state)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetVisible this=%p state=%d popup=%d parent=%p\n",
-			(void *)this, state, _popup, (void *)_parent);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetVisible this=%p state=%d popup=%d parent=%p\n",
+		//	(void *)this, state, _popup, (void *)_parent);
 		if (_visible != state)
 		{
 			vgui2::surface()->SetPanelVisible(reinterpret_cast<VPANEL>(this), state);
@@ -330,8 +330,8 @@ namespace vgui2
 
 	void VPanel::SetParent(VPanel* newParent)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent enter this=%p newParent=%p oldParent=%p client=%p popup=%d listEntry=%u\n",
-			(void *)this, (void *)newParent, (void *)_parent, (void *)_clientPanel, _popup, _listEntry);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent enter this=%p newParent=%p oldParent=%p client=%p popup=%d listEntry=%u\n",
+		//	(void *)this, (void *)newParent, (void *)_parent, (void *)_clientPanel, _popup, _listEntry);
 		if (this == newParent ||
 			_parent == newParent)
 			return;
@@ -358,8 +358,8 @@ namespace vgui2
 				_parent->Client()->OnChildAdded(reinterpret_cast<VPANEL>(this));
 			}
 		}
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent exit this=%p parent=%p childCount=%d\n",
-			(void *)this, (void *)_parent, _parent ? _parent->GetChildCount() : -1);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetParent exit this=%p parent=%p childCount=%d\n",
+		//	(void *)this, (void *)_parent, _parent ? _parent->GetChildCount() : -1);
 	}
 
 	int VPanel::GetChildCount()
@@ -377,8 +377,8 @@ namespace vgui2
 
 	VPanel* VPanel::GetParent()
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetParent this=%p parent=%p\n",
-			(void *)this, (void *)_parent);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetParent this=%p parent=%p\n",
+		//	(void *)this, (void *)_parent);
 		return _parent;
 	}
 
@@ -467,7 +467,7 @@ namespace vgui2
 		// return Client()->GetName();
 		if (!Client())
 		{
-			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetName null client this=%p\n", (void *)this);
+			//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetName null client this=%p\n", (void *)this);
 			return "";
 		}
 
@@ -479,7 +479,7 @@ namespace vgui2
 		// return Client()->GetClassName();
 		if (!Client())
 		{
-			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetClassName null client this=%p\n", (void *)this);
+			//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetClassName null client this=%p\n", (void *)this);
 			return "";
 		}
 
@@ -491,7 +491,7 @@ namespace vgui2
 		// return Client()->GetScheme();
 		if (!Client())
 		{
-			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetScheme null client this=%p\n", (void *)this);
+			//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetScheme null client this=%p\n", (void *)this);
 			return 0;
 		}
 
@@ -502,12 +502,12 @@ namespace vgui2
 	{
 		// Client()->OnMessage(params, ifrompanel);
 		IClientPanel *client = Client();
-		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage this=%p client=%p params=%p from=%p\n",
-			(void *)this, (void *)client, (void *)params, (void *)ifrompanel);
+		//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage this=%p client=%p params=%p from=%p\n",
+		//	(void *)this, (void *)client, (void *)params, (void *)ifrompanel);
 		if (!client)
 		{
-			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage null client this=%p from=%p\n",
-				(void *)this, (void *)ifrompanel);
+			//std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage null client this=%p from=%p\n",
+			//	(void *)this, (void *)ifrompanel);
 			return;
 		}
 

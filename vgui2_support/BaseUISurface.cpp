@@ -722,14 +722,14 @@ void BaseUISurface::SetCursor(vgui2::HCursor cursor) {
 	// g_api->CursorSelect((VGUI_DefaultCursor)cursor);
 	if (!g_api)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because g_api is null cursor=%d\n", (int)cursor);
+		//gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because g_api is null cursor=%d\n", (int)cursor);
 		return;
 	}
 
 	if (!g_api->CursorSelect)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because CursorSelect is null cursor=%d api=%p\n",
-			(int)cursor, (void *)g_api);
+		//gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because CursorSelect is null cursor=%d api=%p\n",
+		//	(int)cursor, (void *)g_api);
 		return;
 	}
 

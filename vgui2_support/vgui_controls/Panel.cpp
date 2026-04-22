@@ -836,8 +836,8 @@ void Panel::GetPos(int &x, int &y)
 //-----------------------------------------------------------------------------
 void Panel::SetSize(int wide, int tall)
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::SetSize this=%p wide=%d tall=%d vpanel=%p\n",
-		(void *)this, wide, tall, (void *)GetVPanel());
+	//fprintf(stderr, "[VGUI2-TRACE] Panel::SetSize this=%p wide=%d tall=%d vpanel=%p\n",
+	//	(void *)this, wide, tall, (void *)GetVPanel());
 	Assert( abs(wide) < 32768 && abs(tall) < 32768 );
 	ipanel()->SetSize(GetVPanel(), wide, tall);
 }
