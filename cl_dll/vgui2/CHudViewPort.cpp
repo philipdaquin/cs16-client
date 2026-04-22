@@ -113,6 +113,57 @@ IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 		pPanel = m_pBuyMenu;
 	}
 
+	// Older implemenetationm remove so we can use the vanilla implentation
+	// if (Q_strcmp("ClientMOTD", pszName) == 0)
+	// {
+	// 	if(!m_pMOTD)
+	// 		m_pMOTD = new CClientMOTD(this);
+	// 	pPanel = m_pMOTD;
+	// }
+    // else if (Q_strcmp(PANEL_TEAM, pszName) == 0)
+    // {
+    //     if (!m_pTeamMenu)
+    //     {
+    //         m_pTeamMenu = new CCSTeamMenu(this);
+    //         m_pTeamMenu->UpdateGameMode();
+    //     }
+    //     pPanel = m_pTeamMenu;
+    // }
+    // else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
+    // {
+    //     if (!m_pClassMenu)
+    //     {
+    //         m_pClassMenu = new CCSClassMenu(this);
+    //         m_pClassMenu->UpdateGameMode();
+    //     }
+    //     pPanel = m_pClassMenu;
+    // }
+	// else if (Q_strcmp(PANEL_BUY, pszName) == 0)
+	// {
+	// 	if(!m_pBuyMenu)
+    //     {
+    //         m_pBuyMenu = new CCSBaseBuyMenu(this);
+    //         m_pBuyMenu->UpdateGameMode();
+    //     }
+	// 	pPanel = m_pBuyMenu;
+	// }
+    // else if (Q_strcmp(CZSHELTERTEAMHOUSINGDLG_NAME, pszName) == 0)
+    // {
+    //     pPanel = new ZShelterTeamHousingDialog();
+    // }
+    // else if (Q_strcmp(PANEL_ZOMBIEKEEPER, pszName) == 0)
+    // {
+    //     if (!m_pZombieKeeperMenu)
+    //     {
+    //         m_pZombieKeeperMenu = new CZb2ZombieKeeper();
+    //         m_pZombieKeeperMenu->SetupPage(0);
+    //     }
+    //     pPanel = m_pZombieKeeperMenu;
+
+    // }
+
+
+
 	return pPanel;
 }
 

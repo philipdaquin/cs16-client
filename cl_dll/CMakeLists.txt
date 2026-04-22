@@ -5,7 +5,6 @@ set(CLIENT_LIB client)
 
 file(GLOB CS_CLIENT_SRC "*.cpp")
 file(GLOB CS_EV_SRC "events/*.cpp")
-file(GLOB CS_VGUI_SRC "VGUI/*.cpp")
 file(GLOB CS_VGUI2_SRC "vgui2/*.cpp")
 file(GLOB CS_VGUI2_GAMECTRL_SRC "vgui2/game_controls/*.cpp")
 file(GLOB CS_WPN_SRC "cs_wpn/*.cpp")
@@ -28,12 +27,6 @@ list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/vgui2_testpanel.cpp"
 list(REMOVE_ITEM CS_WPN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/cs_wpn/cs_baseentity.cpp")
 list(APPEND CS_CLIENT_SRC ../public/utflib.cpp)
 list(APPEND CS_CLIENT_SRC vgui2_bootstrap.cpp)
-list(REMOVE_ITEM CS_VGUI_SRC
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/buymenu.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/buysubmenu.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/counterstrikeviewport.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/cstrikeclassmenu.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/cstriketeammenu.cpp")
 set(VGUI2_SDK_RUNTIME_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier1/KeyValues.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier1/interface.cpp"
@@ -146,7 +139,6 @@ list(APPEND CS_CLIENT_SRC ${VGUI2_SDK_MATHLIB_WASM_SOURCES})
 
 set(VGUI2_VECTOR2D_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/vgui2_bootstrap.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/VGUI/counterstrikeviewport_interface.cpp"
 	${CS_VGUI2_SRC}
 	${CS_VGUI2_GAMECTRL_SRC}
 	${VGUI2_SUPPORT_ALL_SOURCES})
@@ -175,7 +167,6 @@ include_directories(
 	include/hud
 	include/studio
 	include/math
-	VGUI
 	../cl_dll
 	../common
 	../engine

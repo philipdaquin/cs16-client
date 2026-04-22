@@ -26,7 +26,7 @@
 #include "draw_util.h"
 #include "vgui2_bootstrap.h"
 
-#include "VGUI/counterstrikeviewport_interface.h"
+#include "vgui2/counterstrikeviewport_interface.h"
 
 //#include "vgui_TeamFortressViewport.h"
 

@@ -1,7 +1,7 @@
 #include "counterstrikeviewport_interface.h"
 
-#include "../vgui2/CHudViewPort.h"
-#include "../vgui2/CBaseViewport.h"
+#include "CHudViewPort.h"
+#include "CBaseViewport.h"
 #include "hud.h"
 
 bool VGUI2_HasViewport()

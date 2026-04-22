@@ -27,7 +27,7 @@
 #include "vgui_parser.h"
 #include "com_weapons.h"
 #include "vgui2_bootstrap.h"
-#include "VGUI/counterstrikeviewport_interface.h"
+#include "vgui2/counterstrikeviewport_interface.h"
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
