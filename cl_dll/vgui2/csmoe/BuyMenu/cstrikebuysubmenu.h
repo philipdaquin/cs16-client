@@ -4,8 +4,14 @@
 #pragma once
 #endif
 
+#include <string>
+#include <vector>
+
+#include "../../../hud.h"
+#include "../teamname.h"
+#include "moe_buy_types.h"
 #include "game_controls/buysubmenu.h"
-#include "BuyPresetButton.h"
+#include "buypresetbutton.h"
 #include "cstrikebuymouseoverpanelbutton.h"
 #include "cso_controls/NewTabButton.h"
 #include "WeaponImagePanel.h"
@@ -28,7 +34,7 @@ public:
 	virtual void PerformLayout() override;
 	virtual void OnThink() override;
 
-	virtual void SetupItems(cl::MoEWeaponBuyType type);
+	virtual void SetupItems(MoEWeaponBuyType type);
 	virtual void SetupPage(size_t page);
 	virtual void SetTeam(TeamName team);
 	
@@ -166,7 +172,7 @@ public:
 	CCSBuySubMenu_ZombieMod(vgui2::Panel *parent, const char *name = "BuySubMenu") : CCSBuySubMenu(parent, name) {}
 	virtual void LoadControlSettings(const char *dialogResourceName, const char *pathID = NULL, KeyValues *pPreloadedKeyValues = NULL) override;
 	virtual void OnSelectWeapon(const char *weapon) override;
-	virtual void SetupItems(cl::MoEWeaponBuyType type) override;
+	virtual void SetupItems(MoEWeaponBuyType type) override;
 	virtual void OnCommand(const char *command) override;
 };
 

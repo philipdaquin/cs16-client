@@ -7,6 +7,10 @@ file(GLOB CS_CLIENT_SRC "*.cpp")
 file(GLOB CS_EV_SRC "events/*.cpp")
 file(GLOB CS_VGUI2_SRC "vgui2/*.cpp")
 file(GLOB CS_VGUI2_GAMECTRL_SRC "vgui2/game_controls/*.cpp")
+file(GLOB_RECURSE CS_VGUI2_CSMOE_SRC "vgui2/csmoe/*.cpp")
+file(GLOB_RECURSE CS_VGUI2_CSMOE_ZOMBIE_SRC
+	"vgui2/csmoe/zsh/*.cpp"
+	"vgui2/csmoe/zb2/*.cpp")
 file(GLOB CS_WPN_SRC "cs_wpn/*.cpp")
 file(GLOB CS_WPNSH_SRC "../dlls/wpn_shared/*.cpp")
 file(GLOB CS_HUD_SRC "hud/*.cpp")
@@ -134,8 +138,14 @@ list(APPEND CS_CLIENT_SRC ${CS_GAMSH_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_VGUI_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_VGUI2_SRC})
 list(APPEND CS_CLIENT_SRC ${CS_VGUI2_GAMECTRL_SRC})
+list(APPEND CS_CLIENT_SRC ${CS_VGUI2_CSMOE_SRC})
+list(REMOVE_ITEM CS_CLIENT_SRC ${CS_VGUI2_CSMOE_ZOMBIE_SRC})
 list(APPEND CS_CLIENT_SRC ${MINIUTL_SRC})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SDK_MATHLIB_WASM_SOURCES})
+
+# Keep the live TeamMenu / BuyMenu / class menu path, but leave the zombie-mode
+# csmoe sources in-tree for future restoration if needed.
+list(REMOVE_ITEM CS_VGUI2_CSMOE_SRC ${CS_VGUI2_CSMOE_ZOMBIE_SRC})
 
 set(VGUI2_VECTOR2D_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/vgui2_bootstrap.cpp"
@@ -158,6 +168,10 @@ set_source_files_properties(${CS_VGUI2_SRC} ${CS_VGUI2_GAMECTRL_SRC}
 	PROPERTIES COMPILE_OPTIONS
 	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
 
+set_source_files_properties(${CS_VGUI2_CSMOE_SRC}
+	PROPERTIES COMPILE_OPTIONS
+	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
+
 set_source_files_properties(${CS_VGUI_SRC}
 	PROPERTIES COMPILE_OPTIONS
 	"-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public;-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims")
@@ -168,6 +182,7 @@ include_directories(
 	include/studio
 	include/math
 	../cl_dll
+	../cl_dll/vgui2
 	../common
 	../engine
 	../pm_shared
@@ -186,6 +201,7 @@ include_directories(
 	../vgui2_support/cso_controls
 	../vgui2_support/vguimatsurface
 	../3rdparty/ReGameDLL_CS/regamedll/common
+	../3rdparty/ReGameDLL_CS/regamedll/game_shared
 	../../xash3d-fwgs/engine
 	../../hl1_source_sdk/public
 	../../hl1_source_sdk/common

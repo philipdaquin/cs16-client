@@ -9,7 +9,7 @@
 #include "game_controls/classmenu.h"
 #include <vgui_controls/EditablePanel.h>
 #include <FileSystem.h>
-#include "vgui_controls/imagepanel.h"
+#include <vgui_controls/ImagePanel.h>
 #include "cso_controls/NewTabButton.h"
 #include "shared_util.h"
 #include "csmoe/newmouseoverpanelbutton.h"
@@ -92,4 +92,3 @@ private:
 
 };
 #endif
-

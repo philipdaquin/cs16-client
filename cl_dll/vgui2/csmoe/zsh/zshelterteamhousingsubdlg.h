@@ -8,7 +8,7 @@
 
 #include "IViewportPanel.h"
 
-#include <VGUI/IScheme.h>
+#include <vgui/IScheme.h>
 #include <vgui_controls/ImagePanel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Frame.h>
@@ -16,7 +16,7 @@
 #include "cso_controls/RoundPanel.h"
 #include "cso_controls/SignalImagePanel.h"
 
-#include "configs/cfg_zsht.h"
+#include "zsht_compat.h"
 
 constexpr const char* CZSHELTERTEAMHOUSINGSUBDLG_NAME = "ZShelterTeamHousingSubDialog";
 constexpr const int CZSHELTERTEAMHOUSINGSUBDLG_BUILD_NUM = 6;

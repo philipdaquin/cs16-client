@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <wchar.h>
-#include <UtlSymbol.h>
+#include <tier1/utlsymbol.h>
 
 #include <vgui/IBorder.h>
 #include <vgui/IInput.h>
@@ -17,7 +17,7 @@
 #include <vgui_controls/ImagePanel.h>
 #include <vgui_controls/EditablePanel.h>
 
-#include "CBaseViewPort.h"
+#include "../../CBaseViewport.h"
 
 #include "cstrikebuymouseoverpanelbutton.h"
 #include "cstrikebuymouseoverpanel.h"

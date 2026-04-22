@@ -1,6 +1,6 @@
 #include "hud.h"
 #include "Zb2ZombieSelector.h"
-#include "CBaseViewport.h"
+#include "../../CBaseViewport.h"
 
 #include <FileSystem.h>
 
@@ -15,9 +15,43 @@
 #include <vgui_controls/Button.h>
 #include <vgui/KeyCode.h>
 #include <FileSystem.h>
+#include <array>
 
 
 using namespace vgui2;
+
+struct KeeperClassInfo_s
+{
+	std::string name;
+	std::string desc;
+	int level;
+};
+
+static const std::array<KeeperClassInfo_s, 23> KeeperClassInfo = {{
+	{ "tank", "#CSO_ZombieType_defaultzb", 0 },
+	{ "speed", "#CSO_ZombieType_lightzb", 1 },
+	{ "heavy", "#CSO_ZombieType_heavyzb", 2 },
+	{ "pc", "#CSO_ZombieType_pczb", 3 },
+	{ "heal", "#CSO_ZombieType_doctorzb", 4 },
+	{ "dragon", "#CSO_ZombieType_dragonzb", 5 },
+	{ "rage", "#CSO_ZombieType_ragezb", 6 },
+	{ "killer", "#CSO_ZombieType_killerzb", 7 },
+	{ "ninja", "#CSO_ZombieType_ninjazb", 8 },
+	{ "poison", "#CSO_ZombieType_poisonzb", 9 },
+	{ "ice", "#CSO_ZombieType_icezb", 10 },
+	{ "fire", "#CSO_ZombieType_firezb", 11 },
+	{ "mutant", "#CSO_ZombieType_mutantzb", 12 },
+	{ "queen", "#CSO_ZombieType_queenzb", 13 },
+	{ "boss", "#CSO_ZombieType_bosszb", 14 },
+	{ "alpha", "#CSO_ZombieType_alphazb", 15 },
+	{ "beta", "#CSO_ZombieType_betazb", 16 },
+	{ "gamma", "#CSO_ZombieType_gammazb", 17 },
+	{ "delta", "#CSO_ZombieType_deltazb", 18 },
+	{ "epsilon", "#CSO_ZombieType_epsilonzb", 19 },
+	{ "zeta", "#CSO_ZombieType_zetazb", 20 },
+	{ "eta", "#CSO_ZombieType_etazb", 21 },
+	{ "theta", "#CSO_ZombieType_thetazb", 22 }
+}};
 
 CZb2ZombieKeeper::CZb2ZombieKeeper(void) : Frame(NULL, PANEL_ZOMBIEKEEPER)
 {

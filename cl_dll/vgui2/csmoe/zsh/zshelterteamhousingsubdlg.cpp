@@ -1,11 +1,11 @@
 
 #include "hud.h"
-#include "CBaseViewport.h"
+#include "../../CBaseViewport.h"
 #include "zshelterteamhousingsubdlg.h"
 
 #include <tier1/KeyValues.h>
 
-#include <vgui/IVGUI.h>
+#include <vgui/IVGui.h>
 #include <vgui/ISurface.h>
 #include <vgui/IPanel.h>
 

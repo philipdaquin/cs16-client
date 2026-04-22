@@ -5,13 +5,13 @@
 #pragma once
 #endif
 
+#include "../../../hud.h"
+#include "../teamname.h"
 #include <vgui/IScheme.h>
 #include <vgui_controls/Button.h>
 #include <vgui/KeyCode.h>
 #include <filesystem.h>
 #include "shared_util.h"
-#include "player/player_const.h"
-
 #include "game_controls/mouseoverpanelbutton.h"
 #include "buymouseoverpanelbutton.h"
 #include "WeaponImagePanel.h"

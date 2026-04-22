@@ -1,5 +1,5 @@
 #include "hud.h"
-#include "CBaseViewport.h"
+#include "../../CBaseViewport.h"
 #include "cdll_dll.h"
 #include "cl_util.h"
 #include "cstrikebuymenu.h"

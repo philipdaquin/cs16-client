@@ -1,5 +1,5 @@
 #include "hud.h"
-#include "CBaseViewport.h"
+#include "../../CBaseViewport.h"
 #include "cdll_dll.h"
 #include "cl_util.h"
 #include "cstrikebuymenu.h"
@@ -14,9 +14,9 @@
 #include "buymouseoverpanelbutton.h"
 #include "cso_controls/ButtonGlow.h"
 #include "cso_controls/DarkTextEntry.h"
+#include "../../../dlls/weapontype.h"
 
-#include <nlohmann/json.hpp>
-
+#include <array>
 #include <string>
 
 using namespace vgui2;
@@ -29,6 +29,37 @@ const Color COL_TR = { 216, 182, 183, 255 };
 static const char *EQUIPMENT_BUYLIST[] = { "vest","vesthelm","flash","hegrenade","sgren","defuser","nvgs" };
 static const char *EQUIPMENT_BUYLIST_TEXT[] = { "#Cstrike_Kevlar","#Cstrike_Kevlar_Helmet","#Cstrike_Flashbang","#Cstrike_HE_Grenade","#Cstrike_Smoke_Grenade","#Cstrike_Defuser","#Cstrike_NightVision_Button_CT" };
 static const char *EQUIPMENT_BUYLIST_CMD[] = { "vest","vesthelm","flash","VGUI_BuyMenu_BuyWeapon weapon_hegrenade","sgren","defuser","nvgs" };
+
+struct MoEWeaponBuyInfo_s
+{
+	const char *pszClassName;
+	const char *pszDisplayName;
+	int iMenu;
+	int iTeam;
+	int iSlot;
+	int iID;
+	int iLevel;
+};
+
+static const std::array<MoEWeaponBuyInfo_s, 17> g_MoEWeaponBuyInfo = {{
+	{ "weapon_usp", "#Cstrike_USP", 0, UNASSIGNED, 2, 1, 0 },
+	{ "weapon_glock18", "#Cstrike_Glock18", 0, UNASSIGNED, 2, 2, 0 },
+	{ "weapon_deagle", "#Cstrike_Deagle", 0, UNASSIGNED, 2, 3, 0 },
+	{ "weapon_p228", "#Cstrike_P228", 0, UNASSIGNED, 2, 4, 0 },
+	{ "weapon_fiveseven", "#Cstrike_FiveSeven", 0, UNASSIGNED, 2, 5, 0 },
+	{ "weapon_elite", "#Cstrike_ELITE", 0, UNASSIGNED, 2, 6, 0 },
+	{ "weapon_m3", "#Cstrike_M3", 1, UNASSIGNED, 1, 7, 0 },
+	{ "weapon_xm1014", "#Cstrike_XM1014", 1, UNASSIGNED, 1, 8, 0 },
+	{ "weapon_tmp", "#Cstrike_TMP", 2, UNASSIGNED, 1, 9, 0 },
+	{ "weapon_mac10", "#Cstrike_MAC10", 2, UNASSIGNED, 1, 10, 0 },
+	{ "weapon_mp5navy", "#Cstrike_MP5", 2, UNASSIGNED, 1, 11, 0 },
+	{ "weapon_ump45", "#Cstrike_UMP45", 2, UNASSIGNED, 1, 12, 0 },
+	{ "weapon_p90", "#Cstrike_P90", 2, UNASSIGNED, 1, 13, 0 },
+	{ "weapon_famas", "#Cstrike_Famas", 3, UNASSIGNED, 1, 14, 0 },
+	{ "weapon_galil", "#Cstrike_Galil", 3, UNASSIGNED, 1, 15, 0 },
+	{ "weapon_ak47", "#Cstrike_AK47", 3, UNASSIGNED, 1, 16, 0 },
+	{ "weapon_m4a1", "#Cstrike_M4A1", 3, UNASSIGNED, 1, 17, 0 }
+}};
 
 CCSBuySubMenu::CCSBuySubMenu(vgui2::Panel *parent, const char *name) : CBuySubMenu(parent, name)
 {
@@ -429,7 +460,7 @@ void CCSBuySubMenu::SetTeam(TeamName team)
 
 void CCSBuySubMenu::OnSelectWeapon(const char *weapon)
 {
-    auto iter = std::find_if(std::begin(g_MoEWeaponBuyInfo), std::end(g_MoEWeaponBuyInfo), [weapon](const MoEWeaponBuyInfo_s &info){ return !stricmp(info.pszClassName, weapon); });
+	auto iter = std::find_if(std::begin(g_MoEWeaponBuyInfo), std::end(g_MoEWeaponBuyInfo), [weapon](const MoEWeaponBuyInfo_s &info){ return !stricmp(info.pszClassName, weapon); });
 	if(iter == std::end(g_MoEWeaponBuyInfo))
         return;
     
@@ -447,90 +478,35 @@ void CCSBuySubMenu::OnSelectWeapon(const char *weapon)
 
 void CCSBuySubMenu::ReadFavoriteSets()
 {
-    nlohmann::json j;
-    FileHandle_t fh = vgui2::filesystem()->Open("moe_buy.json", "rb", "CONFIG");
-    if (fh != FILESYSTEM_INVALID_HANDLE)
-    {
-        int len = vgui2::filesystem()->Size(fh);
-        if (len > 0)
-        {
-            char *buf = (char *)_alloca(len + 1);
-            vgui2::filesystem()->Read(buf, len, fh);
-            buf[len] = 0;
-            j.parse(buf, buf + len);
-        }
+    // JSON-backed favorites are disabled for now because this build does not
+    // ship nlohmann/json.hpp. Keep the old persistence behavior commented here
+    // for reference:
+    //
+    // nlohmann::json j;
+    // FileHandle_t fh = vgui2::filesystem()->Open("moe_buy.json", "rb", "CONFIG");
+    // ...
+    //
+    // Fall back to empty/default favorites until we restore the dependency.
+    m_SelectedItems = FavoriteSet{};
+    for (auto &favorite : m_FavoriteItems)
+        favorite = FavoriteSet{};
 
-        vgui2::filesystem()->Close(fh);
-    }
-
-    try {
-        m_SelectedItems = {
-                j["Primary"] ,
-                j["Secondary"] ,
-                j["Knife"],
-                j["Grenade"],
-                0,0,0,0, ArmorType::ARMOR_HELMET
-        };
-
-        for(int i = 1; i <= 5; ++i)
-        {
-            std::string app = "QuickBuy";
-            app += std::to_string(i);
-
-            auto &keyvalue = j[app];
-
-            m_FavoriteItems[i - 1] = {
-                    keyvalue["Primary"] ,
-                    keyvalue["Secondary"] ,
-                    keyvalue["Knife"],
-                    keyvalue["Grenade"],
-                    0,0,0,0, ArmorType::ARMOR_HELMET
-            };
-        }
-    } catch(const std::exception &e)
-    {
-        // ignore json error
-        gEngfuncs.Con_DPrintf("moe_buy error: %s", e.what());
-    }
 	UpdateFavoriteSetsControls(); // update images
 }
 
 void CCSBuySubMenu::SaveFavoriteSets()
 {
-    std::string content;
-    try {
-        nlohmann::json j;
-        for (int i = 1; i <= 5; ++i)
-        {
-            std::string app = "QuickBuy";
-            app += std::to_string(i);
-
-            auto &keyvalue = j[app];
-            keyvalue["Primary"] = m_FavoriteItems[i].Primary;
-            keyvalue["Secondary"] = m_FavoriteItems[i].Secondary;
-            keyvalue["Knife"] = m_FavoriteItems[i].Melee;
-            keyvalue["Grenade"] = m_FavoriteItems[i].HEGrenade;
-        }
-
-        auto &keyvalue = j[std::string("QuickBuy0")];
-        keyvalue["Primary"] = m_SelectedItems.Primary;
-        keyvalue["Secondary"] = m_SelectedItems.Secondary;
-        keyvalue["Knife"] = m_SelectedItems.Melee;
-        keyvalue["Grenade"] = m_SelectedItems.HEGrenade;
-
-        content = j.dump();
-    } catch(const std::exception &e)
-    {
-        // ignore json error
-        gEngfuncs.Con_DPrintf("moe_buy error: %s", e.what());
-    }
-
-    FileHandle_t fh = vgui2::filesystem()->Open("moe_buy.json", "wb", "CONFIG");
-    if (fh != FILESYSTEM_INVALID_HANDLE)
-    {
-        vgui2::filesystem()->Write(content.c_str(), content.length(), fh);
-        vgui2::filesystem()->Close(fh);
-    }
+    // JSON-backed favorites are disabled for now because this build does not
+    // ship nlohmann/json.hpp. Keep the old persistence behavior commented here
+    // for reference:
+    //
+    // std::string content;
+    // nlohmann::json j;
+    // ...
+    // FileHandle_t fh = vgui2::filesystem()->Open("moe_buy.json", "wb", "CONFIG");
+    // ...
+    //
+    // No-op fallback: keep the current in-memory selection only.
 	UpdateFavoriteSetsControls(); // update images
 }
 
@@ -600,10 +576,17 @@ void CCSBuySubMenu::OnBuySelectedItems()
 			szCommand += "moe_buy ";
 			szCommand += wpn;
 			szCommand += ';';
-		}
+	}
 	szCommand += "secammo;primammo;vesthelm";
-	if (cl::gHUD.m_iModRunning == MOD_NONE && cl::gHUD.m_FollowIcon.m_iBombTargetsNum > 0) {
-		szCommand += ";defuser";
+	if (cl::gHUD.m_iModRunning == MOD_NONE)
+	{
+		// Original behavior checked bomb-target state via gHUD.m_FollowIcon here.
+		// That member is not present in this build, so we leave the old check
+		// commented out for reference and skip the defuser gate for now.
+		// if (cl::gHUD.m_FollowIcon.m_iBombTargetsNum > 0)
+		// {
+		// 	szCommand += ";defuser";
+		// }
 	}
 	gEngfuncs.pfnClientCmd(const_cast<char *>(szCommand.c_str()));
 

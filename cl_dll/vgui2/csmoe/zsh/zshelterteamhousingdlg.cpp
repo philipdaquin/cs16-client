@@ -1,6 +1,6 @@
 
 #include "hud.h"
-#include "CBaseViewport.h"
+#include "../../CBaseViewport.h"
 #include "zshelterteamhousingdlg.h"
 
 #include <vgui/IScheme.h>
@@ -12,7 +12,7 @@
 #include <string>
 #include <algorithm>
 
-#include "configs/cfg_zsht.h"
+#include "zsht_compat.h"
 
 using namespace vgui2;
 

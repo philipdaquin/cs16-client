@@ -7,7 +7,7 @@
 
 #include <vgui_controls/WizardPanel.h>
 #include "game_controls/buymenu.h"
-#include "IViewPort.h"
+#include "IViewport.h"
 
 namespace vgui
 {
