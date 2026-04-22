@@ -14,6 +14,7 @@
 #include <FileSystem.h>
 #include "../BaseUISurface.h"
 #include "controls.h"
+#include <tier0/dbg.h>
 
 IKeyValues* g_pKeyValuesInterface = nullptr;
 IFileSystem *g_pFullFileSystem = nullptr;
@@ -44,6 +45,18 @@ void COM_TimestampedLog(char const *fmt, ...)
 	std::fprintf(stderr, "[VGUI2-TRACE] ");
 	std::vfprintf(stderr, fmt, args);
 	std::fprintf(stderr, "\n");
+	va_end(args);
+}
+
+// Fallback for wasm/client builds that do not link the engine dbg module.
+// Strong definitions elsewhere will override this weak symbol.
+void Warning( const tchar *pMsgFormat, ... ) __attribute__((weak));
+void Warning( const tchar *pMsgFormat, ... )
+{
+	va_list args;
+	va_start(args, pMsgFormat);
+	std::fprintf(stderr, "[Xash3D][warning] ");
+	std::vfprintf(stderr, pMsgFormat, args);
 	va_end(args);
 }
 
@@ -84,9 +97,9 @@ namespace vgui2
 	}
 
 	vgui2::IPanel *ipanel() {
-		std::fprintf(stderr, "[VGUI2-TRACE] ipanel() &g_pPanelInterface=%p value=%p\n",
-			(void *)&::g_pPanelInterface,
-			(void *)::g_pPanelInterface);
+		// std::fprintf(stderr, "[VGUI2-TRACE] ipanel() &g_pPanelInterface=%p value=%p\n",
+		// 	(void *)&::g_pPanelInterface,
+		// 	(void *)::g_pPanelInterface);
 		return ::g_pPanelInterface;
 	}
 

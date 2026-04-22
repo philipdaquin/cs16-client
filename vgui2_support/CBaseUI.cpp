@@ -306,10 +306,14 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	//Draw above static and client panels.
 	staticGameUIPanel->SetZPos(50);
 	
-	if (staticGameUIFuncs)
-	{
-		staticGameUIFuncs->Initialize(m_FactoryList, m_iNumFactories);
-	}
+		if (staticGameUIFuncs)
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start before GameUI Initialize staticGameUIFuncs=%p factories=%d\n",
+				(void *)staticGameUIFuncs, m_iNumFactories);
+			staticGameUIFuncs->Initialize(m_FactoryList, m_iNumFactories);
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI Initialize staticGameUIFuncs=%p staticClient=%p\n",
+				(void *)staticGameUIFuncs, (void *)staticClient);
+		}
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI init staticGameUIFuncs=%p staticClient=%p\n",
 		(void *)staticGameUIFuncs, (void *)staticClient);
 
@@ -320,11 +324,15 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after client Initialize staticSurface=%p viewport=%p\n",
 		(void *)staticSurface, (void *)g_pViewport);
 
-	if (staticGameUIFuncs)
-	{
-		void* system = nullptr;
-		staticGameUIFuncs->Start(&gEngfuncs, CLDLL_INTERFACE_VERSION, system);
-	}
+		if (staticGameUIFuncs)
+		{
+			void* system = nullptr;
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start before GameUI Start staticGameUIFuncs=%p system=%p\n",
+				(void *)staticGameUIFuncs, system);
+			staticGameUIFuncs->Start(&gEngfuncs, CLDLL_INTERFACE_VERSION, system);
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI Start staticGameUIFuncs=%p\n",
+				(void *)staticGameUIFuncs);
+		}
 
 	staticClientDLLPanel->SetScheme("ClientScheme");
 
@@ -511,6 +519,8 @@ bool CBaseUI::IsGameUIVisible() {
 
 vgui2::VPANEL CEngineVGui::GetPanel(VGUIPANEL type)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CEngineVGui::GetPanel enter type=%d staticPanel=%p staticClientDLLPanel=%p staticGameUIPanel=%p\n",
+		(int)type, (void *)staticPanel, (void *)staticClientDLLPanel, (void *)staticGameUIPanel);
 	switch (type)
 	{
 	default:

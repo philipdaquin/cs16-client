@@ -104,7 +104,11 @@ namespace vgui2
 			_size[0] = wide;
 			_size[1] = tall;
 
-			Client()->OnSizeChanged(wide, tall);
+			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SetSize skipping OnSizeChanged because client is null this=%p wide=%d tall=%d\n",
+				(void *)this, wide, tall);
+			// Client()->OnSizeChanged(wide, tall);
+			if (Client())
+				Client()->OnSizeChanged(wide, tall);
 		}
 	}
 
@@ -460,22 +464,54 @@ namespace vgui2
 
 	const char* VPanel::GetName()
 	{
+		// return Client()->GetName();
+		if (!Client())
+		{
+			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetName null client this=%p\n", (void *)this);
+			return "";
+		}
+
 		return Client()->GetName();
 	}
 
 	const char* VPanel::GetClassName()
 	{
+		// return Client()->GetClassName();
+		if (!Client())
+		{
+			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetClassName null client this=%p\n", (void *)this);
+			return "";
+		}
+
 		return Client()->GetClassName();
 	}
 
 	HScheme VPanel::GetScheme()
 	{
+		// return Client()->GetScheme();
+		if (!Client())
+		{
+			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::GetScheme null client this=%p\n", (void *)this);
+			return 0;
+		}
+
 		return Client()->GetScheme();
 	}
 
 	void VPanel::SendMessage(KeyValues* params, VPANEL ifrompanel)
 	{
-		Client()->OnMessage(params, ifrompanel);
+		// Client()->OnMessage(params, ifrompanel);
+		IClientPanel *client = Client();
+		std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage this=%p client=%p params=%p from=%p\n",
+			(void *)this, (void *)client, (void *)params, (void *)ifrompanel);
+		if (!client)
+		{
+			std::fprintf(stderr, "[VGUI2-TRACE] VPanel::SendMessage null client this=%p from=%p\n",
+				(void *)this, (void *)ifrompanel);
+			return;
+		}
+
+		client->OnMessage(params, ifrompanel);
 	}
 
 	IClientPanel* VPanel::Client()

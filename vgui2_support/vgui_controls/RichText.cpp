@@ -1390,7 +1390,15 @@ void RichText::LayoutVerticalScrollBarSlider()
 	_vertScrollBar->SetSize( _vertScrollBar->GetWide(), tall );
 	
 	// calculate how many lines we can fully display
-	int displayLines = tall / (surface()->GetFontTall(_font) + _drawOffsetY);
+	int lineHeight = surface()->GetFontTall(_font) + _drawOffsetY;
+	//int displayLines = tall / (surface()->GetFontTall(_font) + _drawOffsetY);
+	if (lineHeight <= 0)
+	{
+		std::fprintf(stderr, "[VGUI2-TRACE] RichText::LayoutVerticalScrollBarSlider skipping because lineHeight is invalid this=%p font=%d drawOffsetY=%d\n",
+			(void *)this, _font, _drawOffsetY);
+		return;
+	}
+	int displayLines = tall / lineHeight;
 	int numLines = m_LineBreaks.Count();
 	
 	if (numLines <= displayLines)
@@ -2611,4 +2619,3 @@ void RichText::Validate( CValidator &validator, char *pchName )
 	validator.Pop();
 }
 #endif // DBGFLAG_VALIDATE
-

@@ -19,27 +19,45 @@ static void __CmdFunc_OpenGameUITestPanel()
 
 CGameUITestPanel::CGameUITestPanel(vgui2::VPANEL parent) : BaseClass(nullptr, "GameUITestPanel")
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor enter this=%p parent=%p\n", this, (void *)parent);
 	BaseClass::SetParent(parent);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after BaseClass::SetParent this=%p parent=%p\n", this, (void *)parent);
 
 	SetKeyBoardInputEnabled(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetKeyBoardInputEnabled this=%p\n", this);
 	SetMouseInputEnabled(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetMouseInputEnabled this=%p\n", this);
 
 	SetProportional(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetProportional this=%p\n", this);
 	SetTitleBarVisible(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetTitleBarVisible this=%p\n", this);
 	SetMinimizeButtonVisible(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetMinimizeButtonVisible this=%p\n", this);
 	SetMaximizeButtonVisible(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetMaximizeButtonVisible this=%p\n", this);
 	SetCloseButtonVisible(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetCloseButtonVisible this=%p\n", this);
 	SetSizeable(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetSizeable this=%p\n", this);
 	SetMoveable(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetMoveable this=%p\n", this);
 	SetVisible(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetVisible this=%p\n", this);
 	SetTitle(L"Quote of the day", false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetTitle this=%p\n", this);
 
 	m_pRichText = new vgui2::RichText(this, "QuoteBox");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after RichText this=%p richText=%p\n", this, (void *)m_pRichText);
 	m_pRichText->SetVerticalScrollbar(false);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetVerticalScrollbar this=%p richText=%p\n", this, (void *)m_pRichText);
 
 	SetScheme("ClientScheme");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after SetScheme this=%p\n", this);
 	Reset();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after Reset this=%p\n", this);
     gEngfuncs.pfnAddCommand("gameui_open_test_panel", __CmdFunc_OpenGameUITestPanel);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUITestPanel ctor after pfnAddCommand this=%p\n", this);
 }
 
 CGameUITestPanel::~CGameUITestPanel() {}

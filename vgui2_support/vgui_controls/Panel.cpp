@@ -1274,6 +1274,8 @@ void Panel::SetParent(Panel *newParent)
 //-----------------------------------------------------------------------------
 void Panel::SetParent(VPANEL newParent)
 {
+	fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) enter this=%p selfVPanel=%p newParent=%p currentParent=%p popup=%d\n",
+		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
 	if (newParent)
 	{
 		ipanel()->SetParent(GetVPanel(), newParent);
@@ -1283,19 +1285,34 @@ void Panel::SetParent(VPANEL newParent)
 		ipanel()->SetParent(GetVPanel(), NULL);
 	}
 
+	fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) after ipanel->SetParent this=%p selfVPanel=%p newParent=%p parentNow=%p popup=%d\n",
+		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
+
 	if (GetVParent() && !IsPopup())
 	{
-		SetProportional(ipanel()->IsProportional(GetVParent()));
+		VPANEL parent = GetVParent();
+		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) sync parent state this=%p parent=%p selfVPanel=%p\n",
+			(void *)this, (void *)parent, (void *)GetVPanel());
+		bool proportional = ipanel()->IsProportional(parent);
+		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent proportional this=%p parent=%p proportional=%d\n",
+			(void *)this, (void *)parent, proportional);
+		SetProportional(proportional);
 
 		// most of the time KBInput == parents kbinput
-		if (ipanel()->IsKeyBoardInputEnabled(GetVParent()) != IsKeyBoardInputEnabled())
+		bool parentKb = ipanel()->IsKeyBoardInputEnabled(parent);
+		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent kb state this=%p parent=%p parentKb=%d selfKb=%d\n",
+			(void *)this, (void *)parent, parentKb, IsKeyBoardInputEnabled());
+		if (parentKb != IsKeyBoardInputEnabled())
 		{
-			SetKeyBoardInputEnabled(ipanel()->IsKeyBoardInputEnabled(GetVParent()));
+			SetKeyBoardInputEnabled(parentKb);
 		}
 
-		if (ipanel()->IsMouseInputEnabled(GetVParent()) != IsMouseInputEnabled())
+		bool parentMouse = ipanel()->IsMouseInputEnabled(parent);
+		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent mouse state this=%p parent=%p parentMouse=%d selfMouse=%d\n",
+			(void *)this, (void *)parent, parentMouse, IsMouseInputEnabled());
+		if (parentMouse != IsMouseInputEnabled())
 		{
-			SetMouseInputEnabled(ipanel()->IsMouseInputEnabled(GetVParent()));
+			SetMouseInputEnabled(parentMouse);
 		}
 	}
 }

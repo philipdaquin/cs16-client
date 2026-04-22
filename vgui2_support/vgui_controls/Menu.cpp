@@ -92,7 +92,9 @@ Menu::Menu(Panel *parent, const char *panelName) : Panel(parent, panelName)
 
 	if (IsProportional())
 	{
-		m_iMenuItemHeight = scheme()->GetProportionalScaledValueEx(GetScheme(), DEFAULT_MENU_ITEM_HEIGHT);
+		// m_iMenuItemHeight = scheme()->GetProportionalScaledValueEx(GetScheme(), DEFAULT_MENU_ITEM_HEIGHT);
+		// Use the stable global proportional scaler here to avoid the early scheme-manager compatibility path.
+		m_iMenuItemHeight = scheme()->GetProportionalScaledValue(DEFAULT_MENU_ITEM_HEIGHT);
 	}
 	else
 	{

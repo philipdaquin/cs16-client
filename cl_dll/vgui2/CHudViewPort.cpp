@@ -119,7 +119,26 @@ IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 {
 	if (Q_strcmp("GameUITestPanel", pszName) == 0)
-		return new CGameUITestPanel(engineVgui()->GetPanel(PANEL_GAMEUIDLL));
+	{
+		IEngineVGui *enginevgui = engineVgui();
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName before GetPanel this=%p name='%s' enginevgui=%p viewport=%p\n",
+			this, pszName ? pszName : "<null>", (void *)enginevgui, (void *)g_pViewport);
+		// vgui2::VPANEL gameUIParent = engineVgui()->GetPanel(PANEL_GAMEUIDLL);
+		if (!enginevgui)
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName aborting because enginevgui is null this=%p name='%s'\n",
+				this, pszName ? pszName : "<null>");
+			return nullptr;
+		}
+
+		vgui2::VPANEL gameUIParent = enginevgui->GetPanel(PANEL_GAMEUIDLL);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName this=%p name='%s' gameUIParent=%p viewport=%p\n",
+			this, pszName ? pszName : "<null>", (void *)gameUIParent, (void *)g_pViewport);
+		auto *pPanel = new CGameUITestPanel(gameUIParent);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName created panel=%p name='%s' gameUIParent=%p\n",
+			(void *)pPanel, pszName ? pszName : "<null>", (void *)gameUIParent);
+		return pPanel;
+	}
 
 	return nullptr;
 }

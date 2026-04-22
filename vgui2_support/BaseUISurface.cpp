@@ -171,8 +171,8 @@ void BaseUISurface::RunFrame() {
 }
 
 vgui2::VPANEL BaseUISurface::GetEmbeddedPanel() {
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::GetEmbeddedPanel this=%p embedded=%p\n",
-        (void *)this, (void *)_embeddedPanel);
+    //gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::GetEmbeddedPanel this=%p embedded=%p\n",
+    //    (void *)this, (void *)_embeddedPanel);
 	return _embeddedPanel;
 }
 
@@ -719,6 +719,20 @@ void BaseUISurface::Invalidate(vgui2::VPANEL) {
 
 void BaseUISurface::SetCursor(vgui2::HCursor cursor) {
 	_currentCursor = cursor;
+	// g_api->CursorSelect((VGUI_DefaultCursor)cursor);
+	if (!g_api)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because g_api is null cursor=%d\n", (int)cursor);
+		return;
+	}
+
+	if (!g_api->CursorSelect)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetCursor skip because CursorSelect is null cursor=%d api=%p\n",
+			(int)cursor, (void *)g_api);
+		return;
+	}
+
 	g_api->CursorSelect((VGUI_DefaultCursor)cursor);
 }
 

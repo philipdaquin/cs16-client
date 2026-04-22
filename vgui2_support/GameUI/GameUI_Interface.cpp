@@ -248,8 +248,7 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/valve_%language%.txt");
 	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/vgui_%language%.txt");
 	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/cstrike_%language%.txt");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/csmoe_%language%.txt");
-
+	// vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/csmoe_%language%.txt");
 	gameuifuncs = static_cast<IGameUIFuncs*>(pEngFactory(ENGINE_GAMEUIFUNCS_INTERFACE_VERSION, nullptr));
 	enginevguifuncs = static_cast<IEngineVGui*>(pEngFactory(VENGINE_VGUI_VERSION, nullptr));
 
@@ -262,8 +261,13 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	staticPanel->SetMouseInputEnabled(false);
 	staticPanel->SetKeyBoardInputEnabled(false);
 	
-	staticPanel->SetParent(enginevguifuncs->GetPanel(PANEL_GAMEUIDLL));
-	
+	VPANEL gameUIPanel = enginevguifuncs ? enginevguifuncs->GetPanel(PANEL_GAMEUIDLL) : 0;
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUI::Initialize before staticPanel->SetParent staticPanel=%p enginevguifuncs=%p gameUIPanel=%p\n",
+		(void *)staticPanel, (void *)enginevguifuncs, (void *)(uintptr_t)gameUIPanel);
+	staticPanel->SetParent(gameUIPanel);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUI::Initialize after staticPanel->SetParent staticPanel=%p parent=%p\n",
+		(void *)staticPanel, (void *)(uintptr_t)gameUIPanel);
+
 	baseuifuncs = static_cast<IBaseUI*>(pEngFactory(BASEUI_INTERFACE_VERSION, nullptr));
 
 	/*
@@ -292,7 +296,9 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 		serverbrowser->SetParent(staticPanel->GetVPanel());
 		*/
 	
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUI::Initialize before SetAllowHTMLJavaScript surface=%p\n", (void *)vgui2::surface());
 	vgui2::surface()->SetAllowHTMLJavaScript(true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CGameUI::Initialize after SetAllowHTMLJavaScript surface=%p\n", (void *)vgui2::surface());
 
 	engine->pfnAddCommand("menu_connectionprogress", UI_ConnectionProgress_f);
 }

@@ -471,6 +471,16 @@ bool CBasePanel::IsInitialLoading(void)
 
 void CBasePanel::UpdateBackgroundState(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState enter this=%p vpanel=%p gameMenu=%p gameMenuVPanel=%p visible=%d loading=%d activated=%d state=%d\n",
+		this,
+		(void *)GetVPanel(),
+		(void *)m_pGameMenu,
+		m_pGameMenu ? (void *)m_pGameMenu->GetVPanel() : nullptr,
+		(int)IsVisible(),
+		(int)m_bLevelLoading,
+		(int)m_bEverActivated,
+		(int)m_eBackgroundState);
+
 	GameConsole().SetParent(GetVPanel());
 
 	if (GameUI().IsInLevel())
@@ -493,10 +503,16 @@ void CBasePanel::UpdateBackgroundState(void)
 	bool bHaveActiveDialogs = false;
 	bool bIsInLevel = GameUI().IsInLevel();
 
-	for (int i = 0; i < GetChildCount(); ++i)
+	// int childCount = GetChildCount();
+	int childCount = GetChildCount();
+	gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState childCount this=%p vpanel=%p count=%d\n",
+		this, (void *)GetVPanel(), childCount);
+	for (int i = 0; i < childCount; ++i)
 	{
 		vgui2::VPANEL child = vgui2::ipanel()->GetChild(GetVPanel(), i);
 		const char *name = vgui2::ipanel()->GetName(child);
+		gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState child this=%p index=%d child=%p name=%s\n",
+			this, i, (void *)child, name ? name : "<null>");
 
 		if (child && vgui2::ipanel()->IsVisible(child) && vgui2::ipanel()->IsPopup(child) && child != m_pGameMenu->GetVPanel())
 		{
@@ -508,15 +524,31 @@ void CBasePanel::UpdateBackgroundState(void)
 	if (!bHaveActiveDialogs)
 	{
 		vgui2::VPANEL parent = GetVParent();
+		gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState parent scan this=%p parent=%p\n",
+			this, (void *)parent);
 
-		for (int i = 0; i < vgui2::ipanel()->GetChildCount(parent); ++i)
+		// int parentChildCount = vgui2::ipanel()->GetChildCount(parent);
+		if (!parent)
 		{
-			vgui2::VPANEL child = vgui2::ipanel()->GetChild(parent, i);
-
-			if (child && vgui2::ipanel()->IsVisible(child) && vgui2::ipanel()->IsPopup(child) && child != GetVPanel())
+			gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState skipping parent scan because parent is null this=%p\n",
+				this);
+		}
+		else
+		{
+			int parentChildCount = vgui2::ipanel()->GetChildCount(parent);
+			gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState parent childCount this=%p parent=%p count=%d\n",
+				this, (void *)parent, parentChildCount);
+			for (int i = 0; i < parentChildCount; ++i)
 			{
-				bHaveActiveDialogs = true;
-				break;
+				vgui2::VPANEL child = vgui2::ipanel()->GetChild(parent, i);
+				gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState parent child this=%p index=%d child=%p\n",
+					this, i, (void *)child);
+
+				if (child && vgui2::ipanel()->IsVisible(child) && vgui2::ipanel()->IsPopup(child) && child != GetVPanel())
+				{
+					bHaveActiveDialogs = true;
+					break;
+				}
 			}
 		}
 	}
@@ -525,6 +557,8 @@ void CBasePanel::UpdateBackgroundState(void)
 
 	if (m_bHaveDarkenedBackground != bNeedDarkenedBackground)
 	{
+		gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::UpdateBackgroundState background change this=%p haveDarkened=%d needDarkened=%d state=%d\n",
+			this, (int)m_bHaveDarkenedBackground, (int)bNeedDarkenedBackground, (int)m_eBackgroundState);
 		float targetAlpha, duration;
 
 		if (bNeedDarkenedBackground || m_eBackgroundState == BACKGROUND_LOADING)
@@ -724,7 +758,8 @@ void CBasePanel::CreateGameMenu(void)
 
 	if (!m_pGameMenu)
 	{
-		Error("Could not load file Resource/GameMenu.res");
+		// Error("Could not load file Resource/GameMenu.res");
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CreateGameMenu missing Resource/GameMenu.res, continuing without game menu\n");
 	}
 	else
 	{
@@ -799,6 +834,8 @@ void CBasePanel::RunFrame(void)
 	if (!IsVisible())
 		return;
 
+	gEngfuncs.Con_Printf("[VGUI2-TRACE] CBasePanel::RunFrame this=%p vpanel=%p visible=%d loading=%d activated=%d backgroundState=%d\n",
+		this, (void *)GetVPanel(), (int)IsVisible(), (int)m_bLevelLoading, (int)m_bEverActivated, (int)m_eBackgroundState);
 	if (vgui2::surface()->GetModalPanel())
 		vgui2::surface()->PaintTraverse(GetVPanel());
 
