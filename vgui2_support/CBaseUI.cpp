@@ -337,6 +337,13 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	staticClientDLLPanel->SetScheme("ClientScheme");
 
 	if (staticClient) {
+		// Original order:
+		// staticClient->Start();
+		// staticClient->SetParent(staticClientDLLPanel->GetVPanel());
+		//
+		// The viewport creates its default panels during Start(), so give it
+		// the real client root first and repeat the parent sync after creation.
+		staticClient->SetParent(staticClientDLLPanel->GetVPanel());
 		staticClient->Start();
 		staticClient->SetParent(staticClientDLLPanel->GetVPanel());
 	}

@@ -113,7 +113,13 @@ void CBaseViewport::SetParent( vgui2::VPANEL parent )
 	//NOTE: the engine doesn't set the root to be proportional so it will override our settings. We must restore our settings here. - Solokiller
 	SetProportional( bIsProportional );
 
-	m_pBackGround->SetParent( parent );
+	// Original behavior:
+	// m_pBackGround->SetParent( parent );
+	if (m_pBackGround)
+		m_pBackGround->SetParent( parent );
+	else
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent no background yet this=%p parent=%p\n",
+			this, (void *)parent);
 
 	for( int i = 0; i< m_Panels.Count(); i++ )
 	{
@@ -239,6 +245,9 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 
 void CBaseViewport::Paint()
 {
+	// Original trace:
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Paint this=%p visible=%d panelCount=%d\n",
+	// 	this, IsVisible() ? 1 : 0, GetChildCount());
 }
 
 void CBaseViewport::Layout()

@@ -952,13 +952,22 @@ void BaseUISurface::MovePopupToBack(vgui2::VPANEL panel) {
 }
 
 void BaseUISurface::SolveTraverse(vgui2::VPANEL panel, bool forceApplySchemeSettings) {
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] surface->SolveTraverse enter panel=%p forceApplySchemeSettings=%d\n",
+	// 	(void *)panel, forceApplySchemeSettings ? 1 : 0);
 	InternalSchemeSettingsTraverse(panel, forceApplySchemeSettings);
 	InternalThinkTraverse(panel);
 	InternalSolveTraverse(panel);
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] surface->SolveTraverse exit panel=%p\n", (void *)panel);
 }
 
 void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse enter panel=%p\n", (void *)panel);
 	if (!vgui2::ipanel()->IsVisible(panel)) {
+		// Original trace:
+		// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse skip invisible panel=%p\n", (void *)panel);
 		return;
 	}
 
@@ -984,6 +993,8 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 			vgui2::ipanel()->PaintTraverse(pop, true, true);
 		}
 	}
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse exit panel=%p\n", (void *)panel);
 }
 
 void BaseUISurface::EnableMouseCapture(vgui2::VPANEL, bool) {

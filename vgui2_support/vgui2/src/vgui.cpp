@@ -100,6 +100,9 @@ bool CVGui::IsRunning()
 
 void CVGui::RunFrame()
 {
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] ivgui->RunFrame enter this=%p running=%d panels=%d\n",
+	// 	(void *)this, m_bRunning ? 1 : 0, m_TickSignalVec.Count());
 	vgui2::surface()->RunFrame();
 
 	vgui2::system()->RunFrame();
@@ -146,9 +149,14 @@ void CVGui::RunFrame()
 	auto surface = vgui2::surface();
 	if( surface )
 	{
+		// Original trace:
+		// std::fprintf(stderr, "[VGUI2-TRACE] ivgui->RunFrame SolveTraverse embedded=%p\n",
+		// 	(void *)surface->GetEmbeddedPanel());
 		surface->SolveTraverse( surface->GetEmbeddedPanel() );
 		surface->ApplyChanges();
 	}
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] ivgui->RunFrame exit this=%p\n", (void *)this);
 }
 
 void CVGui::ShutdownMessage( unsigned int shutdownID )

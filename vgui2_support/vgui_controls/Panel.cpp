@@ -1124,6 +1124,8 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 //-----------------------------------------------------------------------------
 void Panel::PaintBorder()
 {
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] Panel::PaintBorder this=%p vpanel=%p\n", (void *)this, (void *)GetVPanel());
 	_border->Paint(GetVPanel());
 }
 
@@ -1133,6 +1135,8 @@ void Panel::PaintBorder()
 //-----------------------------------------------------------------------------
 void Panel::PaintBackground()
 { 
+	// Original trace:
+	// std::fprintf(stderr, "[VGUI2-TRACE] Panel::PaintBackground this=%p vpanel=%p\n", (void *)this, (void *)GetVPanel());
 	int wide, tall;
 	GetSize( wide, tall );
 	if ( m_SkipChild.Get() && m_SkipChild->IsVisible() )

@@ -28,12 +28,16 @@ using cl::g_iTeamNumber;
 
 CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 {
-
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
+		this, (void *)pViewPort);
 }
 
 void CCSTeamMenu::SetupControlSettings()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/CSO_TeamMenu.res pathID=GAME\n",
+		this);
 	LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
 	InvalidateLayout();
 }
 
@@ -43,10 +47,16 @@ CCSTeamMenu::~CCSTeamMenu(void)
 
 void CCSTeamMenu::ShowPanel(bool bShow)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel this=%p show=%d\n",
+		this, bShow ? 1 : 0);
 	if (bShow)
 	{
 		if (gHUD.m_iIntermission || gEngfuncs.IsSpectateOnly())
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel blocked this=%p because intermission/spectate\n",
+				this);
 			return;
+		}
 	}
 
 	BaseClass::ShowPanel(bShow);
@@ -54,6 +64,7 @@ void CCSTeamMenu::ShowPanel(bool bShow)
 
 void CCSTeamMenu::Update(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::Update this=%p\n", this);
 	BaseClass::Update();
 
 	if (g_pViewport->GetAllowSpectators())
@@ -87,6 +98,8 @@ void CCSTeamMenu::Update(void)
 
 void CCSTeamMenu::SetVisible(bool state)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisible this=%p state=%d\n",
+		this, state ? 1 : 0);
 	BaseClass::SetVisible(state);
 
 	if (state)
@@ -100,6 +113,8 @@ void CCSTeamMenu::SetVisible(bool state)
 
 void CCSTeamMenu::OnCommand(const char *command)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand this=%p command='%s'\n",
+		this, command ? command : "<null>");
 	if (Q_stricmp(command, "vguicancel"))
 	{
 		cl::gEngfuncs.pfnClientCmd(const_cast<char *>(command));
@@ -114,6 +129,8 @@ void CCSTeamMenu::OnCommand(const char *command)
 
 void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisibleButton this=%p entry='%s' state=%d\n",
+		this, textEntryName ? textEntryName : "<null>", state ? 1 : 0);
 	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
 
 	if (entry)
@@ -122,21 +139,29 @@ void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 
 void CCSTeamMenu::PaintBackground(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground this=%p visible=%d\n",
+		this, IsVisible() ? 1 : 0);
 	BaseClass::PaintBackground();
 }
 
 void CCSTeamMenu::PerformLayout(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PerformLayout this=%p visible=%d\n",
+		this, IsVisible() ? 1 : 0);
 	BaseClass::PerformLayout();
 }
 
 void CCSTeamMenu::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ApplySchemeSettings this=%p scheme=%p\n",
+		this, (void *)pScheme);
 	BaseClass::ApplySchemeSettings(pScheme);
 }
 
 vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CreateControlByName this=%p control='%s'\n",
+		this, controlName ? controlName : "<null>");
 	if (!Q_stricmp("IGButton", controlName))
 	{
 		return new IGButton(this, controlName);
@@ -147,5 +172,6 @@ vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 
 void CCSTeamMenu::UpdateGameMode()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::UpdateGameMode this=%p\n", this);
 	SetupControlSettings();
 }

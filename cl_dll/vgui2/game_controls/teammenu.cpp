@@ -37,6 +37,8 @@ const char *GetStringTeamColor(int i)
 
 CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPort(pViewPort)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu this=%p viewport=%p panelName=%s\n",
+		this, (void *)m_pViewPort, PANEL_TEAM);
 	SetTitle("#Cstrike_Select_Team", true);
 	SetScheme("ClientScheme");
 	SetMoveable(false);
@@ -50,7 +52,10 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML = new HTML(this, "MapInfoHTML");
 #endif
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu loading control settings this=%p resource=Resource/UI/TeamMenu.res pathID=GAME\n",
+		this);
 	LoadControlSettings("Resource/UI/TeamMenu.res", "GAME");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu loaded control settings this=%p\n", this);
 	InvalidateLayout();
 
 	m_szMapName[0] = 0;
@@ -81,6 +86,8 @@ Panel *CTeamMenu::CreateControlByName(const char *controlName)
 
 void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings this=%p scheme=%p mapName='%s'\n",
+		this, (void *)pScheme, m_szMapName);
 	BaseClass::ApplySchemeSettings(pScheme);
 	m_pMapInfo->SetFgColor(pScheme->GetColor("MapDescriptionText", Color(255, 255, 255, 0)));
 
@@ -97,6 +104,8 @@ void CTeamMenu::AutoAssign(void)
 
 void CTeamMenu::ShowPanel(bool bShow)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	if (BaseClass::IsVisible() == bShow)
 		return;
 
@@ -120,10 +129,13 @@ void CTeamMenu::ShowPanel(bool bShow)
 	}
 
 	m_pViewPort->ShowBackGround(bShow);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel after background this=%p show=%d\n",
+		this, bShow ? 1 : 0);
 }
 
 void CTeamMenu::Update(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Update this=%p mapName='%s'\n", this, m_szMapName);
 	char mapname[32];
 	Q_FileBase(gEngfuncs.pfnGetLevelName(), mapname, sizeof(mapname));
 
@@ -133,6 +145,8 @@ void CTeamMenu::Update(void)
 
 void CTeamMenu::LoadMapPage(const char *mapName)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage this=%p mapName='%s'\n",
+		this, mapName ? mapName : "<null>");
 	Q_strncpy(m_szMapName, mapName, strlen(mapName) + 1);
 
 	char mapRES[MAX_PATH];
@@ -146,6 +160,8 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	if (!filesystem()->FileExists(mapRES))
 	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage missing map res this=%p mapRES='%s' checking default.txt\n",
+			this, mapRES);
 		if (filesystem()->FileExists("maps/default.txt"))
 		{
 			Q_snprintf(mapRES, sizeof(mapRES), "maps/default.txt");
@@ -158,6 +174,8 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 	}
 
 	FileHandle_t f = filesystem()->Open(mapRES, "r");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage opened map res this=%p mapRES='%s' handle=%p\n",
+		this, mapRES, (void *)f);
 
 	int fileSize = filesystem()->Size(f);
 	int dataSize = fileSize + sizeof(wchar_t);
@@ -193,6 +211,8 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	InvalidateLayout();
 	Repaint();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage complete this=%p mapRES='%s'\n",
+		this, mapRES);
 }
 
 void CTeamMenu::SetLabelText(const char *textEntryName, const char *text)
@@ -205,6 +225,7 @@ void CTeamMenu::SetLabelText(const char *textEntryName, const char *text)
 
 void CTeamMenu::Reset(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Reset this=%p childCount=%d\n", this, GetChildCount());
 	for (int i = 0; i < GetChildCount(); ++i)
 	{
 		MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
@@ -215,4 +236,5 @@ void CTeamMenu::Reset(void)
 
 	for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
 		m_mouseoverButtons[i]->HidePage();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Reset complete this=%p\n", this);
 }
