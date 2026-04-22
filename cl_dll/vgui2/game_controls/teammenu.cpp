@@ -107,10 +107,16 @@ void CTeamMenu::ShowPanel(bool bShow)
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	if (BaseClass::IsVisible() == bShow)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel no-op this=%p show=%d\n",
+			this, bShow ? 1 : 0);
 		return;
+	}
 
 	if (bShow)
 	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel activating this=%p mouseButtons=%d parent=%p\n",
+			this, m_mouseoverButtons.Count(), (void *)m_pViewPort);
 		Activate();
 		SetMouseInputEnabled(true);
 

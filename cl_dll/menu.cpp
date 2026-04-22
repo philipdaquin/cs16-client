@@ -329,6 +329,15 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 
 	if ( IsCsVgui2OwnedMenuType( menuType ) )
 	{
+		if (menuType == MENU_TEAM)
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu team toggle-on path ready=%d viewport=%p capture=%d active=%d\n",
+				VGUI2_IsReady() ? 1 : 0,
+				VGUI2_GetViewportPtr(),
+				VGUI2_ShouldCaptureInput() ? 1 : 0,
+				VGUI2_ShouldCaptureInput() ? 1 : 0);
+		}
+
 		if ( !VGUI2_HasViewport() || !VGUI2_IsReady() )
 		{
 			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2-owned CS menu, but viewport not ready (ready=%d viewport=%p). legacy fallback disabled\n",
@@ -341,6 +350,8 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		case MENU_TEAM:
 			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 TeamMenu via CCounterStrikeViewport\n", menuType);
 			VGUI2_ShowTeamMenu();
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] routing type=%d to VGUI2 TeamMenu done viewport=%p capture=%d\n",
+				menuType, VGUI2_GetViewportPtr(), VGUI2_ShouldCaptureInput() ? 1 : 0);
 			m_fMenuDisplayed = 1;
 			return;
 		case MENU_CLASS_T:

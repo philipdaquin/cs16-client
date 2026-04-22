@@ -8,7 +8,8 @@
 #include "CGameUITestPanel.h"
 #include "game_controls/buymenu.h"
 #include "game_controls/classmenu.h"
-#include "game_controls/teammenu.h"
+// #include "game_controls/teammenu.h" // legacy generic team menu
+#include "csmoe/cstriketeammenu.h"
 #include "hud.h"
 #include "parsemsg.h"
 
@@ -97,7 +98,12 @@ IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 	else if (Q_strcmp(PANEL_TEAM, pszName) == 0)
 	{
 		if (!m_pTeamMenu)
-			m_pTeamMenu = new CTeamMenu(this);
+		{
+			// Old generic path:
+			// m_pTeamMenu = new CTeamMenu(this);
+			m_pTeamMenu = new CCSTeamMenu(this);
+			static_cast<CCSTeamMenu *>(m_pTeamMenu)->UpdateGameMode();
+		}
 		pPanel = m_pTeamMenu;
 	}
 	else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
@@ -204,6 +210,8 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 	{
 	case MENU_TEAM:
 		panel = m_pTeamMenu;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TEAM panel=%p type=%d\n",
+			(void *)panel, iMenu);
 		break;
 
 	case MENU_CLASS_T:
@@ -237,8 +245,11 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 		return false;
 	}
 
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu before ShowPanel menu=%d panel=%p visible=%d active=%p\n",
+		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
 	ShowPanel(panel, true);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p\n", iMenu, (void *)panel);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p visible=%d active=%p\n",
+		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
 	return true;
 }
 

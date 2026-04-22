@@ -378,6 +378,8 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 		// if this is an 'active' panel, deactivate old active panel
 		if( pPanel->HasInputElements() )
 		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel activating input panel this=%p panel=%p visible=%d active=%p\n",
+				this, (void *)pPanel, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel);
 			// don't show input panels during normal demo playback
 			if( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
 				return;
@@ -413,7 +415,11 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 	}
 
 	// just show/hide panel
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel calling panel->ShowPanel this=%p panel=%p state=%d parent=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, (void *)pPanel->GetVPanel());
 	pPanel->ShowPanel( bState );
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel panel->ShowPanel done this=%p panel=%p state=%d visible=%d active=%p last=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 
 	UpdateAllPanels(); // let other panels rearrange
 }

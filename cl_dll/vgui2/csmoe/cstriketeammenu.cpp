@@ -15,7 +15,7 @@
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
 
-#include "CBaseViewport.h"
+#include "../CBaseViewport.h"
 #include "shared_util.h"
 #include "igbutton.h"
 
@@ -34,9 +34,11 @@ CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 
 void CCSTeamMenu::SetupControlSettings()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/CSO_TeamMenu.res pathID=GAME\n",
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/TeamMenu.res pathID=GAME\n",
 		this);
-	LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
+	// Old CSO-specific layout:
+	// LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
+	LoadControlSettings("Resource/UI/TeamMenu.res", "GAME");
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
 	InvalidateLayout();
 }
@@ -59,7 +61,11 @@ void CCSTeamMenu::ShowPanel(bool bShow)
 		}
 	}
 
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel forwarding to CTeamMenu this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel done this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::Update(void)
