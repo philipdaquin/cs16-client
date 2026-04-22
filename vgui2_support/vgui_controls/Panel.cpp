@@ -1011,6 +1011,13 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		return;
 	}
 
+	// const char *panelName = GetName();
+	// if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
+	// {
+	// 	ivgui()->DPrintf( "[VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+	// 		this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+	// }
+
 	float oldAlphaMultiplier = surface()->DrawGetAlphaMultiplier();
 	float newAlphaMultiplier = oldAlphaMultiplier * m_flAlpha * 1.0f/255.0f;
 
@@ -1116,6 +1123,12 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 	surface()->DrawSetAlphaMultiplier( oldAlphaMultiplier );
 
 	surface()->SwapBuffers( vpanel );
+
+	// if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
+	// {
+	// 	ivgui()->DPrintf( "[VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+	// 		this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+	// }
 }
 
 

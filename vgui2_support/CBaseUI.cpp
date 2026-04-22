@@ -463,6 +463,7 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 	//staticPanel->PerformApplySchemeSettings();
 	//staticPanel->InvalidateLayout(false, true);
 	static_cast<vgui2::IClientPanel*>( staticPanel )->Think();
+
 	vgui2::surface()->PaintTraverse(staticSurface->GetEmbeddedPanel());
 }
 

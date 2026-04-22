@@ -318,6 +318,9 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu type=%d ready=%d viewport=%d\n",
 		menuType, VGUI2_IsReady() ? 1 : 0, VGUI2_HasViewport() ? 1 : 0);
 
+	// Temporary: keep MENU_TEAM from auto-closing on the next press so we can
+	// verify the menu actually reaches the paint path.
+#if 0
 	if (menuType == MENU_TEAM && VGUI2_ShouldCaptureInput())
 	{
 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] toggling MENU_TEAM off because VGUI2 menu is already visible\n");
@@ -326,6 +329,7 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 		Touch_CloseMenu();
 		return;
 	}
+#endif
 
 	if ( IsCsVgui2OwnedMenuType( menuType ) )
 	{

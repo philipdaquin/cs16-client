@@ -141,7 +141,7 @@ void CTeamMenu::ShowPanel(bool bShow)
 
 void CTeamMenu::Update(void)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Update this=%p mapName='%s'\n", this, m_szMapName);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Update this=%p mapName='%s'\n", this, m_szMapName);
 	char mapname[32];
 	Q_FileBase(gEngfuncs.pfnGetLevelName(), mapname, sizeof(mapname));
 
@@ -151,8 +151,8 @@ void CTeamMenu::Update(void)
 
 void CTeamMenu::LoadMapPage(const char *mapName)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage this=%p mapName='%s'\n",
-		this, mapName ? mapName : "<null>");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage this=%p mapName='%s'\n",
+	// 	this, mapName ? mapName : "<null>");
 	Q_strncpy(m_szMapName, mapName, strlen(mapName) + 1);
 
 	char mapRES[MAX_PATH];
@@ -166,8 +166,6 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	if (!filesystem()->FileExists(mapRES))
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage missing map res this=%p mapRES='%s' checking default.txt\n",
-			this, mapRES);
 		if (filesystem()->FileExists("maps/default.txt"))
 		{
 			Q_snprintf(mapRES, sizeof(mapRES), "maps/default.txt");

@@ -204,16 +204,17 @@ static bool OpenNextSearchDirectory( FindState *state )
 
 static void TraceLookupPath( const char *op, const char *fileName, const char *pathID = nullptr )
 {
-	char cwd[ PATH_MAX ] = {};
-	if( !getcwd( cwd, sizeof( cwd ) ) )
-		strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
-
-	cwd[ sizeof( cwd ) - 1 ] = 0;
-	std::fprintf( stderr, "[Xash3D][stderr] [FILESYSTEM-TRACE] %s file=%s pathID=%s cwd=%s\n",
-		op,
-		fileName ? fileName : "(null)",
-		pathID ? pathID : "(null)",
-		cwd );
+	// temp disbaled 
+	// char cwd[ PATH_MAX ] = {};
+	// if( !getcwd( cwd, sizeof( cwd ) ) )
+	// 	strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
+	//
+	// cwd[ sizeof( cwd ) - 1 ] = 0;
+	// std::fprintf( stderr, "[Xash3D][stderr] [FILESYSTEM-TRACE] %s file=%s pathID=%s cwd=%s\n",
+	// 	op,
+	// 	fileName ? fileName : "(null)",
+	// 	pathID ? pathID : "(null)",
+	// 	cwd );
 }
 
 class CStdFileSystem : public IFileSystem

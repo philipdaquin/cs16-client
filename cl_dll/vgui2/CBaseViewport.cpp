@@ -245,9 +245,7 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 
 void CBaseViewport::Paint()
 {
-	// Original trace:
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Paint this=%p visible=%d panelCount=%d\n",
-	// 	this, IsVisible() ? 1 : 0, GetChildCount());
+	// Intentionally empty for now.
 }
 
 void CBaseViewport::Layout()

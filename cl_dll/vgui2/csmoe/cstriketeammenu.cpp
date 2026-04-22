@@ -14,6 +14,7 @@
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
+#include <vgui_controls/RichText.h>
 
 #include "../CBaseViewport.h"
 #include "shared_util.h"
@@ -64,13 +65,25 @@ void CCSTeamMenu::ShowPanel(bool bShow)
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel forwarding to CTeamMenu this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
+
+	// if (bShow)
+	// {
+	// 	// Debug visibility probe: make the TeamMenu frame impossible to miss while
+	// 	// we verify the actual paint path on the client.
+	// 	SetBgColor(Color(0, 160, 255, 255));
+	// 	SetPaintBackgroundEnabled(true);
+	// 	SetPaintEnabled(true);
+	// 	SetPaintBorderEnabled(true);
+	// 	SetTitleBarVisible(true);
+	// }
+
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel done this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::Update(void)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::Update this=%p\n", this);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::Update this=%p\n", this);
 	BaseClass::Update();
 
 	if (g_pViewport->GetAllowSpectators())
@@ -135,8 +148,8 @@ void CCSTeamMenu::OnCommand(const char *command)
 
 void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisibleButton this=%p entry='%s' state=%d\n",
-		this, textEntryName ? textEntryName : "<null>", state ? 1 : 0);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisibleButton this=%p entry='%s' state=%d\n",
+	// 	this, textEntryName ? textEntryName : "<null>", state ? 1 : 0);
 	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
 
 	if (entry)
@@ -145,9 +158,11 @@ void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 
 void CCSTeamMenu::PaintBackground(void)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground this=%p visible=%d\n",
-		this, IsVisible() ? 1 : 0);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground enter this=%p visible=%d\n",
+	// 	this, IsVisible() ? 1 : 0);
 	BaseClass::PaintBackground();
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
+	// 	this, IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::PerformLayout(void)
