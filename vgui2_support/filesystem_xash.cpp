@@ -35,7 +35,22 @@ struct FindState
 	std::string directory;
 	std::string pattern;
 	std::string current;
+	std::vector<std::string> candidates;
+	size_t candidateIndex = 0;
 };
+
+struct SearchRoot
+{
+	std::string path;
+	bool gameDir = false;
+};
+
+static std::vector<SearchRoot> g_SearchRoots;
+
+static bool IsGameDirPathID( const char *pathID )
+{
+	return pathID && ( strstr( pathID, "GAME" ) || strstr( pathID, "CONFIG" ) || strstr( pathID, "GAMECONFIG" ) );
+}
 
 static void SplitSearchPattern( const char *pattern, std::string &directory, std::string &filePattern )
 {
@@ -81,15 +96,169 @@ static bool IsDir( const std::string &path )
 	return stat( path.c_str(), &st ) == 0 && S_ISDIR( st.st_mode );
 }
 
+static bool IsAbsolutePath( const char *path )
+{
+	if( !path || !*path )
+		return false;
+
+#ifdef _WIN32
+	return ( strlen( path ) > 1 && path[1] == ':' ) || path[0] == '/' || path[0] == '\\';
+#else
+	return path[0] == '/';
+#endif
+}
+
+static bool PathExists( const std::string &path )
+{
+	struct stat st;
+	return stat( path.c_str(), &st ) == 0;
+}
+
+static std::string ResolvePath( const char *pFileName, const char *pathID )
+{
+	if( !pFileName || !*pFileName )
+		return {};
+
+	if( PathExists( pFileName ) )
+		return pFileName;
+
+	if( IsAbsolutePath( pFileName ) )
+		return {};
+
+	const bool gameOnly = IsGameDirPathID( pathID );
+	const bool skinPath = pathID && !strcmp( pathID, "SKIN" );
+
+	for( auto it = g_SearchRoots.rbegin(); it != g_SearchRoots.rend(); ++it )
+	{
+		if( gameOnly && !it->gameDir )
+			continue;
+
+		if( skinPath )
+		{
+			const std::string skinsCandidate = JoinPath( JoinPath( it->path, "skins" ), pFileName );
+			if( PathExists( skinsCandidate ) )
+				return skinsCandidate;
+		}
+
+		const std::string candidate = JoinPath( it->path, pFileName );
+		if( PathExists( candidate ) )
+			return candidate;
+	}
+
+	return {};
+}
+
+static void BuildSearchCandidates( const char *pWildCard, const char *pathID, std::vector<std::string> &candidates )
+{
+	candidates.clear();
+
+	if( !pWildCard || !*pWildCard )
+		return;
+
+	std::string directory;
+	std::string filePattern;
+	SplitSearchPattern( pWildCard, directory, filePattern );
+
+	const bool gameOnly = IsGameDirPathID( pathID );
+	const bool skinPath = pathID && !strcmp( pathID, "SKIN" );
+
+	if( PathExists( directory ) )
+		candidates.push_back( directory );
+
+	for( auto it = g_SearchRoots.rbegin(); it != g_SearchRoots.rend(); ++it )
+	{
+		if( gameOnly && !it->gameDir )
+			continue;
+
+		if( skinPath )
+			candidates.push_back( JoinPath( JoinPath( it->path, "skins" ), directory.c_str() ) );
+		else
+			candidates.push_back( JoinPath( it->path, directory.c_str() ) );
+	}
+
+	if( candidates.empty() )
+		candidates.push_back( directory );
+}
+
+static bool OpenNextSearchDirectory( FindState *state )
+{
+	if( !state )
+		return false;
+
+	while( state->candidateIndex < state->candidates.size() )
+	{
+		if( state->dir )
+		{
+			closedir( state->dir );
+			state->dir = nullptr;
+		}
+
+		state->directory = state->candidates[state->candidateIndex++];
+		state->dir = opendir( state->directory.c_str() );
+		if( state->dir )
+			return true;
+	}
+
+	return false;
+}
+
+static void TraceLookupPath( const char *op, const char *fileName, const char *pathID = nullptr )
+{
+	char cwd[ PATH_MAX ] = {};
+	if( !getcwd( cwd, sizeof( cwd ) ) )
+		strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
+
+	cwd[ sizeof( cwd ) - 1 ] = 0;
+	std::fprintf( stderr, "[Xash3D][stderr] [FILESYSTEM-TRACE] %s file=%s pathID=%s cwd=%s\n",
+		op,
+		fileName ? fileName : "(null)",
+		pathID ? pathID : "(null)",
+		cwd );
+}
+
 class CStdFileSystem : public IFileSystem
 {
 public:
 	void Mount( void ) override {}
 	void Unmount( void ) override {}
-	void RemoveAllSearchPaths( void ) override {}
-	void AddSearchPath( const char *, const char * ) override {}
-	bool RemoveSearchPath( const char * ) override { return true; }
-	void RemoveFile( const char *pRelativePath, const char * ) override { unlink( pRelativePath ); }
+	void RemoveAllSearchPaths( void ) override
+	{
+		TraceLookupPath( "RemoveAllSearchPaths", nullptr );
+		g_SearchRoots.clear();
+	}
+	void AddSearchPath( const char *pPath, const char *pathID ) override
+	{
+		TraceLookupPath( "AddSearchPath", pPath, pathID );
+		if( !pPath || !*pPath )
+			return;
+
+		g_SearchRoots.push_back( { pPath, IsGameDirPathID( pathID ) } );
+	}
+	bool RemoveSearchPath( const char *pPath ) override
+	{
+		if( !pPath || !*pPath )
+			return false;
+
+		for( auto it = g_SearchRoots.begin(); it != g_SearchRoots.end(); ++it )
+		{
+			if( it->path == pPath )
+			{
+				g_SearchRoots.erase( it );
+				return true;
+			}
+		}
+
+		return false;
+	}
+	void RemoveFile( const char *pRelativePath, const char * ) override
+	{
+		TraceLookupPath( "RemoveFile", pRelativePath );
+		if( !pRelativePath )
+			return;
+
+		if( PathExists( pRelativePath ) )
+			unlink( pRelativePath );
+	}
 	void CreateDirHierarchy( const char *path, const char * ) override
 	{
 		if( !path || !*path )
@@ -106,25 +275,48 @@ public:
 	}
 	bool FileExists( const char *pFileName ) override
 	{
-		struct stat st;
-		return pFileName && stat( pFileName, &st ) == 0;
+		TraceLookupPath( "FileExists", pFileName );
+		if( !pFileName )
+			return false;
+
+		if( PathExists( pFileName ) )
+			return true;
+
+		return !ResolvePath( pFileName, nullptr ).empty();
 	}
 	bool IsDirectory( const char *pFileName ) override
 	{
 		return pFileName && IsDir( pFileName );
 	}
-	FileHandle_t Open( const char *pFileName, const char *pOptions, const char * ) override
+	FileHandle_t Open( const char *pFileName, const char *pOptions, const char *pathID ) override
 	{
-		return pFileName && pOptions ? (FileHandle_t)fopen( pFileName, pOptions ) : FILESYSTEM_INVALID_HANDLE;
+		TraceLookupPath( "Open", pFileName, pathID );
+		if( !pFileName || !pOptions )
+			return FILESYSTEM_INVALID_HANDLE;
+
+		std::string resolved = ResolvePath( pFileName, pathID );
+		const char *openPath = resolved.empty() ? pFileName : resolved.c_str();
+
+		return (FileHandle_t)fopen( openPath, pOptions );
 	}
-	void Close( FileHandle_t file ) override { if( file ) fclose( (FILE *)file ); }
+	void Close( FileHandle_t file ) override
+	{
+		if( !file )
+			return;
+		fclose( (FILE *)file );
+	}
 	void Seek( FileHandle_t file, int pos, FileSystemSeek_t seekType ) override
 	{
 		if( !file ) return;
 		int origin = seekType == FILESYSTEM_SEEK_HEAD ? SEEK_SET : seekType == FILESYSTEM_SEEK_CURRENT ? SEEK_CUR : SEEK_END;
 		fseek( (FILE *)file, pos, origin );
 	}
-	unsigned Tell( FileHandle_t file ) override { return file ? (unsigned)ftell( (FILE *)file ) : 0; }
+	unsigned Tell( FileHandle_t file ) override
+	{
+		if( !file )
+			return 0;
+		return (unsigned)ftell( (FILE *)file );
+	}
 	unsigned Size( FileHandle_t file ) override
 	{
 		if( !file ) return 0;
@@ -136,13 +328,21 @@ public:
 	}
 	unsigned Size( const char *pFileName ) override
 	{
+		if( !pFileName )
+			return 0u;
+		std::string resolved = ResolvePath( pFileName, nullptr );
+		const char *sizePath = resolved.empty() ? pFileName : resolved.c_str();
 		struct stat st;
-		return pFileName && stat( pFileName, &st ) == 0 ? (unsigned)st.st_size : 0u;
+		return stat( sizePath, &st ) == 0 ? (unsigned)st.st_size : 0u;
 	}
 	long GetFileTime( const char *pFileName ) override
 	{
+		if( !pFileName )
+			return -1;
+		std::string resolved = ResolvePath( pFileName, nullptr );
+		const char *timePath = resolved.empty() ? pFileName : resolved.c_str();
 		struct stat st;
-		return pFileName && stat( pFileName, &st ) == 0 ? (long)st.st_mtime : -1;
+		return stat( timePath, &st ) == 0 ? (long)st.st_mtime : -1;
 	}
 	void FileTimeToString( char *pStrip, int maxCharsIncludingTerminator, long fileTime ) override
 	{
@@ -158,12 +358,37 @@ public:
 		strncpy( pStrip, s, maxCharsIncludingTerminator );
 		pStrip[maxCharsIncludingTerminator - 1] = 0;
 	}
-	bool IsOk( FileHandle_t file ) override { return file && !ferror( (FILE *)file ); }
-	void Flush( FileHandle_t file ) override { if( file ) fflush( (FILE *)file ); }
-	bool EndOfFile( FileHandle_t file ) override { return file ? feof( (FILE *)file ) != 0 : true; }
-	int Read( void *pOutput, int size, FileHandle_t file ) override { return file ? (int)fread( pOutput, 1, size, (FILE *)file ) : 0; }
-	int Write( const void *pInput, int size, FileHandle_t file ) override { return file ? (int)fwrite( pInput, 1, size, (FILE *)file ) : 0; }
-	char *ReadLine( char *pOutput, int maxChars, FileHandle_t file ) override { return file && fgets( pOutput, maxChars, (FILE *)file ) ? pOutput : nullptr; }
+	bool IsOk( FileHandle_t file ) override { return file != nullptr; }
+	void Flush( FileHandle_t file ) override
+	{
+		if( !file )
+			return;
+		fflush( (FILE *)file );
+	}
+	bool EndOfFile( FileHandle_t file ) override
+	{
+		if( !file )
+			return true;
+		return feof( (FILE *)file ) != 0;
+	}
+	int Read( void *pOutput, int size, FileHandle_t file ) override
+	{
+		if( !file )
+			return 0;
+		return (int)fread( pOutput, 1, size, (FILE *)file );
+	}
+	int Write( const void *pInput, int size, FileHandle_t file ) override
+	{
+		if( !file )
+			return 0;
+		return (int)fwrite( pInput, 1, size, (FILE *)file );
+	}
+	char *ReadLine( char *pOutput, int maxChars, FileHandle_t file ) override
+	{
+		if( !file || !pOutput || maxChars <= 0 )
+			return nullptr;
+		return fgets( pOutput, maxChars, (FILE *)file ) ? pOutput : nullptr;
+	}
 	int FPrintf( FileHandle_t file, const char *pFormat, ... ) override
 	{
 		if( !file || !pFormat ) return 0;
@@ -175,52 +400,62 @@ public:
 	}
 	char *GetReadBuffer( FileHandle_t, char * ) override { return nullptr; }
 	void ReleaseReadBuffer( FileHandle_t, char * ) override {}
-	const char *FindFirst( const char *pWildCard, FileFindHandle_t *pHandle, const char * ) override
+	const char *FindFirst( const char *pWildCard, FileFindHandle_t *pHandle, const char *pathID ) override
 	{
 		if( !pWildCard || !pHandle )
 			return nullptr;
+
+		TraceLookupPath( "FindFirst", pWildCard, pathID );
 
 		auto *state = new FindState();
 		if( !state )
 			return nullptr;
 
 		SplitSearchPattern( pWildCard, state->directory, state->pattern );
-		state->dir = opendir( state->directory.c_str() );
-		if( !state->dir )
+		BuildSearchCandidates( pWildCard, pathID, state->candidates );
+		if( state->candidates.empty() )
 		{
 			delete state;
 			return nullptr;
 		}
 
-		struct dirent *ent = nullptr;
-		while( ( ent = readdir( state->dir )) != nullptr )
+		if( !OpenNextSearchDirectory( state ) )
 		{
-			if( fnmatch( state->pattern.c_str(), ent->d_name, 0 ) == 0 )
-			{
-				state->current = JoinPath( state->directory, ent->d_name );
-				*pHandle = (FileFindHandle_t)state;
-				return state->current.c_str();
-			}
+			delete state;
+			return nullptr;
 		}
 
-		FindClose( (FileFindHandle_t)state );
-		return nullptr;
+		*pHandle = (FileFindHandle_t)state;
+		return FindNext( *pHandle );
 	}
 	const char *FindNext( FileFindHandle_t handle ) override
 	{
 		auto *state = (FindState *)handle;
-		if( !state || !state->dir )
+		if( !state )
 			return nullptr;
 
-		struct dirent *ent = nullptr;
-		while( ( ent = readdir( state->dir )) != nullptr )
+		while( state->dir )
 		{
-			if( fnmatch( state->pattern.c_str(), ent->d_name, 0 ) == 0 )
+			struct dirent *ent = nullptr;
+			while( ( ent = readdir( state->dir )) != nullptr )
 			{
-				state->current = JoinPath( state->directory, ent->d_name );
-				return state->current.c_str();
+				if( fnmatch( state->pattern.c_str(), ent->d_name, 0 ) == 0 )
+				{
+					state->current = JoinPath( state->directory, ent->d_name );
+					return state->current.c_str();
+				}
 			}
+
+			if( state->dir )
+			{
+				closedir( state->dir );
+				state->dir = nullptr;
+			}
+
+			if( !OpenNextSearchDirectory( state ) )
+				break;
 		}
+
 		return nullptr;
 	}
 	bool FindIsDirectory( FileFindHandle_t handle ) override
@@ -242,7 +477,10 @@ public:
 	{
 		if( !pFileName || !pLocalPath || localPathBufferSize <= 0 )
 			return nullptr;
-		strncpy( pLocalPath, pFileName, localPathBufferSize );
+		TraceLookupPath( "GetLocalPath", pFileName );
+		std::string resolved = ResolvePath( pFileName, nullptr );
+		const char *outPath = resolved.empty() ? pFileName : resolved.c_str();
+		strncpy( pLocalPath, outPath, localPathBufferSize );
 		pLocalPath[localPathBufferSize - 1] = 0;
 		return pLocalPath;
 	}
@@ -294,9 +532,11 @@ public:
 	}
 	void GetInterfaceVersion( char *p, int maxlen ) override
 	{
-		if( p && maxlen > 0 )
-			strncpy( p, "stdio-local", maxlen );
-			p[maxlen - 1] = 0;
+		if( !p || maxlen <= 0 )
+			return;
+
+		strncpy( p, "stdio-local", maxlen );
+		p[maxlen - 1] = 0;
 	}
 	bool IsFileImmediatelyAvailable( const char *pFileName ) override { return FileExists( pFileName ); }
 	WaitForResourcesHandle_t WaitForResources( const char * ) override { return 0; }
@@ -313,7 +553,14 @@ public:
 	{
 		return Open( pFileName, pOptions, nullptr );
 	}
-	void AddSearchPathNoWrite( const char *, const char * ) {}
+	void AddSearchPathNoWrite( const char *pPath, const char *pathID )
+	{
+		TraceLookupPath( "AddSearchPathNoWrite", pPath, pathID );
+		if( !pPath || !*pPath )
+			return;
+
+		g_SearchRoots.push_back( { pPath, IsGameDirPathID( pathID ) } );
+	}
 };
 
 static CStdFileSystem g_StdioFileSystem;
