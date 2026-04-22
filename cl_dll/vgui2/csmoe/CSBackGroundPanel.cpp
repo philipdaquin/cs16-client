@@ -1,6 +1,11 @@
 
 #include "vgui_int.h"
 #include <vgui/ISurface.h>
+#include "../../util_vector.h"
+#include "const.h"
+#include "com_model.h"
+#include "studio.h"
+#include "r_studioint.h"
 #include "CSBackGroundPanel.h"
 
 using namespace vgui2;

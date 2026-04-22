@@ -2,6 +2,7 @@
 #include "cstrikeclassmenu.h"
 
 #include <cdll_dll.h>
+#include "com_model.h"
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>

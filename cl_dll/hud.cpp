@@ -581,6 +581,13 @@ void CHud::SetGameType()
 	else if( HUD_IsGame( "czero" ))
 		m_iGameType = GAME_CZERO;
 	else m_iGameType = GAME_CSTRIKE;
+
+	m_iModRunning = MOD_NONE;
+	m_iZlevel = 0;
+	m_flZombieSelectTime = 0.0f;
+	m_setBanWeapon.clear();
+	m_setBanKnife.clear();
+	m_setBanGrenade.clear();
 }
 
 /*

@@ -36,6 +36,7 @@
 
 #include "csprite.h"
 #include "cvardef.h"
+#include <set>
 
 #define MIN_ALPHA	 100	
 #define	HUDELEM_ACTIVE	1
@@ -746,8 +747,10 @@ public:
 	CHudMsgFunc(Money);
 	CHudMsgFunc(BlinkAcct);
 
-private:
+public:
 	int m_iMoneyCount;
+
+private:
 	int m_iDelta;
 	int m_iBlinkAmt;
 	float m_fBlinkTime;
@@ -997,6 +1000,11 @@ public:
 		return m_iGameType;
 	}
 
+	inline bool IsZombieMod( ) const
+	{
+		return m_iGameType == 2;
+	}
+
 	inline int GetSpriteRes()
 	{
 		return m_iRes;
@@ -1090,6 +1098,12 @@ public:
 	int	m_fPlayerDead;
 	int m_iIntermission;
 	int m_iNoConsolePrint;
+	int m_iModRunning;
+	int m_iZlevel;
+	float m_flZombieSelectTime;
+	std::set<int> m_setBanWeapon;
+	std::set<int> m_setBanKnife;
+	std::set<int> m_setBanGrenade;
 
 	// sprite indexes
 	int m_HUD_number_0;
@@ -1136,3 +1150,30 @@ extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
+
+// csmoe sources still refer to the older cl::* namespace layout.
+// Keep a lightweight compatibility shim here so we can preserve those callsites.
+namespace cl
+{
+	using ::gHUD;
+	using ::gEngfuncs;
+	using ::g_PlayerExtraInfo;
+	using ::g_iTeamNumber;
+	using ::g_iUser1;
+	using ::g_iUser2;
+	using ::g_iUser3;
+}
+
+// Legacy mod identifiers used by the csmoe VGUI2 menu code.
+// The exact ordering is only required to keep the existing comparisons working.
+enum
+{
+	MOD_NONE = 0,
+	MOD_ZB1,
+	MOD_ZB2,
+	MOD_ZB3,
+	MOD_ZB4,
+	MOD_ZBZ,
+	MOD_TDM,
+	MOD_DM,
+};
