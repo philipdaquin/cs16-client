@@ -5,12 +5,12 @@
 //=============================================================================
 
 #include "subrectimage.h"
-#include "Controls.h"
+#include "controls.h"
 
 #include <tier0/dbg.h>
 #include <tier1/strtools.h>
 
-#include <vgui/ISurface.h>
+#include "../interfaces/vgui/ISurface.h"
 
 using namespace vgui2;
 
@@ -195,4 +195,3 @@ bool CSubRectImage::IsValid()
 {
 	return _valid;
 }
-

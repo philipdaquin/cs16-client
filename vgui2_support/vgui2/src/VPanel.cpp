@@ -2,7 +2,7 @@
 
 #include <vgui/IClientPanel.h>
 #include <vgui/ISurface.h>
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
 #include "VPanel.h"
 

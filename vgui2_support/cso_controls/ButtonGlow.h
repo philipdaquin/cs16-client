@@ -10,8 +10,8 @@
 #include <vgui/IScheme.h>
 #include <KeyValues.h>
 
-#include <vgui_controls/Button.h>
-#include <vgui_controls/ImagePanel.h>
+#include "../vgui_controls/Button.h"
+#include "../vgui_controls/ImagePanel.h"
 
 class ButtonGlow : public vgui2::Button
 {
@@ -40,6 +40,12 @@ public:
 	{
 		return { 192, 205, 224, 255 };
 	}
+
+private:
+	bool _imageBackground = false;
+	vgui2::IImage *_defaultImage[3] = { nullptr, nullptr, nullptr };
+	vgui2::IImage *_armedImage[3] = { nullptr, nullptr, nullptr };
+	vgui2::IImage *_depressedImage[3] = { nullptr, nullptr, nullptr };
 };
 
 #endif

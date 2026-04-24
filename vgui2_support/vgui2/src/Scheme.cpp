@@ -10,10 +10,10 @@
 #include <math.h>
 
 #include <vgui/VGUI.h>
-#include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
-#include <vgui/IPanel.h>
-#include <vgui/ISystem.h>
+#include "../../interfaces/vgui/IScheme.h"
+#include "../../interfaces/vgui/ISurface.h"
+#include "../../interfaces/vgui/IPanel.h"
+#include "../../interfaces/vgui/ISystem.h"
 #include <vstdlib/IKeyValuesSystem.h>
 
 #include <vgui_controls/controls.h>

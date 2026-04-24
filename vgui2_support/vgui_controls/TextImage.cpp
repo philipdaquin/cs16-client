@@ -24,7 +24,7 @@
 #include <tier1/KeyValues.h>
 
 #include "TextImage.h"
-#include "Controls.h"
+#include "controls.h"
 
 #include <tier0/dbg.h>
 

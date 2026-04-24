@@ -9,7 +9,7 @@
 #include "vgui/ISurface.h"
 #include "vgui/ISystem.h"
 #include "vgui/IVGui.h"
-#include "IBaseUI.h"
+#include "../interfaces/IBaseUI.h"
 #include "FileSystem.h"
 #include "GameConsole.h"
 #include "GameUI_Interface.h"
@@ -45,6 +45,8 @@
 
 #include <memory>
 #include <algorithm>
+
+using vgui2::KeyCode;
 
 extern vgui2::DHANDLE<CLoadingDialog> g_hLoadingDialog;
 namespace vgui2 {

@@ -11,7 +11,7 @@
 
 #include <tier1/KeyValues.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "Menu.h"
 #include "MenuItem.h"
 #include "TextImage.h"

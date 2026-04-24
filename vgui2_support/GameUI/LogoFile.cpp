@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "../SourceSDK/public/tier1/utlbuffer.h"
 #include <vgui/VGUI.h>
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 #include "FileSystem.h"
 
 #define TYP_LUMPY 64

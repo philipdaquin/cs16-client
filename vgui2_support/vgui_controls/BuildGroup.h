@@ -23,7 +23,7 @@
 #include <vgui/MouseCode.h>
 #include <vgui/KeyCode.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "PHandle.h"
 
 class KeyValues;

@@ -46,6 +46,105 @@ void SPR_AdjustSize( float *x, float *y, float *w, float *h );
 void SPR_AdjustSizeReverse( float *x, float *y, float *w, float *h );
 void TextAdjustSize( int *x, int *y, int *w, int *h );
 void TextAdjustSizeReverse( int *x, int *y, int *w, int *h );
+// Old builds expected these helpers to come from the engine/client module.
+// This repo now provides local wasm-safe fallbacks below so VGUI2 does not
+// depend on an unresolved external symbol during TeamMenu paint.
+
+namespace vgui2 {
+	extern cl_enginefunc_t gEngfuncs;
+}
+
+static constexpr float kSurfaceBaseWidth = 640.0f;
+static constexpr float kSurfaceBaseHeight = 480.0f;
+
+static void GetSurfaceScale( float &xscale, float &yscale )
+{
+	SCREENINFO screenInfo;
+	screenInfo.iSize = sizeof( SCREENINFO );
+
+	if ( !vgui2::gEngfuncs.pfnGetScreenInfo( &screenInfo ) || screenInfo.iWidth <= 0 || screenInfo.iHeight <= 0 )
+	{
+		xscale = 1.0f;
+		yscale = 1.0f;
+		return;
+	}
+
+	// Keep the historical 640x480 VGUI base size visible in the code.
+	xscale = screenInfo.iWidth / kSurfaceBaseWidth;
+	yscale = screenInfo.iHeight / kSurfaceBaseHeight;
+}
+
+void SPR_AdjustSize( float *x, float *y, float *w, float *h )
+{
+	float xscale = 1.0f;
+	float yscale = 1.0f;
+
+	GetSurfaceScale( xscale, yscale );
+
+	if ( x )
+		*x *= xscale;
+	if ( y )
+		*y *= yscale;
+	if ( w )
+		*w *= xscale;
+	if ( h )
+		*h *= yscale;
+}
+
+void SPR_AdjustSizeReverse( float *x, float *y, float *w, float *h )
+{
+	float xscale = 1.0f;
+	float yscale = 1.0f;
+
+	GetSurfaceScale( xscale, yscale );
+
+	if ( x && xscale != 0.0f )
+		*x /= xscale;
+	if ( y && yscale != 0.0f )
+		*y /= yscale;
+	if ( w && xscale != 0.0f )
+		*w /= xscale;
+	if ( h && yscale != 0.0f )
+		*h /= yscale;
+}
+
+void TextAdjustSize( int *x, int *y, int *w, int *h )
+{
+	float fx = x ? (float)*x : 0.0f;
+	float fy = y ? (float)*y : 0.0f;
+	float fw = w ? (float)*w : 0.0f;
+	float fh = h ? (float)*h : 0.0f;
+
+	SPR_AdjustSize( x ? &fx : nullptr, y ? &fy : nullptr, w ? &fw : nullptr, h ? &fh : nullptr );
+
+	if ( x )
+		*x = (int)( fx + 0.5f );
+	if ( y )
+		*y = (int)( fy + 0.5f );
+	if ( w )
+		*w = (int)( fw + 0.5f );
+	if ( h )
+		*h = (int)( fh + 0.5f );
+}
+
+void TextAdjustSizeReverse( int *x, int *y, int *w, int *h )
+{
+	float fx = x ? (float)*x : 0.0f;
+	float fy = y ? (float)*y : 0.0f;
+	float fw = w ? (float)*w : 0.0f;
+	float fh = h ? (float)*h : 0.0f;
+
+	SPR_AdjustSizeReverse( x ? &fx : nullptr, y ? &fy : nullptr, w ? &fw : nullptr, h ? &fh : nullptr );
+
+	if ( x )
+		*x = (int)( fx + 0.5f );
+	if ( y )
+		*y = (int)( fy + 0.5f );
+	if ( w )
+		*w = (int)( fw + 0.5f );
+	if ( h )
+		*h = (int)( fh + 0.5f );
+}
 
 bool BaseUISurface::m_bTranslateExtendedKeys;
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
@@ -322,6 +421,7 @@ qboolean ClipRect(const vpoint_t &inUL, const vpoint_t &inLR, vpoint_t *pOutUL, 
 void BaseUISurface::DrawFilledRect(int x0, int y0, int x1, int y1) {
 	vpoint_t rect[2];
 	vpoint_t clippedRect[2];
+	static bool s_bLoggedFillBridge = false;
 
 	if (_drawColor[3] >= 255) {
 		return;
@@ -333,16 +433,32 @@ void BaseUISurface::DrawFilledRect(int x0, int y0, int x1, int y1) {
 	if (!ClipRect(rect[0], rect[1], &clippedRect[0], &clippedRect[1])) {
 		return;
 	}
-#ifdef USE_IMGUI_SURFACE
-    ImGui_Surface_SetRenderMode(kRenderTransAlpha);
-    SPR_AdjustSize(&rect[0].point[0], &rect[0].point[1], &rect[1].point[0], &rect[1].point[1]);
-    ImGui_Surface_DrawRectangle(rect[0].point[0], rect[0].point[1], rect[1].point[0] - rect[0].point[0], rect[1].point[1] - rect[0].point[1], _drawColor[0], _drawColor[1], _drawColor[2],  255 - _drawColor[3]);
-#else
-    g_api->SetupDrawingRect(_drawColor);
-    g_api->EnableTexture(false);
-    g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
-    g_api->EnableTexture(true);
-#endif
+
+	// VGUI2's solid fill path is expected to go through the engine fill bridge.
+	// Keep the old quad-based implementation visible for reference.
+	// g_api->SetupDrawingRect(_drawColor);
+	// g_api->EnableTexture(false);
+	// g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
+	// g_api->EnableTexture(true);
+
+	int x = (int)clippedRect[0].point[0];
+	int y = (int)clippedRect[0].point[1];
+	int w = (int)(clippedRect[1].point[0] - clippedRect[0].point[0]);
+	int h = (int)(clippedRect[1].point[1] - clippedRect[0].point[1]);
+
+	if (!s_bLoggedFillBridge)
+	{
+		s_bLoggedFillBridge = true;
+		vgui2::gEngfuncs.Con_Printf(
+			"[VGUI2-TRACE] BaseUISurface::DrawFilledRect fill bridge x=%d y=%d w=%d h=%d color=%d,%d,%d,%d pfnFillRGBA=%p\n",
+			x, y, w, h,
+			_drawColor[0], _drawColor[1], _drawColor[2], 255 - _drawColor[3],
+			(void *)vgui2::gEngfuncs.pfnFillRGBA
+		);
+	}
+
+	// Historical VGUI alpha is inverted in _drawColor[3].
+	vgui2::gEngfuncs.pfnFillRGBA( x, y, w, h, _drawColor[0], _drawColor[1], _drawColor[2], 255 - _drawColor[3] );
 }
 
 void BaseUISurface::DrawOutlinedRect(int x0, int y0, int x1, int y1) {
@@ -981,15 +1097,46 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 	}
 
 	for (int i = 0; i < GetPopupCount(); ++i) {
-		vgui2::ipanel()->Render_SetPopupVisible(GetPopup(i), false);
+		vgui2::VPANEL pop = GetPopup(i);
+		const char *name = vgui2::ipanel()->GetName(pop);
+		if (name && !Q_stricmp(name, "TeamMenu")) {
+			std::fprintf(stderr,
+				"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse reset popup TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
+				i,
+				(void *)pop,
+				(void *)vgui2::ipanel()->GetParent(pop),
+				vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
+				vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
+		}
+		vgui2::ipanel()->Render_SetPopupVisible(pop, false);
 	}
 
 	vgui2::ipanel()->PaintTraverse(panel, true, true);
 
 	for (int i = 0; i < GetPopupCount(); ++i) {
 		vgui2::VPANEL pop = GetPopup(i);
+		const char *name = vgui2::ipanel()->GetName(pop);
+		if (name && !Q_stricmp(name, "TeamMenu")) {
+			std::fprintf(stderr,
+				"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse popup decision TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
+				i,
+				(void *)pop,
+				(void *)vgui2::ipanel()->GetParent(pop),
+				vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
+				vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
+		}
+
+		if (vgui2::ipanel()->IsVisible(pop) && !vgui2::ipanel()->Render_GetPopupVisible(pop)) {
+			vgui2::ipanel()->Render_SetPopupVisible(pop, true);
+		}
 
 		if (vgui2::ipanel()->Render_GetPopupVisible(pop)) {
+			if (name && !Q_stricmp(name, "TeamMenu")) {
+				std::fprintf(stderr,
+					"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse painting popup TeamMenu index=%d panel=%p\n",
+					i,
+					(void *)pop);
+			}
 			vgui2::ipanel()->PaintTraverse(pop, true, true);
 		}
 	}

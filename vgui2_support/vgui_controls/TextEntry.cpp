@@ -14,7 +14,7 @@
 #include <tier1/KeyValues.h>
 
 #include <vgui/Cursor.h>
-#include <vgui/IInputInternal.h>
+#include "../interfaces/vgui/IInputInternal.h"
 #include <vgui/IScheme.h>
 #include <vgui/ISystem.h>
 #include <vgui/ISurface.h>
@@ -25,7 +25,7 @@
 #include "Menu.h"
 #include "ScrollBar.h"
 #include "TextEntry.h"
-#include "Controls.h"
+#include "controls.h"
 #include "MenuItem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -1356,7 +1356,8 @@ void TextEntry::SetEditable(bool state)
 	_editable = state;
 
 #ifndef DISABLE_MOE_VGUI2_EXT
-    SetVirtualKeyBoardInputEnabled( state );
+    // Optional extension; keep the standard text entry path compiling cleanly here.
+    // SetVirtualKeyBoardInputEnabled( state );
 #endif
 }
 

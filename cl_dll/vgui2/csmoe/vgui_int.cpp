@@ -5,8 +5,9 @@
 #include <vgui/ILocalize.h>
 #include <KeyValues.h>
 
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
+#include "../CClientVGUI.h"
 #include <IEngineVGui.h>
 #include <vgui/IPanel.h>
 

@@ -17,7 +17,7 @@
 #include "Border.h"
 #include "tier1/KeyValues.h"
 
-#include "vgui_controls/Controls.h"
+#include "vgui_controls/controls.h"
 //#include "vgui_controls/Panel.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -275,4 +275,3 @@ IBorder::backgroundtype_e Border::GetBackgroundType(void)
 {
 	return m_eBackgroundType;
 }
-

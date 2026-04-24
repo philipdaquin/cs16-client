@@ -1,4 +1,4 @@
-#include <vgui/IInput.h>
+#include "../interfaces/vgui/IInput.h"
 
 
 #ifndef DISABLE_MOE_VGUI2_EXT

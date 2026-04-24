@@ -5,8 +5,8 @@
 #pragma once
 #endif
 
-#include <vgui/Dar.h>
-#include <vgui/IPanel.h>
+#include "../../interfaces/vgui/Dar.h"
+#include "../../interfaces/vgui/IPanel.h"
 
 #ifdef GetClassName
 #undef GetClassName

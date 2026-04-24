@@ -2,14 +2,16 @@
 #include <locale.h>
 #include <cstdarg>
 #include <cstdio>
-#include <vgui/IInputInternal.h>
-#include <vgui/ISchemeManager.h>
-#include <vgui/ISurface.h>
-#include <vgui/ISystem.h>
-#include <vgui/IVGui.h>
-#include <vgui/IPanel.h>
-#include <vgui/ILocalize.h>
-#include <vgui/IKeyValues.h>
+#include <string>
+#include <vector>
+#include "../interfaces/vgui/IInputInternal.h"
+#include "../interfaces/vgui/ISchemeManager.h"
+#include "../interfaces/vgui/ISurface.h"
+#include "../interfaces/vgui/ISystem.h"
+#include "../interfaces/vgui/IVGui.h"
+#include "../interfaces/vgui/IPanel.h"
+#include "../interfaces/vgui/ILocalize.h"
+#include "../interfaces/vgui/IKeyValues.h"
 #include <tier1/KeyValues.h>
 #include <FileSystem.h>
 #include "../BaseUISurface.h"
@@ -33,6 +35,14 @@ extern IFileSystem *filesystem(void);
 IKeyValues* keyvalues()
 {
 	return g_pKeyValuesInterface;
+}
+
+static void TraceFilesystemState(const char *reason, IFileSystem *fs)
+{
+	std::fprintf(stderr,
+		"[phase3][VGUI2-TRACE] %s filesystem=%p\n",
+		reason ? reason : "<null>",
+		(void *)fs);
 }
 
 // Fallback for wasm/client builds that do not link the engine dbg module.
@@ -108,10 +118,126 @@ namespace vgui2
 	}
 	
 	IFileSystem *filesystem() {
-		//std::fprintf(stderr, "[VGUI2-TRACE] filesystem() &g_pFullFileSystem=%p value=%p\n",
-		//	(void *)&g_pFullFileSystem,
-		//	(void *)g_pFullFileSystem);
+		TraceFilesystemState("vgui2::filesystem()", g_pFullFileSystem);
 		return g_pFullFileSystem;
+	}
+
+	namespace
+	{
+		bool g_FileSystemSearchPathsBootstrapped = false;
+		std::string g_LastBootstrapCwd;
+		std::string g_LastBootstrapGameDir;
+
+		static bool DirectoryExists( IFileSystem *fs, const std::string &path )
+		{
+			return fs && !path.empty() && fs->IsDirectory( path.c_str() );
+		}
+
+		static std::string JoinPath( const std::string &lhs, const char *rhs )
+		{
+			if( lhs.empty() )
+				return rhs ? rhs : "";
+
+			std::string result = lhs;
+			if( result.back() != '/' && result.back() != '\\' )
+				result.push_back( '/' );
+			if( rhs )
+				result.append( rhs );
+			return result;
+		}
+
+		static bool EndsWithPathComponent( const std::string &path, const char *component )
+		{
+			if( !component || !*component )
+				return false;
+
+			const size_t componentLen = strlen( component );
+			if( path.size() < componentLen )
+				return false;
+
+			const size_t start = path.size() - componentLen;
+			if( path.compare( start, componentLen, component ) != 0 )
+				return false;
+
+			return start == 0 || path[start - 1] == '/' || path[start - 1] == '\\';
+		}
+
+		static void PushUniqueRoot( std::vector<std::string> &roots, const std::string &path )
+		{
+			if( path.empty() )
+				return;
+
+			for( const auto &existing : roots )
+			{
+				if( existing == path )
+					return;
+			}
+
+			roots.push_back( path );
+		}
+	}
+
+	void BootstrapFileSystemSearchPaths( const char *gameDir )
+	{
+		IFileSystem *fs = filesystem();
+		if( !fs )
+			return;
+
+		char cwd[1024];
+		if( !fs->GetCurrentDirectory( cwd, sizeof( cwd ) ) )
+			return;
+
+		const std::string cwdString = cwd;
+		const std::string requestedGameDir = gameDir ? gameDir : "";
+
+		if( g_FileSystemSearchPathsBootstrapped &&
+			g_LastBootstrapCwd == cwdString &&
+			g_LastBootstrapGameDir == requestedGameDir )
+		{
+			return;
+		}
+
+		std::vector<std::string> roots;
+		if( !requestedGameDir.empty() )
+		{
+			if( EndsWithPathComponent( cwdString, requestedGameDir.c_str() ) )
+				PushUniqueRoot( roots, cwdString );
+			else
+				PushUniqueRoot( roots, JoinPath( cwdString, requestedGameDir.c_str() ) );
+		}
+
+		PushUniqueRoot( roots, JoinPath( cwdString, "cstrike" ) );
+		PushUniqueRoot( roots, JoinPath( cwdString, "valve" ) );
+		PushUniqueRoot( roots, cwdString );
+
+		fs->RemoveAllSearchPaths();
+
+		for( const auto &root : roots )
+		{
+			if( DirectoryExists( fs, root ) )
+			{
+				std::fprintf(
+					stderr,
+					"[phase3][VGUI2-TRACE] BootstrapFileSystemSearchPaths add root='%s' gameDir='%s'\n",
+					root.c_str(),
+					requestedGameDir.empty() ? "<null>" : requestedGameDir.c_str()
+				);
+				fs->AddSearchPath( root.c_str(), "GAME" );
+			}
+			else
+			{
+				std::fprintf(
+					stderr,
+					"[phase3][VGUI2-TRACE] BootstrapFileSystemSearchPaths skip missing root='%s' gameDir='%s'\n",
+					root.c_str(),
+					requestedGameDir.empty() ? "<null>" : requestedGameDir.c_str()
+				);
+			}
+		}
+
+		g_FileSystemSearchPathsBootstrapped = true;
+		g_LastBootstrapCwd = cwdString;
+		g_LastBootstrapGameDir = requestedGameDir;
 	}
 
 	static void *InitializeInterface(char const *interfaceName, CreateInterfaceFn *factoryList, int numFactories) {
@@ -150,7 +276,8 @@ namespace vgui2
 		g_pSystemInterface = (ISystem *)InitializeInterface(VGUI_SYSTEM_INTERFACE_VERSION, factoryList, numFactories);
 		g_pInputInterface = (IInputInternal *)InitializeInterface(VGUI_INPUTINTERNAL_INTERFACE_VERSION, factoryList, numFactories);
 		g_pLocalizeInterface = (ILocalize *)InitializeInterface(VGUI_LOCALIZE_INTERFACE_VERSION, factoryList, numFactories);
-        g_pFullFileSystem = (IFileSystem *)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, numFactories);
+		g_pFullFileSystem = (IFileSystem *)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, numFactories);
+		TraceFilesystemState("VGuiControls_Init after factory lookup", g_pFullFileSystem);
 
 		g_pKeyValuesInterface = static_cast<IKeyValues*>(InitializeInterface(KEYVALUES_INTERFACE_VERSION, factoryList, numFactories));
 
@@ -184,6 +311,7 @@ namespace vgui2
 			g_pLocalizeInterface = LocalizeInterfaceSingleton();
 		if (!g_pFullFileSystem)
 			g_pFullFileSystem = ::filesystem();
+		TraceFilesystemState("VGuiControls_Init after fallback", g_pFullFileSystem);
 		if (!g_pKeyValuesInterface)
 			g_pKeyValuesInterface = VGuiKeyValuesSingleton();
 #endif

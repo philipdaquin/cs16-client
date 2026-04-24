@@ -20,7 +20,7 @@
 
 #include "SectionedListPanel.h"
 #include "Button.h"
-#include "Controls.h"
+#include "controls.h"
 #include "Label.h"
 #include "ScrollBar.h"
 #include "TextImage.h"

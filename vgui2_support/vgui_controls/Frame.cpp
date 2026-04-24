@@ -15,15 +15,16 @@
 #include <vgui/Cursor.h>
 #include <vgui/MouseCode.h>
 #include <vgui/IBorder.h>
-#include <vgui/IInputInternal.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui/IScheme.h>
 #include <vgui/KeyCode.h>
 
+#include "../interfaces/vgui/IInputInternal.h"
+
 #include "AnimationController.h"
-#include "Controls.h"
+#include "controls.h"
 #include "Frame.h"
 #include "Button.h"
 #include "Menu.h"
@@ -1661,6 +1662,8 @@ bool Frame::GetDefaultScreenPosition(int &x, int &y, int &wide, int &tall)
 //-----------------------------------------------------------------------------
 void Frame::PaintBackground()
 {
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground entry this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
+		this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
 	if (m_bImageBackground)
 	{
 		int wide, tall;
@@ -1758,6 +1761,9 @@ void Frame::PaintBackground()
 			_title->Paint();
 		}
 	}
+
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground exit this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
+		this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------

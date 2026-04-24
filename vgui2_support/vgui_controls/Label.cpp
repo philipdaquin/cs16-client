@@ -21,7 +21,7 @@
 #include "Label.h"
 #include "Image.h"
 #include "TextImage.h"
-#include "Controls.h"
+#include "controls.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -1275,7 +1275,6 @@ void Label::SetWrap( bool bWrap )
 	m_bWrap = bWrap;
 	_textImage->SetWrap( m_bWrap );
 }
-
 
 
 

@@ -12,7 +12,7 @@
 #include <tier1/KeyValues.h>
 
 #include "PropertyPage.h"
-#include "Controls.h"
+#include "controls.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -112,4 +112,3 @@ void PropertyPage::SetVisible(bool state)
 
     BaseClass::SetVisible(state);
 }
-

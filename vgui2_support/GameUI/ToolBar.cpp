@@ -1,4 +1,5 @@
 #include "EngineInterface.h"
+#include "../../SourceSDK/public/steam/steamtypes.h"
 #include "ToolBar.h"
 #include <vgui/ILocalize.h>
 #include <vgui/IScheme.h>

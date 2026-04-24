@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #include "AnalogBar.h"
-#include "Controls.h"
+#include "controls.h"
 
 #include <tier1/KeyValues.h>
 

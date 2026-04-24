@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "hud.h"
 #include "teammenu.h"
 
@@ -37,7 +39,9 @@ const char *GetStringTeamColor(int i)
 
 CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPort(pViewPort)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu this=%p viewport=%p panelName=%s\n",
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CTeamMenu::CTeamMenu entry this=%p viewport=%p panelName=%s\n",
+		this, (void *)m_pViewPort, PANEL_TEAM);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu this=%p viewport=%p panelName=%s\n",
 		this, (void *)m_pViewPort, PANEL_TEAM);
 	SetTitle("#Cstrike_Select_Team", true);
 	SetScheme("ClientScheme");
@@ -52,10 +56,12 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML = new HTML(this, "MapInfoHTML");
 #endif
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu loading control settings this=%p resource=Resource/UI/TeamMenu.res pathID=GAME\n",
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loading control settings this=%p resource=Resource/UI/TeamMenu.res pathID=GAME\n",
 		this);
-	LoadControlSettings("Resource/UI/TeamMenu.res", "GAME");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::CTeamMenu loaded control settings this=%p\n", this);
+	LoadControlSettings("Resource/UI/Teammenu.res", "GAME");
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loaded control settings this=%p\n", this);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CTeamMenu::CTeamMenu exit this=%p viewport=%p\n",
+		this, (void *)m_pViewPort);
 	InvalidateLayout();
 
 	m_szMapName[0] = 0;
@@ -104,20 +110,24 @@ void CTeamMenu::AutoAssign(void)
 
 void CTeamMenu::ShowPanel(bool bShow)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible=%d\n",
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel entry this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	if (BaseClass::IsVisible() == bShow)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel no-op this=%p show=%d\n",
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel no-op this=%p show=%d\n",
 			this, bShow ? 1 : 0);
 		return;
 	}
 
 	if (bShow)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel activating this=%p mouseButtons=%d parent=%p\n",
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel activating this=%p mouseButtons=%d parent=%p\n",
 			this, m_mouseoverButtons.Count(), (void *)m_pViewPort);
 		Activate();
+		std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel after Activate this=%p show=%d visible=%d\n",
+			this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 		SetMouseInputEnabled(true);
 
 		for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
@@ -135,8 +145,10 @@ void CTeamMenu::ShowPanel(bool bShow)
 	}
 
 	m_pViewPort->ShowBackGround(bShow);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ShowPanel after background this=%p show=%d\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel after background this=%p show=%d\n",
 		this, bShow ? 1 : 0);
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel exit this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CTeamMenu::Update(void)

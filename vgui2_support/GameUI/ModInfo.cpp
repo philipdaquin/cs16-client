@@ -8,7 +8,7 @@
 
 #include "ModInfo.h"
 #include <KeyValues.h>
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 #include <FileSystem.h>
 #include "EngineInterface.h"
 
@@ -191,4 +191,3 @@ void CModInfo::LoadGameInfoFromBuffer(const char *buffer, int bufferSize)
 		m_pModData->SetString(key, value);
 	}
 }
-

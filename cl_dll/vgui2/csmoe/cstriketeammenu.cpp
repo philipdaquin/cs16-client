@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "hud.h"
 #include "cstriketeammenu.h"
 
@@ -29,18 +31,22 @@ using cl::g_iTeamNumber;
 
 CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::CCSTeamMenu entry this=%p viewport=%p\n",
+		this, (void *)pViewPort);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
 		this, (void *)pViewPort);
 }
 
 void CCSTeamMenu::SetupControlSettings()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/TeamMenu.res pathID=GAME\n",
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings entry this=%p\n", this);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/Teammenu.res pathID=GAME\n",
 		this);
 	// Old CSO-specific layout:
 	// LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
-	LoadControlSettings("Resource/UI/TeamMenu.res", "GAME");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
+	LoadControlSettings("Resource/UI/Teammenu.res", "GAME");
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
 	InvalidateLayout();
 }
 
@@ -50,19 +56,21 @@ CCSTeamMenu::~CCSTeamMenu(void)
 
 void CCSTeamMenu::ShowPanel(bool bShow)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel this=%p show=%d\n",
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CCSTeamMenu::ShowPanel entry this=%p show=%d\n",
+		this, bShow ? 1 : 0);
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel this=%p show=%d\n",
 		this, bShow ? 1 : 0);
 	if (bShow)
 	{
 		if (gHUD.m_iIntermission || gEngfuncs.IsSpectateOnly())
 		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel blocked this=%p because intermission/spectate\n",
+			gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel blocked this=%p because intermission/spectate\n",
 				this);
 			return;
 		}
 	}
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel forwarding to CTeamMenu this=%p show=%d visible=%d\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel forwarding to CTeamMenu this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
 
@@ -77,13 +85,17 @@ void CCSTeamMenu::ShowPanel(bool bShow)
 	// 	SetTitleBarVisible(true);
 	// }
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ShowPanel done this=%p show=%d visible=%d\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel done this=%p show=%d visible=%d\n",
+		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CCSTeamMenu::ShowPanel exit this=%p show=%d visible=%d\n",
 		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::Update(void)
 {
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::Update this=%p\n", this);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::Update entry this=%p visible=%d\n",
+	// 	this, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::Update();
 
 	if (g_pViewport->GetAllowSpectators())
@@ -113,6 +125,9 @@ void CCSTeamMenu::Update(void)
 		SetVisibleButton("CancelButton", false);
 	else
 		SetVisibleButton("CancelButton", true);
+
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::Update exit this=%p visible=%d team=%d\n",
+	// 	this, BaseClass::IsVisible() ? 1 : 0, g_iTeamNumber);
 }
 
 void CCSTeamMenu::SetVisible(bool state)
@@ -160,9 +175,33 @@ void CCSTeamMenu::PaintBackground(void)
 {
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground enter this=%p visible=%d\n",
 	// 	this, IsVisible() ? 1 : 0);
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground entry this=%p visible=%d\n",
+		this, IsVisible() ? 1 : 0);
+	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe start this=%p visible=%d\n",
+		this, IsVisible() ? 1 : 0);
+
+	// Temporary paint probe: if TeamMenu is reaching paint, this bright box
+	// should be impossible to miss.
+	// vgui2::surface()->DrawSetColor(255, 0, 255, 255);
+	// vgui2::surface()->DrawFilledRect(24, 24, 320, 160);
+	// vgui2::surface()->DrawSetColor(255, 255, 255, 255);
+	// vgui2::surface()->DrawOutlinedRect(24, 24, 320, 160);
+
+	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe before pfnFillRGBA this=%p\n",
+		this);
+	cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 136, 255, 0, 255, 255);
+	cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 1, 255, 255, 255, 255);
+	cl::gEngfuncs.pfnFillRGBA(24, 159, 296, 1, 255, 255, 255, 255);
+	cl::gEngfuncs.pfnFillRGBA(24, 24, 1, 136, 255, 255, 255, 255);
+	cl::gEngfuncs.pfnFillRGBA(319, 24, 1, 136, 255, 255, 255, 255);
+	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe after pfnFillRGBA this=%p\n",
+		this);
+
 	BaseClass::PaintBackground();
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
 	// 	this, IsVisible() ? 1 : 0);
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
+		this, IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::PerformLayout(void)

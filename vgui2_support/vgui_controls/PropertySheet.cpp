@@ -19,7 +19,7 @@
 #include <tier1/KeyValues.h>
 
 #include "Button.h"
-#include "Controls.h"
+#include "controls.h"
 #include "Label.h"
 #include "PropertySheet.h"
 #include "ComboBox.h"

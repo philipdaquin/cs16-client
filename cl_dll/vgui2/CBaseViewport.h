@@ -1,7 +1,7 @@
 #ifndef GAME_CLIENT_UI_VGUI2_CBASEVIEWPORT_H
 #define GAME_CLIENT_UI_VGUI2_CBASEVIEWPORT_H
 
-#include "vgui/IClientVGUI.h"
+#include "../../vgui2_support/interfaces/vgui/IClientVGUI.h"
 
 #include "../../SourceSDK/public/tier1/utlvector.h"
 
@@ -34,9 +34,9 @@ public:
 
 	void Start() override;
 
-	void Init();
+	virtual void Init();
 
-	void VidInit();
+	virtual void VidInit();
 
 	void SetParent( vgui2::VPANEL parent ) override;
 

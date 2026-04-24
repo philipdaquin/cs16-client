@@ -10,7 +10,7 @@
 
 #include "BuildGroup.h"
 #include "Button.h"
-#include "Controls.h"
+#include "controls.h"
 #include "WizardPanel.h"
 #include "WizardSubPanel.h"
 

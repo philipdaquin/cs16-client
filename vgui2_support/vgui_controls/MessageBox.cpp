@@ -10,7 +10,7 @@
 
 #include <tier1/KeyValues.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "Button.h"
 #include "Label.h"
 #include "MessageBox.h"

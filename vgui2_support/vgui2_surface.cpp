@@ -1,10 +1,10 @@
 
 #include "tier1/interface.h"
 #include "vgui/VGUI.h"
-#include "vgui/ISchemeManager.h"
-#include "vgui/IScheme.h"
-#include "vgui/ISurface.h"
-#include "vgui/ILocalize.h"
+#include "interfaces/vgui/ISchemeManager.h"
+#include "interfaces/vgui/IScheme.h"
+#include "interfaces/vgui/ISurface.h"
+#include "interfaces/vgui/ILocalize.h"
 #include "vgui_controls/controls.h"
 #include "xash3d_types.h"
 

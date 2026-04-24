@@ -2,7 +2,8 @@
 #define VGUI2_SRC_INPUT_H
 
 #include <tier1/utllinkedlist.h>
-#include <vgui/IInputInternal.h>
+// #include <vgui/IInputInternal.h>
+#include "../../interfaces/vgui/IInputInternal.h"
 
 namespace vgui2
 {
@@ -123,6 +124,7 @@ public:
 	void InternalKeyCodeTyped(vgui2::KeyCode code) override;
 	void InternalKeyTyped(int unichar) override;
 	void InternalKeyCodeReleased(vgui2::KeyCode code) override;
+	void OnKeyCodeUnhandled(int keyCode) override;
 
 	vgui2::HInputContext CreateInputContext() override;
 	void DestroyInputContext(vgui2::HInputContext context) override;

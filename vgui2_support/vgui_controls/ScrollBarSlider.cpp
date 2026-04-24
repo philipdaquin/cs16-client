@@ -17,7 +17,7 @@
 #include <tier1/KeyValues.h>
 
 #include "ScrollBarSlider.h"
-#include "Controls.h"
+#include "controls.h"
 
 #include <math.h>
 

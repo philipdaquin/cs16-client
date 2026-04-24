@@ -27,14 +27,21 @@
 #include "tier1/utldict.h"
 #include "tier1/utlstring.h"
 
-#include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
-#include <vgui/ISystem.h>
+// #include <vgui/IScheme.h>
+// #include <vgui/ISurface.h>
+// #include <vgui/ISystem.h>
 #include <KeyValues.h>
-#include <vgui/IVGui.h>
-#include <vgui/ILocalize.h>
-#include <vgui/IInput.h>
-#include <vgui/IInputInternal.h>
+// #include <vgui/IVGui.h>
+// #include <vgui/ILocalize.h>
+// #include <vgui/IInput.h>
+// #include <vgui/IInputInternal.h>
+#include "../interfaces/vgui/IScheme.h"
+#include "../interfaces/vgui/ISurface.h"
+#include "../interfaces/vgui/ISystem.h"
+#include "../interfaces/vgui/IVGui.h"
+#include "../interfaces/vgui/ILocalize.h"
+#include "../interfaces/vgui/IInput.h"
+#include "../interfaces/vgui/IInputInternal.h"
 
 #include <vgui_controls/FileOpenDialog.h>
 

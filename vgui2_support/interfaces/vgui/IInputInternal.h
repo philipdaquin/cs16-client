@@ -9,6 +9,7 @@ namespace vgui2
 	class IInputInternal : public IInput
 	{
 	public:
+		virtual void OnKeyCodeUnhandled(int keyCode) = 0;
 		virtual void RunFrame(void) = 0;
 		virtual void UpdateMouseFocus(int x, int y) = 0;
 		virtual void PanelDeleted(VPANEL panel) = 0;

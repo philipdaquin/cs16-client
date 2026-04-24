@@ -397,7 +397,7 @@ void CLoadingDialog::OnCommand(const char *command)
 		BaseClass::OnCommand(command);
 }
 
-void CLoadingDialog::OnKeyCodePressed(KeyCode code)
+void CLoadingDialog::OnKeyCodePressed(vgui2::KeyCode code)
 {
 	if (code == vgui2::KEY_ESCAPE)
 		OnCommand("Cancel");

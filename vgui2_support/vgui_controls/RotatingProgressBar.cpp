@@ -14,7 +14,7 @@
 #include <vgui/IVGui.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
+#include "../interfaces/vgui/ISurface.h"
 
 #include <tier1/KeyValues.h>
 #include <mathlib/mathlib.h>

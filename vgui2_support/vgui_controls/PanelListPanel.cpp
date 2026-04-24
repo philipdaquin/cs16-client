@@ -10,7 +10,7 @@
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "EditablePanel.h"
 #include "ScrollBar.h"
 #include "Label.h"
@@ -461,5 +461,4 @@ void PanelListPanel::ScrollToItem( int itemNumber )
 	m_vbar->SetValue( y );
 	InvalidateLayout();
 }
-
 

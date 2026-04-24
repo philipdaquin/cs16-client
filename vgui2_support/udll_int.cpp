@@ -28,7 +28,7 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #include "netadr.h"
 
 #include <FileSystem.h>
-#include "IBaseUI.h"
+#include "interfaces/IBaseUI.h"
 #include "vgui/IInput.h"
 #include "vgui/IInputInternal.h"
 #include "vgui/KeyCode.h"

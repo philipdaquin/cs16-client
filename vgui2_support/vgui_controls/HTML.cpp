@@ -27,7 +27,7 @@
 //#include "htmlmessages.pb.h"
 //#include <tier0/memdbgon.h>
 
-#include "steam/steamtypes.h"
+#include "../../SourceSDK/public/steam/steamtypes.h"
 #include "html/ihtmlserializer.h"
 #include "html/ipainthtml.h"
 #include "html/ihtmlchrome.h"
@@ -2117,5 +2117,4 @@ void HTML::UpdateSizeAndScrollBars()
 
 	InvalidateLayout();
 }
-
 

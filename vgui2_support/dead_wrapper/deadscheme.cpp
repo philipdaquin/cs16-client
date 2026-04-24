@@ -1,4 +1,5 @@
-#include <vgui/IScheme.h>
+#include "../interfaces/vgui/IScheme.h"
+#include "../interfaces/vgui/ISchemeManager.h"
 
 namespace vgui2
 {

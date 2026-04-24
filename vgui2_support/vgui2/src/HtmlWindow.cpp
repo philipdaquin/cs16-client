@@ -17,7 +17,7 @@
 #include "vgui/iinputinternal.h"
 #include "vgui_key_translation.h"
 
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
 #include <tchar.h>
 #include <stdio.h>

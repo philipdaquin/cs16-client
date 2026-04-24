@@ -13,7 +13,7 @@
 *
 ****/
 
-#include <tier1/UtlVector.h>
+#include <tier1/utlvector.h>
 
 class CHintMessage
 {

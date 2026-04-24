@@ -7,7 +7,7 @@
 #include <tier1/utlsymbol.h>
 #include <tier1/utlvector.h>
 
-#include <vgui/ILocalize.h>
+#include "../../interfaces/vgui/ILocalize.h"
 
 class CLocalizedStringTable : public vgui2::ILocalize
 {

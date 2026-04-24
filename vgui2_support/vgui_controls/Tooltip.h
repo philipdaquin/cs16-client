@@ -14,7 +14,7 @@
 
 #include <vgui/VGUI.h>
 
-#include "Controls.h"
+#include "controls.h"
 
 #include <tier1/utlvector.h>
 

@@ -51,6 +51,67 @@
 
 using namespace vgui2;
 
+namespace
+{
+	void DumpPanelTreeRecursive(vgui2::Panel *panel, int depth)
+	{
+		if (!panel)
+			return;
+
+		int x = 0, y = 0, wide = 0, tall = 0;
+		panel->GetBounds(x, y, wide, tall);
+
+		vgui2::Panel *parent = panel->GetParent();
+		const char *parentName = parent ? parent->GetName() : "<null>";
+		const char *parentClass = parent ? parent->GetClassName() : "<null>";
+		const char *panelName = panel->GetName();
+		const char *panelClass = panel->GetClassName();
+
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE]   %*s%s name='%s' bounds=%d,%d %dx%d visible=%d enabled=%d parent=%p(%s:%s) popup=%d children=%d\n",
+			depth * 2,
+			"",
+			panelClass ? panelClass : "<null>",
+			panelName ? panelName : "<null>",
+			x, y, wide, tall,
+			panel->IsVisible() ? 1 : 0,
+			panel->IsEnabled() ? 1 : 0,
+			(void *)parent,
+			parentClass ? parentClass : "<null>",
+			parentName ? parentName : "<null>",
+			panel->IsPopup() ? 1 : 0,
+			panel->GetChildCount());
+
+		for (int i = 0; i < panel->GetChildCount(); ++i)
+		{
+			DumpPanelTreeRecursive(panel->GetChild(i), depth + 1);
+		}
+	}
+
+	void DumpPanelTree(vgui2::Panel *root, const char *label)
+	{
+		if (!root)
+			return;
+
+		int x = 0, y = 0, wide = 0, tall = 0;
+		root->GetBounds(x, y, wide, tall);
+
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::DumpPanelTree %s root=%p class=%s name='%s' bounds=%d,%d %dx%d visible=%d enabled=%d popup=%d children=%d\n",
+			label ? label : "<null>",
+			(void *)root,
+			root->GetClassName() ? root->GetClassName() : "<null>",
+			root->GetName() ? root->GetName() : "<null>",
+			x, y, wide, tall,
+			root->IsVisible() ? 1 : 0,
+			root->IsEnabled() ? 1 : 0,
+			root->IsPopup() ? 1 : 0,
+			root->GetChildCount());
+
+		DumpPanelTreeRecursive(root, 1);
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Handle table
 //-----------------------------------------------------------------------------
@@ -874,6 +935,11 @@ void BuildGroup::PanelAdded(Panel *panel)
 //-----------------------------------------------------------------------------
 void BuildGroup::LoadControlSettings(const char *controlResourceName, const char *pathID, KeyValues *pPreloadedKeyValues)
 {
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings enter resource='%s' pathID='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		pathID ? pathID : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 	// make sure the file is registered
 	RegisterControlSettingsFile(controlResourceName, pathID);
 
@@ -894,6 +960,11 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 		{
 			bSuccess = rDat->LoadFromFile(filesystem(), controlResourceName, pathID);
 		}
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings file load resource='%s' pathID='%s' success=%d kv=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			pathID ? pathID : "<null>",
+			bSuccess ? 1 : 0,
+			(void *)rDat);
 
 		if ( bSuccess )
 		{
@@ -929,6 +1000,15 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 
 	// loop through the resource data sticking info into controls
 	ApplySettings(rDat);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings applied resource='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
+
+	if (m_pParentPanel)
+	{
+		DumpPanelTree(m_pParentPanel, controlResourceName);
+	}
 
 	if (m_pParentPanel)
 	{
@@ -1118,6 +1198,17 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 			continue;
 
 		char const *keyName = controlKeys->GetName();
+		if (keyName && !Q_stricmp(keyName, "TeamMenu"))
+		{
+			Panel *panel = FieldNameTaken(keyName);
+			int pw = 0, ph = 0;
+			if (panel)
+			{
+				panel->GetSize(pw, ph);
+			}
+			std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings TeamMenu block found panel=%p size=%dx%d\n",
+				(void *)panel, pw, ph);
+		}
 
 		// check to see if any buildgroup panels have this name
 		for ( int i = 0; i < _panelDar.Count(); i++ )
@@ -1139,8 +1230,22 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 
 			if (!Q_stricmp(panelName, keyName))
 			{
+				if (keyName && !Q_stricmp(keyName, "TeamMenu"))
+				{
+					int bw = 0, bh = 0;
+					panel->GetSize(bw, bh);
+					std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings TeamMenu before ApplySettings panel=%p size=%dx%d\n",
+						(void *)panel, bw, bh);
+				}
 				// apply the settings
 				panel->ApplySettings(controlKeys);
+				if (keyName && !Q_stricmp(keyName, "TeamMenu"))
+				{
+					int aw = 0, ah = 0;
+					panel->GetSize(aw, ah);
+					std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings TeamMenu after ApplySettings panel=%p size=%dx%d\n",
+						(void *)panel, aw, ah);
+				}
 				bFound = true;
 				break;
 			}

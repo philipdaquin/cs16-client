@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <vector>
 #include <string.h>
 
@@ -12,14 +14,14 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "CBaseUI.h"
 #include <FileSystem.h>
-#include "vgui/IVGui.h"
-#include "vgui/IPanel.h"
-#include "vgui/ISurface.h"
-#include "vgui/ILocalize.h"
-#include "vgui/IScheme.h"
-#include "vgui/ISystem.h"
-#include "IClientVGUI.h"
-#include "vgui/IInputInternal.h"
+#include "interfaces/vgui/IVGui.h"
+#include "interfaces/vgui/IPanel.h"
+#include "interfaces/vgui/ISurface.h"
+#include "interfaces/vgui/ILocalize.h"
+#include "interfaces/vgui/IScheme.h"
+#include "interfaces/vgui/ISystem.h"
+#include "interfaces/IClientVGUI.h"
+#include "interfaces/vgui/IInputInternal.h"
 #include "vgui_controls/controls.h"
 #include "vgui_controls/Panel.h"
 #include "BaseUISurface.h"
@@ -116,10 +118,12 @@ public:
 };
 
 void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize this=%p factories=%p count=%d staticClient=%p\n",
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseUI::Initialize entry this=%p factories=%p count=%d staticClient=%p\n",
+		this, (void *)factories, count, (void *)staticClient);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize this=%p factories=%p count=%d staticClient=%p\n",
 		this, (void *)factories, count, (void *)staticClient);
 	if (staticClient) {
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize early-return staticClient=%p\n", (void *)staticClient);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize early-return staticClient=%p\n", (void *)staticClient);
 		return;
 	}
 
@@ -140,14 +144,15 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
     m_iNumFactories = 4;
 #endif
 	
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize before VGuiControls_Init factories=%p count=%d\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize before VGuiControls_Init factories=%p count=%d\n",
 		(void *)m_FactoryList[0], m_iNumFactories);
 	if (!vgui2::VGuiControls_Init("BaseUI", m_FactoryList, m_iNumFactories))
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize failed: VGuiControls_Init returned false\n");
+		std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseUI::Initialize failed VGuiControls_Init this=%p\n", this);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize failed: VGuiControls_Init returned false\n");
 		return;
 	}
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize after VGuiControls_Init staticSurface=%p staticClient=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize after VGuiControls_Init staticSurface=%p staticClient=%p\n",
 		(void *)staticSurface, (void *)staticClient);
 
 #ifdef XASH_STATIC_GAMELIB
@@ -178,7 +183,7 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 
 		++m_iNumFactories;
 	}
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize gameui=%p console=%p career=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize gameui=%p console=%p career=%p\n",
 		(void *)staticGameUIFuncs, (void *)staticGameConsole, (void *)staticCareerUI);
 	
 #ifdef XASH_STATIC_GAMELIB
@@ -187,7 +192,7 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	g_pInputInternal = (vgui2::IInputInternal *)m_FactoryList[1](VGUI_INPUTINTERNAL_INTERFACE_VERSION, NULL);
 #endif
 	g_pVGuiInput = g_pInputInternal;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize inputInternal=%p vguiInput=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize inputInternal=%p vguiInput=%p\n",
 		(void *)g_pInputInternal, (void *)g_pVGuiInput);
 
 	//char szClientDLLPath[_MAX_PATH];
@@ -200,15 +205,17 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 #else
 	staticClient = (IClientVGUI *)m_FactoryList[4](CLIENTVGUI_INTERFACE_VERSION, NULL);
 #endif
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Initialize staticClient=%p numFactories=%d\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Initialize staticClient=%p numFactories=%d\n",
 		(void *)staticClient, m_iNumFactories);
 	//gClDllFuncs.pfnInitialize(&gEngfuncs, CLDLL_INTERFACE_VERSION);
 }
 
 	void CBaseUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) {
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start this=%p engineFuncs=%p interfaceVersion=%d staticClient=%p surface=%p viewport=%p\n",
+		std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseUI::Start entry this=%p engineFuncs=%p interfaceVersion=%d staticClient=%p surface=%p viewport=%p\n",
 			this, (void *)engineFuncs, interfaceVersion, (void *)staticClient, (void *)staticSurface, (void *)g_pViewport);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start pre-panel ivgui=%p ipanel=%p surface=%p\n",
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start this=%p engineFuncs=%p interfaceVersion=%d staticClient=%p surface=%p viewport=%p\n",
+			this, (void *)engineFuncs, interfaceVersion, (void *)staticClient, (void *)staticSurface, (void *)g_pViewport);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start pre-panel ivgui=%p ipanel=%p surface=%p\n",
 			(void *)vgui2::ivgui(), (void *)vgui2::ipanel(), (void *)vgui2::surface());
 	#ifdef XASH_STATIC_GAMELIB
 		staticSurface = BaseUISurfaceSingleton();
@@ -217,19 +224,19 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	#endif
 		g_pVGui = vgui2::ivgui();
 		g_pVGuiSystem = vgui2::system();
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface=%p ivgui=%p system=%p\n",
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start surface=%p ivgui=%p system=%p\n",
 			(void *)staticSurface, (void *)g_pVGui, (void *)g_pVGuiSystem);
 		IHTMLChromeController *chromeController = nullptr;
 		if(m_FactoryList[3])
 			chromeController = (IHTMLChromeController *)m_FactoryList[3](HTML_CHROME_CONTROLLER_INTERFACE_VERSION, NULL);
 		vgui2::ivgui()->Start();
 		vgui2::ivgui()->SetSleep(false);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start ivgui started staticSurface=%p viewport=%p\n",
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start ivgui started staticSurface=%p viewport=%p\n",
 			(void *)staticSurface, (void *)g_pViewport);
 
 		staticPanel = new CStaticPanel();
 		VPANEL staticPanelVPanel = staticPanel ? staticPanel->GetVPanel() : 0;
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start staticPanel=%p vpanel=%p\n", (void *)staticPanel, (void *)(uintptr_t)staticPanelVPanel);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start staticPanel=%p vpanel=%p\n", (void *)staticPanel, (void *)(uintptr_t)staticPanelVPanel);
 		g_pVGuiPanel = g_pPanelInterface;
 		staticPanel->SetCursor(vgui2::dc_none);
 
@@ -252,16 +259,17 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 
 		staticSurface->Init(staticPanel->GetVPanel(), chromeController);
 		g_pVGuiSurface = staticSurface;
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start surface init embedded=%p\n",
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start surface init embedded=%p\n",
 			(void *)staticSurface->GetEmbeddedPanel());
 		staticSurface->SetLanguage("schinese");
 		staticSurface->IgnoreMouseVisibility(true);
 
-			vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
+		const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
+		vgui2::BootstrapFileSystemSearchPaths( szGameDir );
+
+			// vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/tracker_%language%.txt");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
-
-		const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
 
 		if (strcmp(szGameDir, "valve")) {
 			char szModLocalizeFile[_MAX_PATH];
@@ -308,47 +316,50 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	
 		if (staticGameUIFuncs)
 		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start before GameUI Initialize staticGameUIFuncs=%p factories=%d\n",
+			gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start before GameUI Initialize staticGameUIFuncs=%p factories=%d\n",
 				(void *)staticGameUIFuncs, m_iNumFactories);
 			staticGameUIFuncs->Initialize(m_FactoryList, m_iNumFactories);
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI Initialize staticGameUIFuncs=%p staticClient=%p\n",
+			gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after GameUI Initialize staticGameUIFuncs=%p staticClient=%p\n",
 				(void *)staticGameUIFuncs, (void *)staticClient);
 		}
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI init staticGameUIFuncs=%p staticClient=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after GameUI init staticGameUIFuncs=%p staticClient=%p\n",
 		(void *)staticGameUIFuncs, (void *)staticClient);
 
 	if (staticClient) {
 		staticClient->Initialize(m_FactoryList, m_iNumFactories);
 		staticSurface->SetVGUI2MouseControl(true);
 	}
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after client Initialize staticSurface=%p viewport=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after client Initialize staticSurface=%p viewport=%p\n",
 		(void *)staticSurface, (void *)g_pViewport);
 
 		if (staticGameUIFuncs)
 		{
 			void* system = nullptr;
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start before GameUI Start staticGameUIFuncs=%p system=%p\n",
+			gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start before GameUI Start staticGameUIFuncs=%p system=%p\n",
 				(void *)staticGameUIFuncs, system);
 			staticGameUIFuncs->Start(&gEngfuncs, CLDLL_INTERFACE_VERSION, system);
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after GameUI Start staticGameUIFuncs=%p\n",
+			gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after GameUI Start staticGameUIFuncs=%p\n",
 				(void *)staticGameUIFuncs);
 		}
 
 	staticClientDLLPanel->SetScheme("ClientScheme");
 
 	if (staticClient) {
-		// Original order:
-		// staticClient->Start();
-		// staticClient->SetParent(staticClientDLLPanel->GetVPanel());
-		//
-		// The viewport creates its default panels during Start(), so give it
-		// the real client root first and repeat the parent sync after creation.
-		staticClient->SetParent(staticClientDLLPanel->GetVPanel());
+		std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseUI::Start before staticClient calls staticClient=%p root=%p viewport=%p\n",
+			(void *)staticClient, (void *)(uintptr_t)(staticClientDLLPanel ? staticClientDLLPanel->GetVPanel() : 0), (void *)g_pViewport);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start pre-client calls staticClient=%p root=%p viewport=%p\n",
+			(void *)staticClient, (void *)(uintptr_t)(staticClientDLLPanel ? staticClientDLLPanel->GetVPanel() : 0), (void *)g_pViewport);
 		staticClient->Start();
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after Start staticClient=%p root=%p viewport=%p\n",
+			(void *)staticClient, (void *)(uintptr_t)(staticClientDLLPanel ? staticClientDLLPanel->GetVPanel() : 0), (void *)g_pViewport);
 		staticClient->SetParent(staticClientDLLPanel->GetVPanel());
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after SetParent staticClient=%p root=%p viewport=%p\n",
+			(void *)staticClient, (void *)(uintptr_t)(staticClientDLLPanel ? staticClientDLLPanel->GetVPanel() : 0), (void *)g_pViewport);
 	}
 	VPANEL staticClientRootPanel = staticClientDLLPanel ? staticClientDLLPanel->GetVPanel() : 0;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseUI::Start after client Start/SetParent viewport=%p root=%p\n",
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseUI::Start exit viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)(uintptr_t)staticClientRootPanel);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseUI::Start after client Start/SetParent viewport=%p root=%p\n",
 		(void *)g_pViewport, (void *)(uintptr_t)staticClientRootPanel);
 
 	int wide, tall;
@@ -453,10 +464,13 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 		return;
 	}
 
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint entry x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
+		x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
     if (staticGameUIFuncs)
 	    staticGameUIFuncs->RunFrame();
 	vgui2::ivgui()->RunFrame();
 	staticSurface->SetScreenBounds(x, y, right - x, bottom - y);
+	vgui2::surface()->DrawSetAlphaMultiplier( 1.0f );
 	staticPanel->SetBounds(0, 0, right, bottom);
 	staticGameUIPanel->SetBounds(0, 0, right, bottom);
 	staticClientDLLPanel->SetBounds(0, 0, right, bottom);
@@ -465,6 +479,8 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 	static_cast<vgui2::IClientPanel*>( staticPanel )->Think();
 
 	vgui2::surface()->PaintTraverse(staticSurface->GetEmbeddedPanel());
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint exit x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
+		x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
 }
 
 void CBaseUI::HideGameUI() {

@@ -26,7 +26,7 @@
 #include "enginecallback.h"
 #endif
 
-#include <tier1/UtlVector.h>
+#include <tier1/utlvector.h>
 
 inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent);
 extern globalvars_t *gpGlobals;

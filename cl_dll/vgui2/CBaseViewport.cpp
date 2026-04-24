@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <vgui/IPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/AnimationController.h>
@@ -20,9 +22,11 @@ CBaseViewport* g_pViewport = nullptr;
 CBaseViewport::CBaseViewport()
 	: BaseClass( nullptr, "CBaseViewport" )
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport ctor this=%p before g_pViewport=%p\n", this, (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport ctor entry this=%p g_pViewport(before)=%p\n", this, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport ctor this=%p before g_pViewport=%p\n", this, (void *)g_pViewport);
 	g_pViewport = this;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport ctor assigned g_pViewport=%p\n", (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport ctor assigned this=%p g_pViewport=%p\n", this, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport ctor assigned g_pViewport=%p\n", (void *)g_pViewport);
 
 	SetKeyBoardInputEnabled( false );
 	SetMouseInputEnabled( false );
@@ -57,26 +61,34 @@ CBaseViewport::~CBaseViewport()
 
 void CBaseViewport::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Initialize this=%p factories=%p count=%d viewport=%p\n",
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::Initialize entry this=%p factories=%p count=%d viewport=%p\n",
+		this, (void *)pFactories, iNumFactories, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Initialize this=%p factories=%p count=%d viewport=%p\n",
 		this, (void *)pFactories, iNumFactories, (void *)g_pViewport);
 	ReloadScheme();
 }
 
 void CBaseViewport::Start()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start this=%p viewport=%p panels=%d gamePanels=%d\n",
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::Start entry this=%p viewport=%p panels=%d gamePanels=%d\n",
 		this, (void *)g_pViewport, m_Panels.Count(), m_GameUIPanels.Count());
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start this=%p viewport=%p panels=%d gamePanels=%d\n",
+		this, (void *)g_pViewport, m_Panels.Count(), m_GameUIPanels.Count());
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start parent state this=%p viewportParent=%p currentParent=%p\n",
+		this, (void *)GetVParent(), (void *)GetParent());
 	// recreate all the default panels
 	RemoveAllPanels();
 
 	m_pBackGround = new CBackGroundPanel( nullptr );
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start background=%p\n", (void *)m_pBackGround);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::Start background created this=%p background=%p\n",
+		this, (void *)m_pBackGround);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start background=%p\n", (void *)m_pBackGround);
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );
 
 	CreateDefaultPanels();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Start default panels created panels=%d gamePanels=%d active=%p\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start default panels created panels=%d gamePanels=%d active=%p\n",
 		m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel);
 
 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
@@ -94,7 +106,7 @@ void CBaseViewport::Init()
 
 void CBaseViewport::VidInit()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::VidInit this=%p viewport=%p panels=%d\n",
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::VidInit this=%p viewport=%p panels=%d\n",
 		this, (void *)g_pViewport, m_Panels.Count());
 	for (int i = 0; i < m_Panels.Count(); i++)
 		m_Panels[i]->VidInit();
@@ -105,20 +117,26 @@ void CBaseViewport::VidInit()
 void CBaseViewport::SetParent( vgui2::VPANEL parent )
 {
 	const bool bIsProportional = IsProportional();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent this=%p parent=%p viewport=%p panels=%d\n",
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::SetParent entry this=%p parent=%p viewport=%p background=%p\n",
+		this, (void *)parent, (void *)g_pViewport, (void *)m_pBackGround);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::SetParent this=%p parent=%p viewport=%p panels=%d\n",
 		this, (void *)parent, (void *)g_pViewport, m_Panels.Count());
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::SetParent state this=%p viewportParent(before)=%p currentParent(before)=%p background=%p backgroundParent(before)=%p\n",
+		this,
+		(void *)GetVParent(),
+		(void *)GetParent(),
+		(void *)m_pBackGround,
+		(void *)(m_pBackGround ? m_pBackGround->GetVParent() : 0));
 
 	BaseClass::SetParent( parent );
 
 	//NOTE: the engine doesn't set the root to be proportional so it will override our settings. We must restore our settings here. - Solokiller
 	SetProportional( bIsProportional );
 
-	// Original behavior:
-	// m_pBackGround->SetParent( parent );
 	if (m_pBackGround)
 		m_pBackGround->SetParent( parent );
 	else
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent no background yet this=%p parent=%p\n",
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::SetParent no background yet this=%p parent=%p\n",
 			this, (void *)parent);
 
 	for( int i = 0; i< m_Panels.Count(); i++ )
@@ -132,7 +150,9 @@ void CBaseViewport::SetParent( vgui2::VPANEL parent )
 
 	SetKeyBoardInputEnabled(false);
 	SetMouseInputEnabled(false);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::SetParent done this=%p parent=%p\n", this, (void *)parent);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::SetParent done this=%p parent=%p\n", this, (void *)parent);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::SetParent exit this=%p parent=%p background=%p\n",
+		this, (void *)parent, (void *)m_pBackGround);
 }
 
 bool CBaseViewport::UseVGUI1()
@@ -178,6 +198,8 @@ void CBaseViewport::Shutdown()
 
 void CBaseViewport::OnThink()
 {
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink entry this=%p panels=%d gamePanels=%d active=%p last=%p\n",
+		this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 	// Clear our active panel pointer if the panel has made
 	// itself invisible. Need this so we don't bring up dead panels
 	// if they are stored as the last active panel
@@ -221,6 +243,8 @@ void CBaseViewport::OnThink()
 	}
 
 	BaseClass::OnThink();
+	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink exit this=%p panels=%d gamePanels=%d active=%p last=%p\n",
+		this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 }
 
 void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
@@ -234,6 +258,10 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 	RemoveAllPanels();
 
 	m_pBackGround = new CBackGroundPanel( nullptr );
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::OnScreenSizeChanged background=%p parent before attach=%p currentParent=%p\n",
+		(void *)m_pBackGround,
+		(void *)GetVParent(),
+		(void *)m_pBackGround->GetVParent());
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );
@@ -369,15 +397,17 @@ void CBaseViewport::ShowPanel( const char* pszName, bool bState )
 
 void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel this=%p panel=%p state=%d active=%p last=%p viewport=%p\n",
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CBaseViewport::ShowPanel entry this=%p panel=%p state=%d active=%p last=%p viewport=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel this=%p panel=%p state=%d active=%p last=%p viewport=%p\n",
 		this, (void *)pPanel, bState ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)g_pViewport);
 	if( bState )
 	{
 		// if this is an 'active' panel, deactivate old active panel
 		if( pPanel->HasInputElements() )
 		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel activating input panel this=%p panel=%p visible=%d active=%p\n",
-				this, (void *)pPanel, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel);
+				gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel activating input panel this=%p panel=%p visible=%d active=%p\n",
+					this, (void *)pPanel, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel);
 			// don't show input panels during normal demo playback
 			if( gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly() )
 				return;
@@ -413,13 +443,15 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 	}
 
 	// just show/hide panel
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel calling panel->ShowPanel this=%p panel=%p state=%d parent=%p\n",
-		this, (void *)pPanel, bState ? 1 : 0, (void *)pPanel->GetVPanel());
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel calling panel->ShowPanel this=%p panel=%p state=%d parent=%p\n",
+			this, (void *)pPanel, bState ? 1 : 0, (void *)pPanel->GetVPanel());
 	pPanel->ShowPanel( bState );
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel panel->ShowPanel done this=%p panel=%p state=%d visible=%d active=%p last=%p\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel panel->ShowPanel done this=%p panel=%p state=%d visible=%d active=%p last=%p\n",
 		this, (void *)pPanel, bState ? 1 : 0, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 
 	UpdateAllPanels(); // let other panels rearrange
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CBaseViewport::ShowPanel exit this=%p panel=%p state=%d visible=%d active=%p last=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 }
 
 void CBaseViewport::RemoveAllPanels()

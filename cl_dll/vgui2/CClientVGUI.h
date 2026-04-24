@@ -1,10 +1,11 @@
 #ifndef CL_UI_CCLIENTVGUI_H
 #define CL_UI_CCLIENTVGUI_H
 
-#include <vgui/IClientVGUI.h>
+#include "../../vgui2_support/interfaces/IClientVGUI.h"
 
 class IGameUIFuncs;
 class IBaseUI;
+class IEngineVGui;
 
 class CClientVGUI : public IClientVGUI
 {
@@ -21,9 +22,9 @@ public:
 
 	void Start() override final;
 
-	void Init() override final;
+	void Init();
 
-	void VidInit() override final;
+	void VidInit();
 
 	void SetParent( vgui2::VPANEL parent ) override final;
 
@@ -69,5 +70,10 @@ IGameUIFuncs* gameUIFuncs();
 *	Global accessor for the game UI.
 */
 IBaseUI* baseUI();
+
+/**
+*	Global accessor for the engine VGUI bridge.
+*/
+IEngineVGui* engineVgui();
 
 #endif //CL_UI_CCLIENTVGUI_H

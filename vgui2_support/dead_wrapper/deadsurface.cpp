@@ -1,4 +1,4 @@
-#include <vgui/ISurface.h>
+#include "../interfaces/vgui/ISurface.h"
 
 namespace vgui2
 {

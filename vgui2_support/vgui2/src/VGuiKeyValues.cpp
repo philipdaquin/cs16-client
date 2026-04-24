@@ -1,5 +1,5 @@
 #include <vgui/ILocalize.h>
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
 #include "VGuiKeyValues.h"
 

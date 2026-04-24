@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <cassert>
 #include <clocale>
 
@@ -12,10 +14,11 @@
 #include <IEngineVGui.h>
 #include "CHudViewPort.h"
 
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
-#include "IGameUIFuncs.h"
-#include "IBaseUI.h"
+#include "../include/cl_dll.h"
+#include "../interfaces/IGameUIFuncs.h"
+#include "../interfaces/IBaseUI.h"
 #include "hud.h"
 
 #include "CClientVGUI.h"
@@ -66,12 +69,15 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CClientVGUI, IClientVGUI, CLIENTVGUI_INTERFAC
 
 CClientVGUI::CClientVGUI()
 {
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI ctor this=%p\n", this);
 	if (gEngfuncs.Con_Printf)
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI ctor this=%p\n", this);
+		gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI ctor this=%p\n", this);
 }
 
 void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 {
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::Initialize entry this=%p factories=%p count=%d\n",
+		this, (void *)pFactories, iNumFactories);
 	/*
 	*	Factories in the given array:
 	*	engine
@@ -84,7 +90,7 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 
 	//4 factories to use.
 	assert( static_cast<size_t>( iNumFactories ) >= NUM_FACTORIES - 1 );
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Initialize this=%p factories=%p count=%d\n", this, (void *)pFactories, iNumFactories);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Initialize this=%p factories=%p count=%d\n", this, (void *)pFactories, iNumFactories);
 
 	m_FactoryList[ 0 ] = Sys_GetFactoryThis();
 
@@ -95,10 +101,11 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 
 	if( !vgui2::VGuiControls_Init( "CLIENT", m_FactoryList, NUM_FACTORIES ) )
 	{
+		std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::Initialize failed VGuiControls_Init this=%p\n", this);
 		Msg( "Failed to initialize VGUI2\n" );
 		return;
 	}
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Initialize controls ok baseui=%p enginevgui=%p\n", (void *)::g_pBaseUI, (void *)g_EngineVgui);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Initialize controls ok baseui=%p enginevgui=%p\n", (void *)::g_pBaseUI, (void *)g_EngineVgui);
 
 	g_GameUIFuncs = ( IGameUIFuncs* ) pFactories[ 0 ](ENGINE_GAMEUIFUNCS_INTERFACE_VERSION, nullptr );
 	::g_pBaseUI = ( IBaseUI* ) pFactories[ 0 ](BASEUI_INTERFACE_VERSION, nullptr );
@@ -108,17 +115,24 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	//Constructor sets itself as the viewport.
 
 	new CHudViewport();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Initialize viewport=%p after new CHudViewport\n", (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::Initialize created viewport=%p\n", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Initialize viewport=%p after new CHudViewport\n", (void *)g_pViewport);
 
 	g_pViewport->Initialize( pFactories, iNumFactories );
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Initialize viewport->Initialize done viewport=%p\n", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Initialize viewport->Initialize done viewport=%p\n", (void *)g_pViewport);
 }
 
 void CClientVGUI::Start()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Start viewport=%p\n", (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::Start entry viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Start viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
 	g_pViewport->Start();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Start done viewport=%p\n", (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::Start exit viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Start done viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
 
 #if 0
 	vgui2::Frame* pFrame = new vgui2::Frame(nullptr, "TestFrame");
@@ -142,23 +156,29 @@ void CClientVGUI::Start()
 
 void CClientVGUI::Init()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Init viewport=%p\n", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Init viewport=%p\n", (void *)g_pViewport);
 	g_pViewport->Init();
 }
 
 void CClientVGUI::VidInit()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::VidInit viewport=%p\n", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::VidInit viewport=%p\n", (void *)g_pViewport);
 	g_pViewport->VidInit();
 }
 
 void CClientVGUI::SetParent( vgui2::VPANEL parent )
 {
 	m_vRootPanel = parent;
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::SetParent this=%p parent=%p viewport=%p\n", this, (void *)parent, (void *)g_pViewport);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::SetParent entry this=%p parent=%p viewport=%p root=%p\n",
+		this, (void *)parent, (void *)g_pViewport, (void *)m_vRootPanel);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::SetParent this=%p parent=%p viewport=%p root=%p\n",
+		this, (void *)parent, (void *)g_pViewport, (void *)m_vRootPanel);
 
 	g_pViewport->SetParent( parent );
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::SetParent done viewport=%p root=%p\n", (void *)g_pViewport, (void *)m_vRootPanel);
+	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CClientVGUI::SetParent exit viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::SetParent done viewport=%p root=%p\n",
+		(void *)g_pViewport, (void *)m_vRootPanel);
 }
 
 bool CClientVGUI::UseVGUI1()
@@ -188,6 +208,6 @@ void CClientVGUI::HideClientUI()
 
 void CClientVGUI::Shutdown()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClientVGUI::Shutdown viewport=%p\n", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CClientVGUI::Shutdown viewport=%p\n", (void *)g_pViewport);
 	g_pViewport->Shutdown();
 }

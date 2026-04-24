@@ -18,7 +18,7 @@
 
 #include "Tooltip.h"
 #include "TextEntry.h"
-#include "Controls.h"
+#include "controls.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>

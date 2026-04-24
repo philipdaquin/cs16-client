@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include <vgui_controls/WizardPanel.h>
+#include "../../../../vgui2_support/vgui_controls/WizardPanel.h"
 #include "game_controls/buymenu.h"
 #include "IViewport.h"
 

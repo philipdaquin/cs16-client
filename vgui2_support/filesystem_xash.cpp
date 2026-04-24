@@ -52,6 +52,30 @@ static bool IsGameDirPathID( const char *pathID )
 	return pathID && ( strstr( pathID, "GAME" ) || strstr( pathID, "CONFIG" ) || strstr( pathID, "GAMECONFIG" ) );
 }
 
+static void TraceSearchRoots( const char *reason, const char *path, const char *pathID )
+{
+	std::fprintf(
+		stderr,
+		"[Xash3D][stderr] [FILESYSTEM-TRACE] %s path='%s' pathID='%s' gameDir=%d rootCount=%zu\n",
+		reason ? reason : "(null)",
+		path ? path : "(null)",
+		pathID ? pathID : "(null)",
+		IsGameDirPathID( pathID ) ? 1 : 0,
+		g_SearchRoots.size()
+	);
+
+	for( size_t i = 0; i < g_SearchRoots.size(); ++i )
+	{
+		std::fprintf(
+			stderr,
+			"[Xash3D][stderr] [FILESYSTEM-TRACE]   root[%zu] path='%s' gameDir=%d\n",
+			i,
+			g_SearchRoots[i].path.c_str(),
+			g_SearchRoots[i].gameDir ? 1 : 0
+		);
+	}
+}
+
 static void SplitSearchPattern( const char *pattern, std::string &directory, std::string &filePattern )
 {
 	const char *slash = strrchr( pattern, '/' );
@@ -114,12 +138,26 @@ static bool PathExists( const std::string &path )
 	return stat( path.c_str(), &st ) == 0;
 }
 
+static void TraceResolveCandidate( const char *fileName, const char *pathID, const char *candidate, bool exists )
+{
+	std::fprintf(
+		stderr,
+		"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath candidate file='%s' pathID='%s' candidate='%s' exists=%d\n",
+		fileName ? fileName : "(null)",
+		pathID ? pathID : "(null)",
+		candidate ? candidate : "(null)",
+		exists ? 1 : 0
+	);
+}
+
 static std::string ResolvePath( const char *pFileName, const char *pathID )
 {
 	if( !pFileName || !*pFileName )
 		return {};
 
-	if( PathExists( pFileName ) )
+	const bool directExists = PathExists( pFileName );
+	TraceResolveCandidate( pFileName, pathID, pFileName, directExists );
+	if( directExists )
 		return pFileName;
 
 	if( IsAbsolutePath( pFileName ) )
@@ -136,15 +174,26 @@ static std::string ResolvePath( const char *pFileName, const char *pathID )
 		if( skinPath )
 		{
 			const std::string skinsCandidate = JoinPath( JoinPath( it->path, "skins" ), pFileName );
-			if( PathExists( skinsCandidate ) )
+			const bool skinsExists = PathExists( skinsCandidate );
+			TraceResolveCandidate( pFileName, pathID, skinsCandidate.c_str(), skinsExists );
+			if( skinsExists )
 				return skinsCandidate;
 		}
 
 		const std::string candidate = JoinPath( it->path, pFileName );
-		if( PathExists( candidate ) )
+		const bool exists = PathExists( candidate );
+		TraceResolveCandidate( pFileName, pathID, candidate.c_str(), exists );
+		if( exists )
 			return candidate;
 	}
 
+	std::fprintf(
+		stderr,
+		"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath miss file='%s' pathID='%s' searchedRoots=%zu\n",
+		pFileName,
+		pathID ? pathID : "(null)",
+		g_SearchRoots.size()
+	);
 	return {};
 }
 
@@ -204,17 +253,19 @@ static bool OpenNextSearchDirectory( FindState *state )
 
 static void TraceLookupPath( const char *op, const char *fileName, const char *pathID = nullptr )
 {
-	// temp disbaled 
-	// char cwd[ PATH_MAX ] = {};
-	// if( !getcwd( cwd, sizeof( cwd ) ) )
-	// 	strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
-	//
-	// cwd[ sizeof( cwd ) - 1 ] = 0;
-	// std::fprintf( stderr, "[Xash3D][stderr] [FILESYSTEM-TRACE] %s file=%s pathID=%s cwd=%s\n",
-	// 	op,
-	// 	fileName ? fileName : "(null)",
-	// 	pathID ? pathID : "(null)",
-	// 	cwd );
+	char cwd[ PATH_MAX ] = {};
+	if( !getcwd( cwd, sizeof( cwd ) ) )
+		strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
+
+	cwd[ sizeof( cwd ) - 1 ] = 0;
+	std::fprintf(
+		stderr,
+		"[Xash3D][stderr] [FILESYSTEM-TRACE] %s file='%s' pathID='%s' cwd='%s'\n",
+		op ? op : "(null)",
+		fileName ? fileName : "(null)",
+		pathID ? pathID : "(null)",
+		cwd
+	);
 }
 
 class CStdFileSystem : public IFileSystem
@@ -225,15 +276,25 @@ public:
 	void RemoveAllSearchPaths( void ) override
 	{
 		TraceLookupPath( "RemoveAllSearchPaths", nullptr );
+		TraceSearchRoots( "RemoveAllSearchPaths", nullptr, nullptr );
 		g_SearchRoots.clear();
 	}
 	void AddSearchPath( const char *pPath, const char *pathID ) override
 	{
 		TraceLookupPath( "AddSearchPath", pPath, pathID );
+		TraceSearchRoots( "AddSearchPath(before)", pPath, pathID );
 		if( !pPath || !*pPath )
 			return;
 
 		g_SearchRoots.push_back( { pPath, IsGameDirPathID( pathID ) } );
+		std::fprintf(
+			stderr,
+			"[Xash3D][stderr] [FILESYSTEM-TRACE] AddSearchPath(after) path='%s' pathID='%s' gameDir=%d rootCount=%zu\n",
+			pPath,
+			pathID ? pathID : "(null)",
+			IsGameDirPathID( pathID ) ? 1 : 0,
+			g_SearchRoots.size()
+		);
 	}
 	bool RemoveSearchPath( const char *pPath ) override
 	{
@@ -297,6 +358,14 @@ public:
 
 		std::string resolved = ResolvePath( pFileName, pathID );
 		const char *openPath = resolved.empty() ? pFileName : resolved.c_str();
+		std::fprintf(
+			stderr,
+			"[Xash3D][stderr] [FILESYSTEM-TRACE] Open resolve file='%s' pathID='%s' resolved='%s' fallback=%d\n",
+			pFileName ? pFileName : "(null)",
+			pathID ? pathID : "(null)",
+			openPath ? openPath : "(null)",
+			resolved.empty() ? 1 : 0
+		);
 
 		return (FileHandle_t)fopen( openPath, pOptions );
 	}
@@ -557,10 +626,19 @@ public:
 	void AddSearchPathNoWrite( const char *pPath, const char *pathID )
 	{
 		TraceLookupPath( "AddSearchPathNoWrite", pPath, pathID );
+		TraceSearchRoots( "AddSearchPathNoWrite(before)", pPath, pathID );
 		if( !pPath || !*pPath )
 			return;
 
 		g_SearchRoots.push_back( { pPath, IsGameDirPathID( pathID ) } );
+		std::fprintf(
+			stderr,
+			"[Xash3D][stderr] [FILESYSTEM-TRACE] AddSearchPathNoWrite(after) path='%s' pathID='%s' gameDir=%d rootCount=%zu\n",
+			pPath,
+			pathID ? pathID : "(null)",
+			IsGameDirPathID( pathID ) ? 1 : 0,
+			g_SearchRoots.size()
+		);
 	}
 };
 

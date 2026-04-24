@@ -4,10 +4,12 @@
 #include <vgui/IClientPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
-#include <vgui/IInput.h>
-#include <vgui/IInputInternal.h>
+// #include <vgui/IInput.h>
+// #include <vgui/IInputInternal.h>
+#include "../../interfaces/vgui/IInput.h"
+#include "../../interfaces/vgui/IInputInternal.h"
 #include <vgui/KeyCode.h>
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
 #ifndef _format
 #define _format(x)
@@ -867,6 +869,11 @@ void CInputWin32::InternalKeyCodeReleased(vgui2::KeyCode code)
 	{
 		pMessage->deleteThis();
 	}
+}
+
+void CInputWin32::OnKeyCodeUnhandled(int keyCode)
+{
+	std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::OnKeyCodeUnhandled keyCode=%d\n", keyCode);
 }
 
 vgui2::HInputContext CInputWin32::CreateInputContext()

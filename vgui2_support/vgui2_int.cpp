@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "vgui_api.h"
 #include "wrect.h"
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
@@ -8,12 +10,12 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include <FileSystem.h>
 #include "tier1/interface.h"
-#include "vgui/ISurface.h"
+#include "interfaces/vgui/ISurface.h"
 #include "vgui_controls/controls.h"
 #include "render_api.h"
 #include "BaseUISurface.h"
 #include "GameUI/IGameConsole.h"
-#include "IBaseUI.h"
+#include "interfaces/IBaseUI.h"
 #include "CBaseUI.h"
 
 #include "winsani_out.h"
@@ -59,18 +61,21 @@ void VGui2_pfnDrawSetTextColor(float r, float g, float b) {
 }
 
 extern "C" int DLLEXPORT VGui2_Initialize(cl_enginefunc_t *pEnginefuncs) {
+    std::fprintf(stderr, "[phase1][VGUI2-TRACE] VGui2_Initialize entry engine=%p\n", (void *)pEnginefuncs);
     gEngfuncs = *pEnginefuncs;
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Initialize engine=%p\n", (void *)pEnginefuncs);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 0 VGui2_Initialize engine=%p\n", (void *)pEnginefuncs);
 
 	return 0;
 }
 
 extern "C" void DLLEXPORT VGui2_Startup()
 {
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+    std::fprintf(stderr, "[phase1][VGUI2-TRACE] VGui2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 3 VGui2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     VGuiWrap2_Startup();
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui2_Startup exit staticUIFuncs=%p surface=%p viewport=%p\n",
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 3 VGui2_Startup exit staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
 }
 
@@ -101,31 +106,41 @@ extern "C" int DLLEXPORT VGui2_Shutdown()
 
 void VGuiWrap2_Startup()
 {
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+    std::fprintf(stderr, "[phase1][VGUI2-TRACE] VGuiWrap2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4 VGuiWrap2_Startup entry staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     if( staticUIFuncs )
         return;
     RegisterInterface();
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.1 VGuiWrap2_Startup after RegisterInterface staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
     RegisterControls();
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.2 VGuiWrap2_Startup after RegisterControls staticUIFuncs=%p surface=%p viewport=%p\n",
+        (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
 
     CreateInterfaceFn pEngineFactory = Sys_GetFactoryThis();
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup engineFactory=%p\n", (void *)pEngineFactory);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.3 VGuiWrap2_Startup engineFactory=%p\n", (void *)pEngineFactory);
 #ifdef XASH_STATIC_GAMELIB
     staticUIFuncs = &g_BaseUI;
 #else
     staticUIFuncs = (IBaseUI *)pEngineFactory(BASEUI_INTERFACE_VERSION, NULL);
 #endif
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup IBaseUI=%p\n", (void *)staticUIFuncs);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.4 VGuiWrap2_Startup IBaseUI=%p\n", (void *)staticUIFuncs);
     if (!staticUIFuncs)
     {
-        gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup failed: IBaseUI missing\n");
+        gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] VGuiWrap2_Startup failed: IBaseUI missing\n");
         return;
     }
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.5 VGuiWrap2_Startup before IBaseUI::Initialize staticUIFuncs=%p\n",
+        (void *)staticUIFuncs);
     staticUIFuncs->Initialize(&pEngineFactory, 1);
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup after Initialize staticUIFuncs=%p surface=%p viewport=%p\n",
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.6 VGuiWrap2_Startup after IBaseUI::Initialize staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.7 VGuiWrap2_Startup before IBaseUI::Start staticUIFuncs=%p\n",
+        (void *)staticUIFuncs);
     staticUIFuncs->Start(NULL, 0);
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGuiWrap2_Startup after Start staticUIFuncs=%p surface=%p viewport=%p\n",
+    gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 4.8 VGuiWrap2_Startup after IBaseUI::Start staticUIFuncs=%p surface=%p viewport=%p\n",
         (void *)staticUIFuncs, (void *)staticSurface, (void *)g_pViewport);
 }
 

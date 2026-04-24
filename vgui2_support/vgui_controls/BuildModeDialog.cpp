@@ -11,12 +11,18 @@
 #include <tier1/utlvector.h>
 #include <tier1/KeyValues.h>
 
-#include <vgui/IInputInternal.h>
-#include <vgui/ILocalize.h>
-#include <vgui/ISurface.h>
-#include <vgui/ISystem.h>
-#include <vgui/KeyCode.h>
-#include <vgui/MouseCode.h>
+// #include <vgui/IInputInternal.h>
+// #include <vgui/ILocalize.h>
+// #include <vgui/ISurface.h>
+// #include <vgui/ISystem.h>
+// #include <vgui/KeyCode.h>
+// #include <vgui/MouseCode.h>
+#include "../interfaces/vgui/IInputInternal.h"
+#include "../interfaces/vgui/ILocalize.h"
+#include "../interfaces/vgui/ISurface.h"
+#include "../interfaces/vgui/ISystem.h"
+#include "../interfaces/vgui/KeyCode.h"
+#include "../interfaces/vgui/MouseCode.h"
 
 #include "BuildModeDialog.h"
 #include "Label.h"

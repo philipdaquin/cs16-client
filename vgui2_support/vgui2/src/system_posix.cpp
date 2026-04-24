@@ -18,13 +18,14 @@
 #include <vgui/VGUI.h>
 #include <vgui/ISystem.h>
 #include <tier1/KeyValues.h>
-#include <vgui/IInputInternal.h>
+// #include <vgui/IInputInternal.h>
+#include "../../interfaces/vgui/IInputInternal.h"
 #include <vgui/ISurface.h>
 #include "tier0/vcrmode.h"
 #include "tier1/fmtstr.h"
 #include "filesystem.h"
 
-#include "vgui_controls/Controls.h"
+#include "vgui_controls/controls.h"
 #include "filesystem_helpers.h"
 #include "vgui_key_translation.h"
 #include "filesystem.h"

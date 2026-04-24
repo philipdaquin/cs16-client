@@ -1,7 +1,7 @@
 
 #include "tier0/dbg.h"
 #include "tier1/utlvector.h"
-#include <vgui/ISurface.h>
+#include "../interfaces/vgui/ISurface.h"
 #include "Clip2D.h"
 
 #include "tier0/memdbgon.h"

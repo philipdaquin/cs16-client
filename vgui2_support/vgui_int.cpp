@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "vgui_api.h"
 #include "wrect.h"
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
@@ -6,14 +8,14 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 #include "BaseUISurface.h"
 
 #include <FileSystem.h>
-#include "IBaseUI.h"
-#include "vgui/IVGui.h"
-#include "vgui/IPanel.h"
-#include "vgui/IInput.h"
-#include "vgui/IInputInternal.h"
-#include "vgui/ISystem.h"
-#include "vgui/KeyCode.h"
-#include "vgui/MouseCode.h"
+#include "interfaces/IBaseUI.h"
+#include "interfaces/vgui/IVGui.h"
+#include "interfaces/vgui/IPanel.h"
+#include "interfaces/vgui/IInput.h"
+#include "interfaces/vgui/IInputInternal.h"
+#include "interfaces/vgui/ISystem.h"
+#include "interfaces/vgui/KeyCode.h"
+#include "interfaces/vgui/MouseCode.h"
 
 #include <stdint.h>
 
@@ -33,8 +35,9 @@ extern cl_enginefunc_t gEngfuncs;
 extern vgui2::IInputInternal *g_pInputInternal;
 
 static void VGui_StartupImpl(int width, int height) {
+	std::fprintf(stderr, "[phase1][VGUI2-TRACE] VGui_StartupImpl width=%d height=%d api=%p\n", width, height, (void *)g_api);
 	if (gEngfuncs.Con_Printf)
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] VGui_Startup width=%d height=%d\n", width, height);
+		gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 2 VGui_Startup width=%d height=%d api=%p\n", width, height, (void *)g_api);
 	if (gEngfuncs.pfnGetGameDirectory == NULL) {
 		return;
 	}
@@ -156,8 +159,9 @@ void VGUI_MouseMove(int x, int y) {
 }
 
 extern "C" void EXPORT InitAPI(vguiapi_t * api) {
+	std::fprintf(stderr, "[phase1][VGUI2-TRACE] InitAPI api=%p\n", (void *)api);
 	if (gEngfuncs.Con_Printf)
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitAPI api=%p\n", (void *)api);
+			gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] STEP 1 InitAPI api=%p\n", (void *)api);
 		g_api = api;
 		g_api->Startup = VGui_Startup;
 		g_api->Shutdown = VGui_Shutdown;
@@ -170,8 +174,9 @@ extern "C" void EXPORT InitAPI(vguiapi_t * api) {
 
 extern "C" void EXPORT InitVGUISupportAPI(vguiapi_t *api)
 {
+	std::fprintf(stderr, "[phase1][VGUI2-TRACE] InitVGUISupportAPI api=%p\n", (void *)api);
 	if (gEngfuncs.Con_Printf)
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] InitVGUISupportAPI api=%p\n", (void *)api);
+		gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] InitVGUISupportAPI api=%p\n", (void *)api);
 	InitAPI(api);
 }
 

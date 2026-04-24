@@ -7,7 +7,7 @@
 
 #define PANEL_BUY "BuyMenu"
 
-#include "vgui_controls/WizardPanel.h"
+#include "../../../vgui2_support/vgui_controls/WizardPanel.h"
 #include "../IViewportPanel.h"
 #include "../IViewport.h"
 

@@ -42,6 +42,7 @@ class ILocalize *localize();
 
 // #include "FileSystem.h"
 ::IFileSystem *filesystem();
+void BootstrapFileSystemSearchPaths( const char *gameDir = nullptr );
 
 // predeclare all the vgui control class names
 class AnimatingImagePanel;

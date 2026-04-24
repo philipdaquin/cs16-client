@@ -1,8 +1,8 @@
 #ifndef CBASEUI_H
 #define CBASEUI_H
 
-#include "IBaseUI.h"
-#include "IEngineVGui.h"
+#include "interfaces/IBaseUI.h"
+#include "interfaces/IEngineVGui.h"
 
 class CBaseUI : public IBaseUI {
 public:

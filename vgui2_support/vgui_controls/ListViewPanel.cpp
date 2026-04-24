@@ -19,7 +19,7 @@
 #include <vgui/IPanel.h>
 #include <vgui/ILocalize.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "ScrollBar.h"
 #include "ImageList.h"
 #include "ImagePanel.h"

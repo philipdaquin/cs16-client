@@ -20,7 +20,7 @@
 #include <vgui/ILocalize.h>
 
 #include "Slider.h"
-#include "Controls.h"
+#include "controls.h"
 #include "TextImage.h"
 
 #include <mathlib/mathlib.h>

@@ -8,13 +8,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <vgui/ISurface.h>
+#include "../../interfaces/vgui/ISurface.h"
 #include "Bitmap.h"
 #include "filesystem.h"
 #include <tier1/utlbuffer.h>
 #include <tier0/dbg.h>
 
-#include <vgui_controls/Controls.h>
+#include "../../vgui_controls/controls.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -189,7 +189,6 @@ HTexture Bitmap::GetID()
 {
 	return _id;
 }
-
 
 
 

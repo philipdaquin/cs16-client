@@ -1,9 +1,12 @@
+#include <cstdio>
+
 #include <KeyValues.h>
 #include <IEngineVGui.h>
 #include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 
 #include "CHudViewPort.h"
+#include "CClientVGUI.h"
 #include "CClientMOTD.h"
 #include "CGameUITestPanel.h"
 #include "game_controls/buymenu.h"
@@ -21,9 +24,11 @@ void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 void CHudViewport::Start()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::Start entry this=%p viewport=%p\n", this, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 	BaseClass::Start();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::Start after BaseClass::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::Start exit this=%p viewport=%p\n", this, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::Start after BaseClass::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 
 	static CHudViewport *const s_pHudViewPort = this;
 
@@ -74,7 +79,8 @@ void CHudViewport::HideClientUI()
 
 void CHudViewport::CreateDefaultPanels()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateDefaultPanels this=%p viewport=%p\n", this, (void *)g_pViewport);
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreateDefaultPanels entry this=%p viewport=%p\n", this, (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreateDefaultPanels this=%p viewport=%p\n", this, (void *)g_pViewport);
 	AddNewPanel(CreatePanelByName("ClientMOTD"));
 	AddNewPanel(CreatePanelByName(PANEL_TEAM));
 	AddNewPanel(CreatePanelByName(PANEL_CLASS));
@@ -85,7 +91,9 @@ void CHudViewport::CreateDefaultPanels()
 
 IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreatePanelByName this=%p name='%s' viewport=%p\n",
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreatePanelByName entry this=%p name='%s' viewport=%p\n",
+		this, pszName ? pszName : "<null>", (void *)g_pViewport);
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreatePanelByName this=%p name='%s' viewport=%p\n",
 		this, pszName ? pszName : "<null>", (void *)g_pViewport);
 	IViewportPanel *pPanel = nullptr;
 
@@ -101,6 +109,10 @@ IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
 		{
 			// Old generic path:
 			// m_pTeamMenu = new CTeamMenu(this);
+			std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreatePanelByName creating TEAM panel this=%p viewport=%p\n",
+				this, (void *)g_pViewport);
+			gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreatePanelByName creating TEAM panel this=%p viewport=%p\n",
+				this, (void *)g_pViewport);
 			m_pTeamMenu = new CCSTeamMenu(this);
 			static_cast<CCSTeamMenu *>(m_pTeamMenu)->UpdateGameMode();
 		}
@@ -202,7 +214,9 @@ IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 
 bool CHudViewport::ShowVGUIMenu(int iMenu)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CHudViewport::ShowVGUIMenu entry this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
+		this, iMenu, (void *)g_pViewport, (void *)m_pTeamMenu, (void *)m_pClassMenu, (void *)m_pBuyMenu);
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
 		this, iMenu, (void *)g_pViewport, (void *)m_pTeamMenu, (void *)m_pClassMenu, (void *)m_pBuyMenu);
 	IViewportPanel *panel = nullptr;
 
@@ -210,7 +224,7 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 	{
 	case MENU_TEAM:
 		panel = m_pTeamMenu;
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TEAM panel=%p type=%d\n",
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TEAM panel=%p type=%d\n",
 			(void *)panel, iMenu);
 		break;
 
@@ -241,15 +255,17 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 
 	if (!panel)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu no panel for menu=%d\n", iMenu);
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu no panel for menu=%d\n", iMenu);
 		return false;
 	}
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu before ShowPanel menu=%d panel=%p visible=%d active=%p\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu before ShowPanel menu=%d panel=%p visible=%d active=%p\n",
 		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
 	ShowPanel(panel, true);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p visible=%d active=%p\n",
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p visible=%d active=%p\n",
 		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
+	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CHudViewport::ShowVGUIMenu exit this=%p menu=%d panel=%p visible=%d active=%p\n",
+		this, iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
 	return true;
 }
 

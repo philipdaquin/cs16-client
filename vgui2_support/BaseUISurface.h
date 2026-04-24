@@ -3,7 +3,10 @@
 
 #include "tier0/platform.h"
 #include "IHTMLChromeController.h"
-#include "vgui/ISurface.h"
+// Keep BaseUISurface on the local VGUI2 interface so we get the wasm-safe
+// Vertex_t / surface contract instead of the HL1 public header.
+//#include "vgui/ISurface.h"
+#include "interfaces/vgui/ISurface.h"
 #include "IMouseControl.h"
 #include "Color.h"
 

@@ -10,23 +10,23 @@
 #include <tier0/dbg.h>
 
 #include "tier1/interface.h"
-#include "vgui_controls/controls.h"
-#include "vgui_controls/MessageBox.h"
+#include "../vgui_controls/controls.h"
+#include "../vgui_controls/MessageBox.h"
 
 #include "KeyValues.h"
 #include <IEngineVGui.h>
-#include <IGameUIFuncs.h>
-#include <IBaseUI.h>
+#include "../interfaces/IGameUIFuncs.h"
+#include "../interfaces/IBaseUI.h"
 #include <ServerBrowser/IServerBrowser.h>
 #include <IVGuiModule.h>
 
 #include <IEngineVGui.h>
-#include <vgui/ILocalize.h>
-#include <vgui/IPanel.h>
-#include <vgui/IScheme.h>
-#include <vgui/IVGui.h>
-#include <vgui/ISystem.h>
-#include <vgui/ISurface.h>
+#include "../interfaces/vgui/ILocalize.h"
+#include "../interfaces/vgui/IPanel.h"
+#include "../interfaces/vgui/IScheme.h"
+#include "../interfaces/vgui/IVGui.h"
+#include "../interfaces/vgui/ISystem.h"
+#include "../interfaces/vgui/ISurface.h"
 
 
 #include "BasePanel.h"

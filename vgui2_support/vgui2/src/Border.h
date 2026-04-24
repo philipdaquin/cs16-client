@@ -13,8 +13,9 @@
 #endif
 
 #include <vgui/VGUI.h>
-#include <vgui/IBorder.h>
-#include <vgui/IScheme.h>
+//#include <vgui/IBorder.h>
+#include "../../interfaces/vgui/IBorder.h"
+#include "../../interfaces/vgui/IScheme.h"
 #include <Color.h>
 
 class KeyValues;

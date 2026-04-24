@@ -5,7 +5,8 @@
 #include <tier1/utlpriorityqueue.h>
 
 #include <vgui/VGUI.h>
-#include <vgui/IInputInternal.h>
+// #include <vgui/IInputInternal.h>
+#include "../../interfaces/vgui/IInputInternal.h"
 #include <vgui/IVGui.h>
 
 namespace vgui2

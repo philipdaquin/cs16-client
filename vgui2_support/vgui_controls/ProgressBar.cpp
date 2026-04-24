@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "ProgressBar.h"
-#include "Controls.h"
+#include "controls.h"
 
 #include <vgui/ILocalize.h>
 #include <vgui/IScheme.h>

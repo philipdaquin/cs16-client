@@ -9,8 +9,8 @@
 #include <vgui/IScheme.h>
 #include <KeyValues.h>
 
-#include <vgui_controls/Button.h>
-#include <vgui_controls/ImagePanel.h>
+#include "../vgui_controls/Button.h"
+#include "../vgui_controls/ImagePanel.h"
 
 
 class TexturedButton : public vgui2::Button

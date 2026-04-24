@@ -19,17 +19,17 @@
 
 #include <vstdlib/IKeyValuesSystem.h>
 #include <FileSystem.h>
-#include <vgui/IBorder.h>
-#include <vgui/IInputInternal.h>
-#include <vgui/IPanel.h>
+#include "../interfaces/vgui/IPanel.h"
+#include "../interfaces/vgui/ISurface.h"
+#include "../interfaces/vgui/IBorder.h"
+#include "../interfaces/vgui/IInputInternal.h"
 #include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IVGui.h>
 #include <vgui/MouseCode.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "Panel.h"
 #include "BuildGroup.h"
 #include "Tooltip.h"
@@ -64,6 +64,7 @@ struct vgui2::DragDrop_t
 {
 	DragDrop_t() :
 		m_bDragEnabled( false ),
+		m_bShowDragHelper( true ),
 		m_bDropEnabled( false ),
 		m_bDragStarted( false ),
 		m_nDragStartTolerance( 8 ),
@@ -78,6 +79,7 @@ struct vgui2::DragDrop_t
 
 	// Drag related data
 	bool		m_bDragEnabled;
+	bool		m_bShowDragHelper;
 	bool		m_bDragging;
 	bool		m_bDragStarted;
 	// How many pixels the dragged box must move before showing the outline rect...
@@ -579,7 +581,7 @@ DECLARE_BUILD_FACTORY( Panel );
 //-----------------------------------------------------------------------------
 Panel::Panel()
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel() this=%p\n", (void *)this);
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel() this=%p\n", (void *)this);
 	Init(0, 0, 64, 24);
 }
 
@@ -588,7 +590,7 @@ Panel::Panel()
 //-----------------------------------------------------------------------------
 Panel::Panel(Panel *parent)
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent) this=%p parent=%p\n", (void *)this, (void *)parent);
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent) this=%p parent=%p\n", (void *)this, (void *)parent);
 	Init(0, 0, 64, 24);
 	SetParent(parent);
 }
@@ -598,7 +600,7 @@ Panel::Panel(Panel *parent)
 //-----------------------------------------------------------------------------
 Panel::Panel(Panel *parent, const char *panelName)
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent,name) this=%p parent=%p name=%s\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name) this=%p parent=%p name=%s\n",
 		(void *)this, (void *)parent, panelName ? panelName : "(null)");
 	Init(0, 0, 64, 24);
 	SetName(panelName);
@@ -611,7 +613,7 @@ Panel::Panel(Panel *parent, const char *panelName)
 //-----------------------------------------------------------------------------
 Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Panel(parent,name,scheme) this=%p parent=%p name=%s scheme=%lu\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name,scheme) this=%p parent=%p name=%s scheme=%lu\n",
 		(void *)this, (void *)parent, panelName ? panelName : "(null)", (unsigned long)scheme);
 	Init(0, 0, 64, 24);
 	SetName(panelName);
@@ -625,28 +627,28 @@ Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 //-----------------------------------------------------------------------------
 void Panel::Init( int x, int y, int wide, int tall )
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Init this=%p x=%d y=%d wide=%d tall=%d vpanel(before)=%p\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init this=%p x=%d y=%d wide=%d tall=%d vpanel(before)=%p\n",
 		(void *)this, x, y, wide, tall, (void *)_vpanel);
 	_panelName = NULL;
 
 	// get ourselves an internal panel
 	_vpanel = ivgui()->AllocPanel();
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Init after AllocPanel this=%p vpanel=%p\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after AllocPanel this=%p vpanel=%p\n",
 		(void *)this, (void *)_vpanel);
 	auto panelInterface = ipanel();
-	fprintf(stderr, "[VGUI2-TRACE] Panel::Init before ipanel->Init this=%p vpanel=%p ipanel=%p\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init before ipanel->Init this=%p vpanel=%p ipanel=%p\n",
 		(void *)this, (void *)_vpanel, (void *)panelInterface);
 	if (panelInterface)
 	{
 		// Old path:
 		// ipanel()->Init(_vpanel, this);
 		panelInterface->Init(_vpanel, this);
-		fprintf(stderr, "[VGUI2-TRACE] Panel::Init after ipanel->Init this=%p vpanel=%p\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after ipanel->Init this=%p vpanel=%p\n",
 			(void *)this, (void *)_vpanel);
 	}
 	else
 	{
-		fprintf(stderr, "[VGUI2-TRACE] Panel::Init skipped ipanel->Init because ipanel is null this=%p vpanel=%p\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init skipped ipanel->Init because ipanel is null this=%p vpanel=%p\n",
 			(void *)this, (void *)_vpanel);
 		// Without ipanel, SetPos/SetSize would dereference a null interface.
 		// Keep the panel object alive, but stop bootstrap here until the interface exists.
@@ -691,6 +693,23 @@ void Panel::Init( int x, int y, int wide, int tall )
 #if defined( VGUI_USEKEYBINDINGMAPS )
 	m_hKeyBindingsContext = INVALID_KEYBINDINGCONTEXT_HANDLE;
 #endif
+
+	m_hMouseEventHandler = NULL;
+	m_NavUp = NULL;
+	m_NavDown = NULL;
+	m_NavLeft = NULL;
+	m_NavRight = NULL;
+	m_NavToRelay = NULL;
+	m_NavActivate = NULL;
+	m_NavBack = NULL;
+	m_sNavUpName = "";
+	m_sNavDownName = "";
+	m_sNavLeftName = "";
+	m_sNavRightName = "";
+	m_sNavToRelayName = "";
+	m_sNavActivateName = "";
+	m_sNavBackName = "";
+	m_LastNavDirection = ND_NONE;
 }
 
 
@@ -1011,12 +1030,13 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		return;
 	}
 
-	// const char *panelName = GetName();
-	// if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
-	// {
-	// 	ivgui()->DPrintf( "[VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-	// 		this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
-	// }
+	const char *panelName = GetName();
+	const bool isTeamMenu = panelName && !Q_stricmp( panelName, "TeamMenu" );
+	if ( isTeamMenu )
+	{
+		ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+			this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+	}
 
 	float oldAlphaMultiplier = surface()->DrawGetAlphaMultiplier();
 	float newAlphaMultiplier = oldAlphaMultiplier * m_flAlpha * 1.0f/255.0f;
@@ -1049,6 +1069,37 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		repaint = false;
 	}
 
+	if ( isTeamMenu )
+	{
+		int x = 0, y = 0, wide = 0, tall = 0;
+		ipanel()->GetAbsPos( vpanel, x, y );
+		ipanel()->GetSize( vpanel, wide, tall );
+		ivgui()->DPrintf(
+			"[phase5][VGUI2-TRACE] Panel::PaintTraverse decision TeamMenu this=%p vpanel=%p parent=%p popup=%d repaint=%d allowForce=%d alpha=%.2f oldAlpha=%.2f newAlpha=%.2f bounds=%d,%d %dx%d clip=%d,%d,%d,%d paintBg=%d paint=%d border=%d post=%d children=%d\n",
+			this,
+			(void *)vpanel,
+			(void *)ipanel()->GetParent( vpanel ),
+			ipanel()->IsPopup( vpanel ) ? 1 : 0,
+			repaint ? 1 : 0,
+			allowForce ? 1 : 0,
+			m_flAlpha,
+			oldAlphaMultiplier,
+			newAlphaMultiplier,
+			x,
+			y,
+			wide,
+			tall,
+			clipRect[0],
+			clipRect[1],
+			clipRect[2],
+			clipRect[3],
+			_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) ? 1 : 0,
+			_flags.IsFlagSet( PAINT_ENABLED ) ? 1 : 0,
+			_flags.IsFlagSet( PAINT_BORDER_ENABLED ) ? 1 : 0,
+			_flags.IsFlagSet( POST_CHILD_PAINT_ENABLED ) ? 1 : 0,
+			ipanel()->GetChildCount( vpanel ) );
+	}
+
 	// set global alpha
 	surface()->DrawSetAlphaMultiplier( newAlphaMultiplier );
 	if ( repaint && _flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) )
@@ -1056,18 +1107,42 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		// draw the background with no inset
 		if ( _flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) )
 		{
+			if ( isTeamMenu )
+			{
+				ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling PaintBackground this=%p\n", this );
+			}
 			surface()->PushMakeCurrent( vpanel, false );
 			PaintBackground();
 			surface()->PopMakeCurrent( vpanel );
+		}
+		else if ( isTeamMenu )
+		{
+			ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped PaintBackground flag disabled this=%p\n", this );
 		}
 
 		// draw the front of the panel with the inset
 		if ( _flags.IsFlagSet( PAINT_ENABLED ) )
 		{
+			if ( isTeamMenu )
+			{
+				ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling Paint this=%p\n", this );
+			}
 			surface()->PushMakeCurrent( vpanel, true );
 			Paint();
 			surface()->PopMakeCurrent( vpanel );
 		}
+		else if ( isTeamMenu )
+		{
+			ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped Paint flag disabled this=%p\n", this );
+		}
+	}
+	else if ( isTeamMenu )
+	{
+		ivgui()->DPrintf(
+			"[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped paint block this=%p repaint=%d anyPaintFlag=%d\n",
+			this,
+			repaint ? 1 : 0,
+			_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) ? 1 : 0 );
 	}
 
 	// traverse and paint all our children
@@ -1124,11 +1199,11 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 
 	surface()->SwapBuffers( vpanel );
 
-	// if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
-	// {
-	// 	ivgui()->DPrintf( "[VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-	// 		this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
-	// }
+	if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
+	{
+		ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+			this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+	}
 }
 
 
@@ -1291,7 +1366,7 @@ void Panel::SetParent(Panel *newParent)
 //-----------------------------------------------------------------------------
 void Panel::SetParent(VPANEL newParent)
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) enter this=%p selfVPanel=%p newParent=%p currentParent=%p popup=%d\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) enter this=%p selfVPanel=%p newParent=%p currentParent=%p popup=%d\n",
 		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
 	if (newParent)
 	{
@@ -1302,22 +1377,22 @@ void Panel::SetParent(VPANEL newParent)
 		ipanel()->SetParent(GetVPanel(), NULL);
 	}
 
-	fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) after ipanel->SetParent this=%p selfVPanel=%p newParent=%p parentNow=%p popup=%d\n",
+	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) after ipanel->SetParent this=%p selfVPanel=%p newParent=%p parentNow=%p popup=%d\n",
 		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
 
 	if (GetVParent() && !IsPopup())
 	{
 		VPANEL parent = GetVParent();
-		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) sync parent state this=%p parent=%p selfVPanel=%p\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) sync parent state this=%p parent=%p selfVPanel=%p\n",
 			(void *)this, (void *)parent, (void *)GetVPanel());
 		bool proportional = ipanel()->IsProportional(parent);
-		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent proportional this=%p parent=%p proportional=%d\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent proportional this=%p parent=%p proportional=%d\n",
 			(void *)this, (void *)parent, proportional);
 		SetProportional(proportional);
 
 		// most of the time KBInput == parents kbinput
 		bool parentKb = ipanel()->IsKeyBoardInputEnabled(parent);
-		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent kb state this=%p parent=%p parentKb=%d selfKb=%d\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent kb state this=%p parent=%p parentKb=%d selfKb=%d\n",
 			(void *)this, (void *)parent, parentKb, IsKeyBoardInputEnabled());
 		if (parentKb != IsKeyBoardInputEnabled())
 		{
@@ -1325,7 +1400,7 @@ void Panel::SetParent(VPANEL newParent)
 		}
 
 		bool parentMouse = ipanel()->IsMouseInputEnabled(parent);
-		fprintf(stderr, "[VGUI2-TRACE] Panel::SetParent(VPANEL) parent mouse state this=%p parent=%p parentMouse=%d selfMouse=%d\n",
+		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent mouse state this=%p parent=%p parentMouse=%d selfMouse=%d\n",
 			(void *)this, (void *)parent, parentMouse, IsMouseInputEnabled());
 		if (parentMouse != IsMouseInputEnabled())
 		{
@@ -1347,8 +1422,8 @@ void Panel::OnChildAdded(VPANEL child)
 //-----------------------------------------------------------------------------
 void Panel::OnSizeChanged(int newWide, int newTall)
 {
-	fprintf(stderr, "[VGUI2-TRACE] Panel::OnSizeChanged this=%p newWide=%d newTall=%d vpanel=%p\n",
-		(void *)this, newWide, newTall, (void *)GetVPanel());
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::OnSizeChanged this=%p newWide=%d newTall=%d vpanel=%p\n",
+	// 	(void *)this, newWide, newTall, (void *)GetVPanel());
 	InvalidateLayout(); // our size changed so force us to layout again
 }
 
@@ -1735,8 +1810,17 @@ void Panel::InternalMousePressed(int code)
 			return;
 		}
 	}
-	
-	OnMousePressed((MouseCode)code);
+
+	Panel *pMouseHandler = m_hMouseEventHandler.Get();
+	if ( pMouseHandler )
+	{
+		pMouseHandler->OnMousePressed( (MouseCode)code );
+	}
+	else
+	{
+		OnMousePressed( (MouseCode)code );
+	}
+
 #if defined( VGUI_USEDRAGDROP )
 	DragDropStartDragging();
 #endif
@@ -1768,7 +1852,16 @@ void Panel::InternalMouseDoublePressed(int code)
 		}
 	}
 
-	OnMouseDoublePressed((MouseCode)code);
+	Panel *pMouseHandler = m_hMouseEventHandler.Get();
+	if ( pMouseHandler )
+	{
+		pMouseHandler->OnMouseDoublePressed( (MouseCode)code );
+	}
+	else
+	{
+		OnMouseDoublePressed( (MouseCode)code );
+	}
+
 #if defined( VGUI_USEDRAGDROP )
 	DragDropStartDragging();
 #endif
@@ -1859,7 +1952,15 @@ void Panel::InternalMouseReleased(int code)
 		}
 	}
 
-	OnMouseReleased((MouseCode)code);
+	Panel *pMouseHandler = m_hMouseEventHandler.Get();
+	if ( pMouseHandler )
+	{
+		pMouseHandler->OnMouseReleased( (MouseCode)code );
+	}
+	else
+	{
+		OnMouseReleased( (MouseCode)code );
+	}
 }
 
 void Panel::InternalMouseWheeled(int delta)
@@ -1872,7 +1973,15 @@ void Panel::InternalMouseWheeled(int delta)
 	if ( !ShouldHandleInputMessage() )
 		return;
 
-	OnMouseWheeled(delta);
+	Panel *pMouseHandler = m_hMouseEventHandler.Get();
+	if ( pMouseHandler )
+	{
+		pMouseHandler->OnMouseWheeled( delta );
+	}
+	else
+	{
+		OnMouseWheeled( delta );
+	}
 }
 
 void Panel::InternalKeyCodePressed(int code)
@@ -2802,6 +2911,10 @@ void Panel::OnMouseReleased(MouseCode code)
 {
 }
 
+void Panel::OnMouseMismatchedRelease( MouseCode code, Panel* pPressedPanel )
+{
+}
+
 void Panel::OnMouseWheeled(int delta)
 {
 	CallParentFunction(new KeyValues("MouseWheeled", "delta", delta));
@@ -3019,6 +3132,13 @@ void Panel::SetCursor(HCursor cursor)
 HCursor Panel::GetCursor()
 {
 	return _cursor;
+}
+
+void Panel::SetCursorAlwaysVisible( bool visible )
+{
+	// Local VGUI build does not currently route this to the surface backend.
+	// Keep it as a compatibility shim so the HL1 symbol is present.
+	(void)visible;
 }
 
 void Panel::SetMinimumSize(int wide,int tall)
@@ -3758,6 +3878,14 @@ void Panel::ApplyAutoResizeSettings(KeyValues *inResourceData)
 //-----------------------------------------------------------------------------
 void Panel::ApplySettings(KeyValues *inResourceData)
 {
+	const bool isTeamMenu = _panelName && !Q_strcmp(_panelName, "TeamMenu");
+	if (isTeamMenu)
+	{
+		int startW = 0, startH = 0;
+		GetSize(startW, startH);
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu enter this=%p size=%dx%d kv=%p\n",
+			this, startW, startH, (void *)inResourceData);
+	}
 	// First restore to default values
 	if ( _flags.IsFlagSet( NEEDS_DEFAULT_SETTINGS_APPLIED ) )
 	{
@@ -3882,6 +4010,13 @@ void Panel::ApplySettings(KeyValues *inResourceData)
 	}
 	
 	SetSize( wide, tall );
+	if (isTeamMenu)
+	{
+		int appliedW = 0, appliedH = 0;
+		GetSize(appliedW, appliedH);
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu after SetSize this=%p requested=%dx%d actual=%dx%d\n",
+			this, wide, tall, appliedW, appliedH);
+	}
 
 	// NOTE: This has to happen after pos + size is set
 	ApplyAutoResizeSettings( inResourceData );
@@ -3934,6 +4069,16 @@ void Panel::ApplySettings(KeyValues *inResourceData)
 	{
 		// Only slam the name if the new one differs...
 		SetName(newName);
+	}
+
+	if (isTeamMenu)
+	{
+		int endW = 0, endH = 0;
+		int endX = 0, endY = 0;
+		GetSize(endW, endH);
+		GetPos(endX, endY);
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu exit this=%p name='%s' pos=%d,%d size=%dx%d visible=%d enabled=%d\n",
+			this, GetName(), endX, endY, endW, endH, IsVisible() ? 1 : 0, IsEnabled() ? 1 : 0);
 	}
 }
 
@@ -4619,6 +4764,520 @@ bool Panel::SetInfo(KeyValues *inputData)
 void Panel::SetSilentMode( bool bSilent )
 {
 	m_bIsSilent = bSilent;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: mouse events will be send to handler panel instead of this panel
+//-----------------------------------------------------------------------------
+void Panel::InstallMouseHandler( Panel *pHandler )
+{
+	m_hMouseEventHandler = pHandler;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: navigation helpers
+//-----------------------------------------------------------------------------
+Panel* Panel::SetNavUp( Panel* navUp )
+{
+	Panel* lastNav = m_NavUp;
+	m_NavUp = navUp;
+
+	if( navUp )
+		m_sNavUpName = navUp->GetName();
+	else
+		m_sNavUpName.Clear();
+
+	return lastNav;
+}
+
+Panel* Panel::SetNavDown( Panel* navDown )
+{
+	Panel* lastNav = m_NavDown;
+	m_NavDown = navDown;
+
+	if( navDown )
+		m_sNavDownName = navDown->GetName();
+	else
+		m_sNavDownName.Clear();
+
+	return lastNav;
+}
+
+Panel* Panel::SetNavLeft( Panel* navLeft )
+{
+	Panel* lastNav = m_NavLeft;
+	m_NavLeft = navLeft;
+
+	if( navLeft )
+		m_sNavLeftName = navLeft->GetName();
+	else
+		m_sNavLeftName.Clear();
+
+	return lastNav;
+}
+
+Panel* Panel::SetNavRight( Panel* navRight )
+{
+	Panel* lastNav = m_NavRight;
+	m_NavRight = navRight;
+
+	if( navRight )
+		m_sNavRightName = navRight->GetName();
+	else
+		m_sNavRightName.Clear();
+
+	return lastNav;
+}
+
+Panel* Panel::SetNavToRelay( Panel* navToRelay )
+{
+	Panel* lastNav = m_NavToRelay;
+	m_NavToRelay = navToRelay;
+	return lastNav;
+}
+
+Panel* Panel::SetNavActivate( Panel* navActivate )
+{
+	Panel* lastNav = m_NavActivate;
+	m_NavActivate = navActivate;
+	return lastNav;
+}
+
+Panel* Panel::SetNavBack( Panel* navBack )
+{
+	Panel* lastNav = m_NavBack;
+	m_NavBack = navBack;
+	return lastNav;
+}
+
+void Panel::SetNavUp( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavUp = NULL;
+		m_sNavUpName = controlName;
+	}
+}
+
+void Panel::SetNavDown( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavDown = NULL;
+		m_sNavDownName = controlName;
+	}
+}
+
+void Panel::SetNavLeft( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavLeft = NULL;
+		m_sNavLeftName = controlName;
+	}
+}
+
+void Panel::SetNavRight( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavRight = NULL;
+		m_sNavRightName = controlName;
+	}
+}
+
+void Panel::SetNavToRelay( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavToRelay = NULL;
+		m_sNavToRelayName = controlName;
+	}
+}
+
+void Panel::SetNavActivate( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavActivate = NULL;
+		m_sNavActivateName = controlName;
+	}
+}
+
+void Panel::SetNavBack( const char* controlName )
+{
+	if ( controlName && 0 < Q_strlen( controlName ) && GetParent() != 0 )
+	{
+		m_NavBack = NULL;
+		m_sNavBackName = controlName;
+	}
+}
+
+Panel::NAV_DIRECTION Panel::GetLastNavDirection()
+{
+	return m_LastNavDirection;
+}
+
+vgui2::Panel* Panel::GetNavUp( Panel *first )
+{
+	if ( !m_NavUp && m_sNavUpName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavUpName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel *foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavUp = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavUp;
+	if( m_NavUp && m_NavUp != first && !m_NavUp->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavUp( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavDown( Panel *first )
+{
+	if ( !m_NavDown && m_sNavDownName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavDownName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel* foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavDown = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavDown;
+	if( m_NavDown && m_NavDown != first && !m_NavDown->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavDown( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavLeft( Panel *first )
+{
+	if ( !m_NavLeft && m_sNavLeftName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavLeftName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel* foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavLeft = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavLeft;
+	if( m_NavLeft && m_NavLeft != first && !m_NavLeft->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavLeft( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavRight( Panel *first )
+{
+	if ( !m_NavRight && m_sNavRightName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavRightName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel* foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavRight = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavRight;
+	if( m_NavRight && m_NavRight != first && !m_NavRight->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavRight( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavToRelay( Panel *first )
+{
+	if ( !m_NavToRelay && m_sNavToRelayName.Length() > 0 )
+	{
+		Panel *pParent = this;
+		const char *pName = m_sNavToRelayName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel* foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavToRelay = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavToRelay;
+	if ( m_NavToRelay && m_NavToRelay != first && !m_NavToRelay->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavToRelay( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavActivate( Panel *first )
+{
+	if ( !m_NavActivate && m_sNavActivateName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavActivateName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel* foundPanel = pParent->FindChildByName( pName, true );
+		if ( foundPanel != 0 )
+		{
+			m_NavActivate = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavActivate;
+	if ( m_NavActivate && m_NavActivate != first && !m_NavActivate->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavActivate( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+vgui2::Panel* Panel::GetNavBack( Panel *first )
+{
+	if ( !m_NavBack && m_sNavBackName.Length() > 0 )
+	{
+		Panel *pParent = GetParent();
+		const char *pName = m_sNavBackName.String();
+		while ( pParent && pName[ 0 ] == '<' )
+		{
+			pParent = pParent->GetParent();
+			pName++;
+		}
+
+		if ( !pParent )
+		{
+			return NULL;
+		}
+
+		Panel *foundPanel = pParent->FindChildByName( pName );
+		if ( foundPanel )
+		{
+			m_NavBack = foundPanel;
+		}
+	}
+
+	vgui2::Panel* nextPanel = m_NavBack;
+	if ( m_NavBack && m_NavBack != first && !m_NavBack->IsVisible() )
+	{
+		Panel *firstPanel = first == NULL ? this : first;
+		nextPanel = nextPanel->GetNavBack( firstPanel );
+	}
+
+	return nextPanel;
+}
+
+void Panel::NavigateTo()
+{
+	if ( IsX360() )
+	{
+		RequestFocus( 0 );
+	}
+
+	CallParentFunction( new KeyValues( "OnNavigateTo", "panelName", GetName() ) );
+
+	Panel *target = GetNavToRelay();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_NONE;
+		NavigateToChild( target );
+	}
+}
+
+void Panel::NavigateFrom()
+{
+	for ( int i = 0; i < GetChildCount(); ++i )
+	{
+		Panel* currentNav = GetChild(i);
+		if ( currentNav != 0 )
+		{
+			currentNav->NavigateFrom();
+		}
+	}
+
+	CallParentFunction( new KeyValues( "OnNavigateFrom", "panelName", GetName() ) );
+
+	if ( m_pTooltips )
+	{
+		m_pTooltips->HideTooltip();
+	}
+
+	m_LastNavDirection = ND_NONE;
+}
+
+void Panel::NavigateToChild( Panel *pNavigateTo )
+{
+	for( int i = 0; i != GetChildCount(); ++i )
+	{
+		vgui2::Panel *pChild = GetChild(i);
+		if( pChild )
+			pChild->NavigateFrom();
+	}
+	pNavigateTo->NavigateTo();
+}
+
+Panel* Panel::NavigateUp()
+{
+	Panel *target = GetNavUp();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_UP;
+		target->NavigateTo();
+	}
+
+	return target;
+}
+
+Panel* Panel::NavigateDown()
+{
+	Panel *target = GetNavDown();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_DOWN;
+		target->NavigateTo();
+	}
+
+	return target;
+}
+
+Panel* Panel::NavigateLeft()
+{
+	Panel *target = GetNavLeft();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_LEFT;
+		target->NavigateTo();
+	}
+	return target;
+}
+
+Panel* Panel::NavigateRight()
+{
+	Panel *target = GetNavRight();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_RIGHT;
+		target->NavigateTo();
+	}
+	return target;
+}
+
+Panel* Panel::NavigateActivate()
+{
+	Panel *target = GetNavActivate();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_NONE;
+		target->NavigateTo();
+	}
+	return target;
+}
+
+Panel* Panel::NavigateBack()
+{
+	Panel *target = GetNavBack();
+	if ( target )
+	{
+		NavigateFrom();
+		target->m_LastNavDirection = ND_NONE;
+		target->NavigateTo();
+	}
+	return target;
 }
 
 //-----------------------------------------------------------------------------
@@ -5504,6 +6163,37 @@ void Panel::DrawHollowBox(int x, int y, int wide, int tall, Color color, float n
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: draws a hollow box with custom corner sizes
+//-----------------------------------------------------------------------------
+void Panel::DrawHollowBox( int x, int y, int wide, int tall, Color color, float normalizedAlpha, int cornerWide, int cornerTall )
+{
+	if ( m_nBgTextureId1 == -1 ||
+		m_nBgTextureId2 == -1 ||
+		m_nBgTextureId3 == -1 ||
+		m_nBgTextureId4 == -1 )
+	{
+		return;
+	}
+
+	color[3] *= normalizedAlpha;
+
+	surface()->DrawSetColor(color);
+	surface()->DrawFilledRect(x + cornerWide, y, x + wide - cornerWide, y + cornerTall);
+	surface()->DrawFilledRect(x, y + cornerTall, x + cornerWide, y + tall - cornerTall);
+	surface()->DrawFilledRect(x + wide - cornerWide, y + cornerTall, x + wide, y + tall - cornerTall);
+	surface()->DrawFilledRect(x + cornerWide, y + tall - cornerTall, x + wide - cornerWide, y + tall);
+
+	surface()->DrawSetTexture(m_nBgTextureId1);
+	surface()->DrawTexturedRect(x, y, x + cornerWide, y + cornerTall);
+	surface()->DrawSetTexture(m_nBgTextureId2);
+	surface()->DrawTexturedRect(x + wide - cornerWide, y, x + wide, y + cornerTall);
+	surface()->DrawSetTexture(m_nBgTextureId3);
+	surface()->DrawTexturedRect(x, y + tall - cornerTall, x + cornerWide, y + tall);
+	surface()->DrawSetTexture(m_nBgTextureId4);
+	surface()->DrawTexturedRect(x + wide - cornerWide, y + tall - cornerTall, x + wide, y + tall);
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: draws a selection box
 //-----------------------------------------------------------------------------
 void Panel::DrawTexturedBox(int x, int y, int wide, int tall, Color color, float normalizedAlpha )
@@ -5532,6 +6222,16 @@ void Panel::SetDragEnabled( bool enabled )
 		OnFinishDragging( false, (MouseCode)-1 );
 	}
 	m_pDragDrop->m_bDragEnabled = enabled;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: show/hide the drag helper overlay while dragging
+//-----------------------------------------------------------------------------
+void Panel::SetShowDragHelper( bool enabled )
+{
+#if defined( VGUI_USEDRAGDROP )
+	m_pDragDrop->m_bShowDragHelper = enabled;
 #endif
 }
 

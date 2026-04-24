@@ -11,7 +11,7 @@
 #include <vgui/ISurface.h>
 
 #include "Image.h"
-#include "Controls.h"
+#include "controls.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -261,6 +261,5 @@ Color Image::GetColor()
 {
 	return _color;
 }
-
 
 

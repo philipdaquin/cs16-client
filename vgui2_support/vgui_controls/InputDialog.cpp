@@ -4,10 +4,10 @@
 //
 //=============================================================================//
 
-#include <vgui_controls/InputDialog.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/TextEntry.h>
+#include "../vgui_controls/InputDialog.h"
+#include "../vgui_controls/Label.h"
+#include "../vgui_controls/Button.h"
+#include "../vgui_controls/TextEntry.h"
 #include "tier1/KeyValues.h"
 #include "vgui/IInputInternal.h"
 

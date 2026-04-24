@@ -24,7 +24,7 @@ const char *CGameUIFuncs::Key_BindingForKey(int keynum) {
 	return ui::engfuncs.pfnKeyGetBinding(keynum);
 }
 
-KeyCode CGameUIFuncs::GetVGUI2KeyCodeForBind(const char *bind) {
+vgui2::KeyCode CGameUIFuncs::GetVGUI2KeyCodeForBind(const char *bind) {
     for(int keynum = 0; keynum < 256; ++keynum)
     {
         auto bind2 = Key_BindingForKey(keynum);

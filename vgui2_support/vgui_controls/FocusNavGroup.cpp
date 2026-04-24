@@ -15,7 +15,7 @@
 #include <tier1/KeyValues.h>
 #include <tier0/dbg.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "FocusNavGroup.h"
 #include "Panel.h"
 

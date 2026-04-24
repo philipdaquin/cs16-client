@@ -14,7 +14,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
 
-#include "Controls.h"
+#include "controls.h"
 #include "MenuButton.h"
 #include "Menu.h"
 #include "TextImage.h"

@@ -1,4 +1,4 @@
-#include <vgui/IPanel.h>
+#include "../interfaces/vgui/IPanel.h"
 
 namespace vgui2
 {

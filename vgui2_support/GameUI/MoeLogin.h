@@ -5,10 +5,10 @@
 #pragma once
 #endif
 
-#include <vgui/IScheme.h>
-#include <vgui_controls/ImagePanel.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/Frame.h>
+#include "../interfaces/vgui/IScheme.h"
+#include "../vgui_controls/ImagePanel.h"
+#include "../vgui_controls/Label.h"
+#include "../vgui_controls/Frame.h"
 
 #include "cso_controls/RoundPanel.h"
 #include "cso_controls/SignalImagePanel.h"

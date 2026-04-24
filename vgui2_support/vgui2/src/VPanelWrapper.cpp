@@ -1,5 +1,5 @@
 
-#include <vgui_controls/Controls.h>
+#include <vgui_controls/controls.h>
 
 #include "VPanel.h"
 #include "VPanelWrapper.h"

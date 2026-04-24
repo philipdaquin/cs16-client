@@ -1,10 +1,13 @@
 
 #include "CBackGroundPanel.h"
 #include <vgui/ISurface.h>
+#include "hud.h"
 
 CBackGroundPanel::CBackGroundPanel( vgui2::Panel* pParent )
 	: BaseClass( pParent, "ViewPortBackGround" )
 {
+	gEngfuncs.Con_Printf("[phase1][VGUI2-CLIENT] CBackGroundPanel ctor this=%p parent=%p vparent=%p\n",
+		this, (void *)pParent, (void *)GetVParent());
 	SetScheme( "ClientScheme" );
 
 	SetTitleBarVisible( false );

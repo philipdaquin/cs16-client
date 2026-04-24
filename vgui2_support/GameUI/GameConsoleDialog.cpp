@@ -7,7 +7,7 @@
 
 #include "EngineInterface.h"
 #include "GameConsoleDialog.h"
-#include "IBaseUI.h"
+#include "../interfaces/IBaseUI.h"
 
 #include <vgui/IInput.h>
 #include <vgui/IInputInternal.h>

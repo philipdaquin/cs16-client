@@ -6,7 +6,7 @@
 //=============================================================================//
 
 #include "KeyRepeat.h"
-#include "Controls.h"
+#include "controls.h"
 #include <vgui/ISystem.h>
 
 #include <tier0/dbg.h>

@@ -26,7 +26,7 @@
 #undef GetCharABCWidths
 #endif
 #include <tier0/dbg.h>
-#include <vgui/ISurface.h>
+#include "../../interfaces/vgui/ISurface.h"
 #include <utlbuffer.h>
 //#include <fontconfig/fontconfig.h>
 #include <freetype/ftbitmap.h>

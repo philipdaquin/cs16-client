@@ -19,8 +19,9 @@
 #include "FileSystem.h"
 #include "FileSystem_Helpers.h"
 
-#include <vgui/IInputInternal.h>
-#include <vgui_controls/Controls.h>
+// #include <vgui/IInputInternal.h>
+#include "../../interfaces/vgui/IInputInternal.h"
+#include <vgui_controls/controls.h>
 
 #include "tier1/KeyValues.h"
 

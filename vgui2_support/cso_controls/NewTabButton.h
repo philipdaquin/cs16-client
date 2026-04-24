@@ -9,14 +9,18 @@
 #include <vgui/IScheme.h>
 #include <KeyValues.h>
 
-#include <vgui_controls/Button.h>
-#include <vgui_controls/ImagePanel.h>
+#include "../vgui_controls/Button.h"
+#include "../vgui_controls/ImagePanel.h"
 
 class NewTabButton : public vgui2::Button
 {
 	typedef vgui2::Button BaseClass;
 
 private:
+	bool _imageBackground;
+	vgui2::IImage *_defaultImage[3];
+	vgui2::IImage *_armedImage[3];
+	vgui2::IImage *_depressedImage[3];
 	Color _replaceColor;
 	int m_bMaxTabWidth;
 
@@ -26,6 +30,13 @@ public:
 	{
 		SetCommand(new KeyValues("TabPressed"));
 		m_bMaxTabWidth = maxTabWidth;
+		_imageBackground = false;
+		for (int i = 0; i < 3; ++i)
+		{
+			_defaultImage[i] = nullptr;
+			_armedImage[i] = nullptr;
+			_depressedImage[i] = nullptr;
+		}
 	}
 
 	virtual void ApplySchemeSettings(vgui2::IScheme *pScheme)

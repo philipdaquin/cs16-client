@@ -29,7 +29,7 @@ protected:
 	virtual CCSBuySubMenu *CreateNewSubMenu(const char *name = "BuySubMenu") override;
 
 public:
-	virtual void LoadControlSettings(const char *dialogResourceName, const char *pathID = NULL, KeyValues *pPreloadedKeyValues = NULL) override;
+	virtual void LoadControlSettings(const char *dialogResourceName, const char *pathID = NULL, KeyValues *pPreloadedKeyValues = NULL);
 	virtual void OnCommand(const char *command) override;
 	virtual void PerformLayout() override;
 	virtual void OnThink() override;

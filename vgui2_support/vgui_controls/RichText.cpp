@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include "Controls.h"
+#include "controls.h"
 #include "Panel.h"
 #include "RichText.h"
 #include "ScrollBar.h"
@@ -1394,8 +1394,8 @@ void RichText::LayoutVerticalScrollBarSlider()
 	//int displayLines = tall / (surface()->GetFontTall(_font) + _drawOffsetY);
 	if (lineHeight <= 0)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] RichText::LayoutVerticalScrollBarSlider skipping because lineHeight is invalid this=%p font=%d drawOffsetY=%d\n",
-			(void *)this, _font, _drawOffsetY);
+		// std::fprintf(stderr, "[VGUI2-TRACE] RichText::LayoutVerticalScrollBarSlider skipping because lineHeight is invalid this=%p font=%d drawOffsetY=%d\n",
+		// 	(void *)this, _font, _drawOffsetY);
 		return;
 	}
 	int displayLines = tall / lineHeight;
