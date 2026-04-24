@@ -40,11 +40,11 @@ CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 void CCSTeamMenu::SetupControlSettings()
 {
 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings entry this=%p\n", this);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading Resource/UI/Teammenu.res pathID=GAME\n",
+	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading resource/UI/Teammenu.res pathID=GAME\n",
 		this);
 	// Old CSO-specific layout:
 	// LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
-	LoadControlSettings("Resource/UI/Teammenu.res", "GAME");
+	LoadControlSettings("resource/UI/Teammenu.res", "GAME");
 	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
 	InvalidateLayout();

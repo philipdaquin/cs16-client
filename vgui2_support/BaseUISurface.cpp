@@ -40,7 +40,7 @@ typedef struct rgbdata_s
     size_t	size;		// for bounds checking
 } rgbdata_t;
 using image_ref = std::shared_ptr<rgbdata_t>;
-image_ref FS_LoadImage( const char *filename, const byte *buffer, size_t size );
+image_ref FS_LoadImage( const char *filename, const byte *buffer, size_t size ) __attribute__((weak));
 
 void SPR_AdjustSize( float *x, float *y, float *w, float *h );
 void SPR_AdjustSizeReverse( float *x, float *y, float *w, float *h );
@@ -666,25 +666,36 @@ void BaseUISurface::DeleteHTMLWindow(class vgui2::IHTML *) {
 void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardwareFilter, bool forceReload) {
 	char name[512];
 	snprintf(name, sizeof(name), "%s.tga", filename);
-    image_ref pic;
+	// Old behaviour:
+	// image_ref pic;
+	// if (FS_LoadImage)
+	// {
+	//     pic = FS_LoadImage( name, nullptr, 0 );
+	//     if (!pic)
+	//     {
+	//         snprintf(name, sizeof(name), "%s.bmp", filename);
+	//         pic = FS_LoadImage( name, nullptr, 0 );
+	//     }
+	// }
+	// if (!pic)
+	// {
+	//     DrawSetTexture(id);
+	//     return;
+	// }
+	// DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
 
-    pic = FS_LoadImage( name, nullptr, 0 );
-	if (!pic)
-	{
-		snprintf(name, sizeof(name), "%s.bmp", filename);
-
-        pic = FS_LoadImage( name, nullptr, 0 );
-		if (!pic)
-		{
-			DrawSetTexture(id);
-			return;
-		}
-	}
-
-	DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
+	std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile fallback filename='%s' using placeholder\n", filename);
+	static const unsigned char s_WhitePixel[4] = { 255, 255, 255, 255 };
+	DrawSetTextureRGBA(id, s_WhitePixel, 1, 1, hardwareFilter, forceReload);
 }
 
 void BaseUISurface::DrawSetTextureRGBA(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload) {
+	if (!g_api || !g_api->UploadTexture)
+	{
+		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureRGBA missing uploader id=%d size=%dx%d\n", id, wide, tall);
+		return;
+	}
+
 	g_api->UploadTexture(id, (const char *)rgba, wide, tall);
 	DrawSetTexture(id);
 }
@@ -701,15 +712,41 @@ void BaseUISurface::DrawSetTexture(int id) {
 #ifdef USE_IMGUI_SURFACE
     // nothing
 #else
-	g_api->BindTexture(id);
+	if (g_api && g_api->BindTexture)
+	{
+		g_api->BindTexture(id);
+	}
 #endif
 }
 
 void BaseUISurface::DrawGetTextureSize(int id, int &wide, int &tall) {
-	int width, height;
-	g_api->BindTexture(id);
+	// Old behaviour:
+	// int width, height;
+	// g_api->BindTexture(id);
+	// g_api->GetTextureSizes(&width, &height);
+	// g_api->BindTexture(m_iCurrentTexture);
+	// wide = width;
+	// tall = height;
+
+	if (!g_api || !g_api->GetTextureSizes)
+	{
+		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawGetTextureSize fallback id=%d\n", id);
+		wide = 1;
+		tall = 1;
+		return;
+	}
+
+	int width = 1;
+	int height = 1;
+	if (g_api->BindTexture)
+	{
+		g_api->BindTexture(id);
+	}
 	g_api->GetTextureSizes(&width, &height);
-	g_api->BindTexture(m_iCurrentTexture);
+	if (g_api->BindTexture)
+	{
+		g_api->BindTexture(m_iCurrentTexture);
+	}
 	wide = width;
 	tall = height;
 }
@@ -724,6 +761,10 @@ void BaseUISurface::DrawTexturedRect(int x0, int y0, int x1, int y1) {
 	if (!ClipRect(rect[0], rect[1], &clippedRect[0], &clippedRect[1])) {
 		return;
 	}
+	// Old behaviour:
+	// g_api->SetupDrawingImage(_drawColor);
+	// g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
+
 #ifdef USE_IMGUI_SURFACE
     int id = m_iCurrentTexture;
     if( id > 0 && id < VGUI_MAX_TEXTURES && g_textures[id] )
@@ -733,6 +774,13 @@ void BaseUISurface::DrawTexturedRect(int x0, int y0, int x1, int y1) {
         ImGui_Surface_DrawImage(g_textures[id], clippedRect[0].point[0], clippedRect[0].point[1], clippedRect[1].point[0], clippedRect[1].point[1], clippedRect[0].coord[0], clippedRect[0].coord[1], clippedRect[1].coord[0], clippedRect[1].coord[1], _drawColor[0], _drawColor[1], _drawColor[2],  255 - _drawColor[3]);
     }
 #else
+	if (!g_api || !g_api->SetupDrawingImage || !g_api->DrawQuad)
+	{
+		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawTexturedRect fallback x0=%d y0=%d x1=%d y1=%d\n",
+			x0, y0, x1, y1);
+		return;
+	}
+
 	g_api->SetupDrawingImage(_drawColor);
 	g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
 #endif
@@ -743,7 +791,19 @@ bool BaseUISurface::IsTextureIDValid(int) {
 }
 
 int BaseUISurface::CreateNewTextureID(bool procedural) {
-	return g_api->GenerateTexture();
+	static int s_NextFallbackTextureId = 1;
+
+	if ( g_api && g_api->GenerateTexture )
+	{
+		return g_api->GenerateTexture();
+	}
+
+	// Some wasm bootstrap paths do not wire the texture factory callback yet.
+	// Hand out a local unique id so scheme image uploads can continue without
+	// trapping on a null function pointer.
+	std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::CreateNewTextureID fallback procedural=%d next=%d\n",
+		procedural ? 1 : 0, s_NextFallbackTextureId);
+	return s_NextFallbackTextureId++;
 }
 
 void BaseUISurface::GetScreenSize(int &wide, int &tall) {

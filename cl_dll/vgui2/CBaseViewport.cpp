@@ -31,7 +31,8 @@ CBaseViewport::CBaseViewport()
 	SetKeyBoardInputEnabled( false );
 	SetMouseInputEnabled( false );
 
-	vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile("Resource/ClientScheme.res", "ClientScheme");
+	// vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile("Resource/ClientScheme.res", "ClientScheme");
+	vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile("resource/ClientScheme.res", "ClientScheme");
 
 	SetScheme( scheme );
 	SetProportional( true );
