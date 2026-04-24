@@ -121,6 +121,7 @@ public:
 	void UsesEscapeSequences(bool state); // default false
 	void UsesConditionals(bool state); // default true
 	bool LoadFromFile( IBaseFileSystem *filesystem, const char *resourceName, const char *pathID = NULL, bool refreshCache = false );
+	bool LoadFromFileValveVDF( IBaseFileSystem *filesystem, const char *resourceName, const char *pathID = NULL, bool refreshCache = false );
 	bool SaveToFile( IBaseFileSystem *filesystem, const char *resourceName, const char *pathID = NULL, bool sortKeys = false, bool bAllowEmptyString = false, bool bCacheResult = false );
 
 	// Read from a buffer...  Note that the buffer must be null terminated
@@ -482,5 +483,7 @@ inline bool KeyValuesDumpAsDevMsg( KeyValues *pKeyValues, int nIndentLevel = 0, 
 	CKeyValuesDumpContextAsDevMsg ctx( nDeveloperLevel );
 	return pKeyValues->Dump( &ctx, nIndentLevel );
 }
+
+bool LoadVGUIKeyValuesFile( KeyValues *kv, IBaseFileSystem *filesystem, const char *resourceName, const char *pathID, bool refreshCache = false );
 
 #endif // KEYVALUES_H

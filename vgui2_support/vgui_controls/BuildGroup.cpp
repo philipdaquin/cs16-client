@@ -954,11 +954,11 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 		bool bSuccess = false;
 		if (!pathID)
 		{
-			bSuccess = rDat->LoadFromFile(filesystem(), controlResourceName, "SKIN");
+			bSuccess = LoadVGUIKeyValuesFile(rDat, filesystem(), controlResourceName, "SKIN");
 		}
 		if (!bSuccess)
 		{
-			bSuccess = rDat->LoadFromFile(filesystem(), controlResourceName, pathID);
+			bSuccess = LoadVGUIKeyValuesFile(rDat, filesystem(), controlResourceName, pathID);
 		}
 		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings file load resource='%s' pathID='%s' success=%d kv=%p\n",
 			controlResourceName ? controlResourceName : "<null>",

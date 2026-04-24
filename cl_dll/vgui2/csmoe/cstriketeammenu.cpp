@@ -175,10 +175,10 @@ void CCSTeamMenu::PaintBackground(void)
 {
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground enter this=%p visible=%d\n",
 	// 	this, IsVisible() ? 1 : 0);
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground entry this=%p visible=%d\n",
-		this, IsVisible() ? 1 : 0);
-	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe start this=%p visible=%d\n",
-		this, IsVisible() ? 1 : 0);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground entry this=%p visible=%d\n",
+	// 	this, IsVisible() ? 1 : 0);
+	// cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe start this=%p visible=%d\n",
+	// 	this, IsVisible() ? 1 : 0);
 
 	// Temporary paint probe: if TeamMenu is reaching paint, this bright box
 	// should be impossible to miss.
@@ -187,21 +187,21 @@ void CCSTeamMenu::PaintBackground(void)
 	// vgui2::surface()->DrawSetColor(255, 255, 255, 255);
 	// vgui2::surface()->DrawOutlinedRect(24, 24, 320, 160);
 
-	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe before pfnFillRGBA this=%p\n",
-		this);
+	// cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe before pfnFillRGBA this=%p\n",
+	// 	this);
 	cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 136, 255, 0, 255, 255);
 	cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 1, 255, 255, 255, 255);
 	cl::gEngfuncs.pfnFillRGBA(24, 159, 296, 1, 255, 255, 255, 255);
 	cl::gEngfuncs.pfnFillRGBA(24, 24, 1, 136, 255, 255, 255, 255);
 	cl::gEngfuncs.pfnFillRGBA(319, 24, 1, 136, 255, 255, 255, 255);
-	cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe after pfnFillRGBA this=%p\n",
-		this);
+	// cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe after pfnFillRGBA this=%p\n",
+	// 	this);
 
 	BaseClass::PaintBackground();
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
 	// 	this, IsVisible() ? 1 : 0);
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
-		this, IsVisible() ? 1 : 0);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
+	// 	this, IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::PerformLayout(void)

@@ -205,10 +205,14 @@ namespace vgui2
 			else
 				PushUniqueRoot( roots, JoinPath( cwdString, requestedGameDir.c_str() ) );
 		}
-
+		// Previous implementation uses cwd as a search root 
 		PushUniqueRoot( roots, JoinPath( cwdString, "cstrike" ) );
 		PushUniqueRoot( roots, JoinPath( cwdString, "valve" ) );
 		PushUniqueRoot( roots, cwdString );
+
+		// PushUniqueRoot( roots, "cstrike" );
+		// PushUniqueRoot( roots, "valve" );
+
 
 		fs->RemoveAllSearchPaths();
 

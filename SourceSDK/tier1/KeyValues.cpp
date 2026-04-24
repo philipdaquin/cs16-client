@@ -15,6 +15,13 @@
 #define _wtoi64(arg) wcstoll(arg, NULL, 10)
 #endif
 
+#include <stdio.h>
+#include <memory>
+#include <string>
+#include <system_error>
+#include <utility>
+#include <vector>
+
 #include "../public/tier1/KeyValues.h"
 #include "../public/FileSystem.h"
 #include "../public/vstdlib/IKeyValuesSystem.h"
@@ -30,6 +37,7 @@
 #include "../public/tier1/utlqueue.h"
 #include "../public/tier1/UtlSortVector.h"
 #include "../public/tier1/convar.h"
+#include <vdf_parser.hpp>
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -725,6 +733,392 @@ bool KeyValues::LoadFromFile( IBaseFileSystem *filesystem, const char *resourceN
     MemFreeScratch();
 
 	return bRetOK;
+}
+
+namespace
+{
+	struct VdfOrderedNode;
+
+	struct VdfOrderedEntry
+	{
+		enum EntryType
+		{
+			ATTRIBUTE,
+			CHILD
+		};
+
+		EntryType type;
+		std::string key;
+		std::string value;
+		std::unique_ptr<VdfOrderedNode> child;
+	};
+
+	struct VdfOrderedNode
+	{
+		std::string name;
+		std::vector<VdfOrderedEntry> entries;
+
+		void add_attribute( std::string key, std::string value )
+		{
+			VdfOrderedEntry entry;
+			entry.type = VdfOrderedEntry::ATTRIBUTE;
+			entry.key = std::move( key );
+			entry.value = std::move( value );
+			entries.push_back( std::move( entry ) );
+		}
+
+		void add_child( std::unique_ptr<VdfOrderedNode> child )
+		{
+			VdfOrderedEntry entry;
+			entry.type = VdfOrderedEntry::CHILD;
+			entry.key = child ? child->name : std::string();
+			entry.child = std::move( child );
+			entries.push_back( std::move( entry ) );
+		}
+
+		void set_name( std::string n )
+		{
+			name = std::move( n );
+		}
+	};
+
+	struct VdfDirective
+	{
+		bool isBase;
+		std::string path;
+	};
+
+	static bool VdfIsSpace( char c )
+	{
+		return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\f';
+	}
+
+	static void VdfSkipWhitespaceAndComments( const char *&cursor )
+	{
+		for( ;; )
+		{
+			while( *cursor && VdfIsSpace( *cursor ) )
+				++cursor;
+
+			if( cursor[0] == '/' && cursor[1] == '/' )
+			{
+				cursor += 2;
+				while( *cursor && *cursor != '\n' )
+					++cursor;
+				continue;
+			}
+
+			if( cursor[0] == '/' && cursor[1] == '*' )
+			{
+				cursor += 2;
+				while( *cursor && !( cursor[0] == '*' && cursor[1] == '/' ) )
+					++cursor;
+				if( *cursor )
+					cursor += 2;
+				continue;
+			}
+
+			break;
+		}
+	}
+
+	static bool VdfReadToken( const char *&cursor, std::string &token )
+	{
+		VdfSkipWhitespaceAndComments( cursor );
+		token.clear();
+
+		if( !*cursor )
+			return false;
+
+		if( *cursor == '{' || *cursor == '}' )
+		{
+			token.assign( 1, *cursor );
+			++cursor;
+			return true;
+		}
+
+		if( *cursor == '"' )
+		{
+			++cursor;
+			while( *cursor )
+			{
+				if( *cursor == '\\' && cursor[1] )
+				{
+					token.push_back( cursor[1] );
+					cursor += 2;
+					continue;
+				}
+
+				if( *cursor == '"' )
+				{
+					++cursor;
+					return true;
+				}
+
+				token.push_back( *cursor++ );
+			}
+			return true;
+		}
+
+		while( *cursor && !VdfIsSpace( *cursor ) && *cursor != '{' && *cursor != '}' && *cursor != '"' )
+			token.push_back( *cursor++ );
+
+		return !token.empty();
+	}
+
+	static std::vector<VdfDirective> CollectVdfDirectives( const char *buffer )
+	{
+		std::vector<VdfDirective> directives;
+		if( !buffer )
+			return directives;
+
+		const char *cursor = buffer;
+		std::string token;
+		int depth = 0;
+
+		while( VdfReadToken( cursor, token ) )
+		{
+			if( token == "{" )
+			{
+				++depth;
+				continue;
+			}
+
+			if( token == "}" )
+			{
+				if( depth > 0 )
+					--depth;
+				continue;
+			}
+
+			if( depth == 0 && ( !Q_stricmp( token.c_str(), "#include" ) || !Q_stricmp( token.c_str(), "#base" ) ) )
+			{
+				std::string includePath;
+				if( VdfReadToken( cursor, includePath ) && !includePath.empty() )
+				{
+					VdfDirective directive;
+					directive.isBase = !Q_stricmp( token.c_str(), "#base" );
+					directive.path = includePath;
+					directives.push_back( directive );
+				}
+			}
+		}
+
+		return directives;
+	}
+
+	static std::string BuildRelativeVdfPath( const char *resourceName, const char *includePath )
+	{
+		if( !includePath || !*includePath )
+			return std::string();
+
+		if( includePath[0] == '/' || includePath[0] == '\\' )
+			return includePath;
+
+		std::string fullPath = resourceName ? resourceName : "";
+		const size_t slash = fullPath.find_last_of( "/\\" );
+		if( slash == std::string::npos )
+			return includePath;
+
+		fullPath.erase( slash + 1 );
+		fullPath += includePath;
+		return fullPath;
+	}
+
+	static bool IsVdfPathInStack( const std::vector<std::string> &stack, const std::string &path )
+	{
+		for( const std::string &entry : stack )
+		{
+			if( entry == path )
+				return true;
+		}
+		return false;
+	}
+
+	static void ConvertVdfNodeIntoKeyValues( const VdfOrderedNode &node, KeyValues *kv )
+	{
+		kv->Clear();
+		if( !node.name.empty() )
+			kv->SetName( node.name.c_str() );
+
+		for( const VdfOrderedEntry &entry : node.entries )
+		{
+			if( entry.type == VdfOrderedEntry::ATTRIBUTE )
+			{
+				KeyValues *child = new KeyValues( entry.key.c_str() );
+				child->SetStringValue( entry.value.c_str() );
+				kv->AddSubKey( child );
+				continue;
+			}
+
+			if( entry.child )
+			{
+				KeyValues *child = new KeyValues( entry.child->name.c_str() );
+				ConvertVdfNodeIntoKeyValues( *entry.child, child );
+				kv->AddSubKey( child );
+			}
+		}
+	}
+
+	static void ConvertVdfDocumentIntoKeyValues( const VdfOrderedNode &node, KeyValues *kv )
+	{
+		if( !node.name.empty() )
+		{
+			ConvertVdfNodeIntoKeyValues( node, kv );
+			return;
+		}
+
+		bool convertedRoot = false;
+		KeyValues *insertSpot = kv;
+		kv->Clear();
+
+		for( const VdfOrderedEntry &entry : node.entries )
+		{
+			if( entry.type != VdfOrderedEntry::CHILD || !entry.child )
+				continue;
+
+			if( !convertedRoot )
+			{
+				ConvertVdfNodeIntoKeyValues( *entry.child, kv );
+				convertedRoot = true;
+				continue;
+			}
+
+			KeyValues *sibling = new KeyValues( entry.child->name.c_str() );
+			ConvertVdfNodeIntoKeyValues( *entry.child, sibling );
+			while( insertSpot->GetNextKey() )
+				insertSpot = insertSpot->GetNextKey();
+			insertSpot->SetNextKey( sibling );
+		}
+	}
+
+	static bool LoadFromFileValveVDFInternal( KeyValues *target, IBaseFileSystem *filesystem, const char *resourceName, const char *pathID, std::vector<std::string> &stack )
+	{
+		if( !target || !filesystem || !resourceName )
+			return false;
+
+		if( IsVdfPathInStack( stack, resourceName ) )
+		{
+			std::fprintf( stderr, "[VDFFLOW][VDF] cycle-skip resource='%s' pathID='%s'\n",
+				resourceName, pathID ? pathID : "<null>" );
+			return false;
+		}
+
+		std::fprintf( stderr, "[VDFFLOW][VDF] open resource='%s' pathID='%s'\n",
+			resourceName, pathID ? pathID : "<null>" );
+		FileHandle_t f = filesystem->Open( resourceName, "rb", pathID );
+		if( !f )
+		{
+			std::fprintf( stderr, "[VDFFLOW][VDF] open-failed resource='%s' pathID='%s'\n",
+				resourceName, pathID ? pathID : "<null>" );
+			return false;
+		}
+
+		const int fileSize = filesystem->Size( f );
+		if( fileSize < 0 )
+		{
+			filesystem->Close( f );
+			std::fprintf( stderr, "[VDFFLOW][VDF] size-failed resource='%s' pathID='%s'\n",
+				resourceName, pathID ? pathID : "<null>" );
+			return false;
+		}
+
+		std::vector<char> buffer( fileSize + 1, 0 );
+		const bool readOk = filesystem->Read( buffer.data(), fileSize, f ) != 0;
+		filesystem->Close( f );
+		if( !readOk )
+		{
+			std::fprintf( stderr, "[VDFFLOW][VDF] read-failed resource='%s' pathID='%s' bytes=%d\n",
+				resourceName, pathID ? pathID : "<null>", fileSize );
+			return false;
+		}
+
+		std::fprintf( stderr, "[VDFFLOW][VDF] read-ok resource='%s' pathID='%s' bytes=%d\n",
+			resourceName, pathID ? pathID : "<null>", fileSize );
+
+		stack.push_back( resourceName );
+		const std::vector<VdfDirective> directives = CollectVdfDirectives( buffer.data() );
+
+		tyti::vdf::Options options;
+		options.ignore_includes = true;
+		std::error_code parseError;
+		VdfOrderedNode parsed = tyti::vdf::read<VdfOrderedNode>( buffer.begin(), buffer.begin() + fileSize, parseError, options );
+		if( parseError )
+		{
+			stack.pop_back();
+			std::fprintf( stderr, "[VDFFLOW][VDF] parse-failed resource='%s' pathID='%s' error=%d\n",
+				resourceName, pathID ? pathID : "<null>", parseError.value() );
+			return false;
+		}
+
+		std::fprintf( stderr, "[VDFFLOW][VDF] parse-ok resource='%s' pathID='%s' root='%s' directives=%zu\n",
+			resourceName, pathID ? pathID : "<null>", parsed.name.c_str(), directives.size() );
+
+		ConvertVdfDocumentIntoKeyValues( parsed, target );
+		std::fprintf( stderr, "[VDFFLOW][VDF] convert-ok resource='%s' pathID='%s' kv=%p name='%s'\n",
+			resourceName, pathID ? pathID : "<null>", (void *)target, target->GetName() );
+
+		for( const VdfDirective &directive : directives )
+		{
+			const std::string fullPath = BuildRelativeVdfPath( resourceName, directive.path.c_str() );
+			if( fullPath.empty() )
+				continue;
+
+			KeyValues *extra = new KeyValues( fullPath.c_str() );
+			if( !LoadFromFileValveVDFInternal( extra, filesystem, fullPath.c_str(), pathID, stack ) )
+			{
+				std::fprintf( stderr, "[VDFFLOW][VDF] %s-failed resource='%s' target='%s'\n",
+					directive.isBase ? "base" : "include",
+					resourceName,
+					fullPath.c_str() );
+				extra->deleteThis();
+				continue;
+			}
+
+			if( directive.isBase )
+			{
+				target->RecursiveMergeKeyValues( extra );
+				std::fprintf( stderr, "[VDFFLOW][VDF] base-merged resource='%s' base='%s'\n",
+					resourceName, fullPath.c_str() );
+				extra->deleteThis();
+			}
+			else
+			{
+				KeyValues *insertSpot = target;
+				while( insertSpot->GetNextKey() )
+					insertSpot = insertSpot->GetNextKey();
+				insertSpot->SetNextKey( extra );
+				std::fprintf( stderr, "[VDFFLOW][VDF] include-appended resource='%s' include='%s'\n",
+					resourceName, fullPath.c_str() );
+			}
+		}
+
+		stack.pop_back();
+		std::fprintf( stderr, "[VDFFLOW][VDF] result resource='%s' pathID='%s' ok=1\n",
+			resourceName, pathID ? pathID : "<null>" );
+		return true;
+	}
+}
+
+bool KeyValues::LoadFromFileValveVDF( IBaseFileSystem *filesystem, const char *resourceName, const char *pathID, bool refreshCache )
+{
+	(void)refreshCache;
+	std::vector<std::string> stack;
+	return LoadFromFileValveVDFInternal( this, filesystem, resourceName, pathID, stack );
+}
+
+bool LoadVGUIKeyValuesFile( KeyValues *kv, IBaseFileSystem *filesystem, const char *resourceName, const char *pathID, bool refreshCache )
+{
+	if( !kv )
+		return false;
+
+	if( kv->LoadFromFileValveVDF( filesystem, resourceName, pathID, refreshCache ) )
+		return true;
+
+	std::fprintf( stderr, "[VDFFLOW][VDF] fallback-native resource='%s' pathID='%s'\n",
+		resourceName ? resourceName : "<null>",
+		pathID ? pathID : "<null>" );
+	return kv->LoadFromFile( filesystem, resourceName, pathID, refreshCache );
 }
 
 //-----------------------------------------------------------------------------

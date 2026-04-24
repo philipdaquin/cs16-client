@@ -267,7 +267,7 @@ void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 		const char *szGameDir = gEngfuncs.pfnGetGameDirectory();
 		vgui2::BootstrapFileSystemSearchPaths( szGameDir );
 
-			// vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
+			vgui2::scheme()->LoadSchemeFromFile("resource/TrackerScheme.res", "BaseUI");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/tracker_%language%.txt");
 			vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
 

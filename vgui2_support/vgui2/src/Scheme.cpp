@@ -343,14 +343,14 @@ HScheme  CSchemeManager::LoadSchemeFromFileEx( VPANEL sizingPanel, const char *f
 	data->UsesEscapeSequences( true );	// VGUI uses this
 	
 	// look first in skins directory
-	bool result = data->LoadFromFile( filesystem(), fileName, "SKIN" );
+	bool result = LoadVGUIKeyValuesFile( data, filesystem(), fileName, "SKIN" );
 	if (!result)
 	{
-		result = data->LoadFromFile( filesystem(), fileName, "GAME" );
+		result = LoadVGUIKeyValuesFile( data, filesystem(), fileName, "GAME" );
 		if ( !result )
 		{
 			// look in any directory
-			result = data->LoadFromFile( filesystem(), fileName, NULL );
+			result = LoadVGUIKeyValuesFile( data, filesystem(), fileName, NULL );
 		}
 	}
 
