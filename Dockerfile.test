@@ -1,6 +1,5 @@
 FROM emscripten/emsdk:4.0.17
 
 WORKDIR /cs
-COPY cs16-client /cs/cs16-client
-COPY hl1_source_sdk /cs/hl1_source_sdk
+COPY . /cs/cs16-client
 RUN emcmake cmake -S /cs/cs16-client -B build && cmake --build build --config Release

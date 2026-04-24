@@ -5,9 +5,9 @@ add_library(vgui2_interfaces INTERFACE)
 target_include_directories(vgui2_interfaces INTERFACE 
     ./ 
     interfaces/
-    ${HLSDK_PATH}/common
-	${HLSDK_PATH}/engine
-	${HLSDK_PATH}/pm_shared
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common
+	${CMAKE_CURRENT_SOURCE_DIR}/../engine
+	${CMAKE_CURRENT_SOURCE_DIR}/../pm_shared
 )
 target_link_libraries(vgui2_interfaces INTERFACE vinterface mathlib)
 
@@ -18,15 +18,15 @@ add_library(vguimatsurface STATIC
 target_include_directories(vguimatsurface PRIVATE
 		./
 		vgui2
-		${HL2SDK_PATH}/public
-		${HL2SDK_PATH}/public/tier0
-		${HL2SDK_PATH}/public/tier1
-		${HL2SDK_PATH}/common
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/common
 		interfaces/
 		vguimatsurface/
-		${HLSDK_PATH}/common
-		${HLSDK_PATH}/engine
-		${HLSDK_PATH}/public
+		${CMAKE_CURRENT_SOURCE_DIR}/../common
+		${CMAKE_CURRENT_SOURCE_DIR}/../engine
+		${CMAKE_CURRENT_SOURCE_DIR}/../public
 		)
 target_link_libraries(vguimatsurface PRIVATE vgui_surfacelib)
 
@@ -41,7 +41,7 @@ add_library(vgui2 STATIC
 		vgui2/src/LocalizedStringTable.cpp
 		vgui2/src/MemoryBitmap.cpp
 		vgui2/src/Scheme.cpp
-		${HL2SDK_PATH}/public/UnicodeFileHelpers.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/UnicodeFileHelpers.cpp
 		vgui2/src/vgui.cpp
 		vgui2/src/VGuiKeyValues.cpp
 		vgui2/vgui_key_translation.cpp
@@ -65,10 +65,10 @@ target_include_directories(vgui2 PUBLIC
 		.
 		vgui2
 		interfaces/
-		${HL2SDK_PATH}/public
-		${HL2SDK_PATH}/public/tier0
-		${HL2SDK_PATH}/public/tier1
-		${HL2SDK_PATH}/common
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/common
 		)
 target_link_libraries(vgui2 PRIVATE platform_config tier0 tier1 vstdlib 3rdparty-sdl2)
 
@@ -108,10 +108,10 @@ endif()
 target_include_directories(vgui_surfacelib PUBLIC
 		vgui2
 		interfaces/
-		${HL2SDK_PATH}/common
-		${HL2SDK_PATH}/public
-		${HL2SDK_PATH}/public/tier0
-		${HL2SDK_PATH}/public/tier1
+		${CMAKE_CURRENT_SOURCE_DIR}/../common
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0
+		${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1
 		)
 target_link_libraries(vgui_surfacelib PUBLIC platform_config video_config)
 
@@ -120,7 +120,7 @@ add_library(dead_wrapper STATIC
     dead_wrapper/deadipanel.cpp
     dead_wrapper/deadscheme.cpp
     dead_wrapper/deadsurface.cpp
-	${HL2SDK_PATH}/public/filesystem_helpers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/filesystem_helpers.cpp
 )
 target_link_libraries(dead_wrapper PUBLIC vgui2_interfaces)
 target_link_libraries(dead_wrapper PRIVATE vguimatsurface)

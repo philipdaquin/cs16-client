@@ -43,9 +43,11 @@ set(VGUI2_SDK_RUNTIME_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier1/utlsymbol.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/vstdlib/KeyValuesSystem.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/vcrmode_posix.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/mem.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/mem_helpers.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/memstd.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/threadtools.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/UnicodeFileHelpers.cpp"
 )
 
 set(VGUI2_SDK_MATHLIB_WASM_SOURCES
@@ -71,7 +73,7 @@ list(REMOVE_ITEM VGUI2_SUPPORT_SURFACELIB_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui2/vgui_surfacelib/Win32Font_x360.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui2/vgui_surfacelib/osxfont.cpp")
 set(VGUI2_SUPPORT_ALL_SOURCES
-	"${CMAKE_CURRENT_SOURCE_DIR}/../../hl1_source_sdk/public/filesystem_helpers.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/filesystem_helpers.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui2/vgui_key_translation.cpp"
 	${VGUI2_SUPPORT_ROOT_SOURCES}
 	${VGUI2_SUPPORT_VGUI2_SOURCES}
@@ -162,11 +164,11 @@ set_source_files_properties(${VGUI2_SDK_RUNTIME_SOURCES}
 
 set_source_files_properties(${VGUI2_SUPPORT_ALL_SOURCES}
 	PROPERTIES COMPILE_OPTIONS
-	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
+	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/interfaces;-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui_controls;-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
 
 set_source_files_properties(${CS_VGUI2_SRC} ${CS_VGUI2_GAMECTRL_SRC}
 	PROPERTIES COMPILE_OPTIONS
-	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
+	"-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/interfaces;-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/shims;-I${CMAKE_CURRENT_SOURCE_DIR}/../vgui2_support/vgui_controls;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier1;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public/tier0;-I${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/public")
 
 set_source_files_properties(${CS_VGUI2_CSMOE_SRC}
 	PROPERTIES COMPILE_OPTIONS
@@ -203,13 +205,6 @@ include_directories(
 	../3rdparty/ReGameDLL_CS/regamedll/common
 	../3rdparty/ReGameDLL_CS/regamedll/game_shared
 	../../xash3d-fwgs/engine
-	../../hl1_source_sdk/public
-	../../hl1_source_sdk/common
-	../../hl1_source_sdk/public/tier1
-	../../hl1_source_sdk/public/tier2
-	../../hl1_source_sdk/public/vgui
-	../../hl1_source_sdk/public/vgui_controls
-	../../hl1_source_sdk/vgui2/vgui_controls
 	../3rdparty/mainui_cpp
 	../3rdparty/mainui_cpp/controls
 	../3rdparty/mainui_cpp/menus
