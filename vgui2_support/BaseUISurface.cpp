@@ -1450,7 +1450,10 @@ void BaseUISurface::DrawSetSubTextureRGBA(int textureID, int drawX, int drawY, c
 		rgba
 	);
 	*/
-	return g_api->Reserved1(textureID, drawX, drawY, rgba, subTextureWide, subTextureTall);
+	if (g_api && g_api->UploadTextureBlock)
+	{
+		g_api->UploadTextureBlock(textureID, drawX, drawY, rgba, subTextureWide, subTextureTall);
+	}
 }
 
 bool BaseUISurface::DrawGetUnicodeCharRenderInfo(uchar32 ch, CharRenderInfo &info)
