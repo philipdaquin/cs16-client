@@ -1030,14 +1030,6 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		return;
 	}
 
-	const char *panelName = GetName();
-	const bool isTeamMenu = panelName && !Q_stricmp( panelName, "TeamMenu" );
-	if ( isTeamMenu )
-	{
-		// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-		// 	this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
-	}
-
 	float oldAlphaMultiplier = surface()->DrawGetAlphaMultiplier();
 	float newAlphaMultiplier = oldAlphaMultiplier * m_flAlpha * 1.0f/255.0f;
 
@@ -1069,37 +1061,6 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		repaint = false;
 	}
 
-	if ( isTeamMenu )
-	{
-		int x = 0, y = 0, wide = 0, tall = 0;
-		ipanel()->GetAbsPos( vpanel, x, y );
-		ipanel()->GetSize( vpanel, wide, tall );
-		// ivgui()->DPrintf(
-		// 	"[phase5][VGUI2-TRACE] Panel::PaintTraverse decision TeamMenu this=%p vpanel=%p parent=%p popup=%d repaint=%d allowForce=%d alpha=%.2f oldAlpha=%.2f newAlpha=%.2f bounds=%d,%d %dx%d clip=%d,%d,%d,%d paintBg=%d paint=%d border=%d post=%d children=%d\n",
-		// 	this,
-		// 	(void *)vpanel,
-		// 	(void *)ipanel()->GetParent( vpanel ),
-		// 	ipanel()->IsPopup( vpanel ) ? 1 : 0,
-		// 	repaint ? 1 : 0,
-		// 	allowForce ? 1 : 0,
-		// 	m_flAlpha,
-		// 	oldAlphaMultiplier,
-		// 	newAlphaMultiplier,
-		// 	x,
-		// 	y,
-		// 	wide,
-		// 	tall,
-		// 	clipRect[0],
-		// 	clipRect[1],
-		// 	clipRect[2],
-		// 	clipRect[3],
-		// 	_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) ? 1 : 0,
-		// 	_flags.IsFlagSet( PAINT_ENABLED ) ? 1 : 0,
-		// 	_flags.IsFlagSet( PAINT_BORDER_ENABLED ) ? 1 : 0,
-		// 	_flags.IsFlagSet( POST_CHILD_PAINT_ENABLED ) ? 1 : 0,
-		// 	ipanel()->GetChildCount( vpanel ) );
-	}
-
 	// set global alpha
 	surface()->DrawSetAlphaMultiplier( newAlphaMultiplier );
 	if ( repaint && _flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) )
@@ -1107,42 +1068,18 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		// draw the background with no inset
 		if ( _flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) )
 		{
-			if ( isTeamMenu )
-			{
-				// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling PaintBackground this=%p\n", this );
-			}
 			surface()->PushMakeCurrent( vpanel, false );
 			PaintBackground();
 			surface()->PopMakeCurrent( vpanel );
-		}
-		else if ( isTeamMenu )
-		{
-			// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped PaintBackground flag disabled this=%p\n", this );
 		}
 
 		// draw the front of the panel with the inset
 		if ( _flags.IsFlagSet( PAINT_ENABLED ) )
 		{
-			if ( isTeamMenu )
-			{
-				// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling Paint this=%p\n", this );
-			}
 			surface()->PushMakeCurrent( vpanel, true );
 			Paint();
 			surface()->PopMakeCurrent( vpanel );
 		}
-		else if ( isTeamMenu )
-		{
-			// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped Paint flag disabled this=%p\n", this );
-		}
-	}
-	else if ( isTeamMenu )
-	{
-		// ivgui()->DPrintf(
-		// 	"[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped paint block this=%p repaint=%d anyPaintFlag=%d\n",
-		// 	this,
-		// 	repaint ? 1 : 0,
-		// 	_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) ? 1 : 0 );
 	}
 
 	// traverse and paint all our children
@@ -1198,13 +1135,8 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 	surface()->DrawSetAlphaMultiplier( oldAlphaMultiplier );
 
 	surface()->SwapBuffers( vpanel );
-
-	if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
-	{
-		// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-		// 	this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
-	}
 }
+
 
 
 //-----------------------------------------------------------------------------
@@ -1212,8 +1144,6 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 //-----------------------------------------------------------------------------
 void Panel::PaintBorder()
 {
-	// Original trace:
-	// std::fprintf(stderr, "[VGUI2-TRACE] Panel::PaintBorder this=%p vpanel=%p\n", (void *)this, (void *)GetVPanel());
 	_border->Paint(GetVPanel());
 }
 
@@ -1223,8 +1153,6 @@ void Panel::PaintBorder()
 //-----------------------------------------------------------------------------
 void Panel::PaintBackground()
 { 
-	// Original trace:
-	// std::fprintf(stderr, "[VGUI2-TRACE] Panel::PaintBackground this=%p vpanel=%p\n", (void *)this, (void *)GetVPanel());
 	int wide, tall;
 	GetSize( wide, tall );
 	if ( m_SkipChild.Get() && m_SkipChild->IsVisible() )
@@ -1774,6 +1702,22 @@ bool Panel::ShouldHandleInputMessage()
 
 void Panel::InternalMousePressed(int code)
 {
+	const char *panelName = GetName();
+	const char *panelClass = GetClassName();
+	Panel *parentPanel = GetParent();
+	const char *parentName = parentPanel ? parentPanel->GetName() : "<null>";
+	std::fprintf(stderr,
+		"[VGUI2-CLICK] Panel::InternalMousePressed this=%p name='%s' class='%s' code=%d visible=%d enabled=%d mouse=%d parent=%p parentName='%s'\n",
+		(void *)this,
+		panelName ? panelName : "<null>",
+		panelClass ? panelClass : "<null>",
+		code,
+		IsVisible() ? 1 : 0,
+		IsEnabled() ? 1 : 0,
+		IsMouseInputEnabled() ? 1 : 0,
+		(void *)parentPanel,
+		parentName ? parentName : "<null>");
+
 	long curtime = system()->GetTimeMillis();
 	if ( IsTriplePressAllowed() )
 	{
