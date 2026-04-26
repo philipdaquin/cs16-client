@@ -9,6 +9,7 @@
 #include <vgui/ILocalize.h>
 #include "vgui_controls/RichText.h"
 #include "buymouseoverpanelbutton.h"
+#include "../../vgui_resource_paths.h"
 
 #include <string>
 
@@ -22,12 +23,12 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort) : CBuyMenu(pViewPort)
 
 void CCSBaseBuyMenu::SetupControlSettings()
 {
-	LoadControlSettings("Resource/UI/Buymenu.res", "GAME");
-	LoadControlSettings("Resource/UI/CSO_Buymenu.res", "GAME");
+	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+	// LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 	if (m_pMainMenu)
 	{
-		m_pMainMenu->LoadControlSettings("Resource/UI/cso_buysubmenu_ver2.res", "GAME");
+		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 		m_pMainMenu->SetVisible(false);
 	}
 	

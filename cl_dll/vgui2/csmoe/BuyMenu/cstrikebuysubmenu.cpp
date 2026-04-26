@@ -15,6 +15,7 @@
 #include "cso_controls/ButtonGlow.h"
 #include "cso_controls/DarkTextEntry.h"
 #include "../../../dlls/weapontype.h"
+#include "../../vgui_resource_paths.h"
 
 #include <array>
 #include <string>
@@ -653,7 +654,9 @@ void CCSBuySubMenu::LoadControlSettings(const char *dialogResourceName, const ch
 void CCSBuySubMenu_DefaultMode::LoadControlSettings(const char *dialogResourceName, const char *pathID, KeyValues *pPreloadedKeyValues)
 {
 	BaseClass::LoadControlSettings(dialogResourceName, pathID, pPreloadedKeyValues);
-	BaseClass::LoadControlSettings("Resource/UI/cso_buysubmenu_ver2.res", "GAME");
+	// BaseClass::LoadControlSettings("resource/UI/cso_buysubmenu_ver2.res", "GAME");
+	BaseClass::LoadControlSettings(vgui2::resource_paths::kMenuBuyShotgunsTER, "GAME");
+
 
 	// hide zbs
 	m_pUpgradeTitle->SetVisible(false);
@@ -719,7 +722,8 @@ void CCSBuySubMenu_DefaultMode::PerformLayout()
 void CCSBuySubMenu_ZombieMod::LoadControlSettings(const char *dialogResourceName, const char *pathID, KeyValues *pPreloadedKeyValues)
 {
 	BaseClass::LoadControlSettings(dialogResourceName, pathID, pPreloadedKeyValues);
-	BaseClass::LoadControlSettings("Resource/UI/cso_buysubmenu_ver5.res", "GAME");
+	// BaseClass::LoadControlSettings("resource/UI/cso_buysubmenu_ver5.res", "GAME");
+	BaseClass::LoadControlSettings(vgui2::resource_paths::kMenuBuyShotgunsTER, "GAME");
 
 	// hide zbs
 	m_pUpgradeTitle->SetVisible(false);
@@ -744,7 +748,9 @@ void CCSBuySubMenu_ZombieMod::LoadControlSettings(const char *dialogResourceName
 void CCSBuySubMenu_DeathMatch::LoadControlSettings(const char *dialogResourceName, const char *pathID, KeyValues *pPreloadedKeyValues)
 {
 	BaseClass::LoadControlSettings(dialogResourceName, pathID, pPreloadedKeyValues);
-	BaseClass::LoadControlSettings("Resource/UI/cso_buysubmenu_ver5.res", "GAME");
+	// BaseClass::LoadControlSettings("resource/UI/cso_buysubmenu_ver5.res", "GAME");
+	BaseClass::LoadControlSettings(vgui2::resource_paths::kMenuBuyShotgunsTER, "GAME");
+
 
 	// hide zbs
 	m_pUpgradeTitle->SetVisible(false);

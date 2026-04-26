@@ -12,6 +12,7 @@
 
 #include "CClientVGUI.h"
 #include "CBaseViewport.h"
+#include "vgui_resource_paths.h"
 
 #include "CClientMOTD.h"
 
@@ -41,7 +42,7 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	m_pMessage = new vgui2::RichText( this, "TextMessage" );
 	m_pMessageHtml = new CClientMOTDHTML( this, "Message" );
 
-	LoadControlSettings( "Resource/UI/MOTD.res" );
+	LoadControlSettings( vgui2::resource_paths::kMenuMOTD );
 	InvalidateLayout();
 
 	m_pServerName = new vgui2::Label( this, "serverName", "" );

@@ -14,12 +14,21 @@
 #include <vgui_controls/Panel.h>
 
 #include "mouseoverpanelbutton.h"
+#include "../vgui_resource_paths.h"
 
 using namespace vgui2;
 
+static const char *GetClassMenuResourceForTeam(int team)
+{
+	if (team == TEAM_TERRORIST)
+		return vgui2::resource_paths::kMenuClassTER;
+
+	return vgui2::resource_paths::kMenuClassCT;
+}
+
 CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pViewPort(pViewPort)
 {
-	m_iTeam = 0;
+	m_iTeam = TEAM_CT;
 
 	SetTitle("", true);
 	SetScheme("ClientScheme");
@@ -31,7 +40,7 @@ CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pView
 
 	m_pPanel = new EditablePanel(this, "ClassInfo");
 
-	LoadControlSettings("Resource/UI/ClassMenu.res", "GAME");
+	LoadControlSettings(GetClassMenuResourceForTeam(m_iTeam), "GAME");
 }
 
 CClassMenu::~CClassMenu(void)
@@ -114,7 +123,14 @@ void CClassMenu::ShowPanel(bool bShow)
 
 void CClassMenu::SetData(KeyValues *data)
 {
-	m_iTeam = data->GetInt("team");
+	const int team = data->GetInt("team");
+
+	if (team == m_iTeam)
+		return;
+
+	m_iTeam = team;
+	LoadControlSettings(GetClassMenuResourceForTeam(m_iTeam), "GAME");
+	InvalidateLayout();
 }
 
 void CClassMenu::SetLabelText(const char *textEntryName, const char *text)

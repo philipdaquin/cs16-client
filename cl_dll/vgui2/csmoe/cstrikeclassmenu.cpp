@@ -14,6 +14,7 @@
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
 #include "cso_controls/DarkTextEntry.h"
+#include "../vgui_resource_paths.h"
 
 
 
@@ -187,7 +188,15 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 	m_pSkillInfoText_Desc[0]->SetVisible(false);
 	m_pSkillInfoText_Desc[1]->SetVisible(false);
 	//cso_classmenu_ver2
-	LoadControlSettings("Resource/UI/cso_classmenu_ver2.res", "GAME");
+	// LoadControlSettings("resource/UI/cso_classmenu_ver2.res", "GAME");
+
+	// Check if the user is in CT or TER
+	LoadControlSettings(vgui2::resource_paths::kMenuClassCT, "GAME");
+
+
+	LoadControlSettings(vgui2::resource_paths::kMenuClassTER, "GAME");
+
+
 }
 CCSClassMenu::~CCSClassMenu(void)
 {
@@ -688,7 +697,7 @@ void CCSClassMenu::OnSelectClassZombie(const char* name)
 
 void CCSClassMenu::UpdateGameMode()
 {
-	//LoadControlSettings("Resource/UI/cso_classmenu_ver2.res", "GAME");
+	//LoadControlSettings("resource/UI/cso_classmenu_ver2.res", "GAME");
 	InvalidateLayout();
 
 	m_pShowCT->SetVisible(false);

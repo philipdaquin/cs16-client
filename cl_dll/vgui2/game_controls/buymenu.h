@@ -37,6 +37,8 @@ public:
 	virtual bool NeedsUpdate(void) { return false; }
 	virtual bool HasInputElements(void) { return true; }
 	virtual void ShowPanel(bool bShow);
+	virtual void GotoMenu(int iMenu);
+	virtual void ActivateMenu(int iMenu);
 
 public:
 	DECLARE_VIEWPORT_PANEL_SIMPLE();

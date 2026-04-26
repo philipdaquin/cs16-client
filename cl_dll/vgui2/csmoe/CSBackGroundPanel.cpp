@@ -7,6 +7,7 @@
 #include "studio.h"
 #include "r_studioint.h"
 #include "CSBackGroundPanel.h"
+#include "../vgui_resource_paths.h"
 
 using namespace vgui2;
 
@@ -30,7 +31,7 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	m_offsetX = 0;
 	m_offsetY = 0;
 
-	LoadControlSettings("Resource/UI/BackgroundPanel.res", "GAME");
+	LoadControlSettings(vgui2::resource_paths::kMenuBackgroundPanel, "GAME");
 	m_enabled = true;
 
 	m_pTopLeftPanel->SetVisible(m_enabled);

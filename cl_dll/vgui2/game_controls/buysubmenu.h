@@ -32,6 +32,7 @@ public:
 	virtual void Close(void);
 	virtual void GotoNextSubPanel(void);
 	virtual void SetupNextSubPanel(const char *fileName);
+	virtual void SetupNextSubPanel(const char *fileName, const char *overlayFileName);
 
 protected:
 	virtual void SetNextSubPanel(vgui2::WizardSubPanel *panel);

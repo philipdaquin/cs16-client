@@ -2,6 +2,7 @@
 
 #include "hud.h"
 #include "teammenu.h"
+#include "../vgui_resource_paths.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -58,7 +59,7 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 #endif
 	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loading control settings this=%p resource=resource/UI/Teammenu.res pathID=GAME\n",
 		this);
-	LoadControlSettings("resource/UI/Teammenu.res", "GAME");
+	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
 	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loaded control settings this=%p\n", this);
 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CTeamMenu::CTeamMenu exit this=%p viewport=%p\n",
 		this, (void *)m_pViewPort);

@@ -247,6 +247,8 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 	case MENU_BUY_MACHINEGUN:
 	case MENU_BUY_ITEM:
 		panel = m_pBuyMenu;
+		if (m_pBuyMenu)
+			m_pBuyMenu->GotoMenu(iMenu);
 		break;
 
 	default:

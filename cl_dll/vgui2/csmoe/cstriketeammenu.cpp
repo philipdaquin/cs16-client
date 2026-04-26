@@ -21,6 +21,7 @@
 #include "../CBaseViewport.h"
 #include "shared_util.h"
 #include "igbutton.h"
+#include "../vgui_resource_paths.h"
 
 using namespace vgui2;
 
@@ -43,8 +44,8 @@ void CCSTeamMenu::SetupControlSettings()
 	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading resource/UI/Teammenu.res pathID=GAME\n",
 		this);
 	// Old CSO-specific layout:
-	// LoadControlSettings("Resource/UI/CSO_TeamMenu.res", "GAME");
-	LoadControlSettings("resource/UI/Teammenu.res", "GAME");
+	// LoadControlSettings("resource/UI/CSO_TeamMenu.res", "GAME");
+	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
 	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
 	InvalidateLayout();

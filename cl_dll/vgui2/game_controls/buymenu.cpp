@@ -3,8 +3,37 @@
 #include "buymenu.h"
 #include "buysubmenu.h"
 #include "mouseoverpanelbutton.h"
+#include "../vgui_resource_paths.h"
 
 using namespace vgui2;
+
+static bool IsLocalPlayerTerrorist()
+{
+	return g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST;
+}
+
+static const char *GetBuyMenuResourceForMenu(int iMenu)
+{
+	const bool isTerrorist = IsLocalPlayerTerrorist();
+
+	switch (iMenu)
+	{
+	case MENU_BUY_PISTOL:
+		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyPistolsCT, vgui2::resource_paths::kMenuBuyPistolsTER, isTerrorist);
+	case MENU_BUY_SHOTGUN:
+		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyShotgunsCT, vgui2::resource_paths::kMenuBuyShotgunsTER, isTerrorist);
+	case MENU_BUY_RIFLE:
+		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyRiflesCT, vgui2::resource_paths::kMenuBuyRiflesTER, isTerrorist);
+	case MENU_BUY_SUBMACHINEGUN:
+		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuySubMachinegunsCT, vgui2::resource_paths::kMenuBuySubMachinegunsTER, isTerrorist);
+	case MENU_BUY_MACHINEGUN:
+		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyMachinegunsCT, vgui2::resource_paths::kMenuBuyMachinegunsTER, isTerrorist);
+	case MENU_BUY_ITEM:
+		return vgui2::resource_paths::kMenuBuyEquipment;
+	default:
+		return nullptr;
+	}
+}
 
 CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pViewPort(pViewPort)
 {
@@ -20,9 +49,9 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 
 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
-	LoadControlSettings("Resource/UI/BuyMenu.res", "GAME");
+	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
-	m_pMainMenu->LoadControlSettings("Resource/UI/MainBuyMenu.res", "GAME");
+	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 	m_pMainMenu->SetVisible(false);
 
 	ShowButtons(false);
@@ -59,6 +88,30 @@ void CBuyMenu::ShowPanel(bool bShow)
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}
+}
+
+void CBuyMenu::GotoMenu(int iMenu)
+{
+	if (!m_pMainMenu)
+		return;
+
+	const char *resourceName = GetBuyMenuResourceForMenu(iMenu);
+
+	ActivateNextSubPanel(m_pMainMenu);
+
+	if (resourceName)
+	{
+		m_pMainMenu->SetupNextSubPanel(resourceName);
+		m_pMainMenu->GotoNextSubPanel();
+	}
+}
+
+void CBuyMenu::ActivateMenu(int iMenu)
+{
+	GotoMenu(iMenu);
+
+	if (g_pViewport)
+		g_pViewport->ShowPanel(this, true);
 }
 
 void CBuyMenu::Update(void)
