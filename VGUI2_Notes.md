@@ -75,7 +75,7 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort)
   → SetTitle(), SetScheme(), SetMoveable(false)
   → m_pPanel = new EditablePanel(this, "ClassInfo");
   → m_pMapInfo = new RichText(this, "MapInfo");
-  → LoadControlSettings("Resource/UI/TeamMenu.res", "GAME");    [teammenu.cpp:53]
+  → LoadControlSettings("resource/UI/TeamMenu.res", "GAME");    [teammenu.cpp:53]
 ---
 PHASE 4: TeamMenu Shown (Trigger)
 Step 13 - Engine or game sends team menu message

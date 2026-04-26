@@ -84,9 +84,9 @@ void CGameMenuItem::ApplySchemeSettings(vgui2::IScheme *pScheme)
 		SetFont(pScheme->GetFont("MenuLarge", IsProportional()));
 
 	SetTextInset(0, 0);
-	SetArmedSound("Resource/UI/buttonrollover.wav");
-	SetDepressedSound("Resource/UI/buttonclick.wav");
-	SetReleasedSound("Resource/UI/buttonclickrelease.wav");
+	SetArmedSound("resource/UI/buttonrollover.wav");
+	SetDepressedSound("resource/UI/buttonclick.wav");
+	SetReleasedSound("resource/UI/buttonclickrelease.wav");
 	SetButtonActivationType(Button::ACTIVATE_ONPRESSED);
 	SetPaintBackgroundType(2);
 
