@@ -39,8 +39,6 @@ typedef struct rgbdata_s
     rgba_t	fogParams;	// some water textures in hl1 has info about fog color and alpha
     size_t	size;		// for bounds checking
 } rgbdata_t;
-using image_ref = std::shared_ptr<rgbdata_t>;
-image_ref FS_LoadImage( const char *filename, const byte *buffer, size_t size ) __attribute__((weak));
 
 void SPR_AdjustSize( float *x, float *y, float *w, float *h );
 void SPR_AdjustSizeReverse( float *x, float *y, float *w, float *h );
@@ -72,6 +70,31 @@ static void GetSurfaceScale( float &xscale, float &yscale )
 	// Keep the historical 640x480 VGUI base size visible in the code.
 	xscale = screenInfo.iWidth / kSurfaceBaseWidth;
 	yscale = screenInfo.iHeight / kSurfaceBaseHeight;
+}
+
+static rgbdata_t *LoadSurfaceImage( const char *filename )
+{
+	if ( !vgui2::gEngfuncs.FS_LoadImage )
+	{
+		std::fprintf( stderr, "[VGUI2-TRACE] BaseUISurface::LoadSurfaceImage missing loader filename='%s'\n", filename ? filename : "<null>" );
+		return nullptr;
+	}
+
+	return vgui2::gEngfuncs.FS_LoadImage( filename, nullptr, 0 );
+}
+
+static void FreeSurfaceImage( rgbdata_t *image )
+{
+	if ( !image )
+		return;
+
+	if ( vgui2::gEngfuncs.FS_FreeImage )
+	{
+		vgui2::gEngfuncs.FS_FreeImage( image );
+		return;
+	}
+
+	std::fprintf( stderr, "[VGUI2-TRACE] BaseUISurface::FreeSurfaceImage missing freer image=%p\n", static_cast<void *>( image ) );
 }
 
 void SPR_AdjustSize( float *x, float *y, float *w, float *h )
@@ -666,27 +689,27 @@ void BaseUISurface::DeleteHTMLWindow(class vgui2::IHTML *) {
 void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardwareFilter, bool forceReload) {
 	char name[512];
 	snprintf(name, sizeof(name), "%s.tga", filename);
-	// Old behaviour:
-	// image_ref pic;
-	// if (FS_LoadImage)
-	// {
-	//     pic = FS_LoadImage( name, nullptr, 0 );
-	//     if (!pic)
-	//     {
-	//         snprintf(name, sizeof(name), "%s.bmp", filename);
-	//         pic = FS_LoadImage( name, nullptr, 0 );
-	//     }
-	// }
-	// if (!pic)
-	// {
-	//     DrawSetTexture(id);
-	//     return;
-	// }
-	// DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
+	rgbdata_t *pic = nullptr;
 
-	std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile fallback filename='%s' using placeholder\n", filename);
-	static const unsigned char s_WhitePixel[4] = { 255, 255, 255, 255 };
-	DrawSetTextureRGBA(id, s_WhitePixel, 1, 1, hardwareFilter, forceReload);
+	pic = LoadSurfaceImage( name );
+	if (!pic)
+	{
+		snprintf(name, sizeof(name), "%s.bmp", filename);
+
+		pic = LoadSurfaceImage( name );
+		if (!pic)
+		{
+			DrawSetTexture(id);
+			return;
+		}
+	}
+
+	DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
+	FreeSurfaceImage( pic );
+
+	// std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile fallback filename='%s' using placeholder\n", filename);
+	// static const unsigned char s_WhitePixel[4] = { 255, 255, 255, 255 };
+	// DrawSetTextureRGBA(id, s_WhitePixel, 1, 1, hardwareFilter, forceReload);
 }
 
 void BaseUISurface::DrawSetTextureRGBA(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload) {
@@ -776,8 +799,8 @@ void BaseUISurface::DrawTexturedRect(int x0, int y0, int x1, int y1) {
 #else
 	if (!g_api || !g_api->SetupDrawingImage || !g_api->DrawQuad)
 	{
-		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawTexturedRect fallback x0=%d y0=%d x1=%d y1=%d\n",
-			x0, y0, x1, y1);
+		// std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawTexturedRect fallback x0=%d y0=%d x1=%d y1=%d gapi=%p\n",
+		// 	x0, y0, x1, y1, (void *)g_api);
 		return;
 	}
 
@@ -801,8 +824,8 @@ int BaseUISurface::CreateNewTextureID(bool procedural) {
 	// Some wasm bootstrap paths do not wire the texture factory callback yet.
 	// Hand out a local unique id so scheme image uploads can continue without
 	// trapping on a null function pointer.
-	std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::CreateNewTextureID fallback procedural=%d next=%d\n",
-		procedural ? 1 : 0, s_NextFallbackTextureId);
+	// std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::CreateNewTextureID fallback procedural=%d next=%d\n",
+	// 	procedural ? 1 : 0, s_NextFallbackTextureId);
 	return s_NextFallbackTextureId++;
 }
 
@@ -1160,13 +1183,13 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 		vgui2::VPANEL pop = GetPopup(i);
 		const char *name = vgui2::ipanel()->GetName(pop);
 		if (name && !Q_stricmp(name, "TeamMenu")) {
-			std::fprintf(stderr,
-				"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse reset popup TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
-				i,
-				(void *)pop,
-				(void *)vgui2::ipanel()->GetParent(pop),
-				vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
-				vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
+			// std::fprintf(stderr,
+			// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse reset popup TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
+			// 	i,
+			// 	(void *)pop,
+			// 	(void *)vgui2::ipanel()->GetParent(pop),
+			// 	vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
+			// 	vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
 		}
 		vgui2::ipanel()->Render_SetPopupVisible(pop, false);
 	}
@@ -1177,13 +1200,13 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 		vgui2::VPANEL pop = GetPopup(i);
 		const char *name = vgui2::ipanel()->GetName(pop);
 		if (name && !Q_stricmp(name, "TeamMenu")) {
-			std::fprintf(stderr,
-				"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse popup decision TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
-				i,
-				(void *)pop,
-				(void *)vgui2::ipanel()->GetParent(pop),
-				vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
-				vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
+			// std::fprintf(stderr,
+			// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse popup decision TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
+			// 	i,
+			// 	(void *)pop,
+			// 	(void *)vgui2::ipanel()->GetParent(pop),
+			// 	vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
+			// 	vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
 		}
 
 		if (vgui2::ipanel()->IsVisible(pop) && !vgui2::ipanel()->Render_GetPopupVisible(pop)) {
@@ -1192,10 +1215,10 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 
 		if (vgui2::ipanel()->Render_GetPopupVisible(pop)) {
 			if (name && !Q_stricmp(name, "TeamMenu")) {
-				std::fprintf(stderr,
-					"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse painting popup TeamMenu index=%d panel=%p\n",
-					i,
-					(void *)pop);
+				// std::fprintf(stderr,
+				// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse painting popup TeamMenu index=%d panel=%p\n",
+				// 	i,
+				// 	(void *)pop);
 			}
 			vgui2::ipanel()->PaintTraverse(pop, true, true);
 		}

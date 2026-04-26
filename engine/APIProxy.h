@@ -18,6 +18,9 @@ typedef struct cmdalias_s
 	char	*value;
 } cmdalias_t;
 
+typedef struct rgbdata_s rgbdata_t;
+typedef struct bpc_desc_s bpc_desc_t;
+
 
 // ********************************************************
 // Functions exported by the client .dll
@@ -366,6 +369,18 @@ typedef int						(*pfnEngSrc_pfnGetAppID_t)			( void );
 typedef cmdalias_t*				(*pfnEngSrc_pfnGetAliases_t)		( void );
 typedef void					(*pfnEngSrc_pfnVguiWrap2_GetMouseDelta_t) ( int *x, int *y );
 typedef int							(*pfnEngSrc_pfnFilteredClientCmd_t) 	( char *szCmdString );
+typedef void					(*pfnEngSrc_Image_AddCmdFlags_t)		( unsigned int flags );
+typedef void					(*pfnEngSrc_Image_SetForceFlags_t)		( unsigned int flags );
+typedef void					(*pfnEngSrc_Image_ClearForceFlags_t)	( void );
+typedef qboolean				(*pfnEngSrc_Image_CustomPalette_t)		( void );
+typedef qboolean				(*pfnEngSrc_Image_Process_t)			( rgbdata_t **pix, int width, int height, unsigned int flags, float reserved );
+typedef rgbdata_t *				(*pfnEngSrc_Image_NewTemp_t)			( void );
+typedef rgbdata_t *				(*pfnEngSrc_FS_LoadImage_t)				( const char *filename, const byte *buffer, size_t size );
+typedef qboolean				(*pfnEngSrc_FS_SaveImage_t)				( const char *filename, rgbdata_t *pix );
+typedef rgbdata_t *				(*pfnEngSrc_FS_CopyImage_t)				( const rgbdata_t *in );
+typedef void					(*pfnEngSrc_FS_FreeImage_t)				( rgbdata_t *pack );
+typedef const bpc_desc_t *		(*pfnEngSrc_Image_GetPFDesc_t)			( int idx );
+typedef size_t					(*pfnEngSrc_Image_CalcImageSize_t)		( int type, int width, int height, int depth );
 
 // Pointers to the exported engine functions themselves
 typedef struct cl_enginefuncs_s
@@ -505,6 +520,18 @@ typedef struct cl_enginefuncs_s
 	pfnEngSrc_pfnGetAliases_t				pfnGetAliasList;
 	pfnEngSrc_pfnVguiWrap2_GetMouseDelta_t pfnVguiWrap2_GetMouseDelta;
 	pfnEngSrc_pfnFilteredClientCmd_t		pfnFilteredClientCmd;
+	pfnEngSrc_Image_AddCmdFlags_t			Image_AddCmdFlags;
+	pfnEngSrc_Image_SetForceFlags_t			Image_SetForceFlags;
+	pfnEngSrc_Image_ClearForceFlags_t		Image_ClearForceFlags;
+	pfnEngSrc_Image_CustomPalette_t			Image_CustomPalette;
+	pfnEngSrc_Image_Process_t				Image_Process;
+	pfnEngSrc_Image_NewTemp_t				Image_NewTemp;
+	pfnEngSrc_FS_LoadImage_t				FS_LoadImage;
+	pfnEngSrc_FS_SaveImage_t				FS_SaveImage;
+	pfnEngSrc_FS_CopyImage_t				FS_CopyImage;
+	pfnEngSrc_FS_FreeImage_t				FS_FreeImage;
+	pfnEngSrc_Image_GetPFDesc_t				Image_GetPFDesc;
+	pfnEngSrc_Image_CalcImageSize_t			Image_CalcImageSize;
 } cl_enginefunc_t;
 
 // Function type declarations for engine destination functions

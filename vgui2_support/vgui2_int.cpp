@@ -45,6 +45,7 @@ extern void RegisterControls();
 void VGuiWrap2_Startup();
 void VGuiWrap2_Shutdown();
 void VGuiWrap2_Paint();
+extern "C" void EXPORT InitAPI(vguiapi_t *api);
 
 qboolean g_bScissor;
 
