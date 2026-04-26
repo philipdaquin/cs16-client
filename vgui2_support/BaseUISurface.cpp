@@ -250,18 +250,30 @@ BaseUISurface::~BaseUISurface() {
 }
 
 void BaseUISurface::Init(vgui2::VPANEL embeddedPanel, IHTMLChromeController *pChromeController) {
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::Init embeddedPanel=%p currentEmbedded=%p chrome=%p\n",
-        (void *)embeddedPanel, (void *)GetEmbeddedPanel(), (void *)pChromeController);
-	SetEmbeddedPanel(embeddedPanel);
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::Init after SetEmbeddedPanel embedded=%p\n",
-        (void *)GetEmbeddedPanel());
+    auto *panelInterface = vgui2::ipanel();
+    if ( !panelInterface || !embeddedPanel )
+        return;
 
+    if ( !panelInterface->Client(embeddedPanel) ) {
+        gEngfuncs.Con_Printf("[VGUI2-CLIENT] BaseUISurface::Init skipped: embedded panel has no client\n");
+        return;
+    }
+
+    SetEmbeddedPanel(embeddedPanel);
+
+    // Keep bootstrap minimal and deterministic for now.
+    // The old font scan and HTML controller init paths can be restored once
+    // we confirm they are safe in the current wasm bootstrap flow.
+    m_pChromeController = pChromeController;
+    if ( !m_pChromeController )
+        return;
+
+    /*
     AddCustomFontFile( "resource/marlett.ttf" );
-#ifndef DISABLE_MOE_VGUI2_EXT
+    #ifndef DISABLE_MOE_VGUI2_EXT
     AddCustomFontFile( "resource/font/Apple Color Emoji.ttc" );
-#endif
+    #endif
 
-    // Added : CSO font loading
     FileFindHandle_t findHandle = NULL;
     const char *pszFilename = vgui2::filesystem()->FindFirst("resource/font/*.ttf", &findHandle);
     while (pszFilename)
@@ -271,12 +283,11 @@ void BaseUISurface::Init(vgui2::VPANEL embeddedPanel, IHTMLChromeController *pCh
     }
     vgui2::filesystem()->FindClose(findHandle);
 
-	m_pChromeController = pChromeController;
-
-	if (pChromeController) {
-		m_pChromeController->Init("htmlcache", "htmlcookies");
-		m_pChromeController->SetCefThreadTargetFrameRate(60);
-	}
+    if (pChromeController) {
+        m_pChromeController->Init("htmlcache", "htmlcookies");
+        m_pChromeController->SetCefThreadTargetFrameRate(60);
+    }
+    */
 }
 
 void BaseUISurface::Shutdown() {
@@ -299,8 +310,8 @@ vgui2::VPANEL BaseUISurface::GetEmbeddedPanel() {
 }
 
 void BaseUISurface::SetEmbeddedPanel(vgui2::VPANEL panel) {
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetEmbeddedPanel this=%p old=%p new=%p\n",
-        (void *)this, (void *)_embeddedPanel, (void *)panel);
+    // gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::SetEmbeddedPanel this=%p old=%p new=%p\n",
+    //     (void *)this, (void *)_embeddedPanel, (void *)panel);
 	_embeddedPanel = panel;
 }
 
@@ -444,7 +455,6 @@ qboolean ClipRect(const vpoint_t &inUL, const vpoint_t &inLR, vpoint_t *pOutUL, 
 void BaseUISurface::DrawFilledRect(int x0, int y0, int x1, int y1) {
 	vpoint_t rect[2];
 	vpoint_t clippedRect[2];
-	static bool s_bLoggedFillBridge = false;
 
 	if (_drawColor[3] >= 255) {
 		return;
@@ -456,34 +466,17 @@ void BaseUISurface::DrawFilledRect(int x0, int y0, int x1, int y1) {
 	if (!ClipRect(rect[0], rect[1], &clippedRect[0], &clippedRect[1])) {
 		return;
 	}
-
-	// VGUI2's solid fill path is expected to go through the engine fill bridge.
-	// Keep the old quad-based implementation visible for reference.
-	// g_api->SetupDrawingRect(_drawColor);
-	// g_api->EnableTexture(false);
-	// g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
-	// g_api->EnableTexture(true);
-
-	int x = (int)clippedRect[0].point[0];
-	int y = (int)clippedRect[0].point[1];
-	int w = (int)(clippedRect[1].point[0] - clippedRect[0].point[0]);
-	int h = (int)(clippedRect[1].point[1] - clippedRect[0].point[1]);
-
-	if (!s_bLoggedFillBridge)
-	{
-		s_bLoggedFillBridge = true;
-		vgui2::gEngfuncs.Con_Printf(
-			"[VGUI2-TRACE] BaseUISurface::DrawFilledRect fill bridge x=%d y=%d w=%d h=%d color=%d,%d,%d,%d pfnFillRGBA=%p\n",
-			x, y, w, h,
-			_drawColor[0], _drawColor[1], _drawColor[2], 255 - _drawColor[3],
-			(void *)vgui2::gEngfuncs.pfnFillRGBA
-		);
-	}
-
-	// Historical VGUI alpha is inverted in _drawColor[3].
-	vgui2::gEngfuncs.pfnFillRGBA( x, y, w, h, _drawColor[0], _drawColor[1], _drawColor[2], 255 - _drawColor[3] );
+#ifdef USE_IMGUI_SURFACE
+    ImGui_Surface_SetRenderMode(kRenderTransAlpha);
+    SPR_AdjustSize(&rect[0].point[0], &rect[0].point[1], &rect[1].point[0], &rect[1].point[1]);
+    ImGui_Surface_DrawRectangle(rect[0].point[0], rect[0].point[1], rect[1].point[0] - rect[0].point[0], rect[1].point[1] - rect[0].point[1], _drawColor[0], _drawColor[1], _drawColor[2],  255 - _drawColor[3]);
+#else
+    g_api->SetupDrawingRect(_drawColor);
+    g_api->EnableTexture(false);
+    g_api->DrawQuad(&clippedRect[0], &clippedRect[1]);
+    g_api->EnableTexture(true);
+#endif
 }
-
 void BaseUISurface::DrawOutlinedRect(int x0, int y0, int x1, int y1) {
 	if (_drawColor[3] >= 255) {
 		return;
@@ -691,12 +684,20 @@ void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardw
 	snprintf(name, sizeof(name), "%s.tga", filename);
 	rgbdata_t *pic = nullptr;
 
+
+	// image_ref pic;
+    // pic = FS_LoadImage( name, nullptr, 0 );
+
+
 	pic = LoadSurfaceImage( name );
 	if (!pic)
 	{
 		snprintf(name, sizeof(name), "%s.bmp", filename);
 
 		pic = LoadSurfaceImage( name );
+
+        // pic = FS_LoadImage( name, nullptr, 0 );
+
 		if (!pic)
 		{
 			DrawSetTexture(id);
@@ -705,11 +706,6 @@ void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardw
 	}
 
 	DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
-	FreeSurfaceImage( pic );
-
-	// std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile fallback filename='%s' using placeholder\n", filename);
-	// static const unsigned char s_WhitePixel[4] = { 255, 255, 255, 255 };
-	// DrawSetTextureRGBA(id, s_WhitePixel, 1, 1, hardwareFilter, forceReload);
 }
 
 void BaseUISurface::DrawSetTextureRGBA(int id, const unsigned char *rgba, int wide, int tall, int hardwareFilter, bool forceReload) {
@@ -743,37 +739,13 @@ void BaseUISurface::DrawSetTexture(int id) {
 }
 
 void BaseUISurface::DrawGetTextureSize(int id, int &wide, int &tall) {
-	// Old behaviour:
-	// int width, height;
-	// g_api->BindTexture(id);
-	// g_api->GetTextureSizes(&width, &height);
-	// g_api->BindTexture(m_iCurrentTexture);
-	// wide = width;
-	// tall = height;
-
-	if (!g_api || !g_api->GetTextureSizes)
-	{
-		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawGetTextureSize fallback id=%d\n", id);
-		wide = 1;
-		tall = 1;
-		return;
-	}
-
-	int width = 1;
-	int height = 1;
-	if (g_api->BindTexture)
-	{
-		g_api->BindTexture(id);
-	}
+	int width, height;
+	g_api->BindTexture(id);
 	g_api->GetTextureSizes(&width, &height);
-	if (g_api->BindTexture)
-	{
-		g_api->BindTexture(m_iCurrentTexture);
-	}
+	g_api->BindTexture(m_iCurrentTexture);
 	wide = width;
 	tall = height;
 }
-
 void BaseUISurface::DrawTexturedRect(int x0, int y0, int x1, int y1) {
 	vpoint_t rect[2];
 	vpoint_t clippedRect[2];
@@ -1162,11 +1134,7 @@ void BaseUISurface::SolveTraverse(vgui2::VPANEL panel, bool forceApplySchemeSett
 }
 
 void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
-	// Original trace:
-	// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse enter panel=%p\n", (void *)panel);
 	if (!vgui2::ipanel()->IsVisible(panel)) {
-		// Original trace:
-		// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse skip invisible panel=%p\n", (void *)panel);
 		return;
 	}
 
@@ -1180,53 +1148,19 @@ void BaseUISurface::PaintTraverse(vgui2::VPANEL panel) {
 	}
 
 	for (int i = 0; i < GetPopupCount(); ++i) {
-		vgui2::VPANEL pop = GetPopup(i);
-		const char *name = vgui2::ipanel()->GetName(pop);
-		if (name && !Q_stricmp(name, "TeamMenu")) {
-			// std::fprintf(stderr,
-			// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse reset popup TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
-			// 	i,
-			// 	(void *)pop,
-			// 	(void *)vgui2::ipanel()->GetParent(pop),
-			// 	vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
-			// 	vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
-		}
-		vgui2::ipanel()->Render_SetPopupVisible(pop, false);
+		vgui2::ipanel()->Render_SetPopupVisible(GetPopup(i), false);
 	}
 
 	vgui2::ipanel()->PaintTraverse(panel, true, true);
 
 	for (int i = 0; i < GetPopupCount(); ++i) {
 		vgui2::VPANEL pop = GetPopup(i);
-		const char *name = vgui2::ipanel()->GetName(pop);
-		if (name && !Q_stricmp(name, "TeamMenu")) {
-			// std::fprintf(stderr,
-			// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse popup decision TeamMenu index=%d panel=%p parent=%p visible=%d renderVisible=%d\n",
-			// 	i,
-			// 	(void *)pop,
-			// 	(void *)vgui2::ipanel()->GetParent(pop),
-			// 	vgui2::ipanel()->IsVisible(pop) ? 1 : 0,
-			// 	vgui2::ipanel()->Render_GetPopupVisible(pop) ? 1 : 0);
-		}
-
-		if (vgui2::ipanel()->IsVisible(pop) && !vgui2::ipanel()->Render_GetPopupVisible(pop)) {
-			vgui2::ipanel()->Render_SetPopupVisible(pop, true);
-		}
 
 		if (vgui2::ipanel()->Render_GetPopupVisible(pop)) {
-			if (name && !Q_stricmp(name, "TeamMenu")) {
-				// std::fprintf(stderr,
-				// 	"[phase5][VGUI2-TRACE] BaseUISurface::PaintTraverse painting popup TeamMenu index=%d panel=%p\n",
-				// 	i,
-				// 	(void *)pop);
-			}
 			vgui2::ipanel()->PaintTraverse(pop, true, true);
 		}
 	}
-	// Original trace:
-	// std::fprintf(stderr, "[VGUI2-TRACE] surface->PaintTraverse exit panel=%p\n", (void *)panel);
 }
-
 void BaseUISurface::EnableMouseCapture(vgui2::VPANEL, bool) {
 	//
 }
@@ -1291,8 +1225,7 @@ void BaseUISurface::CalculateMouseVisible() {
 		LockCursor();
 	}
 
-	// Xash's vguiapi_t has no explicit SetVisible callback; cursor state is driven
-	// through CursorSelect/LockCursor and text-input enablement.
+	g_api->SetVisible(_needMouse);
 }
 
 bool BaseUISurface::NeedKBInput() {

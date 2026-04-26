@@ -32,22 +32,22 @@ using cl::g_iTeamNumber;
 
 CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::CCSTeamMenu entry this=%p viewport=%p\n",
-		this, (void *)pViewPort);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
-		this, (void *)pViewPort);
+	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::CCSTeamMenu entry this=%p viewport=%p\n",
+	// 	this, (void *)pViewPort);
+	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
+	// 	this, (void *)pViewPort);
 }
 
 void CCSTeamMenu::SetupControlSettings()
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings entry this=%p\n", this);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading resource/UI/Teammenu.res pathID=GAME\n",
-		this);
+	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings entry this=%p\n", this);
+	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading resource/UI/Teammenu.res pathID=GAME\n",
+	// 	this);
 	// Old CSO-specific layout:
 	// LoadControlSettings("resource/UI/CSO_TeamMenu.res", "GAME");
 	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
+	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
+	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
 	InvalidateLayout();
 }
 
@@ -57,39 +57,13 @@ CCSTeamMenu::~CCSTeamMenu(void)
 
 void CCSTeamMenu::ShowPanel(bool bShow)
 {
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CCSTeamMenu::ShowPanel entry this=%p show=%d\n",
-		this, bShow ? 1 : 0);
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel this=%p show=%d\n",
-		this, bShow ? 1 : 0);
 	if (bShow)
 	{
 		if (gHUD.m_iIntermission || gEngfuncs.IsSpectateOnly())
-		{
-			gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel blocked this=%p because intermission/spectate\n",
-				this);
 			return;
-		}
 	}
 
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel forwarding to CTeamMenu this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
-
-	// if (bShow)
-	// {
-	// 	// Debug visibility probe: make the TeamMenu frame impossible to miss while
-	// 	// we verify the actual paint path on the client.
-	// 	SetBgColor(Color(0, 160, 255, 255));
-	// 	SetPaintBackgroundEnabled(true);
-	// 	SetPaintEnabled(true);
-	// 	SetPaintBorderEnabled(true);
-	// 	SetTitleBarVisible(true);
-	// }
-
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CCSTeamMenu::ShowPanel done this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CCSTeamMenu::ShowPanel exit this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::Update(void)
@@ -102,12 +76,12 @@ void CCSTeamMenu::Update(void)
 	if (g_pViewport->GetAllowSpectators())
 	{
 		if (g_iTeamNumber == TEAM_UNASSIGNED || (g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].dead))
-			SetVisibleButton("specbutton", true);
+			SetVisibleButton("spec-bottom", true);
 		else
-			SetVisibleButton("specbutton", false);
+			SetVisibleButton("spec-bottom", false);
 	}
 	else
-		SetVisibleButton("specbutton", false);
+		SetVisibleButton("spec-bottom", false);
 
 	m_bVIPMap = false;
 
@@ -139,7 +113,7 @@ void CCSTeamMenu::SetVisible(bool state)
 
 	if (state)
 	{
-		Panel *pAutoButton = FindChildByName("autobutton");
+		Panel *pAutoButton = FindChildByName("auto-bottom");
 
 		if (pAutoButton)
 			pAutoButton->RequestFocus();
@@ -148,8 +122,8 @@ void CCSTeamMenu::SetVisible(bool state)
 
 void CCSTeamMenu::OnCommand(const char *command)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand this=%p command='%s'\n",
-		this, command ? command : "<null>");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand this=%p command='%s'\n",
+	// 	this, command ? command : "<null>");
 	if (Q_stricmp(command, "vguicancel"))
 	{
 		cl::gEngfuncs.pfnClientCmd(const_cast<char *>(command));
@@ -217,8 +191,8 @@ void CCSTeamMenu::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CreateControlByName this=%p control='%s'\n",
-		this, controlName ? controlName : "<null>");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CreateControlByName this=%p control='%s'\n",
+	// 	this, controlName ? controlName : "<null>");
 	if (!Q_stricmp("IGButton", controlName))
 	{
 		return new IGButton(this, controlName);
@@ -229,6 +203,6 @@ vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 
 void CCSTeamMenu::UpdateGameMode()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::UpdateGameMode this=%p\n", this);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::UpdateGameMode this=%p\n", this);
 	SetupControlSettings();
 }

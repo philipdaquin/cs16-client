@@ -3878,19 +3878,19 @@ void Panel::ApplyAutoResizeSettings(KeyValues *inResourceData)
 //-----------------------------------------------------------------------------
 void Panel::ApplySettings(KeyValues *inResourceData)
 {
-	const bool isTeamMenu = _panelName && !Q_strcmp(_panelName, "TeamMenu");
-	if (isTeamMenu)
-	{
-		int startW = 0, startH = 0;
-		GetSize(startW, startH);
-		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu enter this=%p size=%dx%d kv=%p\n",
-			this, startW, startH, (void *)inResourceData);
-	}
-	// First restore to default values
-	if ( _flags.IsFlagSet( NEEDS_DEFAULT_SETTINGS_APPLIED ) )
-	{
-		InternalInitDefaultValues( GetAnimMap() );
-	}
+	// const bool isTeamMenu = _panelName && !Q_strcmp(_panelName, "TeamMenu");
+	// if (isTeamMenu)
+	// {
+	// 	int startW = 0, startH = 0;
+	// 	GetSize(startW, startH);
+	// 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu enter this=%p size=%dx%d kv=%p\n",
+	// 		this, startW, startH, (void *)inResourceData);
+	// }
+	// // First restore to default values
+	// if ( _flags.IsFlagSet( NEEDS_DEFAULT_SETTINGS_APPLIED ) )
+	// {
+	// 	InternalInitDefaultValues( GetAnimMap() );
+	// }
 
 	// Let PanelAnimationVars auto-retrieve settings (we restore defaults above
 	//  since a script might be missing certain values)
@@ -4010,13 +4010,13 @@ void Panel::ApplySettings(KeyValues *inResourceData)
 	}
 	
 	SetSize( wide, tall );
-	if (isTeamMenu)
-	{
-		int appliedW = 0, appliedH = 0;
-		GetSize(appliedW, appliedH);
-		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu after SetSize this=%p requested=%dx%d actual=%dx%d\n",
-			this, wide, tall, appliedW, appliedH);
-	}
+	// if (isTeamMenu)
+	// {
+	// 	int appliedW = 0, appliedH = 0;
+	// 	GetSize(appliedW, appliedH);
+	// 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu after SetSize this=%p requested=%dx%d actual=%dx%d\n",
+	// 		this, wide, tall, appliedW, appliedH);
+	// }
 
 	// NOTE: This has to happen after pos + size is set
 	ApplyAutoResizeSettings( inResourceData );
@@ -4071,15 +4071,15 @@ void Panel::ApplySettings(KeyValues *inResourceData)
 		SetName(newName);
 	}
 
-	if (isTeamMenu)
-	{
-		int endW = 0, endH = 0;
-		int endX = 0, endY = 0;
-		GetSize(endW, endH);
-		GetPos(endX, endY);
-		std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu exit this=%p name='%s' pos=%d,%d size=%dx%d visible=%d enabled=%d\n",
-			this, GetName(), endX, endY, endW, endH, IsVisible() ? 1 : 0, IsEnabled() ? 1 : 0);
-	}
+	// if (isTeamMenu)
+	// {
+	// 	int endW = 0, endH = 0;
+	// 	int endX = 0, endY = 0;
+	// 	GetSize(endW, endH);
+	// 	GetPos(endX, endY);
+	// 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu exit this=%p name='%s' pos=%d,%d size=%dx%d visible=%d enabled=%d\n",
+	// 		this, GetName(), endX, endY, endW, endH, IsVisible() ? 1 : 0, IsEnabled() ? 1 : 0);
+	// }
 }
 
 //-----------------------------------------------------------------------------

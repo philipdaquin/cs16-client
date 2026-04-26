@@ -954,11 +954,18 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 		bool bSuccess = false;
 		if (!pathID)
 		{
+			// Use ValveVDF to parse the file, the older LoadFromFile causes the game to hang 
 			bSuccess = LoadVGUIKeyValuesFile(rDat, filesystem(), controlResourceName, "SKIN");
+			// bSuccess = rDat->LoadFromFile(filesystem(), controlResourceName, "SKIN");
+
 		}
 		if (!bSuccess)
 		{
+			// Use ValveVDF to parse the file, the older LoadFromFile causes the game to hang 
 			bSuccess = LoadVGUIKeyValuesFile(rDat, filesystem(), controlResourceName, pathID);
+			// bSuccess = rDat->LoadFromFile(filesystem(), controlResourceName, pathID);
+
+
 		}
 		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings file load resource='%s' pathID='%s' success=%d kv=%p\n",
 			controlResourceName ? controlResourceName : "<null>",
