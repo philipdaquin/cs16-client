@@ -461,14 +461,14 @@ void CInputWin32::UpdateMouseFocus(int x, int y)
 				auto embeddedPanel = vgui2::surface()->GetEmbeddedPanel();
 				auto pEmbedded = vgui2::VHandleToPanel(embeddedPanel);
 				auto pEmbeddedClient = pEmbedded ? pEmbedded->Client() : nullptr;
-				std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus embeddedPanel=%p embeddedClient=%p x=%d y=%d\n",
-					(void *)embeddedPanel, (void *)pEmbeddedClient, x, y);
+				// std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus embeddedPanel=%p embeddedClient=%p x=%d y=%d\n",
+				// 	(void *)embeddedPanel, (void *)pEmbeddedClient, x, y);
 				// topMost = vgui2::VHandleToPanel(
 				// 	vgui2::surface()->GetEmbeddedPanel()
 				// )->Client()->IsWithinTraverse(x, y, false);
 				if (!pEmbedded || !pEmbeddedClient)
 				{
-					std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus skipping embedded traverse because panel/client is null\n");
+				// std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::UpdateMouseFocus skipping embedded traverse because panel/client is null\n");
 					SetMouseFocus(NULL_HANDLE);
 					return;
 				}
@@ -873,7 +873,7 @@ void CInputWin32::InternalKeyCodeReleased(vgui2::KeyCode code)
 
 void CInputWin32::OnKeyCodeUnhandled(int keyCode)
 {
-	std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::OnKeyCodeUnhandled keyCode=%d\n", keyCode);
+	// std::fprintf(stderr, "[VGUI2-TRACE] CInputWin32::OnKeyCodeUnhandled keyCode=%d\n", keyCode);
 }
 
 vgui2::HInputContext CInputWin32::CreateInputContext()

@@ -140,14 +140,14 @@ static bool PathExists( const std::string &path )
 
 static void TraceResolveCandidate( const char *fileName, const char *pathID, const char *candidate, bool exists )
 {
-	std::fprintf(
-		stderr,
-		"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath candidate file='%s' pathID='%s' candidate='%s' exists=%d\n",
-		fileName ? fileName : "(null)",
-		pathID ? pathID : "(null)",
-		candidate ? candidate : "(null)",
-		exists ? 1 : 0
-	);
+	// std::fprintf(
+	// 	stderr,
+	// 	"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath candidate file='%s' pathID='%s' candidate='%s' exists=%d\n",
+	// 	fileName ? fileName : "(null)",
+	// 	pathID ? pathID : "(null)",
+	// 	candidate ? candidate : "(null)",
+	// 	exists ? 1 : 0
+	// );
 }
 
 static std::string ResolvePath( const char *pFileName, const char *pathID )
@@ -187,13 +187,13 @@ static std::string ResolvePath( const char *pFileName, const char *pathID )
 			return candidate;
 	}
 
-	std::fprintf(
-		stderr,
-		"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath miss file='%s' pathID='%s' searchedRoots=%zu\n",
-		pFileName,
-		pathID ? pathID : "(null)",
-		g_SearchRoots.size()
-	);
+	// std::fprintf(
+	// 	stderr,
+	// 	"[Xash3D][stderr] [FILESYSTEM-TRACE] ResolvePath miss file='%s' pathID='%s' searchedRoots=%zu\n",
+	// 	pFileName,
+	// 	pathID ? pathID : "(null)",
+	// 	g_SearchRoots.size()
+	// );
 	return {};
 }
 
@@ -258,14 +258,14 @@ static void TraceLookupPath( const char *op, const char *fileName, const char *p
 		strncpy( cwd, "(unknown-cwd)", sizeof( cwd ) );
 
 	cwd[ sizeof( cwd ) - 1 ] = 0;
-	std::fprintf(
-		stderr,
-		"[Xash3D][stderr] [FILESYSTEM-TRACE] %s file='%s' pathID='%s' cwd='%s'\n",
-		op ? op : "(null)",
-		fileName ? fileName : "(null)",
-		pathID ? pathID : "(null)",
-		cwd
-	);
+	// std::fprintf(
+	// 	stderr,
+	// 	"[Xash3D][stderr] [FILESYSTEM-TRACE] %s file='%s' pathID='%s' cwd='%s'\n",
+	// 	op ? op : "(null)",
+	// 	fileName ? fileName : "(null)",
+	// 	pathID ? pathID : "(null)",
+	// 	cwd
+	// );
 }
 
 class CStdFileSystem : public IFileSystem
@@ -358,14 +358,14 @@ public:
 
 		std::string resolved = ResolvePath( pFileName, pathID );
 		const char *openPath = resolved.empty() ? pFileName : resolved.c_str();
-		std::fprintf(
-			stderr,
-			"[Xash3D][stderr] [FILESYSTEM-TRACE] Open resolve file='%s' pathID='%s' resolved='%s' fallback=%d\n",
-			pFileName ? pFileName : "(null)",
-			pathID ? pathID : "(null)",
-			openPath ? openPath : "(null)",
-			resolved.empty() ? 1 : 0
-		);
+		// std::fprintf(
+		// 	stderr,
+		// 	"[Xash3D][stderr] [FILESYSTEM-TRACE] Open resolve file='%s' pathID='%s' resolved='%s' fallback=%d\n",
+		// 	pFileName ? pFileName : "(null)",
+		// 	pathID ? pathID : "(null)",
+		// 	openPath ? openPath : "(null)",
+		// 	resolved.empty() ? 1 : 0
+		// );
 
 		return (FileHandle_t)fopen( openPath, pOptions );
 	}

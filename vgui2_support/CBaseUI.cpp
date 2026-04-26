@@ -464,8 +464,8 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 		return;
 	}
 
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint entry x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
-		x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint entry x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
+	// 	x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
     if (staticGameUIFuncs)
 	    staticGameUIFuncs->RunFrame();
 	vgui2::ivgui()->RunFrame();
@@ -479,8 +479,8 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 	static_cast<vgui2::IClientPanel*>( staticPanel )->Think();
 
 	vgui2::surface()->PaintTraverse(staticSurface->GetEmbeddedPanel());
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint exit x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
-		x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseUI::Paint exit x=%d y=%d right=%d bottom=%d surface=%p embedded=%p\n",
+	// 	x, y, right, bottom, (void *)staticSurface, (void *)staticSurface->GetEmbeddedPanel());
 }
 
 void CBaseUI::HideGameUI() {

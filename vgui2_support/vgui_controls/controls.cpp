@@ -39,10 +39,10 @@ IKeyValues* keyvalues()
 
 static void TraceFilesystemState(const char *reason, IFileSystem *fs)
 {
-	std::fprintf(stderr,
-		"[phase3][VGUI2-TRACE] %s filesystem=%p\n",
-		reason ? reason : "<null>",
-		(void *)fs);
+	// std::fprintf(stderr,
+	// 	"[phase3][VGUI2-TRACE] %s filesystem=%p\n",
+	// 	reason ? reason : "<null>",
+	// 	(void *)fs);
 }
 
 // Fallback for wasm/client builds that do not link the engine dbg module.

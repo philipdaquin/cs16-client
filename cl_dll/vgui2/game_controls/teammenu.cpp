@@ -190,8 +190,8 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 	}
 
 	FileHandle_t f = filesystem()->Open(mapRES, "r");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage opened map res this=%p mapRES='%s' handle=%p\n",
-		this, mapRES, (void *)f);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage opened map res this=%p mapRES='%s' handle=%p\n",
+	// 	this, mapRES, (void *)f);
 
 	int fileSize = filesystem()->Size(f);
 	int dataSize = fileSize + sizeof(wchar_t);
@@ -227,8 +227,8 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	InvalidateLayout();
 	Repaint();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage complete this=%p mapRES='%s'\n",
-		this, mapRES);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage complete this=%p mapRES='%s'\n",
+	// 	this, mapRES);
 }
 
 void CTeamMenu::SetLabelText(const char *textEntryName, const char *text)

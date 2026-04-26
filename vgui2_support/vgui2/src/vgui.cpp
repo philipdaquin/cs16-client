@@ -184,40 +184,40 @@ void CVGui::ShutdownMessage( unsigned int shutdownID )
 
 vgui2::VPANEL CVGui::AllocPanel()
 {
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel enter this=%p running=%d panelCount=%d\n",
-		(void *)this,
-		m_bRunning,
-		m_PanelList.Count());
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel pre-surface this=%p surface=%p\n",
-		(void *)this,
-		(void *)vgui2::surface());
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel enter this=%p running=%d panelCount=%d\n",
+	// 	(void *)this,
+	// 	m_bRunning,
+	// 	m_PanelList.Count());
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel pre-surface this=%p surface=%p\n",
+	// 	(void *)this,
+	// 	(void *)vgui2::surface());
 
 	vgui2::VPANEL embeddedPanel = 0;
 	if (vgui2::surface())
 	{
-		std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel before GetEmbeddedPanel surface=%p\n",
-			(void *)vgui2::surface());
+		// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel before GetEmbeddedPanel surface=%p\n",
+		// 	(void *)vgui2::surface());
 		embeddedPanel = vgui2::surface()->GetEmbeddedPanel();
-		std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after GetEmbeddedPanel embedded=%p surface=%p\n",
-			(void *)embeddedPanel,
-			(void *)vgui2::surface());
+		// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after GetEmbeddedPanel embedded=%p surface=%p\n",
+		// 	(void *)embeddedPanel,
+		// 	(void *)vgui2::surface());
 	}
 	else
 	{
-		std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel surface is null before embedded lookup\n");
+		// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel surface is null before embedded lookup\n");
 	}
 
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel before new VPanel embedded=%p\n",
-		(void *)embeddedPanel);
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel before new VPanel embedded=%p\n",
+	// 	(void *)embeddedPanel);
 	auto panel = new vgui2::VPanel();
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after new VPanel panel=%p embedded=%p\n",
-		(void *)panel,
-		(void *)embeddedPanel);
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after new VPanel panel=%p embedded=%p\n",
+	// 	(void *)panel,
+	// 	(void *)embeddedPanel);
 	PanelCreated( panel );
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after PanelCreated panel=%p listEntry=%u embedded=%p\n",
-		(void *)panel,
-		panel ? panel->GetListEntry() : 0xFFFF,
-		(void *)embeddedPanel);
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] AllocPanel after PanelCreated panel=%p listEntry=%u embedded=%p\n",
+	// 	(void *)panel,
+	// 	panel ? panel->GetListEntry() : 0xFFFF,
+	// 	(void *)embeddedPanel);
 
 	return reinterpret_cast<vgui2::VPANEL>( panel );
 }
@@ -507,37 +507,37 @@ bool CVGui::GetShouldVGuiControlSleep()
 void CVGui::PanelCreated( vgui2::VPanel* panel )
 {
 
-	std::fprintf(stderr, "calling PanelCreated\n");
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated enter panel=%p client=%p popup=%d parent=%p embedded=%p\n",
-		(void *)panel,
-		panel ? (void *)panel->Client() : nullptr,
-		panel ? panel->IsPopup() : -1,
-		panel ? (void *)panel->GetParent() : nullptr,
-		// Old path:
-		// (void *)vgui2::surface()->GetEmbeddedPanel()
-		(void *)(
-			vgui2::surface() ? vgui2::surface()->GetEmbeddedPanel() : 0
-		));
+	// std::fprintf(stderr, "calling PanelCreated\n");
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated enter panel=%p client=%p popup=%d parent=%p embedded=%p\n",
+	// 	(void *)panel,
+	// 	panel ? (void *)panel->Client() : nullptr,
+	// 	panel ? panel->IsPopup() : -1,
+	// 	panel ? (void *)panel->GetParent() : nullptr,
+	// 	// Old path:
+	// 	// (void *)vgui2::surface()->GetEmbeddedPanel()
+	// 	(void *)(
+	// 		vgui2::surface() ? vgui2::surface()->GetEmbeddedPanel() : 0
+	// 	));
 
 
 	const auto listEntry = m_PanelList.AddToTail();
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated listEntry=%u count=%d\n", listEntry, m_PanelList.Count());
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated listEntry=%u count=%d\n", listEntry, m_PanelList.Count());
 
 	auto& entry = m_PanelList[ listEntry ];
 
 	entry.m_iSerialNumber = m_iNextSerialNumber++;
 	entry.m_pPanel = reinterpret_cast<vgui2::VPANEL>( panel );
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated stored serial=%u handle=%p\n",
-		entry.m_iSerialNumber,
-		(void *)entry.m_pPanel);
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated stored serial=%u handle=%p\n",
+	// 	entry.m_iSerialNumber,
+	// 	(void *)entry.m_pPanel);
 
 	panel->SetListEntry( listEntry );
-	std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated after SetListEntry panel=%p listEntry=%u popup=%d parent=%p client=%p\n",
-		(void *)panel,
-		panel->GetListEntry(),
-		panel->IsPopup(),
-		(void *)panel->GetParent(),
-		(void *)panel->Client());
+	// std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated after SetListEntry panel=%p listEntry=%u popup=%d parent=%p client=%p\n",
+	// 	(void *)panel,
+	// 	panel->GetListEntry(),
+	// 	panel->IsPopup(),
+	// 	(void *)panel->GetParent(),
+	// 	(void *)panel->Client());
 
 	// During bootstrap the root panel is created before BaseUISurface::Init()
 	// assigns an embedded panel. Defer surface registration until that link
@@ -548,11 +548,11 @@ void CVGui::PanelCreated( vgui2::VPanel* panel )
 	if( surface && surface->GetEmbeddedPanel() )
 	{
 		surface->AddPanel( entry.m_pPanel );
-		std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated after AddPanel panel=%p popup=%d parent=%p embedded=%p\n",
-			(void *)panel,
-			panel->IsPopup(),
-			(void *)panel->GetParent(),
-			(void *)(surface ? surface->GetEmbeddedPanel() : 0));
+		// std::fprintf(stderr, "[phase1][VGUI2-TRACE] PanelCreated after AddPanel panel=%p popup=%d parent=%p embedded=%p\n",
+		// 	(void *)panel,
+		// 	panel->IsPopup(),
+		// 	(void *)panel->GetParent(),
+		// 	(void *)(surface ? surface->GetEmbeddedPanel() : 0));
 	}
 	else
 	{

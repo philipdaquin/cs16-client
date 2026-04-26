@@ -600,8 +600,8 @@ Panel::Panel(Panel *parent)
 //-----------------------------------------------------------------------------
 Panel::Panel(Panel *parent, const char *panelName)
 {
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name) this=%p parent=%p name=%s\n",
-		(void *)this, (void *)parent, panelName ? panelName : "(null)");
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name) this=%p parent=%p name=%s\n",
+	// 	(void *)this, (void *)parent, panelName ? panelName : "(null)");
 	Init(0, 0, 64, 24);
 	SetName(panelName);
 	SetParent(parent);
@@ -613,8 +613,8 @@ Panel::Panel(Panel *parent, const char *panelName)
 //-----------------------------------------------------------------------------
 Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 {
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name,scheme) this=%p parent=%p name=%s scheme=%lu\n",
-		(void *)this, (void *)parent, panelName ? panelName : "(null)", (unsigned long)scheme);
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Panel(parent,name,scheme) this=%p parent=%p name=%s scheme=%lu\n",
+	// 	(void *)this, (void *)parent, panelName ? panelName : "(null)", (unsigned long)scheme);
 	Init(0, 0, 64, 24);
 	SetName(panelName);
 	SetParent(parent);
@@ -627,24 +627,24 @@ Panel::Panel( Panel *parent, const char *panelName, HScheme scheme )
 //-----------------------------------------------------------------------------
 void Panel::Init( int x, int y, int wide, int tall )
 {
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init this=%p x=%d y=%d wide=%d tall=%d vpanel(before)=%p\n",
-		(void *)this, x, y, wide, tall, (void *)_vpanel);
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init this=%p x=%d y=%d wide=%d tall=%d vpanel(before)=%p\n",
+	// 	(void *)this, x, y, wide, tall, (void *)_vpanel);
 	_panelName = NULL;
 
 	// get ourselves an internal panel
 	_vpanel = ivgui()->AllocPanel();
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after AllocPanel this=%p vpanel=%p\n",
-		(void *)this, (void *)_vpanel);
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after AllocPanel this=%p vpanel=%p\n",
+	// 	(void *)this, (void *)_vpanel);
 	auto panelInterface = ipanel();
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init before ipanel->Init this=%p vpanel=%p ipanel=%p\n",
-		(void *)this, (void *)_vpanel, (void *)panelInterface);
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init before ipanel->Init this=%p vpanel=%p ipanel=%p\n",
+	// 	(void *)this, (void *)_vpanel, (void *)panelInterface);
 	if (panelInterface)
 	{
 		// Old path:
 		// ipanel()->Init(_vpanel, this);
 		panelInterface->Init(_vpanel, this);
-		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after ipanel->Init this=%p vpanel=%p\n",
-			(void *)this, (void *)_vpanel);
+		// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::Init after ipanel->Init this=%p vpanel=%p\n",
+		// 	(void *)this, (void *)_vpanel);
 	}
 	else
 	{
@@ -1034,8 +1034,8 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 	const bool isTeamMenu = panelName && !Q_stricmp( panelName, "TeamMenu" );
 	if ( isTeamMenu )
 	{
-		ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-			this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+		// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse enter TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+		// 	this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
 	}
 
 	float oldAlphaMultiplier = surface()->DrawGetAlphaMultiplier();
@@ -1074,30 +1074,30 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		int x = 0, y = 0, wide = 0, tall = 0;
 		ipanel()->GetAbsPos( vpanel, x, y );
 		ipanel()->GetSize( vpanel, wide, tall );
-		ivgui()->DPrintf(
-			"[phase5][VGUI2-TRACE] Panel::PaintTraverse decision TeamMenu this=%p vpanel=%p parent=%p popup=%d repaint=%d allowForce=%d alpha=%.2f oldAlpha=%.2f newAlpha=%.2f bounds=%d,%d %dx%d clip=%d,%d,%d,%d paintBg=%d paint=%d border=%d post=%d children=%d\n",
-			this,
-			(void *)vpanel,
-			(void *)ipanel()->GetParent( vpanel ),
-			ipanel()->IsPopup( vpanel ) ? 1 : 0,
-			repaint ? 1 : 0,
-			allowForce ? 1 : 0,
-			m_flAlpha,
-			oldAlphaMultiplier,
-			newAlphaMultiplier,
-			x,
-			y,
-			wide,
-			tall,
-			clipRect[0],
-			clipRect[1],
-			clipRect[2],
-			clipRect[3],
-			_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) ? 1 : 0,
-			_flags.IsFlagSet( PAINT_ENABLED ) ? 1 : 0,
-			_flags.IsFlagSet( PAINT_BORDER_ENABLED ) ? 1 : 0,
-			_flags.IsFlagSet( POST_CHILD_PAINT_ENABLED ) ? 1 : 0,
-			ipanel()->GetChildCount( vpanel ) );
+		// ivgui()->DPrintf(
+		// 	"[phase5][VGUI2-TRACE] Panel::PaintTraverse decision TeamMenu this=%p vpanel=%p parent=%p popup=%d repaint=%d allowForce=%d alpha=%.2f oldAlpha=%.2f newAlpha=%.2f bounds=%d,%d %dx%d clip=%d,%d,%d,%d paintBg=%d paint=%d border=%d post=%d children=%d\n",
+		// 	this,
+		// 	(void *)vpanel,
+		// 	(void *)ipanel()->GetParent( vpanel ),
+		// 	ipanel()->IsPopup( vpanel ) ? 1 : 0,
+		// 	repaint ? 1 : 0,
+		// 	allowForce ? 1 : 0,
+		// 	m_flAlpha,
+		// 	oldAlphaMultiplier,
+		// 	newAlphaMultiplier,
+		// 	x,
+		// 	y,
+		// 	wide,
+		// 	tall,
+		// 	clipRect[0],
+		// 	clipRect[1],
+		// 	clipRect[2],
+		// 	clipRect[3],
+		// 	_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED ) ? 1 : 0,
+		// 	_flags.IsFlagSet( PAINT_ENABLED ) ? 1 : 0,
+		// 	_flags.IsFlagSet( PAINT_BORDER_ENABLED ) ? 1 : 0,
+		// 	_flags.IsFlagSet( POST_CHILD_PAINT_ENABLED ) ? 1 : 0,
+		// 	ipanel()->GetChildCount( vpanel ) );
 	}
 
 	// set global alpha
@@ -1109,7 +1109,7 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		{
 			if ( isTeamMenu )
 			{
-				ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling PaintBackground this=%p\n", this );
+				// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling PaintBackground this=%p\n", this );
 			}
 			surface()->PushMakeCurrent( vpanel, false );
 			PaintBackground();
@@ -1117,7 +1117,7 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		}
 		else if ( isTeamMenu )
 		{
-			ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped PaintBackground flag disabled this=%p\n", this );
+			// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped PaintBackground flag disabled this=%p\n", this );
 		}
 
 		// draw the front of the panel with the inset
@@ -1125,7 +1125,7 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		{
 			if ( isTeamMenu )
 			{
-				ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling Paint this=%p\n", this );
+				// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu calling Paint this=%p\n", this );
 			}
 			surface()->PushMakeCurrent( vpanel, true );
 			Paint();
@@ -1133,16 +1133,16 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 		}
 		else if ( isTeamMenu )
 		{
-			ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped Paint flag disabled this=%p\n", this );
+			// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped Paint flag disabled this=%p\n", this );
 		}
 	}
 	else if ( isTeamMenu )
 	{
-		ivgui()->DPrintf(
-			"[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped paint block this=%p repaint=%d anyPaintFlag=%d\n",
-			this,
-			repaint ? 1 : 0,
-			_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) ? 1 : 0 );
+		// ivgui()->DPrintf(
+		// 	"[phase5][VGUI2-TRACE] Panel::PaintTraverse TeamMenu skipped paint block this=%p repaint=%d anyPaintFlag=%d\n",
+		// 	this,
+		// 	repaint ? 1 : 0,
+		// 	_flags.IsFlagSet( PAINT_BACKGROUND_ENABLED | PAINT_ENABLED ) ? 1 : 0 );
 	}
 
 	// traverse and paint all our children
@@ -1201,8 +1201,8 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 
 	if ( panelName && !Q_stricmp( panelName, "TeamMenu" ) )
 	{
-		ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
-			this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
+		// ivgui()->DPrintf( "[phase5][VGUI2-TRACE] Panel::PaintTraverse exit TeamMenu this=%p repaint=%d allowForce=%d visible=%d\n",
+		// 	this, repaint ? 1 : 0, allowForce ? 1 : 0, IsVisible() ? 1 : 0 );
 	}
 }
 
@@ -1366,8 +1366,8 @@ void Panel::SetParent(Panel *newParent)
 //-----------------------------------------------------------------------------
 void Panel::SetParent(VPANEL newParent)
 {
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) enter this=%p selfVPanel=%p newParent=%p currentParent=%p popup=%d\n",
-		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) enter this=%p selfVPanel=%p newParent=%p currentParent=%p popup=%d\n",
+	// 	(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
 	if (newParent)
 	{
 		ipanel()->SetParent(GetVPanel(), newParent);
@@ -1377,31 +1377,31 @@ void Panel::SetParent(VPANEL newParent)
 		ipanel()->SetParent(GetVPanel(), NULL);
 	}
 
-	fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) after ipanel->SetParent this=%p selfVPanel=%p newParent=%p parentNow=%p popup=%d\n",
-		(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
+	// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) after ipanel->SetParent this=%p selfVPanel=%p newParent=%p parentNow=%p popup=%d\n",
+	// 	(void *)this, (void *)GetVPanel(), (void *)newParent, (void *)GetVParent(), IsPopup());
 
 	if (GetVParent() && !IsPopup())
 	{
 		VPANEL parent = GetVParent();
-		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) sync parent state this=%p parent=%p selfVPanel=%p\n",
-			(void *)this, (void *)parent, (void *)GetVPanel());
+		// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) sync parent state this=%p parent=%p selfVPanel=%p\n",
+		// 	(void *)this, (void *)parent, (void *)GetVPanel());
 		bool proportional = ipanel()->IsProportional(parent);
-		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent proportional this=%p parent=%p proportional=%d\n",
-			(void *)this, (void *)parent, proportional);
+		// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent proportional this=%p parent=%p proportional=%d\n",
+		// 	(void *)this, (void *)parent, proportional);
 		SetProportional(proportional);
 
 		// most of the time KBInput == parents kbinput
 		bool parentKb = ipanel()->IsKeyBoardInputEnabled(parent);
-		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent kb state this=%p parent=%p parentKb=%d selfKb=%d\n",
-			(void *)this, (void *)parent, parentKb, IsKeyBoardInputEnabled());
+		// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent kb state this=%p parent=%p parentKb=%d selfKb=%d\n",
+		// 	(void *)this, (void *)parent, parentKb, IsKeyBoardInputEnabled());
 		if (parentKb != IsKeyBoardInputEnabled())
 		{
 			SetKeyBoardInputEnabled(parentKb);
 		}
 
 		bool parentMouse = ipanel()->IsMouseInputEnabled(parent);
-		fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent mouse state this=%p parent=%p parentMouse=%d selfMouse=%d\n",
-			(void *)this, (void *)parent, parentMouse, IsMouseInputEnabled());
+		// fprintf(stderr, "[phase1][VGUI2-TRACE] Panel::SetParent(VPANEL) parent mouse state this=%p parent=%p parentMouse=%d selfMouse=%d\n",
+		// 	(void *)this, (void *)parent, parentMouse, IsMouseInputEnabled());
 		if (parentMouse != IsMouseInputEnabled())
 		{
 			SetMouseInputEnabled(parentMouse);

@@ -199,8 +199,8 @@ void CBaseViewport::Shutdown()
 
 void CBaseViewport::OnThink()
 {
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink entry this=%p panels=%d gamePanels=%d active=%p last=%p\n",
-		this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink entry this=%p panels=%d gamePanels=%d active=%p last=%p\n",
+	// 	this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 	// Clear our active panel pointer if the panel has made
 	// itself invisible. Need this so we don't bring up dead panels
 	// if they are stored as the last active panel
@@ -244,8 +244,8 @@ void CBaseViewport::OnThink()
 	}
 
 	BaseClass::OnThink();
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink exit this=%p panels=%d gamePanels=%d active=%p last=%p\n",
-		this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CBaseViewport::OnThink exit this=%p panels=%d gamePanels=%d active=%p last=%p\n",
+	// 	this, m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 }
 
 void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )

@@ -1662,8 +1662,8 @@ bool Frame::GetDefaultScreenPosition(int &x, int &y, int &wide, int &tall)
 //-----------------------------------------------------------------------------
 void Frame::PaintBackground()
 {
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground entry this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
-		this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground entry this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
+	// 	this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
 	if (m_bImageBackground)
 	{
 		int wide, tall;
@@ -1762,8 +1762,8 @@ void Frame::PaintBackground()
 		}
 	}
 
-	std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground exit this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
-		this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
+	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] Frame::PaintBackground exit this=%p visible=%d titleBar=%d imageBg=%d drawTitleBar=%d\n",
+	// 	this, IsVisible() ? 1 : 0, m_bHasFocus ? 1 : 0, m_bImageBackground ? 1 : 0, _drawTitleBar ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------
