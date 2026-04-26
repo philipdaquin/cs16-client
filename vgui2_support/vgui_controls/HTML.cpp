@@ -284,7 +284,11 @@ void HTML::OnSetCursorVGUI( int cursor )
 void HTML::ApplySchemeSettings(IScheme *pScheme)
 {
     BaseClass::ApplySchemeSettings(pScheme);
-	BrowserResize();
+	if (m_Serializer)
+	{
+		BrowserResize();
+	}
+	//BrowserResize();
 }
 
 
@@ -675,8 +679,8 @@ bool HTML::BCanGoFoward()
 void HTML::OnSizeChanged(int wide,int tall)
 {
 	BaseClass::OnSizeChanged(wide,tall);
-	UpdateSizeAndScrollBars();
-	UpdateCachedHTMLValues();
+	//UpdateSizeAndScrollBars();
+	//UpdateCachedHTMLValues();
 //#ifdef WIN32
 //	// under windows we get stuck in the windows message loop pushing out WM_WINDOWPOSCHANGED without returning in the windproc loop
 //	// so we need to manually pump the html dispatching of messages here
@@ -695,7 +699,7 @@ void HTML::OnSizeChanged(int wide,int tall)
 
 	InvalidateLayout();
 
-	m_Serializer->RequestBrowserSizes();
+	//m_Serializer->RequestBrowserSizes();
 }
 
 
@@ -1073,6 +1077,11 @@ void HTML::AddCustomURLHandler(const char *customProtocolName, vgui2::Panel *tar
 //-----------------------------------------------------------------------------
 void HTML::BrowserResize()
 {
+	if (!m_Serializer)
+	{
+		return;
+	}
+
 	int w,h;
 	GetSize( w, h );
 	int right = 0, bottom = 0;
@@ -1096,15 +1105,17 @@ void HTML::BrowserResize()
 			m_iTalLastHTMLSize = 64 - bottom;
 		}
 
-		m_Serializer->BrowserSize( m_iWideLastHTMLSize, m_iTalLastHTMLSize );
-	
-		// webkit forgets the scroll offset when you resize (it saves the scroll in a DC and a resize throws away the DC)
-		// so just tell it after the resize
-		int scrollV = _vbar->GetValue();
-		int scrollH = _hbar->GetValue();
+		/*
+			m_Serializer->BrowserSize( m_iWideLastHTMLSize, m_iTalLastHTMLSize );
 
-		m_Serializer->SetHorizontalScroll( scrollH );
-		m_Serializer->SetVerticalScroll( scrollV );
+			// webkit forgets the scroll offset when you resize (it saves the scroll in a DC and a resize throws away the DC)
+			// so just tell it after the resize
+			int scrollV = _vbar->GetValue();
+			int scrollH = _hbar->GetValue();
+
+			m_Serializer->SetHorizontalScroll( scrollH );
+			m_Serializer->SetVerticalScroll( scrollV );
+		*/
 	}
 }
 
@@ -2089,8 +2100,15 @@ void HTML::DismissJSDialog( int bResult )
 //-----------------------------------------------------------------------------
 void HTML::UpdateCachedHTMLValues()
 {
+	if (!m_Serializer)
+	{
+		return;
+	}
+
 	// request scroll bar sizes
+	/*
 	m_Serializer->RequestBrowserSizes();
+	*/
 }
 
 
@@ -2117,4 +2135,3 @@ void HTML::UpdateSizeAndScrollBars()
 
 	InvalidateLayout();
 }
-

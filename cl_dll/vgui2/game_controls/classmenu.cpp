@@ -129,6 +129,12 @@ void CClassMenu::SetData(KeyValues *data)
 		return;
 
 	m_iTeam = team;
+
+	Reset();
+	m_mouseoverButtons.RemoveAll();
+	MouseOverPanelButton::s_lastPanel = nullptr;
+	MouseOverPanelButton::s_lastButton = nullptr;
+
 	LoadControlSettings(GetClassMenuResourceForTeam(m_iTeam), "GAME");
 	InvalidateLayout();
 }
