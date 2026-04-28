@@ -115,15 +115,15 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
         }
         pPanel = m_pClassMenu;
     }
-	// else if (Q_strcmp(PANEL_BUY, pszName) == 0)
-	// {
-	// 	if(!m_pBuyMenu)
-    //     {
-    //         m_pBuyMenu = new CCSBaseBuyMenu(this);
-    //         m_pBuyMenu->UpdateGameMode();
-    //     }
-	// 	pPanel = m_pBuyMenu;
-	// }
+	else if (Q_strcmp(PANEL_BUY, pszName) == 0)
+	{
+		if(!m_pBuyMenu)
+        {
+            m_pBuyMenu = new CCSBaseBuyMenu(this);
+            m_pBuyMenu->UpdateGameMode();
+        }
+		pPanel = m_pBuyMenu;
+	}
     // else if (Q_strcmp(CZSHELTERTEAMHOUSINGDLG_NAME, pszName) == 0)
     // {
     //     pPanel = new ZShelterTeamHousingDialog();
