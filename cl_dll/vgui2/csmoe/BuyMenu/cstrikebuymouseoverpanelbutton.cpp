@@ -76,10 +76,10 @@ void CSBuyMouseOverPanelButton::SetBanWeapon(const char* weapon, int iLevel)
 		m_pLevelText->SetText(SzLevel);
 		m_pLevelText->SetFgColor({ 255,99,71,255 });
 
-		m_pLockedImage->SetImage("resource/zombiez/level_lock_l");
-		m_pLockedImageBg->SetImage("resource/zombiez/level_lock_bg");
-
-		m_pBlankBg->SetImage("resource/pcbangpremium_bg_red");
+		// Custom zombie/PCBang lock art disabled for the vanilla-only build.
+		m_pLockedImage->SetImage("");
+		m_pLockedImageBg->SetImage("");
+		m_pBlankBg->SetImage("");
 		m_pBlankBg->SetBgColor({ 255,99,71,255 });
 
 		m_pBlankBg->SetVisible(true);

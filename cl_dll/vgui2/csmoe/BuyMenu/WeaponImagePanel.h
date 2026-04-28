@@ -5,6 +5,8 @@
 #pragma once
 #endif
 
+#include <stddef.h>
+
 #include <vgui/IScheme.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/ImagePanel.h>
@@ -19,6 +21,9 @@ public:
 	WeaponImagePanel(Panel *parent, const char *name);
 
 	virtual void PaintBackground() override;
+
+	static const char *ResolveVanillaImageName(const char *weapon);
+	static void BuildVanillaImagePath(const char *weapon, char *path, size_t pathSize);
 
 	void SetWeapon(const char *weapon);
 	void SetWeapon(nullptr_t);

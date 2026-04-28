@@ -18,6 +18,7 @@
 #include <vgui_controls/EditablePanel.h>
 
 #include "cstrikebuymouseoverpanel.h"
+#include "WeaponImagePanel.h"
 
 #include <string>
 
@@ -63,7 +64,7 @@ void CSBuyMouseOverPanel::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	pricelabel->SetFgColor({ 236,224,148,255 });
 	price->SetFgColor({ 236,224,148,255 });
 
-	imageBG->SetImage("resource/Control/basket/basket_blank_slot");
+	imageBG->SetImage("resource/Control/buybutton/blank_slot");
 }
 
 void CSBuyMouseOverPanel::PerformLayout(void)
@@ -105,33 +106,8 @@ void CSBuyMouseOverPanel::UpdateWeapon(const char *weapon)
 	if (!bEnabled)
 		return;
 	
-	// strip prefix
-	if (!strncmp(weapon, "weapon_", 7))
-	{
-		weapon += 7;
-	}
-	if (!strncmp(weapon, "z4b_", 4))
-	{
-		weapon += 4;
-	}
-	if (!strncmp(weapon, "knife_", 6))
-	{
-		weapon += 6;
-	}
-	if (!stricmp(weapon, "mp5navy"))
-	{
-		weapon = "mp5";
-	}
-	if (!stricmp(weapon, "scarl") || !stricmp(weapon, "scarh"))
-	{
-		weapon = "scar";
-	}
-	if (!stricmp(weapon, "xm8c") || !stricmp(weapon, "xm8s"))
-	{
-		weapon = "xm8";
-	}
 	char szBuffer[64];
-	sprintf(szBuffer, (weapon&&weapon[0])?"gfx/vgui/basket/%s":"", weapon);
+	WeaponImagePanel::BuildVanillaImagePath(weapon, szBuffer, sizeof(szBuffer));
 	classimage->SetImage(szBuffer);
 
 	std::string str1("#CStrike_");

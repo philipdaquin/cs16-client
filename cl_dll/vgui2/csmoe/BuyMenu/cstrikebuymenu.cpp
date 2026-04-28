@@ -178,12 +178,8 @@ void CCSBaseBuyMenu::UpdateGameMode()
 	if (m_pMainMenu)
 		m_pMainMenu->DeletePanel();
 
-	if (cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning != MOD_ZB4))
-		m_pMainMenu = new CCSBuySubMenu_ZombieMod(this);
-	else if ((cl::gHUD.m_iModRunning == MOD_ZB4) || (cl::gHUD.m_iModRunning == MOD_TDM) || (cl::gHUD.m_iModRunning == MOD_DM))
-		m_pMainMenu = new CCSBuySubMenu_ZombieMod(this); // new CCSBuySubMenu_DeathMatch(this);
-	else
-		m_pMainMenu = new CCSBuySubMenu_DefaultMode(this);
+	// Zombie / DM buy-menu variants are disabled for the vanilla-only build.
+	m_pMainMenu = new CCSBuySubMenu_DefaultMode(this);
 
 
 	SetupControlSettings();

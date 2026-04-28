@@ -64,12 +64,12 @@ static const std::array<MoEWeaponBuyInfo_s, 17> g_MoEWeaponBuyInfo = {{
 
 CCSBuySubMenu::CCSBuySubMenu(vgui2::Panel *parent, const char *name) : CBuySubMenu(parent, name)
 {
-	m_pTitleLabel = new vgui2::Label(this, "CaptionLabel", "#CSO_WeaponSelectMenu");
+	m_pTitleLabel = new vgui2::Label(this, "CaptionLabel", "Weapon Selection");
 
 	char buffer[64];
 
-	m_pShowCTWeapon = new NewTabButton(this, "ShowCTWeapon", "#CSO_BuyShowCT");
-	m_pShowTERWeapon = new NewTabButton(this, "ShowTERWeapon", "#CSO_BuyShowTER");
+	m_pShowCTWeapon = new NewTabButton(this, "ShowCTWeapon", "CT Weapons");
+	m_pShowTERWeapon = new NewTabButton(this, "ShowTERWeapon", "T Weapons");
 	m_pShowCTWeapon->SetTextColor(COL_CT);
 	m_pShowTERWeapon->SetTextColor(COL_TR);
 
@@ -79,14 +79,14 @@ CCSBuySubMenu::CCSBuySubMenu(vgui2::Panel *parent, const char *name) : CBuySubMe
 		m_pSlotButtons[i] = new CSBuyMouseOverPanelButton(this, buffer, m_pPanel);
 		m_pSlotButtons[i]->GetClassPanel()->SetName("ItemInfo");
 	}
-	m_pPrevBtn = new vgui2::Button(this, "prevBtn", "#CSO_PrevBuy");
-	m_pNextBtn = new vgui2::Button(this, "nextBtn", "#CSO_NextBuy");
+	m_pPrevBtn = new vgui2::Button(this, "prevBtn", "Previous");
+	m_pNextBtn = new vgui2::Button(this, "nextBtn", "Next");
 
 	m_pRebuyButton = new ButtonGlow(this, "RebuyButton", "#Cstrike_BuyMenuRebuy");
 	m_pAutobuyButton = new ButtonGlow(this, "AutobuyButton", "#Cstrike_BuyMenuAutobuy");
 
-	m_pBasketClear = new vgui2::Button(this, "BasketClear", "#CSO_BasketClear");
-	m_pBasketBuy = new ButtonGlow(this, "BasketBuy", "#CSO_BasketBuy");
+	m_pBasketClear = new vgui2::Button(this, "BasketClear", "Clear");
+	m_pBasketBuy = new ButtonGlow(this, "BasketBuy", "Buy");
 	m_pQuitButton = new vgui2::Button(this, "QuitButton", "#Cstrike_Cancel");
 
 	primaryBG = new vgui2::ImagePanel(this, "primaryBG");
@@ -134,7 +134,7 @@ CCSBuySubMenu::CCSBuySubMenu(vgui2::Panel *parent, const char *name) : CBuySubMe
 	m_pPrevSetBtn = new vgui2::Button(this, "PrevSetBtn", "");
 	m_pNextSetBtn = new vgui2::Button(this, "NextSetBtn", "");
 
-	m_pEditDescLabel_DM = new vgui2::Label(this, "EditDescLabel_DM", "#CSO_BuySubMenu_EditDesc");
+	m_pEditDescLabel_DM = new vgui2::Label(this, "EditDescLabel_DM", "Select items for this set");
 	m_pEditDescBg = new vgui2::ImagePanel(this, "EditDescBg");
 	m_pEquipSample = new vgui2::ImagePanel(this, "EquipSample");
 
@@ -293,6 +293,7 @@ void CCSBuySubMenu::OnThink()
 
 	account_num->SetText(std::to_wstring(gHUD.m_Money.m_iMoneyCount).c_str());
 	buytime_num->SetText(std::to_wstring(0).c_str());
+	buytime->SetText("Buy Time");
 }
 
 void CCSBuySubMenu::SetupItems(MoEWeaponBuyType type)
@@ -408,7 +409,8 @@ void CCSBuySubMenu::SetupPage(size_t iPage)
 			m_pSlotButtons[i]->SetHotkey('0' + i + 1);
 			m_pSlotButtons[i]->UpdateWeapon(weapon);
 
-			//如果武器等级＞玩家等级，该武器上锁
+			// Zombie level gating is disabled for the vanilla-only build.
+			/*
 			if ((cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning == MOD_ZBZ)))
 			{
 				if (m_BuyItemList[iElement].level > cl::gHUD.m_iZlevel)
@@ -417,12 +419,13 @@ void CCSBuySubMenu::SetupPage(size_t iPage)
 					m_pSlotButtons[i]->SetBanWeapon(weapon, m_BuyItemList[iElement].level);
 				}
 			}
+			*/
 		}
 	}
 	
 	m_pSlotButtons[9]->SetBanWeapon("");
 	m_pSlotButtons[9]->SetEnabled(true);
-	m_pSlotButtons[9]->SetText("#CSO_PrevWpnBuy");
+	m_pSlotButtons[9]->SetText("Previous");
 	m_pSlotButtons[9]->SetCommand("VGUI_BuyMenu_Show");
 	m_pSlotButtons[9]->SetHotkey('0');
 	
@@ -513,6 +516,8 @@ void CCSBuySubMenu::SaveFavoriteSets()
 
 void CCSBuySubMenu::UpdateFavoriteSetsControls()
 {
+	char imagePath[MAX_PATH];
+
 	for (int i = 0; i < 5; ++i)
 	{
 		m_pFavButtons[i]->SetPrimaryWeapon(m_FavoriteItems[i].Primary.c_str());
@@ -525,18 +530,26 @@ void CCSBuySubMenu::UpdateFavoriteSetsControls()
 	hgrenBG->SetWeapon(m_SelectedItems.HEGrenade.c_str());
 	newknifeBG->SetWeapon(m_SelectedItems.Melee.c_str());
 
-	
-
-	fgrenBG->SetImage(m_SelectedItems.nFlashBang ? "gfx/vgui/basket/flash" : "");
-	sgrenBG->SetImage(m_SelectedItems.nSmokeGrenade ? "gfx/vgui/basket/sgren" : "");
-	dfBG->SetImage(m_SelectedItems.bDefuser ? "gfx/vgui/basket/defuser" : "");
-	nvBG->SetImage(m_SelectedItems.bDefuser ? "gfx/vgui/basket/nvgs" : "");
+	WeaponImagePanel::BuildVanillaImagePath(m_SelectedItems.nFlashBang ? "flash" : "", imagePath, sizeof(imagePath));
+	fgrenBG->SetImage(imagePath);
+	WeaponImagePanel::BuildVanillaImagePath(m_SelectedItems.nSmokeGrenade ? "sgren" : "", imagePath, sizeof(imagePath));
+	sgrenBG->SetImage(imagePath);
+	WeaponImagePanel::BuildVanillaImagePath(m_SelectedItems.bDefuser ? "defuser" : "", imagePath, sizeof(imagePath));
+	dfBG->SetImage(imagePath);
+	WeaponImagePanel::BuildVanillaImagePath(m_SelectedItems.bDefuser ? "nvgs" : "", imagePath, sizeof(imagePath));
+	nvBG->SetImage(imagePath);
 
 	switch (m_SelectedItems.iKelmet)
 	{
 	case ArmorType::NONE: kevBG->SetImage(""); break;
-	case ArmorType::ARMOR: kevBG->SetImage("gfx/vgui/basket/vest"); break;
-	case ArmorType::ARMOR_HELMET: kevBG->SetImage("gfx/vgui/basket/vesthelm"); break;
+	case ArmorType::ARMOR:
+		WeaponImagePanel::BuildVanillaImagePath("vest", imagePath, sizeof(imagePath));
+		kevBG->SetImage(imagePath);
+		break;
+	case ArmorType::ARMOR_HELMET:
+		WeaponImagePanel::BuildVanillaImagePath("vesthelm", imagePath, sizeof(imagePath));
+		kevBG->SetImage(imagePath);
+		break;
 	}
 }
 
@@ -613,7 +626,7 @@ void CCSBuySubMenu::LoadControlSettings(const char *dialogResourceName, const ch
 	m_pSlotButtons[9]->SetCommand("vguicancel");
 
 	account->SetText("#Cstrike_Current_Money");
-	buytime->SetText("#CSO_BuyTime");
+	buytime->SetText("Buy Time");
 	for (vgui2::TextEntry *p : { account , buytime })
 	{
 		p->SetMouseInputEnabled(false);
@@ -778,7 +791,7 @@ void CCSBuySubMenu_DeathMatch::LoadControlSettings(const char *dialogResourceNam
 void CCSBuySubMenu_DefaultMode::SetupPage(size_t iPage)
 {
 	BaseClass::SetupPage(iPage);
-	m_pSlotButtons[9]->SetText("#CSO_EndWpnBuy");
+	m_pSlotButtons[9]->SetText("End Buy");
 	m_pSlotButtons[9]->SetCommand("vguicancel");
 	m_pSlotButtons[9]->SetHotkey('0');
 }
@@ -799,6 +812,9 @@ void CCSBuySubMenu_DefaultMode::OnSelectFavoriteWeapons(int iSet)
 
 void CCSBuySubMenu_ZombieMod::OnCommand(const char *command)
 {
+	// Zombie-specific buy menu behavior is disabled for the vanilla-only build.
+	(void)command;
+	/*
 	if (!Q_strcmp(command, "vest"))
 	{
 		m_SelectedItems.iKelmet = ArmorType::ARMOR;
@@ -825,6 +841,7 @@ void CCSBuySubMenu_ZombieMod::OnCommand(const char *command)
 		return;
 	}
 	BaseClass::OnCommand(command);
+	*/
 }
 
 void CCSBuySubMenu_ZombieMod::OnSelectWeapon(const char *weapon)

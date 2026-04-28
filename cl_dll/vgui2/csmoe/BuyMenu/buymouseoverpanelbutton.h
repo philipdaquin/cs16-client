@@ -96,6 +96,11 @@ public:
 		}
 	}
 
+	virtual void OnCursorEntered(void)
+	{
+		::MouseOverPanelButton::OnCursorEntered();
+	}
+
 	virtual void PaintBackground(void)
 	{
 		BaseClass::PaintBackground();

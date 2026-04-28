@@ -59,16 +59,17 @@ public:
 		SetKeyFocusBorder(pScheme->GetBorder("TabBorder"));
 		SetDepressedBorder(pScheme->GetBorder("TabActiveBorder"));
 
-		_imageBackground = true;
-		_depressedImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_left_c", true);
-		_depressedImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_center_c", true);
-		_depressedImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_right_c", true);
-		_defaultImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_left_n", true);
-		_defaultImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_center_n", true);
-		_defaultImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_right_n", true);
-		_armedImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_left_o", true);
-		_armedImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_center_o", true);
-		_armedImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_right_o", true);
+		// Disable the custom tab strip artwork and fall back to the stock button paint path.
+		_imageBackground = false;
+		// _depressedImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_left_c", true);
+		// _depressedImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_center_c", true);
+		// _depressedImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_right_c", true);
+		// _defaultImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_left_n", true);
+		// _defaultImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_center_n", true);
+		// _defaultImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_disabled_right_n", true);
+		// _armedImage[0] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_left_o", true);
+		// _armedImage[1] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_center_o", true);
+		// _armedImage[2] = vgui2::scheme()->GetImage("resource/control/tabbutton/tab_small_abled_right_o", true);
 	}
 
 	virtual void SetActive(bool state)

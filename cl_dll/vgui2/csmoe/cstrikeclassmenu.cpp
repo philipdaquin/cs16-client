@@ -35,46 +35,23 @@ struct ClassInfo
 };
 
 const ClassInfo Class_TE[] = {
-	//介绍图片, 按钮, 介绍
-	{"yuri"},
-	{"pirateboy"},
-	{"marineboy"},
-	{"pirategirl"},
-	{"rb"},
-	{"jpngirl01"},
-	{"ritsuka"},
-	{"terror","classic"},
-	{"leet","classic"},
-	{"arctic","classic"},
-	{"guerilla","classic"},
-	{"militia","classic"},
-	{"buffclassb"},
-	{"buffclasshunter"},
-	{"buffclassblair"},
+	{"terror", "Phoenix Connexion"},
+	{"leet", "L337 Krew"},
+	{"arctic", "Arctic Avengers"},
+	{"guerilla", "Guerilla Warfare"},
 };
 
 const ClassInfo Class_CT[] = {
-	//介绍图片, 按钮, 介绍
-	{"saf"},
-	{"choijiyoon"},
-	{"fernando"},
-	{"707"},
-	{"sozo"},
-	{"magui"},
-	{"natasha"},
-	{"urban","classic"},
-	{"gsg9","classic"},
-	{"sas","classic"},
-	{"gign","classic"},
-	{"spetsnaz","classic"},
-	{"buffclassa"},
-	{"buffclasslycan"},
-	{"buffclassfernando"},
-
+	{"urban", "Seal Team 6"},
+	{"gsg9", "German GSG-9"},
+	{"sas", "UK SAS"},
+	{"gign", "French GIGN"},
 };
 
+// Zombie class support is intentionally commented out for the vanilla-only build.
+// Keep the original data here as reference in case we ever need to restore it.
+/*
 const ClassInfo Class_Zb[] = {
-
 	{"tank", "#CSO_ZombieType_defaultzb","#CSO_zombi_Z_Label","zombicrazy","strengthrecovery"},
 	{"speed", "#CSO_ZombieType_lightzb","#CSO_Lightzombi_Z_Label","zombihiding","zombijumpup"},
 	{"heavy", "#CSO_ZombieType_heavyzb","#CSO_HeavyZombi_Z_Label","zombitrap","armorrecovery"},
@@ -94,12 +71,12 @@ const ClassInfo Class_Zb[] = {
 	{"witch", "#CSO_ZombieType_witchzb","#CSO_witch_Z_Label","zombihook","zombijumpup"},
 	{"aksha", "#CSO_ZombieType_akshazb","#CSO_akshazombi_Z_Label","charge","armorrecovery"},
 	{"boomer", "#CSO_ZombieType_boomerzb","#CSO_boomerzombi_Z_Label","zombiselfdestruct","armorrecovery"},
-
 	{"nemesis", "#CSO_ZombieType_nemesiszb","#CSO_zombi_Z_Label","zombitrap","armorrecovery"},
 	{"spider", "#CSO_ZombieType_spiderzb","#CSO_zombi_Z_Label","webshooter","webbomb"},
 	{"deathknight", "#CSO_ZombieType_deathknight","#CSO_zombi_Z_Label","protect","chargeslash"},
 	{"siren", "#CSO_ZombieType_sirenzb","#CSO_zombi_Z_Label","zombitrap","armorrecovery"},
 };
+*/
 
 CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 {
@@ -113,12 +90,12 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 		"[VGUI2-TRACE] CCSClassMenu::ctor before title/buttons this=%p panel=%p\n",
 		(void *)this,
 		(void *)m_pPanel);
-	m_pTitleLabel = new vgui2::Label(this, "CaptionLabel", CheckShowType() ? "选择默认僵尸" : "选择角色");
-	m_pShowCT = new NewTabButton(this, "ShowCTWeapon", "#CSO_ClsCT");
-	m_pShowTER = new NewTabButton(this, "ShowTERWeapon", "#CSO_ClsTER");
+	m_pTitleLabel = new vgui2::Label(this, "CaptionLabel", "Select Class");
+	m_pShowCT = new NewTabButton(this, "ShowCTWeapon", "CT");
+	m_pShowTER = new NewTabButton(this, "ShowTERWeapon", "T");
 
-	m_pPrevBtn = new vgui2::Button(this, "prevBtn", "#CSO_PrevBuy");
-	m_pNextBtn = new vgui2::Button(this, "nextBtn", "#CSO_NextBuy");
+	m_pPrevBtn = new vgui2::Button(this, "prevBtn", "Previous");
+	m_pNextBtn = new vgui2::Button(this, "nextBtn", "Next");
 
 	m_pClassImage = new vgui2::ImagePanel(this, "ClassInfo");
 	m_pClassImage->SetShouldScaleImage(true);
@@ -138,12 +115,12 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 	m_pSkillInfoImage[1]->SetVisible(false);
 
 	m_pClassDesc = new vgui2::Label(this, "ClassDesc", "");
-	m_pTipText = new vgui2::Label(this, "ClassDesc", "#CSO_ZOMBI3_KeepZombiTypeDesc");
+	m_pTipText = new vgui2::Label(this, "ClassDesc", "Select a class");
 
-	m_pSkillInfoText[0] = new vgui2::Label(this, "SkillInfo1_Text", "#CSO_ZombieSkill_zombicrazy");
-	m_pSkillInfoText[1] = new vgui2::Label(this, "SkillInfo2_Text", "#CSO_ZombieSkill_zombicrazy");
-	m_pSkillInfoText_Desc[0] = new vgui2::Label(this, "SkillInfo1_TextDesc", "#CSO_ZI_Skill_Desc_zombicrazy");
-	m_pSkillInfoText_Desc[1] = new vgui2::Label(this, "SkillInfo2_TextDesc", "#CSO_ZI_Skill_Desc_zombicrazy");
+	m_pSkillInfoText[0] = new vgui2::Label(this, "SkillInfo1_Text", "");
+	m_pSkillInfoText[1] = new vgui2::Label(this, "SkillInfo2_Text", "");
+	m_pSkillInfoText_Desc[0] = new vgui2::Label(this, "SkillInfo1_TextDesc", "");
+	m_pSkillInfoText_Desc[1] = new vgui2::Label(this, "SkillInfo2_TextDesc", "");
 	std::fprintf(stderr,
 		"[VGUI2-TRACE] CCSClassMenu::ctor after static controls this=%p panel=%p\n",
 		(void *)this,
@@ -284,17 +261,17 @@ void CCSClassMenu::SetTeam(TeamName team)
 	if (team == CT)
 	{
 		info = Class_CT;
-		num = 7;
+		num = sizeof(Class_CT) / sizeof(Class_CT[0]);
 		col = COL_CT;
 	}
 	else if (team == TERRORIST)
 	{
 		info = Class_TE;
-		num = 7;
+		num = sizeof(Class_TE) / sizeof(Class_TE[0]);
 		col = COL_TR;
 	}
 
-	for (int i = 0; i < 7; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		m_pSlotButtons[i]->SetFgColor(col);
 		m_pSlotButtons[i]->SetText(info[i].name.c_str());
@@ -316,7 +293,7 @@ void CCSClassMenu::SetTeam(TeamName team)
 	}
 
 	// TODO : pages
-	m_pTitleLabel->SetText(CheckShowType() ? "选择默认僵尸" : "选择角色");
+	m_pTitleLabel->SetText("Select Class");
 
 	m_pPrevBtn->SetVisible(false);
 	m_pNextBtn->SetVisible(false);
@@ -358,15 +335,15 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t iPage)
 		col = COL_TR;
 	}
 
-	int totalpages = ((num + 1) - 1) / 9 ;
-	if ((num / 9) % 9 != 0)
-		totalpages++;
+	int totalpages = (num + 8) / 9;
+	if (totalpages < 1)
+		totalpages = 1;
 
 	if (iPage <= 0) iPage = 0;
 	else if (iPage >= totalpages)
 		iPage = totalpages - 1;
 
-	m_pTitleLabel->SetText( "选择角色");
+	m_pTitleLabel->SetText("Select Class");
 	m_pTitleLabel->SizeToContents();
 
 	if (team == CT)
@@ -391,7 +368,6 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t iPage)
 		else
 		{
 			const char* SzGfxName = info[iElement].model.c_str();
-			const char* SzIsClassic = info[iElement].name.c_str();
 
 			char buffer[64];
 			sprintf(buffer, "VGUI_ClassMenu_Select %d", iElement + 1);
@@ -399,25 +375,8 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t iPage)
 
 			// ClassImage Show
 			char szBuffer[64];
-			if(!strcmp(SzIsClassic ,"classic"))
-				sprintf(szBuffer, "#CSO_Item_Name_%s", SzGfxName);
-			else
-				sprintf(szBuffer, "#CSO_%s", SzGfxName);
-
-			auto SzCheckValidVguiString = vgui2::localize()->Find(szBuffer);
-			char* szBuffer2;
-
-			if (SzCheckValidVguiString != nullptr)
-			{
-				
-				m_pSlotButtons[i]->SetText(SzCheckValidVguiString);
-			}
-			else
-			{
-				//szBuffer2 = new char[std::char_traits<wchar_t>::length(vgui2::localize()->Find(szBuffer)) + 1];
-				m_pSlotButtons[i]->SetText(szBuffer);
-
-			}
+			sprintf(szBuffer, "#Cstrike_%s_Label", SzGfxName);
+			m_pSlotButtons[i]->SetText(vgui2::localize()->Find(szBuffer) ? szBuffer : info[iElement].name.c_str());
 
 			m_pSlotButtons[i]->SetVisible(true);
 			m_pSlotButtons[i]->SetEnabled(true);
@@ -428,7 +387,7 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t iPage)
 
 		}
 	}
-	m_pSlotButtons[9]->SetText("自动选择");
+	m_pSlotButtons[9]->SetText("Auto Select");
 	m_pSlotButtons[9]->SetVisible(true);
 	m_pSlotButtons[9]->SetEnabled(true);
 	// extern char* va(const char* format, ...);
@@ -450,7 +409,7 @@ void CCSClassMenu::SetupPage(size_t iPage)
 	else if (iPage >= totalpages)
 		iPage = totalpages - 1;
 
-	m_pTitleLabel->SetText(CheckShowType() ? "选择默认僵尸" : "选择角色");
+	m_pTitleLabel->SetText("Select Class");
 	m_pTitleLabel->SizeToContents();
 
 	m_pShowCT->SetActive(false);
@@ -476,6 +435,8 @@ void CCSClassMenu::SetupPage(size_t iPage)
 	m_pPrevBtn->SetVisible(iPage != 0);
 	m_pNextBtn->SetVisible(m_iCurrentPage != totalpages - 1);
 
+	// Zombie class page rendering disabled for the vanilla-only build.
+	/*
 	for (int i = 0; i < 9; ++i)
 	{
 		int iElement = m_iCurrentPage * 9 + i;
@@ -490,23 +451,22 @@ void CCSClassMenu::SetupPage(size_t iPage)
 			char buffer[64];
 			sprintf(buffer, "VGUI_ZombieKeeper_Select %d", iElement);
 
-
 			m_pSlotButtons[i]->SetText(SzName);
 			m_pSlotButtons[i]->SetVisible(true);
 			m_pSlotButtons[i]->SetEnabled(true);
 			m_pSlotButtons[i]->SetHotkey('0' + i + 1);
 			m_pSlotButtons[i]->SetCommand(buffer);
 			m_pSlotButtons[i]->AddActionSignalTarget(this);
-
 		}
 	}
 
-	m_pSlotButtons[9]->SetText("取消（默认）选择");
+	m_pSlotButtons[9]->SetText("Cancel");
 	m_pSlotButtons[9]->SetVisible(true);
 	m_pSlotButtons[9]->SetEnabled(true);
 	m_pSlotButtons[9]->SetCommand("VGUI_ZombieKeeper_Select 66");
 	m_pSlotButtons[9]->SetHotkey('0');
 	m_pSlotButtons[9]->AddActionSignalTarget(this);
+	*/
 
 }
 
@@ -667,11 +627,14 @@ void CCSClassMenu::OnCommand(const char* command)
 		OnSelectClass(m_iCurrentTeamPage, command + 22);
 		return;
 	}
+	// Zombie class selection is disabled in the vanilla-only build.
+	/*
 	else if (!strncmp(command, "VGUI_ZombieKeeper_Select ", 25))
 	{
 		OnSelectClassZombie(command + 22);
 		return;
 	}
+	*/
 	else if (!strncmp(command, "VGUI_ClassMenu_SetTeam", 22))
 	{
 		TeamName team;
@@ -738,11 +701,8 @@ void CCSClassMenu::OnSelectClass(TeamName team, const char* name)
 }
 void CCSClassMenu::OnSelectClassZombie(const char* name)
 {
-
-	char buffer[64];
-	sprintf(buffer, "bte_zb2_zombie_keep %s", name);
-	cl::gEngfuncs.pfnClientCmd(buffer);
-	BaseClass::OnCommand("vguicancel");
+	// Zombie-only command path disabled for the vanilla-only build.
+	(void)name;
 }
 
 void CCSClassMenu::UpdateGameMode()
@@ -759,28 +719,46 @@ void CCSClassMenu::UpdateGameMode()
 void CCSClassMenu::UpdateClass(int i)
 {
 	const ClassInfo* info = nullptr;
+	int num = 0;
 	//Zb Mod
 	if (!CheckShowType())
 	{
 		if (m_iCurrentTeamPage == TERRORIST)
 		{
 			info = Class_TE;
+			num = sizeof(Class_TE) / sizeof(Class_TE[0]);
 		}
 		else if (m_iCurrentTeamPage == CT)
 		{
 			info = Class_CT;
+			num = sizeof(Class_CT) / sizeof(Class_CT[0]);
 		}
 		else
+		{
 			info = Class_CT;
+			num = sizeof(Class_CT) / sizeof(Class_CT[0]);
+		}
 	}
-	else
-	{
-		info = Class_Zb;
-	}
+	// Zombie class rendering disabled for the vanilla-only build.
 
+	if (!CheckShowType() && i == 9)
+	{
+		m_pClassImage->SetVisible(true);
+		m_pClassImage->SetImage(m_iCurrentTeamPage == CT ? "gfx/vgui/ct_random" : "gfx/vgui/t_random");
+		m_pClassDesc->SetVisible(true);
+		m_pClassDesc->SetTextColorState(Label::CS_BRIGHT);
+		m_pClassDesc->SetText("Random Select");
+		m_pClassDesc->SizeToContents();
+		return;
+	}
 
 	int iElement = m_iCurrentPage * 9 + i;
-	if (iElement > 23)iElement = 0;
+	if (iElement < 0 || iElement >= num)
+	{
+		m_pClassImage->SetVisible(false);
+		m_pClassDesc->SetVisible(false);
+		return;
+	}
 
 	const char* SzCheck = info[iElement].model.c_str();
 	bool bEnabled = (SzCheck[0] && SzCheck) ? true : false;
@@ -817,19 +795,19 @@ void CCSClassMenu::UpdateClass(int i)
 
 		m_pClassDesc->SetVisible(true);
 		m_pClassDesc->SetTextColorState(Label::CS_BRIGHT);
-		m_pClassDesc->SetText((i == 9) ? "随机选择人物" : (SzCheckValidVguiString != nullptr ? szBuffer2 : szBuffer));
+		m_pClassDesc->SetText((i == 9) ? "Random Select" : (SzCheckValidVguiString != nullptr ? szBuffer2 : szBuffer));
 		m_pClassDesc->SizeToContents();
 
 		if (SzCheckValidVguiString != nullptr && szBuffer2)
 			delete[] szBuffer2;
 	}
+	/*
 	else
 	{
-
+		// Zombie class rendering disabled for the vanilla-only build.
 		char szBuffer[128];
 		sprintf(szBuffer, (i == 9) ? "resource/hud/zombie/randomzombie" : "resource/hud/zombie/%s_zombi", info[iElement].model.c_str());
 		m_pClassImage->SetImage(szBuffer);
-
 
 		m_pClassDesc->SetVisible(true);
 		m_pClassDesc->SetTextColorState(Label::CS_BRIGHT);
@@ -875,6 +853,7 @@ void CCSClassMenu::UpdateClass(int i)
 		char sdaa[64]; sprintf(sdaa, "Sznam After Cast= %d\n", iElement);
 		cl::gEngfuncs.pfnConsolePrint(sdaa);
 	}
+	*/
 }
 
 
@@ -889,6 +868,7 @@ bool IsValidEntity(cl_entity_s* pEntity)
 bool CCSClassMenu::CheckShowType()
 {
 	return false;
-	return ((cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning != MOD_ZB4)) && IsValidEntity(cl::gEngfuncs.GetEntityByIndex(cl::gEngfuncs.GetLocalPlayer()->index))) ? true : false;
-	//return ((cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning != MOD_ZB4)) && (cl::g_iTeamNumber != TEAM_UNASSIGNED) && cl::gEngfuncs.GetLocalPlayer()->model!=NULL && cl::gEngfuncs.GetLocalPlayer()->curstate.playerclass)? true : false;
+	// Zombie class mode disabled for the vanilla-only build.
+	// return ((cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning != MOD_ZB4)) && IsValidEntity(cl::gEngfuncs.GetEntityByIndex(cl::gEngfuncs.GetLocalPlayer()->index))) ? true : false;
+	// return ((cl::gHUD.IsZombieMod() && (cl::gHUD.m_iModRunning != MOD_ZB4)) && (cl::g_iTeamNumber != TEAM_UNASSIGNED) && cl::gEngfuncs.GetLocalPlayer()->model!=NULL && cl::gEngfuncs.GetLocalPlayer()->curstate.playerclass)? true : false;
 }
