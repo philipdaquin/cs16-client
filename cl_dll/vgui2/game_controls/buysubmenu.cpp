@@ -160,13 +160,6 @@ void CBuySubMenu::GotoNextSubPanel(void)
 
 void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 {
-	const char *resourceName = ResolveBuySubMenuResource(fileName);
-	const char *overlayResourceName = ResolveBuySubMenuOverlayResource(fileName);
-	SetupNextSubPanel(resourceName, overlayResourceName);
-}
-
-void CBuySubMenu::SetupNextSubPanel(const char *fileName, const char *overlayFileName)
-{
 	int i;
 
 	for (i = 0; i < m_SubMenus.Count(); i++)
@@ -188,8 +181,6 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName, const char *overlayFil
 
 		CBuySubMenu *newMenu = CreateNewSubMenu();
 		newMenu->LoadControlSettings(fileName, "GAME");
-		if (overlayFileName)
-			newMenu->LoadControlSettings(overlayFileName, "GAME");
 		m_NextPanel = newMenu;
 		Q_strncpy(newEntry.filename, fileName, sizeof(newEntry.filename));
 		newEntry.panel = newMenu;

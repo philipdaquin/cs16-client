@@ -70,7 +70,7 @@ CZb2ZombieKeeper::CZb2ZombieKeeper(void) : Frame(NULL, PANEL_ZOMBIEKEEPER)
 	GetSize(wide, tall);
 	SetPos((screenWide / 2) - wide / 2, (screenTall / 2) - tall / 2);
 
-	LoadControlSettings("Resource/popup_zb2zombieselector.res", "GAME");
+	LoadControlSettings("resource/popup_zb2zombieselector.res", "GAME");
 
 	FindControl<Label>("TitleLabel")->SetScheme("BaseUI");
 	SetTitle("#CSO_ZombiSelect", true);

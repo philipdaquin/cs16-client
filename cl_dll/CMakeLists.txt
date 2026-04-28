@@ -42,6 +42,7 @@ set(VGUI2_SDK_RUNTIME_SOURCES
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier1/utlstring.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier1/utlsymbol.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/vstdlib/KeyValuesSystem.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/vstdlib/random.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/vcrmode_posix.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/mem.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../SourceSDK/tier0/mem_helpers.cpp"

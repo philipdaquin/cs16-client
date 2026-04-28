@@ -109,7 +109,8 @@ public:
 		const char *classPage = GetClassPage(GetName());
 		KeyValues *resourceData = new KeyValues("classes");
 
-		if (resourceData->LoadFromFile(g_pFullFileSystem, classPage, "GAME"))
+		// if (resourceData->LoadFromFile(g_pFullFileSystem, classPage, "GAME"))
+		if (resourceData->LoadFromFileValveVDF(g_pFullFileSystem, classPage, "GAME"))
 		{
 			const char *require = resourceData->GetString("require", "");
 

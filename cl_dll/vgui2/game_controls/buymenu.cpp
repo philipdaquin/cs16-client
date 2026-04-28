@@ -90,30 +90,6 @@ void CBuyMenu::ShowPanel(bool bShow)
 	}
 }
 
-void CBuyMenu::GotoMenu(int iMenu)
-{
-	if (!m_pMainMenu)
-		return;
-
-	const char *resourceName = GetBuyMenuResourceForMenu(iMenu);
-
-	ActivateNextSubPanel(m_pMainMenu);
-
-	if (resourceName)
-	{
-		m_pMainMenu->SetupNextSubPanel(resourceName);
-		m_pMainMenu->GotoNextSubPanel();
-	}
-}
-
-void CBuyMenu::ActivateMenu(int iMenu)
-{
-	GotoMenu(iMenu);
-
-	if (g_pViewport)
-		g_pViewport->ShowPanel(this, true);
-}
-
 void CBuyMenu::Update(void)
 {
 	NULL;

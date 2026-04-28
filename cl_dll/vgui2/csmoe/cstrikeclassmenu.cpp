@@ -15,6 +15,7 @@
 #include <vgui_controls/Panel.h>
 #include "cso_controls/DarkTextEntry.h"
 #include "../vgui_resource_paths.h"
+#include <stdio.h>
 
 
 
@@ -102,7 +103,16 @@ const ClassInfo Class_Zb[] = {
 
 CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 {
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor enter this=%p viewport=%p panel=%p\n",
+		(void *)this,
+		(void *)pViewPort,
+		(void *)m_pPanel);
 
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor before title/buttons this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 	m_pTitleLabel = new vgui2::Label(this, "CaptionLabel", CheckShowType() ? "选择默认僵尸" : "选择角色");
 	m_pShowCT = new NewTabButton(this, "ShowCTWeapon", "#CSO_ClsCT");
 	m_pShowTER = new NewTabButton(this, "ShowTERWeapon", "#CSO_ClsTER");
@@ -134,6 +144,10 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 	m_pSkillInfoText[1] = new vgui2::Label(this, "SkillInfo2_Text", "#CSO_ZombieSkill_zombicrazy");
 	m_pSkillInfoText_Desc[0] = new vgui2::Label(this, "SkillInfo1_TextDesc", "#CSO_ZI_Skill_Desc_zombicrazy");
 	m_pSkillInfoText_Desc[1] = new vgui2::Label(this, "SkillInfo2_TextDesc", "#CSO_ZI_Skill_Desc_zombicrazy");
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor after static controls this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 
 	m_pShowCT->SetTextColor(COL_CT);
 	m_pShowTER->SetTextColor(COL_TR);
@@ -144,10 +158,27 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 	m_pShowTER->SetEnabled(true);
 
 	char buffer[64];
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor before slot loop this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 	for (int i = 0; i < 10; i++)
 	{
 		sprintf(buffer, "slot%d", i);
+		std::fprintf(stderr,
+			"[VGUI2-TRACE] CCSClassMenu::ctor creating slot index=%d name=%s this=%p panel=%p templatePanel=%p\n",
+			i,
+			buffer,
+			(void *)this,
+			(void *)m_pPanel,
+			(void *)m_pPanel);
 		m_pSlotButtons[i] = new NewMouseOverPanelButton(this, buffer, m_pPanel);
+		std::fprintf(stderr,
+			"[VGUI2-TRACE] CCSClassMenu::ctor created slot index=%d button=%p this=%p panel=%p\n",
+			i,
+			(void *)m_pSlotButtons[i],
+			(void *)this,
+			(void *)m_pPanel);
 		m_pSlotButtons[i]->GetClassPanel()->SetName("ClassInfo");
 
 		sprintf(buffer, "VGUI_ClassMenu_Select %d", i + 1);
@@ -159,6 +190,10 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 		m_pSlotButtons[i]->AddActionSignalTarget(this);
 
 	}
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor after slot loop this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 	m_iCurrentPage = 0;
 	m_iCurrentTeamPage = CT;
 
@@ -191,10 +226,22 @@ CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
 	// LoadControlSettings("resource/UI/cso_classmenu_ver2.res", "GAME");
 
 	// Check if the user is in CT or TER
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor before LoadControlSettings CT resource this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 	LoadControlSettings(vgui2::resource_paths::kMenuClassCT, "GAME");
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor after LoadControlSettings CT resource this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 
 
-	LoadControlSettings(vgui2::resource_paths::kMenuClassTER, "GAME");
+	// LoadControlSettings(vgui2::resource_paths::kMenuClassTER, "GAME");
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] CCSClassMenu::ctor exit this=%p panel=%p\n",
+		(void *)this,
+		(void *)m_pPanel);
 
 
 }
@@ -381,11 +428,14 @@ void CCSClassMenu::SetupTeamPage(TeamName team, size_t iPage)
 
 		}
 	}
-	extern char* va(const char* format, ...);
 	m_pSlotButtons[9]->SetText("自动选择");
 	m_pSlotButtons[9]->SetVisible(true);
 	m_pSlotButtons[9]->SetEnabled(true);
-	m_pSlotButtons[9]->SetCommand(va("VGUI_ClassMenu_Select %d", RandomInt(1, num)));
+	// extern char* va(const char* format, ...);
+	// m_pSlotButtons[9]->SetCommand(va("VGUI_ClassMenu_Select %d", RandomInt(1, num)));
+	char autoSelectCmd[64];
+	V_snprintf(autoSelectCmd, sizeof(autoSelectCmd), "VGUI_ClassMenu_Select %d", RandomInt(1, num));
+	m_pSlotButtons[9]->SetCommand(autoSelectCmd);
 	m_pSlotButtons[9]->SetHotkey('0');
 	m_pSlotButtons[9]->AddActionSignalTarget(this);
 

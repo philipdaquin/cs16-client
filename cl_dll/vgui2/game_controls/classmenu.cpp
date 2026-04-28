@@ -29,6 +29,8 @@ static const char *GetClassMenuResourceForTeam(int team)
 CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pViewPort(pViewPort)
 {
 	m_iTeam = TEAM_CT;
+	MouseOverPanelButton::s_lastPanel = nullptr;
+	MouseOverPanelButton::s_lastButton = nullptr;
 
 	SetTitle("", true);
 	SetScheme("ClientScheme");
@@ -68,6 +70,9 @@ Panel *CClassMenu::CreateControlByName(const char *controlName)
 
 void CClassMenu::Reset(void)
 {
+	MouseOverPanelButton::s_lastPanel = nullptr;
+	MouseOverPanelButton::s_lastButton = nullptr;
+
 	for (int i = 0; i < GetChildCount(); ++i)
 	{
 		MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
@@ -104,16 +109,23 @@ void CClassMenu::ShowPanel(bool bShow)
 		Activate();
 		SetMouseInputEnabled(true);
 
-		for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
+		for (int i = 0; i < GetChildCount(); ++i)
 		{
+			MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
+
+			if (!pPanel)
+				continue;
+
 			if (i == 0)
-				m_mouseoverButtons[i]->ShowPage();
+				pPanel->ShowPage();
 			else
-				m_mouseoverButtons[i]->HidePage();
+				pPanel->HidePage();
 		}
 	}
 	else
 	{
+		MouseOverPanelButton::s_lastPanel = nullptr;
+		MouseOverPanelButton::s_lastButton = nullptr;
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}
