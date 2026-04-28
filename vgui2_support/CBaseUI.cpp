@@ -40,8 +40,10 @@ namespace ui
 	extern ui_enginefuncs_t engfuncs;
 }
 
+namespace vgui2 {
 class CStaticPanel;
 class CEnginePanel;
+}
 
 extern "C" vgui2::ISurface *g_pVGuiSurface;
 extern "C" vgui2::IInputInternal *g_pVGuiInput;
@@ -71,7 +73,9 @@ extern IClientVGUI* clientVGUIInterface();
 
 CBaseUI g_BaseUI;
 
-class CEnginePanel : public vgui2::Panel {
+namespace vgui2 {
+
+class CEnginePanel : public Panel {
 public:
 	CEnginePanel() : Panel() {
 		m_bCanFocus = true;
@@ -82,12 +86,12 @@ public:
 		m_bCanFocus = true;
 	}
 
-	vgui2::VPANEL IsWithinTraverse(int x, int y, bool traversePopups) {
+	VPANEL IsWithinTraverse(int x, int y, bool traversePopups) {
 		if (!m_bCanFocus) {
 			return 0;
 		}
 
-		vgui2::VPANEL result = vgui2::Panel::IsWithinTraverse(x, y, traversePopups);
+		VPANEL result = Panel::IsWithinTraverse(x, y, traversePopups);
 
 		if (result == GetVPanel()) {
 			return 0;
@@ -100,14 +104,14 @@ private:
 	bool m_bCanFocus;
 };
 
-class CStaticPanel : public vgui2::Panel {
+class CStaticPanel : public Panel {
 public:
-	vgui2::VPANEL GetCurrentKeyFocus() {
-		return staticClientDLLPanel->GetCurrentKeyFocus();
+	VPANEL GetCurrentKeyFocus() {
+		return Panel::GetCurrentKeyFocus();
 	}
 
-	vgui2::VPANEL IsWithinTraverse(int x, int y, bool traversePopups) {
-		vgui2::VPANEL result = vgui2::Panel::IsWithinTraverse(x, y, traversePopups);
+	VPANEL IsWithinTraverse(int x, int y, bool traversePopups) {
+		VPANEL result = Panel::IsWithinTraverse(x, y, traversePopups);
 
 		if (result == GetVPanel()) {
 			return 0;
@@ -116,6 +120,8 @@ public:
 		return result;
 	}
 };
+
+}
 
 void CBaseUI::Initialize(CreateInterfaceFn* factories, int count) {
 	if (staticClient) {

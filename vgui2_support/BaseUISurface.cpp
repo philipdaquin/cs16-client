@@ -72,17 +72,6 @@ static void GetSurfaceScale( float &xscale, float &yscale )
 	yscale = screenInfo.iHeight / kSurfaceBaseHeight;
 }
 
-static rgbdata_t *LoadSurfaceImage( const char *filename )
-{
-	if ( !vgui2::gEngfuncs.FS_LoadImage )
-	{
-		std::fprintf( stderr, "[VGUI2-TRACE] BaseUISurface::LoadSurfaceImage missing loader filename='%s'\n", filename ? filename : "<null>" );
-		return nullptr;
-	}
-
-	return vgui2::gEngfuncs.FS_LoadImage( filename, nullptr, 0 );
-}
-
 static void FreeSurfaceImage( rgbdata_t *image )
 {
 	if ( !image )
@@ -683,27 +672,56 @@ void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardw
 	char name[512];
 	snprintf(name, sizeof(name), "%s.tga", filename);
 	rgbdata_t *pic = nullptr;
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile enter id=%d filename='%s' tga='%s' forceReload=%d hardwareFilter=%d\n",
+		id,
+		filename ? filename : "<null>",
+		name,
+		forceReload ? 1 : 0,
+		hardwareFilter);
 
 
 	// image_ref pic;
     // pic = FS_LoadImage( name, nullptr, 0 );
 
 
-	pic = LoadSurfaceImage( name );
+	if ( !vgui2::gEngfuncs.FS_LoadImage )
+	{
+		std::fprintf( stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile missing FS_LoadImage filename='%s'\n", name );
+		DrawSetTexture(id);
+		return;
+	}
+
+	pic = vgui2::gEngfuncs.FS_LoadImage( name, nullptr, 0 );
 	if (!pic)
 	{
+		std::fprintf(stderr,
+			"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile tga miss id=%d filename='%s' fallback='bmp'\n",
+			id,
+			name);
 		snprintf(name, sizeof(name), "%s.bmp", filename);
 
-		pic = LoadSurfaceImage( name );
+		pic = vgui2::gEngfuncs.FS_LoadImage( name, nullptr, 0 );
 
         // pic = FS_LoadImage( name, nullptr, 0 );
 
 		if (!pic)
 		{
+			std::fprintf(stderr,
+				"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile bmp miss id=%d filename='%s'\n",
+				id,
+				name);
 			DrawSetTexture(id);
 			return;
 		}
 	}
+
+	std::fprintf(stderr,
+		"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile loaded id=%d filename='%s' size=%dx%d\n",
+		id,
+		name,
+		pic->width,
+		pic->height);
 
 	DrawSetTextureRGBA(id, pic->buffer, pic->width, pic->height, hardwareFilter, forceReload);
 }

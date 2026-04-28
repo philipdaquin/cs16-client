@@ -71,34 +71,21 @@ void CBaseViewport::Initialize( CreateInterfaceFn* pFactories, int iNumFactories
 
 void CBaseViewport::Start()
 {
-	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::Start entry this=%p viewport=%p panels=%d gamePanels=%d\n",
-		this, (void *)g_pViewport, m_Panels.Count(), m_GameUIPanels.Count());
-	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start this=%p viewport=%p panels=%d gamePanels=%d\n",
-		this, (void *)g_pViewport, m_Panels.Count(), m_GameUIPanels.Count());
-	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start parent state this=%p viewportParent=%p currentParent=%p\n",
-		this, (void *)GetVParent(), (void *)GetParent());
 	// recreate all the default panels
 	RemoveAllPanels();
 
 	m_pBackGround = new CBackGroundPanel( nullptr );
-	std::fprintf(stderr, "[phase2][VGUI2-TRACE] CBaseViewport::Start background created this=%p background=%p\n",
-		this, (void *)m_pBackGround);
-	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start background=%p\n", (void *)m_pBackGround);
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );
 
 	CreateDefaultPanels();
-	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::Start default panels created panels=%d gamePanels=%d active=%p\n",
-		m_Panels.Count(), m_GameUIPanels.Count(), (void *)m_pActivePanel);
 
 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() ); // really send it to the back 
 }
 
 void CBaseViewport::Init()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::Init this=%p viewport=%p panels=%d\n",
-		this, (void *)g_pViewport, m_Panels.Count());
 	for (int i = 0; i < m_Panels.Count(); i++)
 		m_Panels[i]->Init();
 

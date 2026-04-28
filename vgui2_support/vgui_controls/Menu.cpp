@@ -1696,26 +1696,29 @@ void Menu::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 
-	SetFgColor(GetSchemeColor("Menu.TextColor", GetSchemeColor("Menu/FgColor", Color(255, 255, 255, 155), pScheme), pScheme));
-	SetBgColor(GetSchemeColor("Menu.BgColor", GetSchemeColor("Menu/BgColor", Color(255, 255, 255, 155), pScheme), pScheme));
+	// SetFgColor(GetSchemeColor("Menu.TextColor", GetSchemeColor("Menu/FgColor", Color(255, 255, 255, 155), pScheme), pScheme));
+	// SetBgColor(GetSchemeColor("Menu.BgColor", GetSchemeColor("Menu/BgColor", Color(255, 255, 255, 155), pScheme), pScheme));
+	// _borderDark = GetSchemeColor("Border.Dark", GetSchemeColor("BorderDark", Color(255, 255, 255, 0), pScheme), pScheme);
+	// const char *resourceString = pScheme->GetResourceString("Menu/TopLeft");
 
-	_borderDark = GetSchemeColor("Border.Dark", GetSchemeColor("BorderDark", Color(255, 255, 255, 0), pScheme), pScheme);
+	SetFgColor(GetSchemeColor("Menu.TextColor", pScheme));
+	SetBgColor(GetSchemeColor("Menu.BgColor", pScheme));
 
-	const char *resourceString = pScheme->GetResourceString("Menu/TopLeft");
+	_borderDark = pScheme->GetColor("BorderDark", Color(255, 255, 255, 0));
 
-	if (resourceString[0])
-	{
-		m_bImageBackground = true;
-		m_pTopBackground[0] = scheme()->GetImage(resourceString, true);
-		m_pTopBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/TopCenter"), true);
-		m_pTopBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/TopRight"), true);
-		m_pCenterBackground[0] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleLeft"), true);
-		m_pCenterBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleCenter"), true);
-		m_pCenterBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleRight"), true);
-		m_pBottomBackground[0] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomLeft"), true);
-		m_pBottomBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomCenter"), true);
-		m_pBottomBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomRight"), true);
-	}
+	// if (resourceString[0])
+	// {
+	// 	m_bImageBackground = true;
+	// 	m_pTopBackground[0] = scheme()->GetImage(resourceString, true);
+	// 	m_pTopBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/TopCenter"), true);
+	// 	m_pTopBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/TopRight"), true);
+	// 	m_pCenterBackground[0] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleLeft"), true);
+	// 	m_pCenterBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleCenter"), true);
+	// 	m_pCenterBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/MiddleRight"), true);
+	// 	m_pBottomBackground[0] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomLeft"), true);
+	// 	m_pBottomBackground[1] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomCenter"), true);
+	// 	m_pBottomBackground[2] = scheme()->GetImage(pScheme->GetResourceString("Menu/BottomRight"), true);
+	// }
 
 	FOR_EACH_LL(m_MenuItems, i)
 	{

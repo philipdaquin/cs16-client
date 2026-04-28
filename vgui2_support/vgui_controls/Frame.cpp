@@ -235,8 +235,10 @@ namespace
 			bool isSmall = ((Frame *)GetParent())->IsSmallCaption();
 
 			_marlettFont = pScheme->GetFont( isSmall ? "MarlettSmall" : "Marlett", IsProportional());
-			SetFgColor(GetSchemeColor("FrameGrip.Color1", GetSchemeColor("BorderBright", pScheme), pScheme));
-			SetBgColor(GetSchemeColor("FrameGrip.Color2", GetSchemeColor("BorderSelection", pScheme), pScheme));
+			// SetFgColor(GetSchemeColor("FrameGrip.Color1", GetSchemeColor("BorderBright", pScheme), pScheme));
+			// SetBgColor(GetSchemeColor("FrameGrip.Color2", GetSchemeColor("BorderSelection", pScheme), pScheme));
+			SetFgColor(GetSchemeColor("FrameGrip.Color1", pScheme));
+			SetBgColor(GetSchemeColor("FrameGrip.Color2", pScheme));
 
 			const char *snapRange = pScheme->GetResourceString("Frame.AutoSnapRange");
 

@@ -151,41 +151,55 @@ void TextEntry::ApplySchemeSettings(IScheme *pScheme)
 	SetFgColor(GetSchemeColor("TextEntryFgColor", GetSchemeColor("TextEntry.TextColor", GetSchemeColor("WindowFgColor", pScheme), pScheme), pScheme));
 	SetBgColor(GetSchemeColor("TextEntryBgColor", GetSchemeColor("TextEntry.BgColor", GetSchemeColor("WindowBgColor", pScheme), pScheme), pScheme));
 
-	_cursorColor = GetSchemeColor("TextEntry.CursorColor", GetSchemeColor("TextCursorColor", pScheme), pScheme);
-	_disabledFgColor = GetSchemeColor("TextEntry.DisabledTextColor", GetSchemeColor("WindowDisabledFgColor", pScheme), pScheme);
-	_disabledBgColor = GetSchemeColor("TextEntry.DisabledBgColor", GetSchemeColor("ControlBG", pScheme), pScheme);
+	// _cursorColor = GetSchemeColor("TextEntry.CursorColor", GetSchemeColor("TextCursorColor", pScheme), pScheme);
+	// _disabledFgColor = GetSchemeColor("TextEntry.DisabledTextColor", GetSchemeColor("WindowDisabledFgColor", pScheme), pScheme);
+	// _disabledBgColor = GetSchemeColor("TextEntry.DisabledBgColor", GetSchemeColor("ControlBG", pScheme), pScheme);
 
-	_selectionTextColor = GetSchemeColor("TextEntry.SelectedTextColor", GetSchemeColor("SelectionFgColor", GetFgColor(), pScheme), pScheme);
-	_selectionColor = GetSchemeColor("TextEntry.SelectedBgColor", GetSchemeColor("SelectionBgColor", pScheme), pScheme);
-	_defaultSelectionBG2Color = GetSchemeColor("TextEntry.OutOfFocusSelectedBgColor", GetSchemeColor("SelectionBG2", pScheme), pScheme);
-	_focusEdgeColor = GetSchemeColor("TextEntry.FocusEdgeColor", GetSchemeColor("BorderSelection", Color(0, 0, 0, 0), pScheme), pScheme);
+	// _selectionTextColor = GetSchemeColor("TextEntry.SelectedTextColor", GetSchemeColor("SelectionFgColor", GetFgColor(), pScheme), pScheme);
+	// _selectionColor = GetSchemeColor("TextEntry.SelectedBgColor", GetSchemeColor("SelectionBgColor", pScheme), pScheme);
+	// _defaultSelectionBG2Color = GetSchemeColor("TextEntry.OutOfFocusSelectedBgColor", GetSchemeColor("SelectionBG2", pScheme), pScheme);
+	// _focusEdgeColor = GetSchemeColor("TextEntry.FocusEdgeColor", GetSchemeColor("BorderSelection", Color(0, 0, 0, 0), pScheme), pScheme);
 
+	_cursorColor = GetSchemeColor("TextEntry.CursorColor", pScheme);
+	_disabledFgColor = GetSchemeColor("TextEntry.DisabledTextColor", pScheme);
+	_disabledBgColor = GetSchemeColor("TextEntry.DisabledBgColor", pScheme);
+	
+	_selectionTextColor = GetSchemeColor("TextEntry.SelectedTextColor", GetFgColor(), pScheme);
+	_selectionColor = GetSchemeColor("TextEntry.SelectedBgColor", pScheme);
+	_defaultSelectionBG2Color = GetSchemeColor("TextEntry.OutOfFocusSelectedBgColor", pScheme);
+	_focusEdgeColor = GetSchemeColor("TextEntry.FocusEdgeColor", Color(0, 0, 0, 0), pScheme);
 	SetBorder( pScheme->GetBorder("ButtonDepressedBorder"));
 
 	_font = pScheme->GetFont("Default", IsProportional() );
 	_smallfont = pScheme->GetFont( "DefaultVerySmall", IsProportional() );
 
-	// skip if it already set background
-	if (!m_bImageBackground)
-	{
-		const char* resourceString = pScheme->GetResourceString("TextEntry/TopLeft");
+	SetBorder( pScheme->GetBorder("ButtonDepressedBorder"));
 
-		if (resourceString[0])
-		{
-			m_bImageBackground = true;
-			m_pTopBackground[0] = scheme()->GetImage(resourceString, true);
-			m_pTopBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/TopCenter"), true);
-			m_pTopBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/TopRight"), true);
-			m_pCenterBackground[0] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleLeft"), true);
-			m_pCenterBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleCenter"), true);
-			m_pCenterBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleRight"), true);
-			m_pBottomBackground[0] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomLeft"), true);
-			m_pBottomBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomCenter"), true);
-			m_pBottomBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomRight"), true);
-		}
-	}
+	if ( _font == INVALID_FONT ) _font = pScheme->GetFont("Default", IsProportional() );
+	if ( _smallfont == INVALID_FONT ) _smallfont = pScheme->GetFont( "DefaultVerySmall", IsProportional() );
 
 	SetFont( _font );
+	// skip if it already set background
+	// if (!m_bImageBackground)
+	// {
+	// 	const char* resourceString = pScheme->GetResourceString("TextEntry/TopLeft");
+
+	// 	if (resourceString[0])
+	// 	{
+	// 		m_bImageBackground = true;
+	// 		m_pTopBackground[0] = scheme()->GetImage(resourceString, true);
+	// 		m_pTopBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/TopCenter"), true);
+	// 		m_pTopBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/TopRight"), true);
+	// 		m_pCenterBackground[0] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleLeft"), true);
+	// 		m_pCenterBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleCenter"), true);
+	// 		m_pCenterBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/MiddleRight"), true);
+	// 		m_pBottomBackground[0] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomLeft"), true);
+	// 		m_pBottomBackground[1] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomCenter"), true);
+	// 		m_pBottomBackground[2] = scheme()->GetImage(pScheme->GetResourceString("TextEntry/BottomRight"), true);
+	// 	}
+	// }
+
+	// SetFont( _font );
 }
 
 void TextEntry::SetSelectionTextColor( const Color& clr )
