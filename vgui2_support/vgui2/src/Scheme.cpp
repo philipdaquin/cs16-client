@@ -386,8 +386,8 @@ struct SchemeEntryTranslation_t
 SchemeEntryTranslation_t g_SchemeTranslation[] =
 {
 	{ "Border.Bright",					"BorderBright",		"200 200 200 196" },	// the lit side of a control
-	{ "Border.Dark"						"BorderDark",		"40 40 40 196" },		// the dark/unlit side of a control
-	{ "Border.Selection"				"BorderSelection",	"0 0 0 196" },			// the additional border color for displaying the default/selected button
+	{ "Border.Dark",  					"BorderDark",		"40 40 40 196" },		// the dark/unlit side of a control
+	{ "Border.Selection",				"BorderSelection",	"0 0 0 196" },			// the additional border color for displaying the default/selected button
 
 	{ "Button.TextColor",				"ControlFG",		"White" },
 	{ "Button.BgColor",					"ControlBG",		"Blank" },

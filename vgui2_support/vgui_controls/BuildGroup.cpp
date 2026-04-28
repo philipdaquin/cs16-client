@@ -973,8 +973,8 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 			bSuccess ? 1 : 0,
 			(void *)rDat);
 
-		if ( bSuccess )
-		{
+	if ( bSuccess )
+	{
 			if ( IsXbox() )
 			{
 				//rDat->ProcessResolutionKeys( surface()->GetResolutionKey() );
@@ -990,6 +990,11 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 		}
 	}
 
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-save resource='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
+
 	// save off the resource name
 	delete [] m_pResourceName;
 	m_pResourceName = new char[strlen(controlResourceName) + 1];
@@ -1003,9 +1008,21 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 	}
 
 	// delete any controls not in both files
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-delete resource='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 	DeleteAllControlsCreatedByControlSettingsFile();
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings after-delete resource='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 
 	// loop through the resource data sticking info into controls
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-apply resource='%s' parent=%p context=%p\n",
+		controlResourceName ? controlResourceName : "<null>",
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 	ApplySettings(rDat);
 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings applied resource='%s' parent=%p context=%p\n",
 		controlResourceName ? controlResourceName : "<null>",
@@ -1014,18 +1031,47 @@ void BuildGroup::LoadControlSettings(const char *controlResourceName, const char
 
 	if (m_pParentPanel)
 	{
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-dump resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		DumpPanelTree(m_pParentPanel, controlResourceName);
 	}
 
 	if (m_pParentPanel)
 	{
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-invalidate resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		m_pParentPanel->InvalidateLayout();
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings after-invalidate resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-repaint resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		m_pParentPanel->Repaint();
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings after-repaint resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 	}
 
 	if ( rDat != pPreloadedKeyValues )
 	{
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings before-delete-kv resource='%s' parent=%p context=%p kv=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext,
+			(void *)rDat);
 		rDat->deleteThis();
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::LoadControlSettings after-delete-kv resource='%s' parent=%p context=%p\n",
+			controlResourceName ? controlResourceName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 	}
 }
 
@@ -1195,6 +1241,10 @@ void BuildGroup::DeleteAllControlsCreatedByControlSettingsFile()
 //-----------------------------------------------------------------------------
 void BuildGroup::ApplySettings( KeyValues *resourceData )
 {
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings enter resourceData=%p parent=%p context=%p\n",
+		(void *)resourceData,
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 	// loop through all the keys, applying them wherever
 	for (KeyValues *controlKeys = resourceData->GetFirstSubKey(); controlKeys != NULL; controlKeys = controlKeys->GetNextKey())
 	{
@@ -1205,6 +1255,11 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 			continue;
 
 		char const *keyName = controlKeys->GetName();
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings key='%s' dtype=%d parent=%p context=%p\n",
+			keyName ? keyName : "<null>",
+			controlKeys->GetDataType(),
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		if (keyName && !Q_stricmp(keyName, "TeamMenu"))
 		{
 			Panel *panel = FieldNameTaken(keyName);
@@ -1245,6 +1300,12 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 						(void *)panel, bw, bh);
 				}
 				// apply the settings
+				std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings applying key='%s' to panel=%p class=%s parent=%p context=%p\n",
+					keyName ? keyName : "<null>",
+					(void *)panel,
+					panel->GetClassName() ? panel->GetClassName() : "<null>",
+					(void *)m_pParentPanel,
+					(void *)m_pBuildContext);
 				panel->ApplySettings(controlKeys);
 				if (keyName && !Q_stricmp(keyName, "TeamMenu"))
 				{
@@ -1253,6 +1314,11 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 					std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings TeamMenu after ApplySettings panel=%p size=%dx%d\n",
 						(void *)panel, aw, ah);
 				}
+				std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings applied key='%s' to panel=%p parent=%p context=%p\n",
+					keyName ? keyName : "<null>",
+					(void *)panel,
+					(void *)m_pParentPanel,
+					(void *)m_pBuildContext);
 				bFound = true;
 				break;
 			}
@@ -1264,10 +1330,22 @@ void BuildGroup::ApplySettings( KeyValues *resourceData )
 			if ( keyName /*controlKeys->GetInt("AlwaysCreate", false)*/ )
 			{
 				// create the control even though it wasn't registered
+				std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings creating key='%s' parent=%p context=%p\n",
+					keyName ? keyName : "<null>",
+					(void *)m_pParentPanel,
+					(void *)m_pBuildContext);
 				NewControl( controlKeys );
+				std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings created key='%s' parent=%p context=%p\n",
+					keyName ? keyName : "<null>",
+					(void *)m_pParentPanel,
+					(void *)m_pBuildContext);
 			}
 		}
 	}
+	std::fprintf(stderr, "[phase3][VGUI2-TRACE] BuildGroup::ApplySettings exit resourceData=%p parent=%p context=%p\n",
+		(void *)resourceData,
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 }
 
 //-----------------------------------------------------------------------------
@@ -1283,19 +1361,80 @@ Panel *BuildGroup::NewControl( const char *name, int x, int y)
 	Assert (name);
 	
 	Panel *newPanel = NULL;
+	const char *controlName = name;
+	const char *fieldName = name;
 	// returns NULL on failure
 	newPanel = static_cast<EditablePanel *>(m_pParentPanel)->CreateControlByName(name);
 	
 	if (newPanel)
 	{
 		// panel successfully created
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetParent controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetParent(m_pParentPanel);	
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetParent controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetBuildGroup controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetBuildGroup(this);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetBuildGroup controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetPos controlName='%s' fieldName='%s' newPanel=%p pos=%d,%d parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			x, y,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetPos(x, y);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetPos controlName='%s' fieldName='%s' newPanel=%p pos=%d,%d parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			x, y,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 
 		char newFieldName[255];
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetName controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		GetNewFieldName(newFieldName, sizeof(newFieldName), newPanel);
 		newPanel->SetName(newFieldName);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetName controlName='%s' fieldName='%s' assignedName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			newFieldName,
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		
 		newPanel->AddActionSignalTarget(m_pParentPanel);
 		newPanel->SetBuildModeEditable(true);
@@ -1303,6 +1442,13 @@ Panel *BuildGroup::NewControl( const char *name, int x, int y)
 		
 		// make sure it gets freed
 		newPanel->SetAutoDelete(true);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before exit controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 	}	
 
 	return newPanel;
@@ -1318,13 +1464,49 @@ Panel *BuildGroup::NewControl( KeyValues *controlKeys, int x, int y)
 	Assert (controlKeys);
 	
 	Panel *newPanel = NULL;
+	const char *controlName = NULL;
+	const char *fieldName = NULL;
 	if (controlKeys)
 	{
+		controlName = controlKeys->GetString("ControlName");
+		fieldName = controlKeys->GetName();
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl enter controlName='%s' fieldName='%s' parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+
 		KeyValues *keyVal = new KeyValues("ControlFactory", "ControlName", controlKeys->GetString("ControlName"));
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before RequestInfo controlName='%s' keyVal=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			(void *)keyVal,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		m_pBuildContext->RequestInfo(keyVal);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after RequestInfo controlName='%s' keyVal=%p panelPtr=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			(void *)keyVal,
+			keyVal ? keyVal->GetPtr("PanelPtr") : nullptr,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		// returns NULL on failure
 		newPanel = (Panel *)keyVal->GetPtr("PanelPtr");
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl panel lookup controlName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		keyVal->deleteThis();
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after key cleanup controlName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 	}
 	else
 	{
@@ -1334,12 +1516,84 @@ Panel *BuildGroup::NewControl( KeyValues *controlKeys, int x, int y)
 	if (newPanel)
 	{
 		// panel successfully created
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetParent controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetParent(m_pParentPanel);	
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetParent controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetBuildGroup controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetBuildGroup(this);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetBuildGroup controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetPos controlName='%s' fieldName='%s' newPanel=%p pos=%d,%d parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			x, y,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetPos(x, y);
-
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetPos controlName='%s' fieldName='%s' newPanel=%p pos=%d,%d parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			x, y,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before SetName controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->SetName(controlKeys->GetName()); // name before applysettings :)
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after SetName controlName='%s' fieldName='%s' assignedName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			controlKeys->GetName() ? controlKeys->GetName() : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl before ApplySettings controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 		newPanel->ApplySettings(controlKeys);
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] BuildGroup::NewControl after ApplySettings controlName='%s' fieldName='%s' newPanel=%p parent=%p context=%p\n",
+			controlName ? controlName : "<null>",
+			fieldName ? fieldName : "<null>",
+			(void *)newPanel,
+			(void *)m_pParentPanel,
+			(void *)m_pBuildContext);
 
 		newPanel->AddActionSignalTarget(m_pParentPanel);
 		newPanel->SetBuildModeEditable(true);
@@ -1348,6 +1602,12 @@ Panel *BuildGroup::NewControl( KeyValues *controlKeys, int x, int y)
 		// make sure it gets freed
 		newPanel->SetAutoDelete(true);
 	}	
+
+	std::fprintf(stderr,
+		"[phase3][VGUI2-TRACE] BuildGroup::NewControl exit newPanel=%p parent=%p context=%p\n",
+		(void *)newPanel,
+		(void *)m_pParentPanel,
+		(void *)m_pBuildContext);
 
 	return newPanel;
 }

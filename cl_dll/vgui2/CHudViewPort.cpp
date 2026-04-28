@@ -9,52 +9,51 @@
 #include "CClientVGUI.h"
 #include "CClientMOTD.h"
 #include "CGameUITestPanel.h"
-#include "game_controls/buymenu.h"
-#include "game_controls/classmenu.h"
-// #include "game_controls/teammenu.h" // legacy generic team menu
+#include "csmoe/BuyMenu/cstrikebuymenu.h"
 #include "csmoe/cstriketeammenu.h"
+#include "csmoe/cstrikeclassmenu.h"
 #include "hud.h"
 #include "parsemsg.h"
-
 void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
+
 	SetPaintBackgroundEnabled(false);
+
+	//extern vgui2::HFont g_HudTextVgui_TextFont;
+	//g_HudTextVgui_TextFont = pScheme->GetFont("Default");
 }
 
 void CHudViewport::Start()
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::Start entry this=%p viewport=%p\n", this, (void *)g_pViewport);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 	BaseClass::Start();
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::Start exit this=%p viewport=%p\n", this, (void *)g_pViewport);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::Start after BaseClass::Start this=%p viewport=%p\n", this, (void *)g_pViewport);
 
-	static CHudViewport *const s_pHudViewPort = this;
+	static CHudViewport * const s_pHudViewPort = this;
 
-	gEngfuncs.pfnHookUserMsg("VGUIMenu", [](const char *pszName, int iSize, void *pbuf)
-	{
-		return s_pHudViewPort->MsgFunc_MOTD(pszName, iSize, pbuf);
-	});
+	gEngfuncs.pfnHookUserMsg("VGUIMenu", [](const char *pszName, int iSize, void *pbuf) { return s_pHudViewPort->MsgFunc_MOTD(pszName, iSize, pbuf); });
 
-	gEngfuncs.pfnAddCommand("motd_open", []()
-	{
-		s_pHudViewPort->m_pMOTD->Activate(gHUD.m_szServerName, "wow");
-	});
+    gEngfuncs.pfnAddCommand("motd_open", []() { s_pHudViewPort->m_pMOTD->Activate(gHUD.m_szServerName, "wow"); });
 }
 
 int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::MsgFunc_MOTD this=%p size=%d viewport=%p\n",
-		this, iSize, (void *)g_pViewport);
 	if (m_bGotAllMOTD)
 		m_szMOTD.clear();
 
 	BufferReader buf(pszName, pbuf, iSize);
 
 	m_bGotAllMOTD = buf.ReadByte();
-	m_szMOTD += buf.ReadString();
 
+	m_szMOTD += buf.ReadString();
+#if 0
+	CClientMOTD *panel = m_pMOTD;
+	if (panel)
+	{
+		panel->Activate(gHUD.m_szServerName, m_szMOTD.c_str());
+	}
+	else
+		gEngfuncs.Con_Printf("MsgFunc_MOTD() : Error! CClientMOTD is nullptr\n");
+#endif
 	return 1;
 }
 
@@ -67,7 +66,6 @@ void CHudViewport::HideScoreBoard()
 void CHudViewport::ActivateClientUI()
 {
 	BaseClass::ActivateClientUI();
-
 	if (gHUD.m_iIntermission)
 		gHUD.m_Scoreboard.UserCmd_ShowScores();
 }
@@ -79,83 +77,44 @@ void CHudViewport::HideClientUI()
 
 void CHudViewport::CreateDefaultPanels()
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreateDefaultPanels entry this=%p viewport=%p\n", this, (void *)g_pViewport);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreateDefaultPanels this=%p viewport=%p\n", this, (void *)g_pViewport);
 	AddNewPanel(CreatePanelByName("ClientMOTD"));
-	AddNewPanel(CreatePanelByName(PANEL_TEAM));
-	AddNewPanel(CreatePanelByName(PANEL_CLASS));
-	AddNewPanel(CreatePanelByName(PANEL_BUY));
+    AddNewPanel(CreatePanelByName(PANEL_TEAM));
+    AddNewPanel(CreatePanelByName(PANEL_CLASS));
+    AddNewPanel(CreatePanelByName(PANEL_BUY));
+    //AddNewPanel(CreatePanelByName(VIEWPORT_PANEL_SCORE));
 
-	AddNewGameUIPanel(CreateGameUIPanelByName("GameUITestPanel"));
+	// Temporarily disabled for startup isolation.
+	// AddNewGameUIPanel(CreateGameUIPanelByName("GameUITestPanel"));
 }
 
-IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
+IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreatePanelByName entry this=%p name='%s' viewport=%p\n",
-		this, pszName ? pszName : "<null>", (void *)g_pViewport);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreatePanelByName this=%p name='%s' viewport=%p\n",
-		this, pszName ? pszName : "<null>", (void *)g_pViewport);
-	IViewportPanel *pPanel = nullptr;
-
+	IViewportPanel* pPanel = nullptr;
+	
 	if (Q_strcmp("ClientMOTD", pszName) == 0)
 	{
-		if (!m_pMOTD)
+		if(!m_pMOTD)
 			m_pMOTD = new CClientMOTD(this);
 		pPanel = m_pMOTD;
 	}
 	else if (Q_strcmp(PANEL_TEAM, pszName) == 0)
 	{
-		if (!m_pTeamMenu)
-		{
-			// Old generic path:
-			// m_pTeamMenu = new CTeamMenu(this);
-			std::fprintf(stderr, "[phase3][VGUI2-TRACE] CHudViewport::CreatePanelByName creating TEAM panel this=%p viewport=%p\n",
-				this, (void *)g_pViewport);
-			gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CHudViewport::CreatePanelByName creating TEAM panel this=%p viewport=%p\n",
-				this, (void *)g_pViewport);
-			m_pTeamMenu = new CCSTeamMenu(this);
-			static_cast<CCSTeamMenu *>(m_pTeamMenu)->UpdateGameMode();
-		}
-		pPanel = m_pTeamMenu;
-	}
-	else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
-	{
-		if (!m_pClassMenu)
-			m_pClassMenu = new CClassMenu(this);
-		pPanel = m_pClassMenu;
-	}
-	else if (Q_strcmp(PANEL_BUY, pszName) == 0)
-	{
-		if (!m_pBuyMenu)
-			m_pBuyMenu = new CBuyMenu(this);
-		pPanel = m_pBuyMenu;
-	}
-
-	// Older implemenetationm remove so we can use the vanilla implentation
-	// if (Q_strcmp("ClientMOTD", pszName) == 0)
-	// {
-	// 	if(!m_pMOTD)
-	// 		m_pMOTD = new CClientMOTD(this);
-	// 	pPanel = m_pMOTD;
-	// }
-    // else if (Q_strcmp(PANEL_TEAM, pszName) == 0)
-    // {
-    //     if (!m_pTeamMenu)
-    //     {
-    //         m_pTeamMenu = new CCSTeamMenu(this);
-    //         m_pTeamMenu->UpdateGameMode();
-    //     }
-    //     pPanel = m_pTeamMenu;
-    // }
-    // else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
-    // {
-    //     if (!m_pClassMenu)
-    //     {
-    //         m_pClassMenu = new CCSClassMenu(this);
-    //         m_pClassMenu->UpdateGameMode();
-    //     }
-    //     pPanel = m_pClassMenu;
-    // }
+        if (!m_pTeamMenu)
+        {
+            m_pTeamMenu = new CCSTeamMenu(this);
+            m_pTeamMenu->UpdateGameMode();
+        }
+        pPanel = m_pTeamMenu;
+    }
+    else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
+    {
+        if (!m_pClassMenu)
+        {
+            m_pClassMenu = new CCSClassMenu(this);
+            m_pClassMenu->UpdateGameMode();
+        }
+        pPanel = m_pClassMenu;
+    }
 	// else if (Q_strcmp(PANEL_BUY, pszName) == 0)
 	// {
 	// 	if(!m_pBuyMenu)
@@ -179,153 +138,189 @@ IViewportPanel *CHudViewport::CreatePanelByName(const char *pszName)
     //     pPanel = m_pZombieKeeperMenu;
 
     // }
-
-
-
+	/*else if (Q_strcmp(VIEWPORT_PANEL_SCORE, pszName) == 0)
+	{
+		pPanel = new CScorePanel(this);
+	}
+	*/
 	return pPanel;
 }
 
 IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 {
+	IGameUIPanel *pPanel = nullptr;
+	
 	if (Q_strcmp("GameUITestPanel", pszName) == 0)
 	{
 		IEngineVGui *enginevgui = engineVgui();
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName before GetPanel this=%p name='%s' enginevgui=%p viewport=%p\n",
-			this, pszName ? pszName : "<null>", (void *)enginevgui, (void *)g_pViewport);
-		// vgui2::VPANEL gameUIParent = engineVgui()->GetPanel(PANEL_GAMEUIDLL);
 		if (!enginevgui)
 		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName aborting because enginevgui is null this=%p name='%s'\n",
-				this, pszName ? pszName : "<null>");
+			std::fprintf(stderr, "[phase3][VGUI2-TRACE] CreateGameUIPanelByName skipped GameUITestPanel: engineVgui is null\n");
 			return nullptr;
 		}
 
 		vgui2::VPANEL gameUIParent = enginevgui->GetPanel(PANEL_GAMEUIDLL);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName this=%p name='%s' gameUIParent=%p viewport=%p\n",
-			this, pszName ? pszName : "<null>", (void *)gameUIParent, (void *)g_pViewport);
-		auto *pPanel = new CGameUITestPanel(gameUIParent);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateGameUIPanelByName created panel=%p name='%s' gameUIParent=%p\n",
-			(void *)pPanel, pszName ? pszName : "<null>", (void *)gameUIParent);
-		return pPanel;
-	}
+		if (!gameUIParent)
+		{
+			std::fprintf(stderr, "[phase3][VGUI2-TRACE] CreateGameUIPanelByName skipped GameUITestPanel: PANEL_GAMEUIDLL is null\n");
+			return nullptr;
+		}
 
-	return nullptr;
+		std::fprintf(stderr, "[phase3][VGUI2-TRACE] CreateGameUIPanelByName creating GameUITestPanel parent=%p\n", (void *)gameUIParent);
+		pPanel = new CGameUITestPanel(gameUIParent);
+	}
+	
+	return pPanel;
 }
 
 bool CHudViewport::ShowVGUIMenu(int iMenu)
 {
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CHudViewport::ShowVGUIMenu entry this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
-		this, iMenu, (void *)g_pViewport, (void *)m_pTeamMenu, (void *)m_pClassMenu, (void *)m_pBuyMenu);
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu this=%p menu=%d viewport=%p team=%p class=%p buy=%p\n",
-		this, iMenu, (void *)g_pViewport, (void *)m_pTeamMenu, (void *)m_pClassMenu, (void *)m_pBuyMenu);
-	IViewportPanel *panel = nullptr;
+    IViewportPanel *panel = NULL;
 
-	switch (iMenu)
-	{
-	case MENU_TEAM:
-		panel = m_pTeamMenu;
-		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TEAM panel=%p type=%d\n",
-			(void *)panel, iMenu);
-		break;
+    switch (iMenu)
+    {
+        case MENU_TEAM:
+        {
+            if (m_pClassMenu->CheckShowType())
+            {
+                panel = m_pClassMenu;
+                m_pClassMenu->m_iCurrentPage = 0;
+                m_pClassMenu->SetupPage(0);
+            }
+            else
+            {
+                panel = m_pTeamMenu;
+            }
+            break;
+        }
+        case MENU_CLASS_T:
+        {
+            panel = m_pClassMenu;
 
-	case MENU_CLASS_T:
-	case MENU_CLASS_CT:
-		panel = m_pClassMenu;
-		if (m_pClassMenu)
-		{
-			KeyValues::AutoDelete data(new KeyValues("ClassMenu"));
-			data->SetInt("team", iMenu == MENU_CLASS_CT ? TEAM_CT : TEAM_TERRORIST);
-			m_pClassMenu->SetData(data);
-		}
-		break;
+            if (m_pClassMenu->CheckShowType())
+            {
+                panel = m_pClassMenu;
+                m_pClassMenu->m_iCurrentPage = 0;
+                m_pClassMenu->SetupPage(0);
+            }
+            else
+            {
+                m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
+                m_pClassMenu->SetTeam(TERRORIST);
+            }
+            break;
+        }
+        case MENU_CLASS_CT:
+        {
+            panel = m_pClassMenu;
+            if (m_pClassMenu->CheckShowType())
+            {
+                panel = m_pClassMenu;
+                m_pClassMenu->m_iCurrentPage = 0;
+                m_pClassMenu->SetupPage(0);
+            }
+            else
+            {
+                m_pClassMenu->m_iCurrentTeamPage = CT;
+                m_pClassMenu->SetTeam(CT);
+            }
+            break;
+        }
+        case MENU_BUY:
+        case MENU_BUY_PISTOL:
+        case MENU_BUY_SHOTGUN:
+        case MENU_BUY_RIFLE:
+        case MENU_BUY_SUBMACHINEGUN:
+        case MENU_BUY_MACHINEGUN:
+        case MENU_BUY_ITEM:
+        {
+            if (cl::g_iTeamNumber == TEAM_CT)
+                m_pBuyMenu->SetTeam(TEAM_CT);
+            else if (cl::g_iTeamNumber == TEAM_TERRORIST)
+                m_pBuyMenu->SetTeam(TEAM_TERRORIST);
+            else
+                m_pBuyMenu->SetTeam(TEAM_UNASSIGNED);
 
-	case MENU_BUY:
-	case MENU_BUY_PISTOL:
-	case MENU_BUY_SHOTGUN:
-	case MENU_BUY_RIFLE:
-	case MENU_BUY_SUBMACHINEGUN:
-	case MENU_BUY_MACHINEGUN:
-	case MENU_BUY_ITEM:
-		panel = m_pBuyMenu;
-		if (m_pBuyMenu)
-			m_pBuyMenu->GotoMenu(iMenu);
-		break;
+            m_pBuyMenu->ActivateMenu(iMenu);
+            return true;
+        }
+    }
 
-	default:
-		break;
-	}
+    if (panel)
+    {
+        ShowPanel(panel, true);
+        return true;
+    }
 
-	if (!panel)
-	{
-		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu no panel for menu=%d\n", iMenu);
-		return false;
-	}
-
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu before ShowPanel menu=%d panel=%p visible=%d active=%p\n",
-		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
-	ShowPanel(panel, true);
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CHudViewport::ShowVGUIMenu shown menu=%d panel=%p visible=%d active=%p\n",
-		iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CHudViewport::ShowVGUIMenu exit this=%p menu=%d panel=%p visible=%d active=%p\n",
-		this, iMenu, (void *)panel, panel->IsVisible() ? 1 : 0, (void *)GetActivePanel());
-	return true;
+    return false;
 }
 
 bool CHudViewport::HideVGUIMenu(int iMenu)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu this=%p menu=%d viewport=%p\n",
-		this, iMenu, (void *)g_pViewport);
-	IViewportPanel *panel = nullptr;
+    IViewportPanel *panel = NULL;
 
-	switch (iMenu)
-	{
-	case MENU_TEAM:
-		panel = m_pTeamMenu;
-		break;
+    switch (iMenu)
+    {
+    case MENU_TEAM:
+    {
+        if (m_pClassMenu->CheckShowType())
+        {
+            panel = m_pClassMenu;
+            m_pClassMenu->SetupPage(0);
+        }
+        else
+        {
+            panel = m_pTeamMenu;
+        }
+        break;
+    }
+        case MENU_CLASS_T:
+        case MENU_CLASS_CT:
+        {
+            panel = m_pClassMenu;
+            break;
+        }
 
-	case MENU_CLASS_T:
-	case MENU_CLASS_CT:
-		panel = m_pClassMenu;
-		break;
+        case MENU_BUY:
+        case MENU_BUY_PISTOL:
+        case MENU_BUY_SHOTGUN:
+        case MENU_BUY_RIFLE:
+        case MENU_BUY_SUBMACHINEGUN:
+        case MENU_BUY_MACHINEGUN:
+        case MENU_BUY_ITEM:
+        {
+            panel = m_pBuyMenu;
+        }
+    }
 
-	case MENU_BUY:
-	case MENU_BUY_PISTOL:
-	case MENU_BUY_SHOTGUN:
-	case MENU_BUY_RIFLE:
-	case MENU_BUY_SUBMACHINEGUN:
-	case MENU_BUY_MACHINEGUN:
-	case MENU_BUY_ITEM:
-		panel = m_pBuyMenu;
-		break;
+    if (panel)
+    {
+        ShowPanel(panel, false);
+        return true;
+    }
 
-	default:
-		break;
-	}
-
-	if (!panel)
-	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu no panel for menu=%d\n", iMenu);
-		return false;
-	}
-
-	ShowPanel(panel, false);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::HideVGUIMenu hidden menu=%d panel=%p\n", iMenu, (void *)panel);
-	return true;
+    return false;
 }
 
 void CHudViewport::UpdateGameMode()
 {
+    if(m_pBuyMenu)
+        m_pBuyMenu->UpdateGameMode();
+    if (m_pTeamMenu)
+        m_pTeamMenu->UpdateGameMode();
+    if (m_pClassMenu)
+        m_pClassMenu->UpdateGameMode();
 }
 
-bool CHudViewport::ShowVGUIMenuByName(const char *szName)
+bool CHudViewport::ShowVGUIMenuByName(const char* szName)
 {
-	IViewportPanel *pPanel = FindPanelByName(szName);
-	if (!pPanel)
-		pPanel = CreatePanelByName(szName);
+    auto pPanel = FindPanelByName(szName);
+    if (pPanel == nullptr)
+        pPanel = CreatePanelByName(szName);
 
-	if (!pPanel)
-		return false;
+    if (pPanel == nullptr)
+        return false;
 
-	ShowPanel(pPanel, true);
-	return true;
+    ShowPanel(pPanel, true);
+    return true;
 }

@@ -5,10 +5,12 @@
 
 #include <string>
 
+
 class CClientMOTD;
-class CBuyMenu;
-class CTeamMenu;
-class CClassMenu;
+class CCSBaseBuyMenu;
+class CCSTeamMenu;
+class CCSClassMenu;
+class CZb2ZombieKeeper;
 
 /**
 *	Viewport for the Hud.
@@ -48,9 +50,10 @@ public:
 	std::string	m_szMOTD;
 	
 	CClientMOTD *m_pMOTD = nullptr;
-	CTeamMenu *m_pTeamMenu = nullptr;
-	CClassMenu *m_pClassMenu = nullptr;
-    CBuyMenu *m_pBuyMenu = nullptr;
+	CCSTeamMenu *m_pTeamMenu = nullptr;
+	CCSClassMenu *m_pClassMenu = nullptr;
+    CCSBaseBuyMenu *m_pBuyMenu = nullptr;
+	CZb2ZombieKeeper* m_pZombieKeeperMenu = nullptr;
 };
 
 #endif //GAME_CLIENT_UI_HUD_CHUDVIEWPORT_H

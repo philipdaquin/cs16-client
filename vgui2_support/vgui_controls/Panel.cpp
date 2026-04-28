@@ -505,7 +505,10 @@ void Panel::LoadKeyBindingsForOnePanel( KeyBindingContextHandle_t handle, Panel 
 	char const *pathID = g_KBMgr.GetKeyBindingsFilePathID( handle );
 
 	KeyValues *kv = new KeyValues( "keybindings" );
-	if ( kv->LoadFromFile(vgui2::filesystem(), filename, pathID ) )
+	// Use the VGUI keyvalues loader for keybinding data.
+	// if ( kv->LoadFromFile(vgui2::filesystem(), filename, pathID ) )
+	if ( kv->LoadFromFileValveVDF(vgui2::filesystem(), filename, pathID ) )
+	// if ( LoadVGUIKeyValuesFile( kv, vgui2::filesystem(), filename, pathID ) )
 	{
 		int c = GetPanelsWithKeyBindingsCount( handle );
 		for ( int i = 0; i < c; ++i )
@@ -546,7 +549,10 @@ void Panel::ReloadKeyBindings( KeyBindingContextHandle_t handle )
 	char const *pathID = g_KBMgr.GetKeyBindingsFilePathID( handle );
 
 	KeyValues *kv = new KeyValues( "keybindings" );
-	if ( kv->LoadFromFile(vgui2::filesystem(), filename, pathID ) )
+	// Use the VGUI keyvalues loader for keybinding data.
+	// if ( kv->LoadFromFile(vgui2::filesystem(), filename, pathID ) )
+	if ( kv->LoadFromFileValveVDF(vgui2::filesystem(), filename, pathID ) )
+	// if ( LoadVGUIKeyValuesFile( kv, vgui2::filesystem(), filename, pathID ) )
 	{
 		int c = GetPanelsWithKeyBindingsCount( handle );
 		for ( int i = 0; i < c; ++i )
@@ -3954,13 +3960,6 @@ void Panel::ApplySettings(KeyValues *inResourceData)
 	}
 	
 	SetSize( wide, tall );
-	// if (isTeamMenu)
-	// {
-	// 	int appliedW = 0, appliedH = 0;
-	// 	GetSize(appliedW, appliedH);
-	// 	std::fprintf(stderr, "[phase3][VGUI2-TRACE] Panel::ApplySettings TeamMenu after SetSize this=%p requested=%dx%d actual=%dx%d\n",
-	// 		this, wide, tall, appliedW, appliedH);
-	// }
 
 	// NOTE: This has to happen after pos + size is set
 	ApplyAutoResizeSettings( inResourceData );
@@ -5885,12 +5884,25 @@ PanelAnimationMapEntry *Panel::FindPanelAnimationEntry( char const *scriptname, 
 // Recursively invoke settings for PanelAnimationVars
 void Panel::InternalApplySettings( PanelAnimationMap *map, KeyValues *inResourceData)
 {
+	std::fprintf(stderr,
+		"[phase3][VGUI2-TRACE] Panel::InternalApplySettings enter this=%p name=%s resourceData=%p map=%p\n",
+		(void *)this,
+		GetName() ? GetName() : "<null>",
+		(void *)inResourceData,
+		(void *)map);
+
 	// Loop through keys
 	KeyValues *kv;
 	
 	for ( kv = inResourceData->GetFirstSubKey(); kv; kv = kv->GetNextKey() )
 	{
 		char const *varname = kv->GetName();
+		std::fprintf(stderr,
+			"[phase3][VGUI2-TRACE] Panel::InternalApplySettings key='%s' this=%p name=%s resourceData=%p\n",
+			varname ? varname : "<null>",
+			(void *)this,
+			GetName() ? GetName() : "<null>",
+			(void *)inResourceData);
 
 		PanelAnimationMapEntry *entry = FindPanelAnimationEntry( varname, GetAnimMap() );
 		if ( entry )
@@ -5899,10 +5911,31 @@ void Panel::InternalApplySettings( PanelAnimationMap *map, KeyValues *inResource
 			IPanelAnimationPropertyConverter *converter = FindConverter( entry->type() );
 			if ( converter )
 			{
+				std::fprintf(stderr,
+					"[phase3][VGUI2-TRACE] Panel::InternalApplySettings before converter this=%p name=%s key='%s' entry=%p converter=%p\n",
+					(void *)this,
+					GetName() ? GetName() : "<null>",
+					varname ? varname : "<null>",
+					(void *)entry,
+					(void *)converter);
 				converter->SetData( this, inResourceData, entry );
+				std::fprintf(stderr,
+					"[phase3][VGUI2-TRACE] Panel::InternalApplySettings after converter this=%p name=%s key='%s' entry=%p converter=%p\n",
+					(void *)this,
+					GetName() ? GetName() : "<null>",
+					varname ? varname : "<null>",
+					(void *)entry,
+					(void *)converter);
 			}
 		}
 	}
+
+	std::fprintf(stderr,
+		"[phase3][VGUI2-TRACE] Panel::InternalApplySettings exit this=%p name=%s resourceData=%p map=%p\n",
+		(void *)this,
+		GetName() ? GetName() : "<null>",
+		(void *)inResourceData,
+		(void *)map);
 }
 
 //-----------------------------------------------------------------------------
