@@ -52,7 +52,7 @@ COptionsSubMoeSettings::COptionsSubMoeSettings(vgui2::Panel *parent) : PropertyP
 		"#CSMoE_AutoAim",
 		"in_autoaim");
 
-	LoadControlSettings("Resource/optionssubmoesettings.res");
+	LoadControlSettings("resource/optionssubmoesettings.res");
 }
 
 void COptionsSubMoeSettings::InitFloatingDamageTypeList(CLabeledCommandComboBox* cb, bool read)

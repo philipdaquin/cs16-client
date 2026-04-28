@@ -25,7 +25,7 @@ COptionsSubMouse::COptionsSubMouse(vgui2::Panel *parent) : PropertyPage(parent, 
 
 	m_pAutoAimCheckBox = new CCvarToggleCheckButton(this, "Auto-Aim", "#GameUI_AutoAim", "sv_aim");
 
-	LoadControlSettings("Resource/OptionsSubMouse.res");
+	LoadControlSettings("resource/OptionsSubMouse.res");
 
 	float sensitivity = engine->pfnGetCvarFloat("sensitivity");
 	char buf[64];

@@ -80,11 +80,11 @@ void CLoadingDialog::SetupControlSettings(bool bForceShowProgressText)
 {
 	if (ModInfo().BShowSimpleLoadingDialog())
 	{
-		LoadControlSettings("Resource/LoadingDialogNoBannerSingle.res");
+		LoadControlSettings("resource/LoadingDialogNoBannerSingle.res");
 	}
 	else
 	{
-		LoadControlSettings("Resource/LoadingDialogNoBanner.res");
+		LoadControlSettings("resource/LoadingDialogNoBanner.res");
 	}
 }
 
@@ -325,12 +325,12 @@ void CLoadingDialog::SetSecondaryProgress(float progress)
 		static bool bShowingVACInfo = false;
 		if (bShowingVACInfo || gameuifuncs->IsConnectedToVACSecureServer())
 		{
-			LoadControlSettings("Resource/LoadingDialogDualProgressVAC.res");
+			LoadControlSettings("resource/LoadingDialogDualProgressVAC.res");
 			bShowingVACInfo = true;
 		}
 		else
 		{
-			LoadControlSettings("Resource/LoadingDialogDualProgress.res");
+			LoadControlSettings("resource/LoadingDialogDualProgress.res");
 		}
 
 		m_bShowingSecondaryProgress = true;

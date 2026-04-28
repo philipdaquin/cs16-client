@@ -158,8 +158,8 @@ void DirectorySelectDialog::PerformLayout()
 void DirectorySelectDialog::ApplySchemeSettings(IScheme *pScheme)
 {
 	ImageList *imageList = new ImageList(false);
-	imageList->AddImage(scheme()->GetImage("Resource/icon_folder", false));
-	imageList->AddImage(scheme()->GetImage("Resource/icon_folder_selected", false));
+	imageList->AddImage(scheme()->GetImage("resource/icon_folder", false));
+	imageList->AddImage(scheme()->GetImage("resource/icon_folder_selected", false));
 	m_pDirTree->SetImageList(imageList, true);
 
 	BaseClass::ApplySchemeSettings(pScheme);

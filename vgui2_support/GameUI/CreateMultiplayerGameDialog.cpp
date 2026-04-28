@@ -60,7 +60,9 @@ CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui2::Panel *parent)
 	// load the bot config data
 	if (m_pBotSavedData)
 	{
-		if ( !m_pBotSavedData->LoadFromFile( vgui2::filesystem(), "CSBotConfig.vdf", "CONFIG" ) )
+		// Use the VGUI keyvalues loader for config-style keyvalue files too.
+		// if ( !m_pBotSavedData->LoadFromFile( vgui2::filesystem(), "CSBotConfig.vdf", "CONFIG" ) )
+		if ( !m_pBotSavedData->LoadFromFileValveVDF( vgui2::filesystem(), "CSBotConfig.vdf", "CONFIG" ) )
 		{
 			m_pBotSavedData->SetString( "bot_difficulty", "0" );
 			m_pBotSavedData->SetString( "bot_join_after_player", "1" );

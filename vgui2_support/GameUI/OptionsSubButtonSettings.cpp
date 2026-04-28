@@ -129,7 +129,7 @@ COptionsSubButtonSettings::COptionsSubButtonSettings(vgui2::Panel *parent) : Pro
 	m_pProfileDelete = new vgui2::Button(this, "Profile Delete", "#Profile_Delete");
 	m_pProfileDelete->SetCommand("ProfileDelete");
 
-	LoadControlSettings("Resource/optionssubbuttonsettings.res");
+	LoadControlSettings("resource/optionssubbuttonsettings.res");
 
 	UpdateProfileList();
 	m_pButtonProfileList->ActivateItem(0);

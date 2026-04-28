@@ -25,9 +25,9 @@ const char *g_LanguageList[] =
 COptionsSubAdvanced::COptionsSubAdvanced(vgui2::Panel *parent) : PropertyPage(parent, NULL)
 {
 
-	//vgui2::localize()->AddFile("Resource/language_%language%.txt");
+	//vgui2::localize()->AddFile("resource/language_%language%.txt");
 
-	LoadControlSettings("Resource/OptionsSubAdvanced.res");
+	LoadControlSettings("resource/OptionsSubAdvanced.res");
 }
 
 COptionsSubAdvanced::~COptionsSubAdvanced(void)

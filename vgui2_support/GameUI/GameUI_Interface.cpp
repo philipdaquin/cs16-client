@@ -99,7 +99,7 @@ void UI_ConnectionProgress_f(void)
 		m_iState = STATE_DOWNLOAD;
 		if (g_pGameUI)
 		{
-			snprintf(sDownloadString, sizeof(sDownloadString) - 1, "ÕýÔÚÏÂÔØ×ÊÔ´ %s", engine->Cmd_Argv(2));
+			snprintf(sDownloadString, sizeof(sDownloadString) - 1, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ %s", engine->Cmd_Argv(2));
 			g_pGameUI->SetProgressBarStatusText(sDownloadString);
 			int iCurrent = atoi(engine->Cmd_Argv(4));
 			int iTotal = atoi(engine->Cmd_Argv(5));
@@ -178,7 +178,7 @@ void UI_ConnectionProgress_f(void)
 			g_pGameUI->LoadingStarted("", "");
 			g_pGameUI->StartProgressBar("", 24);
 			g_pGameUI->ContinueProgressBar(4, 0);
-			g_pGameUI->SetProgressBarStatusText("·þÎñÆ÷ÕýÔÚ¸ü»»µØÍ¼...");
+			g_pGameUI->SetProgressBarStatusText("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ï¿½ï¿½Í¼...");
 		}
 	}
 
@@ -244,11 +244,11 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 		return;
 
     vgui2::surface()->SetLanguage("schinese");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/gameui_%language%.txt");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/valve_%language%.txt");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/vgui_%language%.txt");
-	vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/cstrike_%language%.txt");
-	// vgui2::localize()->AddFile(vgui2::filesystem(), "Resource/csmoe_%language%.txt");
+	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/gameui_%language%.txt");
+	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
+	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/vgui_%language%.txt");
+	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/cstrike_%language%.txt");
+	// vgui2::localize()->AddFile(vgui2::filesystem(), "resource/csmoe_%language%.txt");
 	gameuifuncs = static_cast<IGameUIFuncs*>(pEngFactory(ENGINE_GAMEUIFUNCS_INTERFACE_VERSION, nullptr));
 	enginevguifuncs = static_cast<IEngineVGui*>(pEngFactory(VENGINE_VGUI_VERSION, nullptr));
 

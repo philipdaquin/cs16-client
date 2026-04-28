@@ -584,7 +584,8 @@ void CSystem::SetUserConfigFile( const char *fileName, const char *pathName )
 	strncpy( m_szFileName, fileName, ARRAYSIZE( m_szFileName ) - 1 );
 	strncpy( m_szPathID, pathName, ARRAYSIZE( m_szPathID ) - 1 );
 
-	m_pUserConfigData->LoadFromFile( vgui2::filesystem(), m_szFileName, m_szPathID );
+	// m_pUserConfigData->LoadFromFile( vgui2::filesystem(), m_szFileName, m_szPathID );
+	m_pUserConfigData->LoadFromFileValveVDF(vgui2::filesystem(), m_szFileName, m_szPathID );
 }
 
 void CSystem::SaveUserConfigFile()

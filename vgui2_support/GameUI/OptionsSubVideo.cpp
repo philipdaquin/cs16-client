@@ -115,7 +115,7 @@ COptionsSubVideo::COptionsSubVideo(vgui2::Panel *parent) : PropertyPage(parent, 
 	m_pLowVideoDetail->SetSelected( m_CurrentSettings.vid_level ? false : true);
 	m_pLowVideoDetail->SetVisible(false);
 
-	LoadControlSettings("Resource/OptionsSubVideo.res");
+	LoadControlSettings("resource/OptionsSubVideo.res");
 	PrepareResolutionList();
 
 	bool detailTexturesSupported = engine->pfnGetCvarFloat( "r_detailtexturessupported" ) > 0;

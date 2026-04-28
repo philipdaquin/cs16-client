@@ -32,7 +32,7 @@ COptionsSubVoice::COptionsSubVoice(vgui2::Panel *parent) : PropertyPage(parent, 
 	m_pMicBoost->AddActionSignalTarget(this);
 	m_pTestMicrophoneButton = new vgui2::Button(this, "TestMicrophone", "#GameUI_TestMicrophone");
 
-	LoadControlSettings("Resource/OptionsSubVoice.res");
+	LoadControlSettings("resource/OptionsSubVoice.res");
 
 	m_bVoiceOn = false;
 	m_pMicMeter2->SetVisible(false);

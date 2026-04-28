@@ -701,7 +701,8 @@ void CSystem::SetUserConfigFile(const char *fileName, const char *pathName)
 
 	// open
 	m_pUserConfigData->UsesEscapeSequences( true ); // VGUI may use this
-	m_pUserConfigData->LoadFromFile(g_pFullFileSystem, m_szFileName, m_szPathID);
+	// m_pUserConfigData->LoadFromFile(g_pFullFileSystem, m_szFileName, m_szPathID);
+	m_pUserConfigData->LoadFromFileValveVDF(g_pFullFileSystem, m_szFileName, m_szPathID);
 }
 
 //-----------------------------------------------------------------------------

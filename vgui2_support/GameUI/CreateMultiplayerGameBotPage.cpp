@@ -129,7 +129,7 @@ CCreateMultiplayerGameBotPage::CCreateMultiplayerGameBotPage( vgui2::Panel *pare
 	m_prefixEntry = new vgui2::TextEntry( this, "BotPrefixEntry" );
 
 	// set positions and sizes from resources file
-	LoadControlSettings( "Resource/CreateMultiplayerGameBotPage.res" );
+	LoadControlSettings( "resource/CreateMultiplayerGameBotPage.res" );
 
 	// set initial values
 	if (engine->pfnGetCvarPointer( "bot_difficulty" ))

@@ -64,7 +64,7 @@ COptionsSubTouch::COptionsSubTouch(vgui2::Panel *parent) : PropertyPage(parent, 
 
 	//m_pProfileName = new CCvarTextEntry(this, "NameEntry", "name");
 
-	LoadControlSettings("Resource/optionssubtouch.res");
+	LoadControlSettings("resource/optionssubtouch.res");
 }
 
 COptionsSubTouch::~COptionsSubTouch()

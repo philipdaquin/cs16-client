@@ -51,7 +51,7 @@ CCreateMultiplayerGameGameplayPage::CCreateMultiplayerGameGameplayPage(vgui2::Pa
 	//m_pDescription->TransferCurrentValues( NULL );
 	m_pList = NULL;
 
-	LoadControlSettings("Resource/CreateMultiplayerGameGameplayPage.res");
+	LoadControlSettings("resource/CreateMultiplayerGameGameplayPage.res");
 
 	LoadGameOptionsList();
 }

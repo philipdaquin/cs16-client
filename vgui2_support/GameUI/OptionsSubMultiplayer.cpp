@@ -297,7 +297,7 @@ COptionsSubMultiplayer::COptionsSubMultiplayer(vgui2::Panel *parent) : vgui2::Pr
 	m_pCrosshairTranslucencyCheckbox = new CCvarToggleCheckButton(this, "CrosshairTranslucencyCheckbox", "#GameUI_Translucent", "cl_crosshair_translucent");
 	m_pCrosshairImage = new CrosshairImagePanel(this, "CrosshairImage", m_pCrosshairTranslucencyCheckbox, m_pCrosshairType);
 
-	LoadControlSettings("Resource/OptionsSubMultiplayer.res");
+	LoadControlSettings("resource/OptionsSubMultiplayer.res");
 
 	InitCrosshairColorEntries();
 	InitCrosshairSizeList(m_pCrosshairSize);

@@ -47,7 +47,7 @@ COptionsSubAudio::COptionsSubAudio(vgui2::Panel *parent) : PropertyPage(parent, 
 		
 
 
-	LoadControlSettings("Resource/OptionsSubAudio.res");
+	LoadControlSettings("resource/OptionsSubAudio.res");
 
 	// override, hide the HEV suit volume when not in half-life
 	if (ModInfo().IsMultiplayerOnly())

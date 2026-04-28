@@ -46,7 +46,7 @@ CMultiplayerAdvancedDialog::CMultiplayerAdvancedDialog(vgui2::Panel *parent) : B
 	m_pDescription->InitFromFile(OPTIONS_FILE);
 	m_pDescription->TransferCurrentValues(NULL);
 
-	LoadControlSettings("Resource/MultiplayerAdvancedDialog.res");
+	LoadControlSettings("resource/MultiplayerAdvancedDialog.res");
 	CreateControls();
 
 	MoveToCenterOfScreen();

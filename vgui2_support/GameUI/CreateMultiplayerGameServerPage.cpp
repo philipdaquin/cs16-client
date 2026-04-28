@@ -51,7 +51,7 @@ CCreateMultiplayerGameServerPage::CCreateMultiplayerGameServerPage(vgui2::Panel 
 	m_pEnableTutorCheck = new CCvarToggleCheckButton( this, "CheckButtonTutor", "#CStrike_Tutor_Enabled", "tutor_enable" );
 	m_pEnableBotsCheck = new vgui2::CheckButton( this, "EnableBotsCheck", "Enable bots" );
 
-	LoadControlSettings("Resource/CreateMultiplayerGameServerPage.res");
+	LoadControlSettings("resource/CreateMultiplayerGameServerPage.res");
 
 	LoadMapList();
 	LoadModeList();

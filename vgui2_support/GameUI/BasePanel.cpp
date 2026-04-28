@@ -755,7 +755,10 @@ void CBasePanel::CreateGameMenu(void)
 	KeyValues *datafile = new KeyValues("GameMenu");
 	datafile->UsesEscapeSequences(true);
 
-	if (datafile->LoadFromFile(vgui2::filesystem(), "Resource/GameMenu.res"))
+	// Use the VGUI keyvalues loader for menu resources.
+	// if (datafile->LoadFromFile(vgui2::filesystem(), "resource/GameMenu.res"))
+	if (datafile->LoadFromFileValveVDF(vgui2::filesystem(), "resource/GameMenu.res"))
+	// if (LoadVGUIKeyValuesFile(datafile, vgui2::filesystem(), "resource/GameMenu.res", NULL))
 		m_pGameMenu = RecursiveLoadGameMenu(datafile);
 
 	if (!m_pGameMenu)
@@ -1631,7 +1634,7 @@ void CMainMenuGameLogo::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 
-	LoadControlSettings("Resource/GameLogo.res");
+	LoadControlSettings("resource/GameLogo.res");
 }
 
 void CBasePanel::CloseBaseDialogs(void)

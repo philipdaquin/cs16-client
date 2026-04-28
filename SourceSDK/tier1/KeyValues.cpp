@@ -1118,6 +1118,7 @@ bool LoadVGUIKeyValuesFile( KeyValues *kv, IBaseFileSystem *filesystem, const ch
 	std::fprintf( stderr, "[VDFFLOW][VDF] fallback-native resource='%s' pathID='%s'\n",
 		resourceName ? resourceName : "<null>",
 		pathID ? pathID : "<null>" );
+	// Fallback to the oroginal LoadFromFile if the VDF-specific one fails. This allows us to support both VDF and non-VDF files without breaking existing content.
 	return kv->LoadFromFile( filesystem, resourceName, pathID, refreshCache );
 }
 
@@ -2495,7 +2496,8 @@ void KeyValues::ParseIncludedKeys( char const *resourceName, const char *filetoi
 	newKV->UsesEscapeSequences( m_bHasEscapeSequences != 0 );	// use same format as parent
 	newKV->UsesConditionals( m_bEvaluateConditionals != 0 );
 
-	if ( newKV->LoadFromFile( pFileSystem, fullpath, pPathID ) )
+	// if ( newKV->LoadFromFile( pFileSystem, fullpath, pPathID ) )
+	if ( newKV->LoadFromFileValveVDF( pFileSystem, fullpath, pPathID ) )
 	{
 		includedKeys.AddToTail( newKV );
 	}
