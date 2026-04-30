@@ -33,6 +33,12 @@
 #define MAX_AMMO_TYPES 32
 #define MAX_AMMO_SLOTS 32
 
+
+// Max decorated map name, with things like workshop/cp_foo.ugc123456
+#define MAX_MAP_NAME				96
+
+
+
 #define HUD_PRINTNOTIFY 1
 #define HUD_PRINTCONSOLE 2
 #define HUD_PRINTTALK 3

@@ -29,6 +29,7 @@ private:
 
 public:
 	CClassMenu(IViewport* pViewPort);
+	CClassMenu(IViewport* pViewPort, const char *panelName);
 	virtual ~CClassMenu(void);
 
 public:

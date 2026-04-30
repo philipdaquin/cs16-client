@@ -47,9 +47,9 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 	SetTitleBarVisible(false);
 	SetAutoDelete(false);
 
-	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
-
 	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+
+	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 	m_pMainMenu->SetVisible(false);
@@ -80,6 +80,9 @@ void CBuyMenu::ShowPanel(bool bShow)
 	if (bShow)
 	{
 		Update();
+
+		Run(m_pMainMenu);
+
 		Activate();
 		SetMouseInputEnabled(true);
 	}
@@ -88,6 +91,8 @@ void CBuyMenu::ShowPanel(bool bShow)
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}
+
+	m_pViewPort->ShowBackGround( bShow );
 }
 
 void CBuyMenu::Update(void)

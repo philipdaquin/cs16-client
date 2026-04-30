@@ -28,21 +28,46 @@ static const char *GetClassMenuResourceForTeam(int team)
 
 CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pViewPort(pViewPort)
 {
-	m_iTeam = TEAM_CT;
-	MouseOverPanelButton::s_lastPanel = nullptr;
-	MouseOverPanelButton::s_lastButton = nullptr;
+	m_iTeam = 0;
 
+	// initialize dialog
 	SetTitle("", true);
+
+	// load the new scheme early!!
 	SetScheme("ClientScheme");
 	SetMoveable(false);
 	SetSizeable(false);
 
-	SetTitleBarVisible(false);
+	// hide the system buttons
+	SetTitleBarVisible( false );
 	SetProportional(true);
 
-	m_pPanel = new EditablePanel(this, "ClassInfo");
+	// info window about this class
+	m_pPanel = new EditablePanel( this, "ClassInfo" );
 
-	LoadControlSettings(GetClassMenuResourceForTeam(m_iTeam), "GAME");
+	LoadControlSettings("Resource/UI/ClassMenu.res" );
+}
+
+CClassMenu::CClassMenu(IViewport* pViewPort, const char *panelName) : Frame(NULL, panelName ? panelName : PANEL_CLASS), m_pViewPort(pViewPort)
+{
+	m_iTeam = 0;
+
+	// initialize dialog
+	SetTitle("", true);
+
+	// load the new scheme early!!
+	SetScheme("ClientScheme");
+	SetMoveable(false);
+	SetSizeable(false);
+
+	// hide the system buttons
+	SetTitleBarVisible( false );
+	SetProportional(true);
+
+	// info window about this class
+	m_pPanel = new EditablePanel( this, "ClassInfo" );
+
+	// Inheriting classes are responsible for calling LoadControlSettings()!
 }
 
 CClassMenu::~CClassMenu(void)
@@ -70,9 +95,6 @@ Panel *CClassMenu::CreateControlByName(const char *controlName)
 
 void CClassMenu::Reset(void)
 {
-	MouseOverPanelButton::s_lastPanel = nullptr;
-	MouseOverPanelButton::s_lastButton = nullptr;
-
 	for (int i = 0; i < GetChildCount(); ++i)
 	{
 		MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
@@ -81,8 +103,19 @@ void CClassMenu::Reset(void)
 			pPanel->HidePage();
 	}
 
-	for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
-		m_mouseoverButtons[i]->HidePage();
+	// Turn the first button back on again (so we have a default description shown)
+	Assert( m_mouseoverButtons.Count() );
+	for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
+	{
+		if ( i == 0 )
+		{
+			m_mouseoverButtons[i]->ShowPage();	// Show the first page
+		}
+		else
+		{
+			m_mouseoverButtons[i]->HidePage();	// Hide the rest
+		}
+	}
 }
 
 void CClassMenu::OnCommand(const char *command)
@@ -99,56 +132,47 @@ void CClassMenu::OnCommand(const char *command)
 	BaseClass::OnCommand(command);
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: shows the class menu
+//-----------------------------------------------------------------------------
 void CClassMenu::ShowPanel(bool bShow)
 {
-	if (BaseClass::IsVisible() == bShow)
-		return;
-
-	if (bShow)
+	if ( bShow )
 	{
 		Activate();
-		SetMouseInputEnabled(true);
+		SetMouseInputEnabled( true );
 
-		for (int i = 0; i < GetChildCount(); ++i)
+		// load a default class page
+		for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
 		{
-			MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
-
-			if (!pPanel)
-				continue;
-
-			if (i == 0)
-				pPanel->ShowPage();
+			if ( i == 0 )
+			{
+				m_mouseoverButtons[i]->ShowPage();	// Show the first page
+			}
 			else
-				pPanel->HidePage();
+			{
+				m_mouseoverButtons[i]->HidePage();	// Hide the rest
+			}
 		}
+
+		//Temporary disbaled
+		// if ( m_iScoreBoardKey == BUTTON_CODE_INVALID )
+		// {
+		// 	m_iScoreBoardKey = gameuifuncs->GetButtonCodeForBind( "showscores" );
+		// }
 	}
 	else
 	{
-		MouseOverPanelButton::s_lastPanel = nullptr;
-		MouseOverPanelButton::s_lastButton = nullptr;
-		SetVisible(false);
-		SetMouseInputEnabled(false);
+		SetVisible( false );
+		SetMouseInputEnabled( false );
 	}
 
-	m_pViewPort->ShowBackGround(bShow);
+	m_pViewPort->ShowBackGround( bShow );
 }
 
 void CClassMenu::SetData(KeyValues *data)
 {
-	const int team = data->GetInt("team");
-
-	if (team == m_iTeam)
-		return;
-
-	m_iTeam = team;
-
-	Reset();
-	m_mouseoverButtons.RemoveAll();
-	MouseOverPanelButton::s_lastPanel = nullptr;
-	MouseOverPanelButton::s_lastButton = nullptr;
-
-	LoadControlSettings(GetClassMenuResourceForTeam(m_iTeam), "GAME");
-	InvalidateLayout();
+	m_iTeam = data->GetInt("team");
 }
 
 void CClassMenu::SetLabelText(const char *textEntryName, const char *text)

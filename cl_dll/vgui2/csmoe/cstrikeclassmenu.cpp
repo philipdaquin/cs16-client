@@ -78,7 +78,7 @@ const ClassInfo Class_Zb[] = {
 };
 */
 
-CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort)
+CCSClassMenu::CCSClassMenu(IViewport* pViewPort) : CClassMenu(pViewPort, PANEL_CLASS)
 {
 	std::fprintf(stderr,
 		"[VGUI2-TRACE] CCSClassMenu::ctor enter this=%p viewport=%p panel=%p\n",

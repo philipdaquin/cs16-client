@@ -25,18 +25,30 @@
 
 using namespace vgui2;
 
-const char *GetStringTeamColor(int i)
+
+// helper function
+const char *GetStringTeamColor( int i )
 {
-	switch (i)
+	switch( i )
 	{
-		case 0: return "team0";
-		case 1: return "team1";
-		case 2: return "team2";
-		case 3: return "team3";
-		case 4:
-		default: return "team4";
+	case 0:
+		return "team0";
+
+	case 1:
+		return "team1";
+
+	case 2:
+		return "team2";
+
+	case 3:
+		return "team3";
+
+	case 4:
+	default:
+		return "team4";
 	}
 }
+
 
 CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPort(pViewPort)
 {
@@ -98,37 +110,29 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	m_pMapInfo->SetFgColor(pScheme->GetColor("MapDescriptionText", Color(255, 255, 255, 0)));
 
-	if (*m_szMapName)
+	if (*m_szMapName) {
 		LoadMapPage(m_szMapName);
+	}
+
 }
 
 void CTeamMenu::AutoAssign(void)
 {
 	gEngfuncs.pfnClientCmd("jointeam 5");
-
 	OnClose();
 }
 
 void CTeamMenu::ShowPanel(bool bShow)
 {
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel entry this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 	if (BaseClass::IsVisible() == bShow)
 	{
-		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel no-op this=%p show=%d\n",
-			this, bShow ? 1 : 0);
 		return;
 	}
 
 	if (bShow)
 	{
-		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel activating this=%p mouseButtons=%d parent=%p\n",
-			this, m_mouseoverButtons.Count(), (void *)m_pViewPort);
 		Activate();
-		std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel after Activate this=%p show=%d visible=%d\n",
-			this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
+
 		SetMouseInputEnabled(true);
 
 		for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
@@ -146,16 +150,12 @@ void CTeamMenu::ShowPanel(bool bShow)
 	}
 
 	m_pViewPort->ShowBackGround(bShow);
-	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CTeamMenu::ShowPanel after background this=%p show=%d\n",
-		this, bShow ? 1 : 0);
-	std::fprintf(stderr, "[phase4][VGUI2-TRACE] CTeamMenu::ShowPanel exit this=%p show=%d visible=%d\n",
-		this, bShow ? 1 : 0, BaseClass::IsVisible() ? 1 : 0);
 }
 
 void CTeamMenu::Update(void)
 {
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Update this=%p mapName='%s'\n", this, m_szMapName);
-	char mapname[32];
+	char mapname[MAX_MAP_NAME];
 	Q_FileBase(gEngfuncs.pfnGetLevelName(), mapname, sizeof(mapname));
 
 	SetLabelText("mapname", mapname);
@@ -164,8 +164,7 @@ void CTeamMenu::Update(void)
 
 void CTeamMenu::LoadMapPage(const char *mapName)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage this=%p mapName='%s'\n",
-	// 	this, mapName ? mapName : "<null>");
+
 	Q_strncpy(m_szMapName, mapName, strlen(mapName) + 1);
 
 	char mapRES[MAX_PATH];
@@ -228,16 +227,17 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	InvalidateLayout();
 	Repaint();
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::LoadMapPage complete this=%p mapRES='%s'\n",
-	// 	this, mapRES);
+
 }
 
 void CTeamMenu::SetLabelText(const char *textEntryName, const char *text)
 {
 	Label *entry = dynamic_cast<Label *>(FindChildByName(textEntryName));
 
-	if (entry)
+	if (entry) 
+	{
 		entry->SetText(text);
+	}
 }
 
 void CTeamMenu::Reset(void)
@@ -247,8 +247,9 @@ void CTeamMenu::Reset(void)
 	{
 		MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
 
-		if (pPanel)
+		if (pPanel) { 
 			pPanel->HidePage();
+		}
 	}
 
 	for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
