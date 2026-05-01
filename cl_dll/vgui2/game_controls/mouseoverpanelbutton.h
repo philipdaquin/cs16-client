@@ -11,6 +11,9 @@
 #include "vgui/KeyCode.h"
 #include "FileSystem.h"
 
+extern vgui2::Panel *g_lastPanel;
+extern vgui2::Button *g_lastButton;
+
 class MouseOverPanelButton : public vgui2::Button
 {
 	DECLARE_CLASS_SIMPLE(MouseOverPanelButton, vgui2::Button);
@@ -42,11 +45,11 @@ public:
 
 	virtual void ShowPage(void)
 	{
-		if (s_lastPanel)
+		if (g_lastPanel)
 		{
-			for (int i = 0; i < s_lastPanel->GetParent()->GetChildCount(); i++)
+			for (int i = 0; i < g_lastPanel->GetParent()->GetChildCount(); i++)
 			{
-                MouseOverPanelButton *pButton = dynamic_cast<MouseOverPanelButton *>(s_lastPanel->GetParent()->GetChild(i));
+                MouseOverPanelButton *pButton = dynamic_cast<MouseOverPanelButton *>(g_lastPanel->GetParent()->GetChild(i));
 
 				if (pButton)
 					pButton->HidePage();
@@ -57,7 +60,7 @@ public:
 		{
 			m_pPanel->SetVisible(true);
 			m_pPanel->MoveToFront();
-			s_lastPanel = m_pPanel;
+			g_lastPanel = m_pPanel;
 		}
 	}
 
@@ -112,18 +115,18 @@ public:
 
 		if (m_bPreserveArmedButtons)
 		{
-			if (s_lastButton && s_lastButton != this)
-                s_lastButton->SetArmed(false);
+			if (g_lastButton && g_lastButton != this)
+                g_lastButton->SetArmed(false);
 
-            s_lastButton = this;
+            g_lastButton = this;
 		}
 
 		if (m_pPanel)
 		{
             if(!m_pPanel->IsVisible())
             {
-                if (s_lastPanel && s_lastPanel->IsVisible())
-                    s_lastPanel->SetVisible(false);
+                if (g_lastPanel && g_lastPanel->IsVisible())
+                    g_lastPanel->SetVisible(false);
 
                 ShowPage();
             }
@@ -136,8 +139,8 @@ public:
 
 		if (m_bPreserveArmedButtons)
 		{
-			if (s_lastButton)
-                s_lastButton->SetArmed(true);
+			if (g_lastButton)
+                g_lastButton->SetArmed(true);
 		}
 	}
 
@@ -146,9 +149,6 @@ protected:
 	bool m_bPreserveArmedButtons;
 	bool m_bUpdateDefaultButtons;
 
-public:
-    static inline vgui2::DHANDLE<vgui2::Panel> s_lastPanel;
-    static inline vgui2::DHANDLE<vgui2::Button> s_lastButton;
 };
 
 #endif

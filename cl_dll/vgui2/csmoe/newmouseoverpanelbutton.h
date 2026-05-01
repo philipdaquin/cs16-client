@@ -8,6 +8,7 @@
 #include <vgui_controls/TextImage.h>
 #include <vgui_controls/ImagePanel.h>
 #include <vgui/ISurface.h>
+#include "shared_util.h"
 
 extern vgui2::Panel *g_lastPanel;
 extern vgui2::Button *g_lastButton;

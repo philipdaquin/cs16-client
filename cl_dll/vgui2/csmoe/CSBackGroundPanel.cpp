@@ -129,7 +129,7 @@ static int GetAlternateProportionalValueFromNormal(int normalizedValue)
 	return (int)(normalizedValue * scale);
 }
 
-static int GetAlternateProportionalValueFromScaled(HScheme hScheme, int scaledValue)
+static int GetCSLegacyAlternateProportionalValueFromScaled(HScheme hScheme, int scaledValue)
 {
 	return GetAlternateProportionalValueFromNormal(scheme()->GetProportionalNormalizedValueEx(hScheme, scaledValue));
 }
@@ -150,10 +150,10 @@ static void RepositionControl(Panel *pPanel)
 	h2 = scheme()->GetProportionalNormalizedValueEx(pPanel->GetScheme(), h1);
 #endif
 
-	x = GetAlternateProportionalValueFromScaled(pPanel->GetScheme(), x);
-	y = GetAlternateProportionalValueFromScaled(pPanel->GetScheme(), y);
-	w = GetAlternateProportionalValueFromScaled(pPanel->GetScheme(), w);
-	h = GetAlternateProportionalValueFromScaled(pPanel->GetScheme(), h);
+	x = GetCSLegacyAlternateProportionalValueFromScaled(pPanel->GetScheme(), x);
+	y = GetCSLegacyAlternateProportionalValueFromScaled(pPanel->GetScheme(), y);
+	w = GetCSLegacyAlternateProportionalValueFromScaled(pPanel->GetScheme(), w);
+	h = GetCSLegacyAlternateProportionalValueFromScaled(pPanel->GetScheme(), h);
 
 	pPanel->SetBounds(x, y, w, h);
 
@@ -162,7 +162,7 @@ static void RepositionControl(Panel *pPanel)
 #endif
 }
 
-static void ResizeWindowControls(EditablePanel *pWindow, int tall, int wide, int offsetX, int offsetY)
+static void ResizeCSLegacyWindowControls(EditablePanel *pWindow, int tall, int wide, int offsetX, int offsetY)
 {
 	if (!pWindow || !pWindow->GetBuildGroup() || !pWindow->GetBuildGroup()->GetPanelList())
 		return;
@@ -250,8 +250,8 @@ void CCSBackGroundPanel::Activate(void)
 		{
 			SetSize(screenW, screenH);
 
-			wide = GetAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(640));
-			tall = GetAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(480));
+			wide = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(640));
+			tall = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(480));
 
 			int offsetX = (screenW - wide) / 2;
 			int offsetY = (screenH - tall) / 2;
@@ -270,7 +270,7 @@ void CCSBackGroundPanel::Activate(void)
 				}
 			}
 
-			ResizeWindowControls(this, tall, wide, offsetX, offsetY);
+			ResizeCSLegacyWindowControls(this, tall, wide, offsetX, offsetY);
 		}
 	}
 }

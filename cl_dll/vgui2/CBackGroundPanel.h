@@ -2,6 +2,7 @@
 #define GAME_CLIENT_UI_VGUI2_CBACKGROUNDPANEL_H
 
 #include <vgui_controls/Frame.h>
+#include <vgui_controls/EditablePanel.h>
 
 class CBackGroundPanel : public vgui2::Frame
 {
@@ -21,5 +22,13 @@ public:
 
 	void PerformLayout() override;
 };
+
+void CreateBackground(vgui2::EditablePanel *pWindow);
+void LayoutBackgroundPanel(vgui2::EditablePanel *pWindow);
+void ApplyBackgroundSchemeSettings(vgui2::EditablePanel *pWindow, vgui2::IScheme *pScheme);
+void ResizeWindowControls(vgui2::EditablePanel *pWindow, int tall, int wide, int offsetX, int offsetY);
+int GetAlternateProportionalValueFromScaled(vgui2::HScheme scheme, int scaledValue);
+void DrawRoundedBackground(Color bgColor, int wide, int tall);
+void DrawRoundedBorder(Color borderColor, int wide, int tall);
 
 #endif //GAME_CLIENT_UI_VGUI2_CBACKGROUNDPANEL_H

@@ -17,7 +17,15 @@
 #include "cl_util.h"
 #include "demo_api.h"
 
+namespace vgui2
+{
+class Panel;
+class Button;
+}
+
 CBaseViewport* g_pViewport = nullptr;
+vgui2::Panel *g_lastPanel = nullptr;
+vgui2::Button *g_lastButton = nullptr;
 
 CBaseViewport::CBaseViewport()
 	: BaseClass( nullptr, "CBaseViewport" )
@@ -378,7 +386,13 @@ void CBaseViewport::ShowPanel( const char* pszName, bool bState )
 	}
 
 	if( !pPanel )
-		return;
+	{
+		pPanel = CreatePanelByName( pszName );
+		if( !pPanel )
+			return;
+
+		AddNewPanel( pPanel );
+	}
 
 	ShowPanel( pPanel, bState );
 }
