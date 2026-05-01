@@ -127,7 +127,32 @@ void CBuySubMenu::OnCommand(const char *command)
 {
 	if (Q_strstr(command, ".res"))
 	{
-		SetupNextSubPanel(command);
+		int i;
+
+		for (i = 0; i < m_SubMenus.Count(); i++)
+		{
+			if (!Q_stricmp(m_SubMenus[i].filename, command))
+			{
+				m_NextPanel = m_SubMenus[i].panel;
+				Assert(m_NextPanel);
+				m_NextPanel->InvalidateLayout();
+				break;
+			}
+		}
+
+		if (i == m_SubMenus.Count())
+		{
+			SubMenuEntry_t newEntry;
+			memset(&newEntry, 0x0, sizeof(newEntry));
+
+			CBuySubMenu *newMenu = CreateNewSubMenu();
+			newMenu->LoadControlSettings(command, "GAME");
+			m_NextPanel = newMenu;
+			Q_strncpy(newEntry.filename, command, sizeof(newEntry.filename));
+			newEntry.panel = newMenu;
+			m_SubMenus.AddToTail(newEntry);
+		}
+
 		GotoNextSubPanel();
 	}
 	else

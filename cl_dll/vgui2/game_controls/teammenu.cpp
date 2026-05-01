@@ -52,10 +52,13 @@ const char *GetStringTeamColor( int i )
 
 CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPort(pViewPort)
 {
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CTeamMenu::CTeamMenu entry this=%p viewport=%p panelName=%s\n",
-		this, (void *)m_pViewPort, PANEL_TEAM);
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu this=%p viewport=%p panelName=%s\n",
-		this, (void *)m_pViewPort, PANEL_TEAM);
+
+	// m_pViewPort = pViewPort;
+	// m_iJumpKey = BUTTON_CODE_INVALID; // this is looked up in Activate()
+	// m_iScoreBoardKey = BUTTON_CODE_INVALID; // this is looked up in Activate()
+
+
+	// initialize dialog
 	SetTitle("#Cstrike_Select_Team", true);
 	SetScheme("ClientScheme");
 	SetMoveable(false);
@@ -69,12 +72,9 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML = new HTML(this, "MapInfoHTML");
 #endif
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loading control settings this=%p resource=resource/UI/Teammenu.res pathID=GAME\n",
-		this);
+
 	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
-	gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CTeamMenu::CTeamMenu loaded control settings this=%p\n", this);
-	std::fprintf(stderr, "[phase3][VGUI2-TRACE] CTeamMenu::CTeamMenu exit this=%p viewport=%p\n",
-		this, (void *)m_pViewPort);
+
 	InvalidateLayout();
 
 	m_szMapName[0] = 0;
