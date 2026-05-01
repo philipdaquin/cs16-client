@@ -5,81 +5,89 @@
 #pragma once
 #endif
 
-#include "../../hud.h"
-#include "teamname.h"
 #include "game_controls/classmenu.h"
-#include <vgui_controls/EditablePanel.h>
+#include "teamname.h"
 #include <FileSystem.h>
+#include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/ImagePanel.h>
-#include "cso_controls/NewTabButton.h"
-#include "shared_util.h"
+#include "../../../SourceSDK/public/tier1/utlvector.h"
 
+#define PANEL_CLASS_CT "ClassMenu_CT"
+#define PANEL_CLASS_TER "ClassMenu_TER"
 
+class CCSClassImagePanel : public vgui2::ImagePanel
+{
+public:
+	DECLARE_CLASS_SIMPLE(CCSClassImagePanel, vgui2::ImagePanel);
 
-#include "csmoe/newmouseoverpanelbutton.h"
+	CCSClassImagePanel(vgui2::Panel *pParent, const char *pName);
+	~CCSClassImagePanel() override;
 
-#define PANEL_CLASS "ClassMenu"
+	void ApplySettings(KeyValues *inResourceData) override;
+	void Paint() override;
 
-using namespace vgui2;
+	char m_ModelName[128];
+};
 
-class CCSClassMenu : public CClassMenu
+extern CUtlVector<CCSClassImagePanel *> g_ClassImagePanels;
+
+class CClassMenu_TER : public CClassMenu
 {
 private:
-	DECLARE_CLASS_SIMPLE(CCSClassMenu, CClassMenu);
+	DECLARE_CLASS_SIMPLE(CClassMenu_TER, CClassMenu);
 
 public:
-	CCSClassMenu(IViewport* pViewPort);
-	~CCSClassMenu(void);
-	MESSAGE_FUNC_CHARPTR(OnUpdateClass, "UpdateClass", name);
+	explicit CClassMenu_TER(IViewport *pViewPort);
+
+	void PaintBackground() override;
+	void PerformLayout() override;
+	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
+
+	vgui2::Panel *CreateControlByName(const char *controlName) override;
+	const char *GetName() override;
+	void ShowPanel(bool bShow) override;
+	void Update() override;
+	void SetVisible(bool state) override;
+
+	bool m_backgroundLayoutFinished;
+};
+
+class CClassMenu_CT : public CClassMenu
+{
+private:
+	DECLARE_CLASS_SIMPLE(CClassMenu_CT, CClassMenu);
 
 public:
-	virtual void PaintBackground(void);
-	virtual void PerformLayout(void);
-	virtual void ApplySchemeSettings(IScheme* pScheme);
+	explicit CClassMenu_CT(IViewport *pViewPort);
 
-protected:
-	void SetupControlSettings();
-	virtual MouseOverPanelButton* CreateNewMouseOverPanelButton(EditablePanel* panel);
-	int m_pAfterUpdated;
+	void PaintBackground() override;
+	void PerformLayout() override;
+	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
+
+	vgui2::Panel *CreateControlByName(const char *controlName) override;
+	const char *GetName() override;
+	void ShowPanel(bool bShow) override;
+	void Update() override;
+	void SetVisible(bool state) override;
+
+	bool m_backgroundLayoutFinished;
+};
+
+// Compatibility shell for older call sites. The viewport now uses the Source
+// split CT/T panels directly, but keeping this type avoids churn elsewhere.
+class CCSClassMenu : public CClassMenu_CT
+{
+private:
+	DECLARE_CLASS_SIMPLE(CCSClassMenu, CClassMenu_CT);
 
 public:
-	const char* GetName(void);
-	void ShowPanel(bool bShow);
-	void Update(void);
-	void Reset(void);
-	void SetVisible(bool state);
-	bool NeedsUpdate(void) { return true; }
-	void OnCommand(const char* command);
-	void OnSelectClass(TeamName team, const char* name);
-	void OnSelectClassZombie(const char* name);
+	explicit CCSClassMenu(IViewport *pViewPort) : CClassMenu_CT(pViewPort) {}
 
-	void SetTeam(TeamName team);
-	void SetupTeamPage(TeamName team, size_t iPage);
-	void SetupPage(size_t iPage);
-	void UpdateGameMode();
-	void UpdateClass(int i);
-	bool CheckShowType();
-public:
-	// Left Column
-	NewTabButton* m_pShowCT;
-	NewTabButton* m_pShowTER;
-	NewMouseOverPanelButton* m_pSlotButtons[10]; // slot0 ... slot10
-	vgui2::Button* m_pPrevBtn; // prevpage
-	vgui2::Button* m_pNextBtn; // nextpage
-
-	vgui2::Label* m_pTitleLabel;
-	vgui2::ImagePanel* m_pClassImage;
-	vgui2::ImagePanel* m_pSkillInfo[2];
-	vgui2::ImagePanel* m_pSkillInfoImage[2];
-
-	vgui2::Label* m_pClassDesc;
-	vgui2::Label* m_pTipText;
-	vgui2::Label* m_pSkillInfoText[2];
-	vgui2::Label* m_pSkillInfoText_Desc[2];
-
-	int m_pCurrentGameMode;
-	size_t m_iCurrentPage;
-	TeamName m_iCurrentTeamPage;
+	void UpdateGameMode() {}
+	bool CheckShowType() { return false; }
+	void SetTeam(TeamName) {}
+	void SetupTeamPage(TeamName, size_t) {}
+	void SetupPage(size_t) {}
 };
 
 #endif

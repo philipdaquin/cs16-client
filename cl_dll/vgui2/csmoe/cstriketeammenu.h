@@ -32,6 +32,7 @@ private:
 
 private:
 	bool m_bVIPMap;
+	bool m_backgroundLayoutFinished;
 
 public:
 	virtual void PaintBackground(void);

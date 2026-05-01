@@ -10,10 +10,33 @@
 #include "CClientMOTD.h"
 #include "CGameUITestPanel.h"
 #include "csmoe/BuyMenu/cstrikebuymenu.h"
+#include "csmoe/BuyMenu/cstrikebuyequipmenu.h"
+#include "csmoe/BuyMenu/buy_presets.h"
 #include "csmoe/cstriketeammenu.h"
 #include "csmoe/cstrikeclassmenu.h"
 #include "hud.h"
 #include "parsemsg.h"
+
+static CHudViewport *s_pHudViewPort = nullptr;
+
+static void Cmd_ShowBuyMenu()
+{
+	if (s_pHudViewPort)
+		s_pHudViewPort->OpenBuyMenuForLocalTeam(false);
+}
+
+static void Cmd_ShowBuyEquipMenu()
+{
+	if (s_pHudViewPort)
+		s_pHudViewPort->OpenBuyMenuForLocalTeam(true);
+}
+
+static void Cmd_ChooseTeam()
+{
+	if (s_pHudViewPort)
+		s_pHudViewPort->ShowPanel(PANEL_TEAM, true);
+}
+
 void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
@@ -28,11 +51,15 @@ void CHudViewport::Start()
 {
 	BaseClass::Start();
 
-	static CHudViewport * const s_pHudViewPort = this;
+	s_pHudViewPort = this;
 
 	gEngfuncs.pfnHookUserMsg("VGUIMenu", [](const char *pszName, int iSize, void *pbuf) { return s_pHudViewPort->MsgFunc_MOTD(pszName, iSize, pbuf); });
 
     gEngfuncs.pfnAddCommand("motd_open", []() { s_pHudViewPort->m_pMOTD->Activate(gHUD.m_szServerName, "wow"); });
+	gEngfuncs.pfnAddCommand("buymenu", Cmd_ShowBuyMenu);
+	gEngfuncs.pfnAddCommand("buyequip", Cmd_ShowBuyEquipMenu);
+	gEngfuncs.pfnAddCommand("chooseteam", Cmd_ChooseTeam);
+	RegisterBuyPresetCommands();
 }
 
 int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
@@ -79,8 +106,12 @@ void CHudViewport::CreateDefaultPanels()
 {
 	AddNewPanel(CreatePanelByName("ClientMOTD"));
     AddNewPanel(CreatePanelByName(PANEL_TEAM));
-    AddNewPanel(CreatePanelByName(PANEL_CLASS));
-    AddNewPanel(CreatePanelByName(PANEL_BUY));
+    AddNewPanel(CreatePanelByName(PANEL_CLASS_CT));
+    AddNewPanel(CreatePanelByName(PANEL_CLASS_TER));
+    AddNewPanel(CreatePanelByName(PANEL_BUY_CT));
+    AddNewPanel(CreatePanelByName(PANEL_BUY_TER));
+    AddNewPanel(CreatePanelByName(PANEL_BUY_EQUIP_CT));
+    AddNewPanel(CreatePanelByName(PANEL_BUY_EQUIP_TER));
     //AddNewPanel(CreatePanelByName(VIEWPORT_PANEL_SCORE));
 
 	// Temporarily disabled for startup isolation.
@@ -106,14 +137,21 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
         }
         pPanel = m_pTeamMenu;
     }
+    else if (Q_strcmp(PANEL_CLASS_CT, pszName) == 0)
+    {
+        if (!m_pClassMenuCT)
+            m_pClassMenuCT = new CClassMenu_CT(this);
+        pPanel = m_pClassMenuCT;
+    }
+    else if (Q_strcmp(PANEL_CLASS_TER, pszName) == 0)
+    {
+        if (!m_pClassMenuTER)
+            m_pClassMenuTER = new CClassMenu_TER(this);
+        pPanel = m_pClassMenuTER;
+    }
     else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
     {
-        if (!m_pClassMenu)
-        {
-            m_pClassMenu = new CCSClassMenu(this);
-            m_pClassMenu->UpdateGameMode();
-        }
-        pPanel = m_pClassMenu;
+        pPanel = (cl::g_iTeamNumber == TEAM_TERRORIST) ? CreatePanelByName(PANEL_CLASS_TER) : CreatePanelByName(PANEL_CLASS_CT);
     }
 	else if (Q_strcmp(PANEL_BUY, pszName) == 0)
 	{
@@ -123,6 +161,30 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
             m_pBuyMenu->UpdateGameMode();
         }
 		pPanel = m_pBuyMenu;
+	}
+	else if (Q_strcmp(PANEL_BUY_CT, pszName) == 0)
+	{
+		if (!m_pBuyMenuCT)
+			m_pBuyMenuCT = new CCSBuyMenu_CT(this);
+		pPanel = m_pBuyMenuCT;
+	}
+	else if (Q_strcmp(PANEL_BUY_TER, pszName) == 0)
+	{
+		if (!m_pBuyMenuTER)
+			m_pBuyMenuTER = new CCSBuyMenu_TER(this);
+		pPanel = m_pBuyMenuTER;
+	}
+	else if (Q_strcmp(PANEL_BUY_EQUIP_CT, pszName) == 0)
+	{
+		if (!m_pBuyEquipMenuCT)
+			m_pBuyEquipMenuCT = new CCSBuyEquipMenu_CT(this);
+		pPanel = m_pBuyEquipMenuCT;
+	}
+	else if (Q_strcmp(PANEL_BUY_EQUIP_TER, pszName) == 0)
+	{
+		if (!m_pBuyEquipMenuTER)
+			m_pBuyEquipMenuTER = new CCSBuyEquipMenu_TER(this);
+		pPanel = m_pBuyEquipMenuTER;
 	}
     // else if (Q_strcmp(CZSHELTERTEAMHOUSINGDLG_NAME, pszName) == 0)
     // {
@@ -181,49 +243,17 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
     {
         case MENU_TEAM:
         {
-            if (m_pClassMenu->CheckShowType())
-            {
-                panel = m_pClassMenu;
-                m_pClassMenu->m_iCurrentPage = 0;
-                m_pClassMenu->SetupPage(0);
-            }
-            else
-            {
-                panel = m_pTeamMenu;
-            }
+            panel = m_pTeamMenu;
             break;
         }
         case MENU_CLASS_T:
         {
-            panel = m_pClassMenu;
-
-            if (m_pClassMenu->CheckShowType())
-            {
-                panel = m_pClassMenu;
-                m_pClassMenu->m_iCurrentPage = 0;
-                m_pClassMenu->SetupPage(0);
-            }
-            else
-            {
-                m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
-                m_pClassMenu->SetTeam(TERRORIST);
-            }
+            panel = m_pClassMenuTER ? static_cast<IViewportPanel *>(m_pClassMenuTER) : CreatePanelByName(PANEL_CLASS_TER);
             break;
         }
         case MENU_CLASS_CT:
         {
-            panel = m_pClassMenu;
-            if (m_pClassMenu->CheckShowType())
-            {
-                panel = m_pClassMenu;
-                m_pClassMenu->m_iCurrentPage = 0;
-                m_pClassMenu->SetupPage(0);
-            }
-            else
-            {
-                m_pClassMenu->m_iCurrentTeamPage = CT;
-                m_pClassMenu->SetTeam(CT);
-            }
+            panel = m_pClassMenuCT ? static_cast<IViewportPanel *>(m_pClassMenuCT) : CreatePanelByName(PANEL_CLASS_CT);
             break;
         }
         case MENU_BUY:
@@ -234,14 +264,36 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
         case MENU_BUY_MACHINEGUN:
         case MENU_BUY_ITEM:
         {
-            if (cl::g_iTeamNumber == TEAM_CT)
-                m_pBuyMenu->SetTeam(TEAM_CT);
-            else if (cl::g_iTeamNumber == TEAM_TERRORIST)
-                m_pBuyMenu->SetTeam(TEAM_TERRORIST);
-            else
-                m_pBuyMenu->SetTeam(TEAM_UNASSIGNED);
+			if (iMenu == MENU_BUY_ITEM)
+			{
+				OpenBuyMenuForLocalTeam(true);
+				return true;
+			}
 
-            m_pBuyMenu->ActivateMenu(iMenu);
+			if (iMenu == MENU_BUY)
+			{
+				OpenBuyMenuForLocalTeam(false);
+				return true;
+			}
+
+			CCSBaseBuyMenu *buyMenu = nullptr;
+			if (cl::g_iTeamNumber == TEAM_CT)
+			{
+				buyMenu = m_pBuyMenuCT ? m_pBuyMenuCT : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_CT));
+			}
+			else if (cl::g_iTeamNumber == TEAM_TERRORIST)
+			{
+				buyMenu = m_pBuyMenuTER ? m_pBuyMenuTER : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_TER));
+			}
+			else
+			{
+				buyMenu = m_pBuyMenu;
+			}
+
+			if (!buyMenu)
+				break;
+
+			buyMenu->ActivateMenu(iMenu);
             return true;
         }
     }
@@ -263,21 +315,17 @@ bool CHudViewport::HideVGUIMenu(int iMenu)
     {
     case MENU_TEAM:
     {
-        if (m_pClassMenu->CheckShowType())
-        {
-            panel = m_pClassMenu;
-            m_pClassMenu->SetupPage(0);
-        }
-        else
-        {
-            panel = m_pTeamMenu;
-        }
+        panel = m_pTeamMenu;
         break;
     }
         case MENU_CLASS_T:
+        {
+            panel = m_pClassMenuTER;
+            break;
+        }
         case MENU_CLASS_CT:
         {
-            panel = m_pClassMenu;
+            panel = m_pClassMenuCT;
             break;
         }
 
@@ -289,7 +337,16 @@ bool CHudViewport::HideVGUIMenu(int iMenu)
         case MENU_BUY_MACHINEGUN:
         case MENU_BUY_ITEM:
         {
-            panel = m_pBuyMenu;
+			panel = m_pBuyMenu;
+			if (m_pBuyMenuCT)
+				ShowPanel(m_pBuyMenuCT, false);
+			if (m_pBuyMenuTER)
+				ShowPanel(m_pBuyMenuTER, false);
+			if (m_pBuyEquipMenuCT)
+				ShowPanel(m_pBuyEquipMenuCT, false);
+			if (m_pBuyEquipMenuTER)
+				ShowPanel(m_pBuyEquipMenuTER, false);
+			return true;
         }
     }
 
@@ -306,10 +363,33 @@ void CHudViewport::UpdateGameMode()
 {
     if(m_pBuyMenu)
         m_pBuyMenu->UpdateGameMode();
+	if (m_pBuyMenuCT)
+		m_pBuyMenuCT->UpdateGameMode();
+	if (m_pBuyMenuTER)
+		m_pBuyMenuTER->UpdateGameMode();
     if (m_pTeamMenu)
         m_pTeamMenu->UpdateGameMode();
-    if (m_pClassMenu)
-        m_pClassMenu->UpdateGameMode();
+}
+
+void CHudViewport::OpenPanelWithCheck(const char *panelToOpen, const char *panelToCheck)
+{
+	IViewportPanel *checkPanel = FindPanelByName(panelToCheck);
+	if (!checkPanel || !checkPanel->IsVisible())
+		ShowPanel(panelToOpen, true);
+}
+
+void CHudViewport::OpenBuyMenuForLocalTeam(bool equipmentMenu)
+{
+	if (cl::g_iTeamNumber == TEAM_CT)
+	{
+		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_CT : PANEL_BUY_CT,
+			equipmentMenu ? PANEL_BUY_CT : PANEL_BUY_EQUIP_CT);
+	}
+	else if (cl::g_iTeamNumber == TEAM_TERRORIST)
+	{
+		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_TER : PANEL_BUY_TER,
+			equipmentMenu ? PANEL_BUY_TER : PANEL_BUY_EQUIP_TER);
+	}
 }
 
 bool CHudViewport::ShowVGUIMenuByName(const char* szName)

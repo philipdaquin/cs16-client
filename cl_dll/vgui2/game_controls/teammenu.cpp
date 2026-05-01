@@ -122,6 +122,9 @@ void CTeamMenu::AutoAssign(void)
 	OnClose();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: shows the team menu
+//-----------------------------------------------------------------------------
 void CTeamMenu::ShowPanel(bool bShow)
 {
 	if (BaseClass::IsVisible() == bShow)

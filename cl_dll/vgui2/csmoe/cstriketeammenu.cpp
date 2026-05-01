@@ -18,6 +18,7 @@
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/RichText.h>
 
+#include "../CBackGroundPanel.h"
 #include "../CBaseViewport.h"
 #include "shared_util.h"
 #include "igbutton.h"
@@ -32,22 +33,15 @@ using cl::g_iTeamNumber;
 
 CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 {
-	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::CCSTeamMenu entry this=%p viewport=%p\n",
-	// 	this, (void *)pViewPort);
-	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::CCSTeamMenu this=%p viewport=%p\n",
-	// 	this, (void *)pViewPort);
+	CreateBackground(this);
+	m_bVIPMap = false;
+	m_backgroundLayoutFinished = false;
 }
 
 void CCSTeamMenu::SetupControlSettings()
 {
-	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings entry this=%p\n", this);
-	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings this=%p loading resource/UI/Teammenu.res pathID=GAME\n",
-	// 	this);
-	// Old CSO-specific layout:
-	// LoadControlSettings("resource/UI/CSO_TeamMenu.res", "GAME");
 	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
-	// gEngfuncs.Con_Printf("[phase3][VGUI2-CLIENT] CCSTeamMenu::SetupControlSettings complete this=%p\n", this);
-	// std::fprintf(stderr, "[phase3][VGUI2-TRACE] CCSTeamMenu::SetupControlSettings exit this=%p\n", this);
+	m_backgroundLayoutFinished = false;
 	InvalidateLayout();
 }
 
@@ -68,9 +62,6 @@ void CCSTeamMenu::ShowPanel(bool bShow)
 
 void CCSTeamMenu::Update(void)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::Update this=%p\n", this);
-	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::Update entry this=%p visible=%d\n",
-	// 	this, BaseClass::IsVisible() ? 1 : 0);
 	BaseClass::Update();
 
 	if (g_pViewport->GetAllowSpectators())
@@ -100,15 +91,10 @@ void CCSTeamMenu::Update(void)
 		SetVisibleButton("CancelButton", false);
 	else
 		SetVisibleButton("CancelButton", true);
-
-	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::Update exit this=%p visible=%d team=%d\n",
-	// 	this, BaseClass::IsVisible() ? 1 : 0, g_iTeamNumber);
 }
 
 void CCSTeamMenu::SetVisible(bool state)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisible this=%p state=%d\n",
-		this, state ? 1 : 0);
 	BaseClass::SetVisible(state);
 
 	if (state)
@@ -122,8 +108,6 @@ void CCSTeamMenu::SetVisible(bool state)
 
 void CCSTeamMenu::OnCommand(const char *command)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand this=%p command='%s'\n",
-	// 	this, command ? command : "<null>");
 	if (Q_stricmp(command, "vguicancel"))
 	{
 		cl::gEngfuncs.pfnClientCmd(const_cast<char *>(command));
@@ -138,8 +122,6 @@ void CCSTeamMenu::OnCommand(const char *command)
 
 void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::SetVisibleButton this=%p entry='%s' state=%d\n",
-	// 	this, textEntryName ? textEntryName : "<null>", state ? 1 : 0);
 	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
 
 	if (entry)
@@ -148,51 +130,28 @@ void CCSTeamMenu::SetVisibleButton(const char *textEntryName, bool state)
 
 void CCSTeamMenu::PaintBackground(void)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground enter this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
-	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground entry this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
-	// cl::gEngfuncs.Con_Printf("[phase5][VGUI2-CLIENT] CCSTeamMenu::PaintBackground probe start this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
-
-	// Temporary paint probe removed.
-	// The old bright magenta test rectangle is left here commented out in case
-	// we need to re-enable it for debugging later.
-	// vgui2::surface()->DrawSetColor(255, 0, 255, 255);
-	// vgui2::surface()->DrawFilledRect(24, 24, 320, 160);
-	// vgui2::surface()->DrawSetColor(255, 255, 255, 255);
-	// vgui2::surface()->DrawOutlinedRect(24, 24, 320, 160);
-	// cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 136, 255, 0, 255, 255);
-	// cl::gEngfuncs.pfnFillRGBA(24, 24, 296, 1, 255, 255, 255, 255);
-	// cl::gEngfuncs.pfnFillRGBA(24, 159, 296, 1, 255, 255, 255, 255);
-	// cl::gEngfuncs.pfnFillRGBA(24, 24, 1, 136, 255, 255, 255, 255);
-	// cl::gEngfuncs.pfnFillRGBA(319, 24, 1, 136, 255, 255, 255, 255);
-
-	BaseClass::PaintBackground();
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
-	// std::fprintf(stderr, "[phase5][VGUI2-TRACE] CCSTeamMenu::PaintBackground exit this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
 }
 
 void CCSTeamMenu::PerformLayout(void)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::PerformLayout this=%p visible=%d\n",
-	// 	this, IsVisible() ? 1 : 0);
 	BaseClass::PerformLayout();
+
+	if (!m_backgroundLayoutFinished)
+	{
+		LayoutBackgroundPanel(this);
+		m_backgroundLayoutFinished = true;
+	}
 }
 
 void CCSTeamMenu::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::ApplySchemeSettings this=%p scheme=%p\n",
-		this, (void *)pScheme);
 	BaseClass::ApplySchemeSettings(pScheme);
+	ApplyBackgroundSchemeSettings(this, pScheme);
+	m_backgroundLayoutFinished = false;
 }
 
 vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::CreateControlByName this=%p control='%s'\n",
-	// 	this, controlName ? controlName : "<null>");
 	if (!Q_stricmp("IGButton", controlName))
 	{
 		return new IGButton(this, controlName);
@@ -203,6 +162,5 @@ vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)
 
 void CCSTeamMenu::UpdateGameMode()
 {
-	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::UpdateGameMode this=%p\n", this);
 	SetupControlSettings();
 }

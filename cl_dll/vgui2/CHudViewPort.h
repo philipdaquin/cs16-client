@@ -8,8 +8,14 @@
 
 class CClientMOTD;
 class CCSBaseBuyMenu;
+class CCSBuyMenu_CT;
+class CCSBuyMenu_TER;
+class CCSBuyEquipMenu_CT;
+class CCSBuyEquipMenu_TER;
 class CCSTeamMenu;
 class CCSClassMenu;
+class CClassMenu_CT;
+class CClassMenu_TER;
 class CZb2ZombieKeeper;
 
 /**
@@ -43,6 +49,9 @@ public:
     bool HideVGUIMenu(int iMenu) override;
     void UpdateGameMode() override;
 
+	void OpenPanelWithCheck(const char *panelToOpen, const char *panelToCheck);
+	void OpenBuyMenuForLocalTeam(bool equipmentMenu);
+
 	int MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf);
 
 	// MOTD
@@ -52,7 +61,13 @@ public:
 	CClientMOTD *m_pMOTD = nullptr;
 	CCSTeamMenu *m_pTeamMenu = nullptr;
 	CCSClassMenu *m_pClassMenu = nullptr;
+	CClassMenu_CT *m_pClassMenuCT = nullptr;
+	CClassMenu_TER *m_pClassMenuTER = nullptr;
     CCSBaseBuyMenu *m_pBuyMenu = nullptr;
+	CCSBuyMenu_CT *m_pBuyMenuCT = nullptr;
+	CCSBuyMenu_TER *m_pBuyMenuTER = nullptr;
+	CCSBuyEquipMenu_CT *m_pBuyEquipMenuCT = nullptr;
+	CCSBuyEquipMenu_TER *m_pBuyEquipMenuTER = nullptr;
 	CZb2ZombieKeeper* m_pZombieKeeperMenu = nullptr;
 };
 
