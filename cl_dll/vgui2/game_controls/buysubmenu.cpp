@@ -1,8 +1,6 @@
 #include "hud.h"
 #include "../CBaseViewport.h"
 #include "buysubmenu.h"
-#include "../vgui_resource_paths.h"
-
 #include "tier1/KeyValues.h"
 #include "vgui_controls/WizardPanel.h"
 #include "FileSystem.h"
@@ -11,49 +9,6 @@
 #include <string>
 
 using namespace vgui2;
-
-static bool IsLocalPlayerTerrorist()
-{
-	return g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST;
-}
-
-static const char *ResolveBuySubMenuResource(const char *fileName)
-{
-	const bool isTerrorist = IsLocalPlayerTerrorist();
-
-	struct BuyResourceMap_t
-	{
-		const char *generic;
-		const char *ct;
-		const char *terrorist;
-	};
-
-	static const BuyResourceMap_t maps[] =
-	{
-		{ vgui2::resource_paths::kMenuBuyPistols, vgui2::resource_paths::kMenuBuyPistolsCT, vgui2::resource_paths::kMenuBuyPistolsTER },
-		{ vgui2::resource_paths::kMenuBuyShotguns, vgui2::resource_paths::kMenuBuyShotgunsCT, vgui2::resource_paths::kMenuBuyShotgunsTER },
-		{ vgui2::resource_paths::kMenuBuyRifles, vgui2::resource_paths::kMenuBuyRiflesCT, vgui2::resource_paths::kMenuBuyRiflesTER },
-		{ vgui2::resource_paths::kMenuBuySubMachineguns, vgui2::resource_paths::kMenuBuySubMachinegunsCT, vgui2::resource_paths::kMenuBuySubMachinegunsTER },
-		{ vgui2::resource_paths::kMenuBuyMachineguns, vgui2::resource_paths::kMenuBuyMachinegunsCT, vgui2::resource_paths::kMenuBuyMachinegunsTER },
-		{ vgui2::resource_paths::kMenuBuyEquipment, vgui2::resource_paths::kMenuBuyEquipmentCT, vgui2::resource_paths::kMenuBuyEquipmentTER },
-	};
-
-	for (int i = 0; i < ARRAYSIZE(maps); ++i)
-	{
-		if (!Q_stricmp(fileName, maps[i].generic))
-			return isTerrorist ? maps[i].terrorist : maps[i].ct;
-	}
-
-	return fileName;
-}
-
-static const char *ResolveBuySubMenuOverlayResource(const char *fileName)
-{
-	if (Q_stricmp(fileName, vgui2::resource_paths::kMenuBuyEquipment))
-		return nullptr;
-
-	return IsLocalPlayerTerrorist() ? vgui2::resource_paths::kMenuBuyEquipmentTER : vgui2::resource_paths::kMenuBuyEquipmentCT;
-}
 
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *name) : WizardSubPanel(parent, name)
 {
@@ -77,7 +32,9 @@ Panel *CBuySubMenu::CreateControlByName(const char *controlName)
 		MouseOverPanelButton *newButton = CreateNewMouseOverPanelButton(m_pPanel);
 
 		if (!m_pFirstButton)
+		{
 			m_pFirstButton = newButton;
+		}
 
 		return newButton;
 	}

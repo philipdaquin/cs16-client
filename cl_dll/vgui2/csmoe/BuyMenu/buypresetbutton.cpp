@@ -103,6 +103,9 @@ BuyPresetButton::BuyPresetButton(Panel *parent, const char *panelName) : BaseCla
 
 	m_pSetCommand = NULL;
 	m_iMousePressed = (MouseCode)-1;
+	m_available = false;
+	m_availableColor = Color(0, 0, 0, 0);
+	m_unavailableColor = Color(0, 0, 0, 0);
 }
 
 BuyPresetButton::~BuyPresetButton(void)
@@ -146,6 +149,10 @@ void BuyPresetButton::ApplySchemeSettings(IScheme *pScheme)
 
 	if (!m_pSelect)
 		m_pSelect = scheme()->GetImage("resource/Control/buybutton/select", true);
+
+	m_availableColor = pScheme->GetColor("Label.TextColor", Color(0, 0, 0, 0));
+	m_unavailableColor = pScheme->GetColor("Label.DisabledFgColor2", Color(0, 0, 0, 0));
+	SetFgColor(GetButtonFgColor());
 
 	if (m_iKeyOffset == -1)
 	{
@@ -400,6 +407,17 @@ void BuyPresetButton::SetText(const char *text)
 void BuyPresetButton::ClearWeapons(void)
 {
 	m_pImagePanel->ClearWeapons();
+}
+
+void BuyPresetButton::SetAvailable(bool available)
+{
+	m_available = available;
+	SetFgColor(GetButtonFgColor());
+}
+
+Color BuyPresetButton::GetButtonFgColor(void)
+{
+	return m_available ? m_availableColor : m_unavailableColor;
 }
 
 void BuyPresetButton::SetPrimaryWeapon(const char *name)

@@ -45,6 +45,8 @@ public:
 	void SetPrimaryWeapon(const char *name);
 	void SetSecondaryWeapon(const char *name);
 	void SetKnifeWeapon(const char *name);
+	void SetAvailable(bool available);
+	Color GetButtonFgColor(void);
 
 protected:
 	BuyPresetImagePanel *m_pImagePanel;
@@ -62,6 +64,9 @@ protected:
 
 	char *m_pSetCommand;
 	vgui2::MouseCode m_iMousePressed;
+	bool m_available;
+	Color m_availableColor;
+	Color m_unavailableColor;
 };
 
 #endif
