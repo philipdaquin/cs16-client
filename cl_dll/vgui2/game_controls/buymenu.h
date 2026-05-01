@@ -10,6 +10,7 @@
 #include "../../../vgui2_support/vgui_controls/WizardPanel.h"
 #include "../IViewportPanel.h"
 #include "../IViewport.h"
+#include "../../../vgui2_support/interfaces/vgui/KeyCode.h"
 
 class CBuySubMenu;
 
@@ -43,6 +44,7 @@ public:
 
 public:
 	virtual void OnClose(void);
+	virtual void OnKeyCodeTyped(vgui2::KeyCode code);
 
 protected:
 	CBuySubMenu *m_pMainMenu;

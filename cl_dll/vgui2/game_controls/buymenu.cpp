@@ -49,7 +49,7 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 
 	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
-	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
+	m_pMainMenu = new CBuySubMenu(this, "mainmenu");
 
 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 	m_pMainMenu->SetVisible(false);
@@ -105,4 +105,16 @@ void CBuyMenu::OnClose(void)
 	BaseClass::OnClose();
 
 	ResetHistory();
+}
+
+void CBuyMenu::OnKeyCodeTyped(KeyCode code)
+{
+	if (code == KEY_ESCAPE)
+	{
+		OnClose();
+	}
+	else
+	{
+		BaseClass::OnKeyCodeTyped(code);
+	}
 }
