@@ -47,6 +47,8 @@ public:
 	const char *GetName() override;
 	void ShowPanel(bool bShow) override;
 	void Update() override;
+	void UpdateGameMode();
+	void SetupControlSettings();
 	void SetVisible(bool state) override;
 
 	bool m_backgroundLayoutFinished;
@@ -68,6 +70,8 @@ public:
 	const char *GetName() override;
 	void ShowPanel(bool bShow) override;
 	void Update() override;
+	void UpdateGameMode();
+	void SetupControlSettings();
 	void SetVisible(bool state) override;
 
 	bool m_backgroundLayoutFinished;

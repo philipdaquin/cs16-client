@@ -3,9 +3,11 @@
 #include "hud.h"
 #include "CBackGroundPanel.h"
 #include "vgui_resource_paths.h"
+#include "vgui_int.h"
 
 #include <KeyValues.h>
 #include <vgui/IScheme.h>
+#include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
 #include <vgui_controls/Button.h>
 
@@ -49,6 +51,27 @@ CClassMenu_TER::CClassMenu_TER(IViewport *pViewPort)
 	// CreateBackground(this);
 }
 
+void CClassMenu_TER::SetupControlSettings()
+{
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER::SetupControlSettings this=%p loading='%s'\n",
+		this, vgui2::resource_paths::kMenuClassTER);
+	g_lastPanel = nullptr;
+	g_lastButton = nullptr;
+	m_mouseoverButtons.Purge();
+	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
+		m_pPanel = classInfo;
+	LoadControlSettings(vgui2::resource_paths::kMenuClassTER, "GAME");
+	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
+		m_pPanel = classInfo;
+	m_backgroundLayoutFinished = false;
+	InvalidateLayout();
+}
+
+void CClassMenu_TER::UpdateGameMode()
+{
+	SetupControlSettings();
+}
+
 const char *CClassMenu_TER::GetName()
 {
 	return PANEL_CLASS_TER;
@@ -58,6 +81,15 @@ void CClassMenu_TER::ShowPanel(bool bShow)
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER::ShowPanel this=%p show=%d visible(before)=%d\n",
 		this, bShow ? 1 : 0, IsVisible() ? 1 : 0);
+	if (bShow)
+	{
+		int wide = 0;
+		int tall = 0;
+		GetHudSize(wide, tall);
+		SetPos(0, 0);
+		SetSize(wide, tall);
+		SetupControlSettings();
+	}
 	BaseClass::ShowPanel(bShow);
 }
 
@@ -92,15 +124,23 @@ Panel *CClassMenu_TER::CreateControlByName(const char *controlName)
 
 void CClassMenu_TER::PaintBackground()
 {
+	// Temporary visual test:
+	// if (!IsVisible())
+	// 	return;
+	//
+	// surface()->DrawSetColor(Color(160, 40, 40, 220));
+	// surface()->DrawFilledRect(0, 0, GetWide(), GetTall());
 }
 
 void CClassMenu_TER::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	// if (!m_backgroundLayoutFinished)
-	// 	LayoutBackgroundPanel(this);
-	// m_backgroundLayoutFinished = true;
+	if (!m_backgroundLayoutFinished)
+	{
+		LayoutBackgroundPanel(this);
+		m_backgroundLayoutFinished = true;
+	}
 }
 
 void CClassMenu_TER::ApplySchemeSettings(IScheme *pScheme)
@@ -121,6 +161,27 @@ CClassMenu_CT::CClassMenu_CT(IViewport *pViewPort)
 	// CreateBackground(this);
 }
 
+void CClassMenu_CT::SetupControlSettings()
+{
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT::SetupControlSettings this=%p loading='%s'\n",
+		this, vgui2::resource_paths::kMenuClassCT);
+	g_lastPanel = nullptr;
+	g_lastButton = nullptr;
+	m_mouseoverButtons.Purge();
+	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
+		m_pPanel = classInfo;
+	LoadControlSettings(vgui2::resource_paths::kMenuClassCT, "GAME");
+	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
+		m_pPanel = classInfo;
+	m_backgroundLayoutFinished = false;
+	InvalidateLayout();
+}
+
+void CClassMenu_CT::UpdateGameMode()
+{
+	SetupControlSettings();
+}
+
 Panel *CClassMenu_CT::CreateControlByName(const char *controlName)
 {
 	if (!Q_stricmp(controlName, "CSClassImagePanel"))
@@ -138,6 +199,15 @@ void CClassMenu_CT::ShowPanel(bool bShow)
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT::ShowPanel this=%p show=%d visible(before)=%d\n",
 		this, bShow ? 1 : 0, IsVisible() ? 1 : 0);
+	if (bShow)
+	{
+		int wide = 0;
+		int tall = 0;
+		GetHudSize(wide, tall);
+		SetPos(0, 0);
+		SetSize(wide, tall);
+		SetupControlSettings();
+	}
 	BaseClass::ShowPanel(bShow);
 }
 
@@ -164,15 +234,23 @@ void CClassMenu_CT::Update()
 
 void CClassMenu_CT::PaintBackground()
 {
+	// Temporary visual test:
+	// if (!IsVisible())
+	// 	return;
+	//
+	// surface()->DrawSetColor(Color(40, 40, 160, 220));
+	// surface()->DrawFilledRect(0, 0, GetWide(), GetTall());
 }
 
 void CClassMenu_CT::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	// if (!m_backgroundLayoutFinished)
-	// 	LayoutBackgroundPanel(this);
-	// m_backgroundLayoutFinished = true;
+	if (!m_backgroundLayoutFinished)
+	{
+		LayoutBackgroundPanel(this);
+		m_backgroundLayoutFinished = true;
+	}
 }
 
 void CClassMenu_CT::ApplySchemeSettings(IScheme *pScheme)

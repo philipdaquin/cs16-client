@@ -8,8 +8,8 @@
 namespace vgui2::resource_paths
 {
 inline constexpr const char kMenuTeam[] = "resource/UI/Teammenu.res";
-inline constexpr const char kMenuClassCT[] = "resource/UI/ClassMenu_CT.res";
-inline constexpr const char kMenuClassTER[] = "resource/UI/ClassMenu_TER.res";
+inline constexpr const char kMenuClassCT[] = "resource/UI/Classmenu_CT.res";
+inline constexpr const char kMenuClassTER[] = "resource/UI/Classmenu_TER.res";
 inline constexpr const char kMenuBuy[] = "resource/UI/BuyMenu.res";
 inline constexpr const char kMenuBuyCT[] = "resource/UI/BuyMenu_CT.res";
 inline constexpr const char kMenuBuyTER[] = "resource/UI/BuyMenu_TER.res";
@@ -35,7 +35,7 @@ inline constexpr const char kMenuBuyMachinegunsTER[] = "resource/UI/BuyMachinegu
 inline constexpr const char kMenuMOTD[] = "resource/UI/MOTD.res";
 inline constexpr const char kMenuBackgroundPanel[] = "resource/UI/BackgroundPanel.res";
 
-inline constexpr const char *ClassMenuForTeam(bool isTerrorist)
+inline constexpr const char *ClassmenuForTeam(bool isTerrorist)
 {
 	return isTerrorist ? kMenuClassTER : kMenuClassCT;
 }

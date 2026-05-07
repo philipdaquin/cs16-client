@@ -53,8 +53,6 @@ void CHudViewport::Start()
 
 	s_pHudViewPort = this;
 
-	gEngfuncs.pfnHookUserMsg("VGUIMenu", [](const char *pszName, int iSize, void *pbuf) { return s_pHudViewPort->MsgFunc_MOTD(pszName, iSize, pbuf); });
-
     gEngfuncs.pfnAddCommand("motd_open", []() { s_pHudViewPort->m_pMOTD->Activate(gHUD.m_szServerName, "wow"); });
 	gEngfuncs.pfnAddCommand("buymenu", Cmd_ShowBuyMenu);
 	gEngfuncs.pfnAddCommand("buyequip", Cmd_ShowBuyEquipMenu);
@@ -104,13 +102,24 @@ void CHudViewport::HideClientUI()
 
 void CHudViewport::CreateDefaultPanels()
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateDefaultPanels resetting cached panel pointers this=%p\n",
+		this);
+	m_pMOTD = nullptr;
+	m_pTeamMenu = nullptr;
+	m_pClassMenu = nullptr;
+	m_pClassMenuCT = nullptr;
+	m_pClassMenuTER = nullptr;
+	m_pBuyMenu = nullptr;
+	m_pBuyMenuCT = nullptr;
+	m_pBuyMenuTER = nullptr;
+	m_pBuyEquipMenuCT = nullptr;
+	m_pBuyEquipMenuTER = nullptr;
+	m_pZombieKeeperMenu = nullptr;
+
 	AddNewPanel(CreatePanelByName("ClientMOTD"));
     AddNewPanel(CreatePanelByName(PANEL_TEAM));
     AddNewPanel(CreatePanelByName(PANEL_CLASS_CT));
     AddNewPanel(CreatePanelByName(PANEL_CLASS_TER));
-	AddNewPanel(CreatePanelByName(PANEL_CLASS));
-
-
 
     AddNewPanel(CreatePanelByName(PANEL_BUY_CT));
     AddNewPanel(CreatePanelByName(PANEL_BUY_TER));
@@ -144,13 +153,23 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
     else if (Q_strcmp(PANEL_CLASS_CT, pszName) == 0)
     {
         if (!m_pClassMenuCT)
+        {
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreatePanelByName creating PANEL_CLASS_CT this=%p\n",
+				this);
             m_pClassMenuCT = new CClassMenu_CT(this);
+            m_pClassMenuCT->UpdateGameMode();
+        }
         pPanel = m_pClassMenuCT;
     }
     else if (Q_strcmp(PANEL_CLASS_TER, pszName) == 0)
     {
         if (!m_pClassMenuTER)
+        {
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreatePanelByName creating PANEL_CLASS_TER this=%p\n",
+				this);
             m_pClassMenuTER = new CClassMenu_TER(this);
+            m_pClassMenuTER->UpdateGameMode();
+        }
         pPanel = m_pClassMenuTER;
     }
     else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
@@ -257,42 +276,14 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
         {
             gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TER class menu team=%d\n",
                 cl::g_iTeamNumber);
-            panel = m_pClassMenuTER; //? static_cast<IViewportPanel *>(m_pClassMenuTER) : CreatePanelByName(PANEL_CLASS_TER);
-			
-			// if (m_pClassMenu->CheckShowType())
-            // {
-            //     panel = m_pClassMenu;
-            //     m_pClassMenu->m_iCurrentPage = 0;
-            //     m_pClassMenu->SetupPage(0);
-            // }
-            // else
-            // {
-            //     m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
-            //     m_pClassMenu->SetTeam(TERRORIST);
-            // }
-
-
+            panel = m_pClassMenuTER ? m_pClassMenuTER : CreatePanelByName(PANEL_CLASS_TER);
             break;
         }
         case MENU_CLASS_CT:
         {
             gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting CT class menu team=%d\n",
                 cl::g_iTeamNumber);
-            panel = m_pClassMenuCT; //? static_cast<IViewportPanel *>(m_pClassMenuCT) : CreatePanelByName(PANEL_CLASS_CT);
-            
-			
-			// if (m_pClassMenu->CheckShowType())
-            // {
-            //     panel = m_pClassMenu;
-            //     m_pClassMenu->m_iCurrentPage = 0;
-            //     m_pClassMenu->SetupPage(0);
-            // }
-            // else
-            // {
-            //     m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
-            //     m_pClassMenu->SetTeam(TERRORIST);
-            // }
-			
+            panel = m_pClassMenuCT ? m_pClassMenuCT : CreatePanelByName(PANEL_CLASS_CT);
 			break;
         }
         case MENU_BUY:
