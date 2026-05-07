@@ -163,6 +163,9 @@ void CBaseViewport::HideScoreBoard()
 
 void CBaseViewport::HideAllVGUIMenu()
 {
+	// Hide-all is terminal; do not restore a previous active panel while closing.
+	m_pLastActivePanel = NULL;
+
     for (int i = 0; i < m_Panels.Count(); i++)
     {
         if (m_Panels[i]->IsVisible())

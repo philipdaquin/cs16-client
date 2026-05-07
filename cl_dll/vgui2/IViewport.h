@@ -9,6 +9,7 @@ public:
 	virtual ~IViewport() = 0;
 
 	virtual void UpdateAllPanels() = 0;
+	virtual void HideAllVGUIMenu() = 0;
 	virtual void ShowPanel( const char *pName, bool state ) = 0;
 	virtual void ShowPanel( IViewportPanel* pPanel, bool state ) = 0;
 	virtual void ShowBackGround( bool bShow ) = 0;

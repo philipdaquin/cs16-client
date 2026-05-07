@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 
 #include "hud.h"
 #include "cstriketeammenu.h"
@@ -20,6 +21,7 @@
 
 #include "../CBackGroundPanel.h"
 #include "../CBaseViewport.h"
+#include "../counterstrikeviewport_interface.h"
 #include "shared_util.h"
 #include "igbutton.h"
 #include "../vgui_resource_paths.h"
@@ -108,7 +110,15 @@ void CCSTeamMenu::SetVisible(bool state)
 
 void CCSTeamMenu::OnCommand(const char *command)
 {
-	if (Q_stricmp(command, "vguicancel"))
+	const bool isCancel = (Q_stricmp(command, "vguicancel") == 0);
+	int chosenTeam = 0;
+
+	if (!isCancel && Q_strncmp(command, "jointeam", 8) == 0)
+	{
+		chosenTeam = atoi(command + 8);
+	}
+
+	if (!isCancel)
 	{
 		cl::gEngfuncs.pfnClientCmd(const_cast<char *>(command));
 	}
@@ -116,6 +126,17 @@ void CCSTeamMenu::OnCommand(const char *command)
 	Close();
 
 	m_pViewPort->ShowBackGround(false);
+
+	if (chosenTeam == TEAM_TERRORIST)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand opening TER class menu after '%s'\n", command);
+		VGUI2_ShowClassMenu(MENU_CLASS_T);
+	}
+	else if (chosenTeam == TEAM_CT)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSTeamMenu::OnCommand opening CT class menu after '%s'\n", command);
+		VGUI2_ShowClassMenu(MENU_CLASS_CT);
+	}
 
 	BaseClass::OnCommand(command);
 }

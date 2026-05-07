@@ -120,12 +120,17 @@ void CClassMenu::Reset(void)
 
 void CClassMenu::OnCommand(const char *command)
 {
-	if (Q_stricmp(command, "vguicancel"))
+	const bool isCancel = (Q_stricmp(command, "vguicancel") == 0);
+
+	if (!isCancel)
 	{
 		gEngfuncs.pfnClientCmd(command);
+		m_pViewPort->HideAllVGUIMenu();
 	}
-
-	Close();
+	else
+	{
+		Close();
+	}
 
 	m_pViewPort->ShowBackGround(false);
 
