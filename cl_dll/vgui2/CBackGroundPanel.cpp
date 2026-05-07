@@ -4,6 +4,7 @@
 
 #include "hud.h"
 #include "csmoe/vgui_int.h"
+#include "vgui_resource_paths.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
@@ -533,32 +534,36 @@ void CreateBackground(EditablePanel *pWindow)
 	if (!pWindow)
 		return;
 
-	if (!pWindow->FindChildByName("TopLeftPanel"))
-		new CBitmapImagePanel(pWindow, "TopLeftPanel", "gfx/vgui/round_corner_nw");
-	if (!pWindow->FindChildByName("TopRightPanel"))
-		new CBitmapImagePanel(pWindow, "TopRightPanel", "gfx/vgui/round_corner_ne");
-	if (!pWindow->FindChildByName("BottomLeftPanel"))
-		new CBitmapImagePanel(pWindow, "BottomLeftPanel", "gfx/vgui/round_corner_sw");
-	if (!pWindow->FindChildByName("BottomRightPanel"))
-		new CBitmapImagePanel(pWindow, "BottomRightPanel", "gfx/vgui/round_corner_se");
 
-	if (!pWindow->FindChildByName("TopSolid"))
-		new CBitmapImagePanel(pWindow, "TopSolid", "gfx/vgui/solid_background");
-	if (!pWindow->FindChildByName("UpperMiddleSolid"))
-		new CBitmapImagePanel(pWindow, "UpperMiddleSolid", "gfx/vgui/solid_background");
-	if (!pWindow->FindChildByName("LowerMiddleSolid"))
-		new CBitmapImagePanel(pWindow, "LowerMiddleSolid", "gfx/vgui/solid_background");
-	if (!pWindow->FindChildByName("BottomSolid"))
-		new CBitmapImagePanel(pWindow, "BottomSolid", "gfx/vgui/solid_background");
+	pWindow->LoadControlSettings(vgui2::resource_paths::kMenuBackgroundPanel, "GAME");
 
-	if (!pWindow->FindChildByName("TopClear"))
-		new CBitmapImagePanel(pWindow, "TopClear", "gfx/vgui/trans_background");
-	if (!pWindow->FindChildByName("BottomClear"))
-		new CBitmapImagePanel(pWindow, "BottomClear", "gfx/vgui/trans_background");
-	if (!pWindow->FindChildByName("LeftClear"))
-		new CBitmapImagePanel(pWindow, "LeftClear", "gfx/vgui/trans_background");
-	if (!pWindow->FindChildByName("RightClear"))
-		new CBitmapImagePanel(pWindow, "RightClear", "gfx/vgui/trans_background");
+
+	// if (!pWindow->FindChildByName("TopLeftPanel"))
+	// 	new CBitmapImagePanel(pWindow, "TopLeftPanel", "gfx/vgui/round_corner_nw");
+	// if (!pWindow->FindChildByName("TopRightPanel"))
+	// 	new CBitmapImagePanel(pWindow, "TopRightPanel", "gfx/vgui/round_corner_ne");
+	// if (!pWindow->FindChildByName("BottomLeftPanel"))
+	// 	new CBitmapImagePanel(pWindow, "BottomLeftPanel", "gfx/vgui/round_corner_sw");
+	// if (!pWindow->FindChildByName("BottomRightPanel"))
+	// 	new CBitmapImagePanel(pWindow, "BottomRightPanel", "gfx/vgui/round_corner_se");
+
+	// if (!pWindow->FindChildByName("TopSolid"))
+	// 	new CBitmapImagePanel(pWindow, "TopSolid", "gfx/vgui/solid_background");
+	// if (!pWindow->FindChildByName("UpperMiddleSolid"))
+	// 	new CBitmapImagePanel(pWindow, "UpperMiddleSolid", "gfx/vgui/solid_background");
+	// if (!pWindow->FindChildByName("LowerMiddleSolid"))
+	// 	new CBitmapImagePanel(pWindow, "LowerMiddleSolid", "gfx/vgui/solid_background");
+	// if (!pWindow->FindChildByName("BottomSolid"))
+	// 	new CBitmapImagePanel(pWindow, "BottomSolid", "gfx/vgui/solid_background");
+
+	// if (!pWindow->FindChildByName("TopClear"))
+	// 	new CBitmapImagePanel(pWindow, "TopClear", "gfx/vgui/trans_background");
+	// if (!pWindow->FindChildByName("BottomClear"))
+	// 	new CBitmapImagePanel(pWindow, "BottomClear", "gfx/vgui/trans_background");
+	// if (!pWindow->FindChildByName("LeftClear"))
+	// 	new CBitmapImagePanel(pWindow, "LeftClear", "gfx/vgui/trans_background");
+	// if (!pWindow->FindChildByName("RightClear"))
+	// 	new CBitmapImagePanel(pWindow, "RightClear", "gfx/vgui/trans_background");
 
 	if (!pWindow->FindChildByName("ExclamationPanel"))
 		new CBitmapImagePanel(pWindow, "ExclamationPanel", "gfx/vgui/CS_logo");

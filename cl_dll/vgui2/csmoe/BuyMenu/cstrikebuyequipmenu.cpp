@@ -18,7 +18,7 @@ CCSBuyEquipMenu_CT::CCSBuyEquipMenu_CT(IViewport *pViewPort) : CBuyMenu(pViewPor
 
 	m_iTeam = TEAM_CT;
 
-	CreateBackground(this);
+	// CreateBackground(this);
 	m_backgroundLayoutFinished = false;
 }
 
@@ -30,18 +30,18 @@ void CCSBuyEquipMenu_CT::PerformLayout(void)
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-	{
-		LayoutBackgroundPanel(this);
-		m_backgroundLayoutFinished = true;
-	}
+	// if (!m_backgroundLayoutFinished)
+	// {
+	// 	LayoutBackgroundPanel(this);
+	// 	m_backgroundLayoutFinished = true;
+	// }
 }
 
 void CCSBuyEquipMenu_CT::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	ApplyBackgroundSchemeSettings(this, pScheme);
-	m_backgroundLayoutFinished = false;
+	// ApplyBackgroundSchemeSettings(this, pScheme);
+	// m_backgroundLayoutFinished = false;
 }
 
 CCSBuyEquipMenu_TER::CCSBuyEquipMenu_TER(IViewport *pViewPort) : CBuyMenu(pViewPort)
@@ -58,7 +58,7 @@ CCSBuyEquipMenu_TER::CCSBuyEquipMenu_TER(IViewport *pViewPort) : CBuyMenu(pViewP
 
 	m_iTeam = TEAM_TERRORIST;
 
-	CreateBackground(this);
+	// CreateBackground(this);
 	m_backgroundLayoutFinished = false;
 }
 
@@ -70,11 +70,11 @@ void CCSBuyEquipMenu_TER::PerformLayout(void)
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-	{
-		LayoutBackgroundPanel(this);
-		m_backgroundLayoutFinished = true;
-	}
+	// if (!m_backgroundLayoutFinished)
+	// {
+	// 	LayoutBackgroundPanel(this);
+	// 	m_backgroundLayoutFinished = true;
+	// }
 }
 
 void CCSBuyEquipMenu_TER::ApplySchemeSettings(vgui2::IScheme *pScheme)

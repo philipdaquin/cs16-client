@@ -16,7 +16,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "demo_api.h"
-
+#include "csmoe/CSBackGroundPanel.h"
 namespace vgui2
 {
 class Panel;
@@ -82,7 +82,8 @@ void CBaseViewport::Start()
 	// recreate all the default panels
 	RemoveAllPanels();
 
-	m_pBackGround = new CBackGroundPanel( nullptr );
+	// m_pBackGround = new CBackGroundPanel( nullptr );
+	m_pBackGround = new CCSBackGroundPanel( nullptr );
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );
@@ -253,11 +254,12 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 	// recreate all the default panels
 	RemoveAllPanels();
 
-	m_pBackGround = new CBackGroundPanel( nullptr );
-	gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::OnScreenSizeChanged background=%p parent before attach=%p currentParent=%p\n",
-		(void *)m_pBackGround,
-		(void *)GetVParent(),
-		(void *)m_pBackGround->GetVParent());
+	// m_pBackGround = new CBackGroundPanel( nullptr );
+	m_pBackGround = new CCSBackGroundPanel( nullptr );
+	// gEngfuncs.Con_Printf("[phase2][VGUI2-CLIENT] CBaseViewport::OnScreenSizeChanged background=%p parent before attach=%p currentParent=%p\n",
+	// 	(void *)m_pBackGround,
+	// 	(void *)GetVParent(),
+	// 	(void *)m_pBackGround->GetVParent());
 
 	m_pBackGround->SetZPos( -20 ); // send it to the back 
 	m_pBackGround->SetVisible( false );

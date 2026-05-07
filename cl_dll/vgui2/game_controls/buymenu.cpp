@@ -47,9 +47,9 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 	SetTitleBarVisible(false);
 	SetAutoDelete(false);
 
-	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
-	m_pMainMenu = new CBuySubMenu(this, "mainmenu");
+	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 	m_pMainMenu->SetVisible(false);
@@ -77,11 +77,18 @@ void CBuyMenu::ShowPanel(bool bShow)
 	if (BaseClass::IsVisible() == bShow)
 		return;
 
+
 	if (bShow)
 	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel reloading base buy resources this=%p buy='%s' main='%s'\n",
+			this, vgui2::resource_paths::kMenuBuy, vgui2::resource_paths::kMenuBuyMain);
+		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+		if (m_pMainMenu)
+			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+
 		Update();
 
-		Run(m_pMainMenu);
+		// Run(m_pMainMenu);
 
 		Activate();
 		SetMouseInputEnabled(true);

@@ -33,15 +33,15 @@ using cl::g_iTeamNumber;
 
 CCSTeamMenu::CCSTeamMenu(IViewport* pViewPort) : CTeamMenu(pViewPort)
 {
-	CreateBackground(this);
-	m_bVIPMap = false;
-	m_backgroundLayoutFinished = false;
+	// CreateBackground(this);
+	// m_bVIPMap = false;
+	// m_backgroundLayoutFinished = false;
 }
 
 void CCSTeamMenu::SetupControlSettings()
 {
 	LoadControlSettings(vgui2::resource_paths::kMenuTeam, "GAME");
-	m_backgroundLayoutFinished = false;
+	// m_backgroundLayoutFinished = false;
 	InvalidateLayout();
 }
 
@@ -136,18 +136,18 @@ void CCSTeamMenu::PerformLayout(void)
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-	{
-		LayoutBackgroundPanel(this);
-		m_backgroundLayoutFinished = true;
-	}
+	// if (!m_backgroundLayoutFinished)
+	// {
+	// 	LayoutBackgroundPanel(this);
+	// 	m_backgroundLayoutFinished = true;
+	// }
 }
 
 void CCSTeamMenu::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	ApplyBackgroundSchemeSettings(this, pScheme);
-	m_backgroundLayoutFinished = false;
+	// ApplyBackgroundSchemeSettings(this, pScheme);
+	// m_backgroundLayoutFinished = false;
 }
 
 vgui2::Panel* CCSTeamMenu::CreateControlByName(const char* controlName)

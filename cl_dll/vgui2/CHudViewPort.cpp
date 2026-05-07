@@ -108,6 +108,10 @@ void CHudViewport::CreateDefaultPanels()
     AddNewPanel(CreatePanelByName(PANEL_TEAM));
     AddNewPanel(CreatePanelByName(PANEL_CLASS_CT));
     AddNewPanel(CreatePanelByName(PANEL_CLASS_TER));
+	AddNewPanel(CreatePanelByName(PANEL_CLASS));
+
+
+
     AddNewPanel(CreatePanelByName(PANEL_BUY_CT));
     AddNewPanel(CreatePanelByName(PANEL_BUY_TER));
     AddNewPanel(CreatePanelByName(PANEL_BUY_EQUIP_CT));
@@ -237,6 +241,9 @@ IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 
 bool CHudViewport::ShowVGUIMenu(int iMenu)
 {
+    gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu menu=%d team=%d viewport=%p classCT=%p classTER=%p\n",
+        iMenu, cl::g_iTeamNumber, (void *)this, (void *)m_pClassMenuCT, (void *)m_pClassMenuTER);
+
     IViewportPanel *panel = NULL;
 
     switch (iMenu)
@@ -248,13 +255,45 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
         }
         case MENU_CLASS_T:
         {
-            panel = m_pClassMenuTER ? static_cast<IViewportPanel *>(m_pClassMenuTER) : CreatePanelByName(PANEL_CLASS_TER);
+            gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting TER class menu team=%d\n",
+                cl::g_iTeamNumber);
+            panel = m_pClassMenuTER; //? static_cast<IViewportPanel *>(m_pClassMenuTER) : CreatePanelByName(PANEL_CLASS_TER);
+			
+			// if (m_pClassMenu->CheckShowType())
+            // {
+            //     panel = m_pClassMenu;
+            //     m_pClassMenu->m_iCurrentPage = 0;
+            //     m_pClassMenu->SetupPage(0);
+            // }
+            // else
+            // {
+            //     m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
+            //     m_pClassMenu->SetTeam(TERRORIST);
+            // }
+
+
             break;
         }
         case MENU_CLASS_CT:
         {
-            panel = m_pClassMenuCT ? static_cast<IViewportPanel *>(m_pClassMenuCT) : CreatePanelByName(PANEL_CLASS_CT);
-            break;
+            gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu selecting CT class menu team=%d\n",
+                cl::g_iTeamNumber);
+            panel = m_pClassMenuCT; //? static_cast<IViewportPanel *>(m_pClassMenuCT) : CreatePanelByName(PANEL_CLASS_CT);
+            
+			
+			// if (m_pClassMenu->CheckShowType())
+            // {
+            //     panel = m_pClassMenu;
+            //     m_pClassMenu->m_iCurrentPage = 0;
+            //     m_pClassMenu->SetupPage(0);
+            // }
+            // else
+            // {
+            //     m_pClassMenu->m_iCurrentTeamPage = TERRORIST;
+            //     m_pClassMenu->SetTeam(TERRORIST);
+            // }
+			
+			break;
         }
         case MENU_BUY:
         case MENU_BUY_PISTOL:

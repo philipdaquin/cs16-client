@@ -42,7 +42,7 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	m_pMessage = new vgui2::RichText( this, "TextMessage" );
 	m_pMessageHtml = new CClientMOTDHTML( this, "Message" );
 
-	LoadControlSettings( vgui2::resource_paths::kMenuMOTD );
+	LoadControlSettings( vgui2::resource_paths::kMenuMOTD, "GAME" );
 	InvalidateLayout();
 
 	m_pServerName = new vgui2::Label( this, "serverName", "" );

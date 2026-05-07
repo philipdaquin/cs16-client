@@ -43,8 +43,10 @@ CClassMenu_TER::CClassMenu_TER(IViewport *pViewPort)
 	: CClassMenu(pViewPort, PANEL_CLASS_TER),
 	  m_backgroundLayoutFinished(false)
 {
-	LoadControlSettings(vgui2::resource_paths::kMenuClassTER);
-	CreateBackground(this);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER ctor this=%p viewport=%p loading='%s'\n",
+		this, (void *)pViewPort, vgui2::resource_paths::kMenuClassTER);
+	LoadControlSettings(vgui2::resource_paths::kMenuClassTER, "GAME");
+	// CreateBackground(this);
 }
 
 const char *CClassMenu_TER::GetName()
@@ -54,6 +56,8 @@ const char *CClassMenu_TER::GetName()
 
 void CClassMenu_TER::ShowPanel(bool bShow)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER::ShowPanel this=%p show=%d visible(before)=%d\n",
+		this, bShow ? 1 : 0, IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
 }
 
@@ -94,23 +98,27 @@ void CClassMenu_TER::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-		LayoutBackgroundPanel(this);
-	m_backgroundLayoutFinished = true;
+	// if (!m_backgroundLayoutFinished)
+	// 	LayoutBackgroundPanel(this);
+	// m_backgroundLayoutFinished = true;
 }
 
 void CClassMenu_TER::ApplySchemeSettings(IScheme *pScheme)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER::ApplySchemeSettings this=%p scheme=%p resource='%s'\n",
+		this, (void *)pScheme, vgui2::resource_paths::kMenuClassTER);
 	BaseClass::ApplySchemeSettings(pScheme);
-	ApplyBackgroundSchemeSettings(this, pScheme);
+	// ApplyBackgroundSchemeSettings(this, pScheme);
 }
 
 CClassMenu_CT::CClassMenu_CT(IViewport *pViewPort)
 	: CClassMenu(pViewPort, PANEL_CLASS_CT),
 	  m_backgroundLayoutFinished(false)
 {
-	LoadControlSettings(vgui2::resource_paths::kMenuClassCT);
-	CreateBackground(this);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT ctor this=%p viewport=%p loading='%s'\n",
+		this, (void *)pViewPort, vgui2::resource_paths::kMenuClassCT);
+	LoadControlSettings(vgui2::resource_paths::kMenuClassCT, "GAME");
+	// CreateBackground(this);
 }
 
 Panel *CClassMenu_CT::CreateControlByName(const char *controlName)
@@ -128,6 +136,8 @@ const char *CClassMenu_CT::GetName()
 
 void CClassMenu_CT::ShowPanel(bool bShow)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT::ShowPanel this=%p show=%d visible(before)=%d\n",
+		this, bShow ? 1 : 0, IsVisible() ? 1 : 0);
 	BaseClass::ShowPanel(bShow);
 }
 
@@ -160,13 +170,15 @@ void CClassMenu_CT::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-		LayoutBackgroundPanel(this);
-	m_backgroundLayoutFinished = true;
+	// if (!m_backgroundLayoutFinished)
+	// 	LayoutBackgroundPanel(this);
+	// m_backgroundLayoutFinished = true;
 }
 
 void CClassMenu_CT::ApplySchemeSettings(IScheme *pScheme)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT::ApplySchemeSettings this=%p scheme=%p resource='%s'\n",
+		this, (void *)pScheme, vgui2::resource_paths::kMenuClassCT);
 	BaseClass::ApplySchemeSettings(pScheme);
-	ApplyBackgroundSchemeSettings(this, pScheme);
+	// ApplyBackgroundSchemeSettings(this, pScheme);
 }

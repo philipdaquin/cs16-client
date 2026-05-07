@@ -45,7 +45,7 @@ CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pView
 	// info window about this class
 	m_pPanel = new EditablePanel( this, "ClassInfo" );
 
-	LoadControlSettings("Resource/UI/ClassMenu.res" );
+	LoadControlSettings("resource/UI/ClassMenu.res", "GAME");
 }
 
 CClassMenu::CClassMenu(IViewport* pViewPort, const char *panelName) : Frame(NULL, panelName ? panelName : PANEL_CLASS), m_pViewPort(pViewPort)
@@ -137,6 +137,10 @@ void CClassMenu::OnCommand(const char *command)
 //-----------------------------------------------------------------------------
 void CClassMenu::ShowPanel(bool bShow)
 {
+
+	if (BaseClass::IsVisible() == bShow) return;
+
+
 	if ( bShow )
 	{
 		Activate();

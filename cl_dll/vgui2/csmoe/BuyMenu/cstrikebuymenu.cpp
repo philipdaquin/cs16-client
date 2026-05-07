@@ -33,7 +33,7 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort)
 {
 	SetTitle("#Cstrike_Buy_Menu", true);
 	SetProportional(true);
-	CreateBackground(this);
+	// CreateBackground(this);
 	m_backgroundLayoutFinished = false;
 	m_pMoney = NULL;
 	m_pMainBackground = NULL;
@@ -49,7 +49,7 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, const char *subPanelName, c
 {
 	SetTitle("#Cstrike_Buy_Menu", true);
 	SetProportional(true);
-	CreateBackground(this);
+	// CreateBackground(this);
 	m_backgroundLayoutFinished = false;
 	m_pMoney = NULL;
 	m_pMainBackground = NULL;
@@ -105,6 +105,10 @@ void CCSBaseBuyMenu::SetupBuyPresetControls()
 
 void CCSBaseBuyMenu::SetupControlSettings()
 {
+
+	// LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+
+
 	if (m_iTeam == TEAM_CT)
 		LoadTeamResource("BuySubMenu_CT", vgui2::resource_paths::kMenuBuyCT, TEAM_CT);
 	else
@@ -149,8 +153,8 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 
 	BaseClass::ShowPanel(bShow);
 
-	if (bShow)
-		UpdateBuyPresets(true);
+	// if (bShow)
+	// 	UpdateBuyPresets(true);
 }
 
 void CCSBaseBuyMenu::Paint(void)
@@ -174,39 +178,39 @@ void CCSBaseBuyMenu::PerformLayout(void)
 {
 	BaseClass::PerformLayout();
 
-	if (!m_backgroundLayoutFinished)
-	{
-		LayoutBackgroundPanel(this);
-		if (m_pMainMenu)
-		{
-			const int startX = scheme()->GetProportionalScaledValueEx(GetScheme(), 70);
-			const int startY = scheme()->GetProportionalScaledValueEx(GetScheme(), 320);
-			const int wide = scheme()->GetProportionalScaledValueEx(GetScheme(), 120);
-			const int tall = scheme()->GetProportionalScaledValueEx(GetScheme(), 28);
-			const int gap = scheme()->GetProportionalScaledValueEx(GetScheme(), 8);
-			for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
-			{
-				if (m_pBuyPresetButtons[i])
-					m_pBuyPresetButtons[i]->SetBounds(startX + i * (wide + gap), startY, wide, tall);
-			}
-			if (m_pMoney)
-				m_pMoney->SetBounds(startX, startY - tall - gap, wide * 2, tall);
-		}
-		m_backgroundLayoutFinished = true;
-	}
+	// if (!m_backgroundLayoutFinished)
+	// {
+	// 	LayoutBackgroundPanel(this);
+	// 	if (m_pMainMenu)
+	// 	{
+	// 		const int startX = scheme()->GetProportionalScaledValueEx(GetScheme(), 70);
+	// 		const int startY = scheme()->GetProportionalScaledValueEx(GetScheme(), 320);
+	// 		const int wide = scheme()->GetProportionalScaledValueEx(GetScheme(), 120);
+	// 		const int tall = scheme()->GetProportionalScaledValueEx(GetScheme(), 28);
+	// 		const int gap = scheme()->GetProportionalScaledValueEx(GetScheme(), 8);
+	// 		for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
+	// 		{
+	// 			if (m_pBuyPresetButtons[i])
+	// 				m_pBuyPresetButtons[i]->SetBounds(startX + i * (wide + gap), startY, wide, tall);
+	// 		}
+	// 		if (m_pMoney)
+	// 			m_pMoney->SetBounds(startX, startY - tall - gap, wide * 2, tall);
+	// 	}
+	// 	m_backgroundLayoutFinished = true;
+	// }
 }
 
 void CCSBaseBuyMenu::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	ApplyBackgroundSchemeSettings(this, pScheme);
-	if (m_pMainBackground)
-	{
-		m_pMainBackground->SetBorder(pScheme->GetBorder("ButtonDepressedBorder"));
-		m_pMainBackground->SetBgColor(pScheme->GetColor("Button.BgColor", GetBgColor()));
-	}
-	m_backgroundLayoutFinished = false;
-	UpdateBuyPresets(true);
+	// ApplyBackgroundSchemeSettings(this, pScheme);
+	// if (m_pMainBackground)
+	// {
+	// 	m_pMainBackground->SetBorder(pScheme->GetBorder("ButtonDepressedBorder"));
+	// 	m_pMainBackground->SetBgColor(pScheme->GetColor("Button.BgColor", GetBgColor()));
+	// }
+	// m_backgroundLayoutFinished = false;
+	// UpdateBuyPresets(true);
 }
 
 void CCSBaseBuyMenu::UpdateBuyPresets(bool)

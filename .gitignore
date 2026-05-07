@@ -8,6 +8,9 @@ build-local
 *.gch
 *.pch
 
+/cl_dll/vgui2/cs-source 
+
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
