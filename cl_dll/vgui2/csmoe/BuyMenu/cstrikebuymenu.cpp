@@ -10,6 +10,7 @@
 #include "shared_util.h"
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
+#include <vgui_controls/Button.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Panel.h>
 #include "buymouseoverpanelbutton.h"
@@ -18,13 +19,20 @@
 
 using namespace vgui2;
 
+static void SetMainBuyButtonCommand(Panel *panel, const char *buttonName, const char *command)
+{
+	Button *button = panel ? dynamic_cast<Button *>(panel->FindChildByName(buttonName)) : NULL;
+	if (button)
+		button->SetCommand(command);
+}
+
 CCSBuyMenu_CT::CCSBuyMenu_CT(IViewport *pViewPort)
-	: CCSBaseBuyMenu(pViewPort, "BuySubMenu_CT", vgui2::resource_paths::kMenuBuyCT, TEAM_CT)
+	: CCSBaseBuyMenu(pViewPort, TEAM_CT)
 {
 }
 
 CCSBuyMenu_TER::CCSBuyMenu_TER(IViewport *pViewPort)
-	: CCSBaseBuyMenu(pViewPort, "BuySubMenu_TER", vgui2::resource_paths::kMenuBuyTER, TEAM_TERRORIST)
+	: CCSBaseBuyMenu(pViewPort, TEAM_TERRORIST)
 {
 }
 
@@ -44,7 +52,7 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort)
 	UpdateGameMode();
 }
 
-CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, const char *subPanelName, const char *resourceName, int team)
+CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, int team)
 	: CBuyMenu(pViewPort)
 {
 	SetTitle("#Cstrike_Buy_Menu", true);
@@ -57,10 +65,10 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, const char *subPanelName, c
 	m_lastMoney = -1;
 	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
 		m_pBuyPresetButtons[i] = NULL;
-	LoadTeamResource(subPanelName, resourceName, team);
+	LoadTeamResource(team);
 }
 
-void CCSBaseBuyMenu::LoadTeamResource(const char *subPanelName, const char *resourceName, int team)
+void CCSBaseBuyMenu::LoadTeamResource(int team)
 {
 	m_iTeam = team;
 
@@ -73,10 +81,37 @@ void CCSBaseBuyMenu::LoadTeamResource(const char *subPanelName, const char *reso
 		m_pMainMenu = nullptr;
 	}
 
-	m_pMainMenu = new CCSBuySubMenu(this, subPanelName);
-	m_pMainMenu->LoadControlSettings(resourceName, "GAME");
+	m_pMainMenu = new CCSBuySubMenu(this, "BuySubMenu");
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource this=%p team=%d loading main='%s'\n",
+		this, m_iTeam, vgui2::resource_paths::kMenuBuyMain);
+	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+	ConfigureMainBuyMenuCommands();
 	SetupBuyPresetControls();
 	m_pMainMenu->SetVisible(false);
+}
+
+void CCSBaseBuyMenu::ConfigureMainBuyMenuCommands()
+{
+	if (!m_pMainMenu)
+		return;
+
+	const bool isTerrorist = (m_iTeam == TEAM_TERRORIST);
+
+	SetMainBuyButtonCommand(m_pMainMenu, "pistols",
+		isTerrorist ? vgui2::resource_paths::kMenuBuyPistolsTER : vgui2::resource_paths::kMenuBuyPistolsCT);
+	SetMainBuyButtonCommand(m_pMainMenu, "shotguns",
+		isTerrorist ? vgui2::resource_paths::kMenuBuyShotgunsTER : vgui2::resource_paths::kMenuBuyShotgunsCT);
+	SetMainBuyButtonCommand(m_pMainMenu, "submachineguns",
+		isTerrorist ? vgui2::resource_paths::kMenuBuySubMachinegunsTER : vgui2::resource_paths::kMenuBuySubMachinegunsCT);
+	SetMainBuyButtonCommand(m_pMainMenu, "rifles",
+		isTerrorist ? vgui2::resource_paths::kMenuBuyRiflesTER : vgui2::resource_paths::kMenuBuyRiflesCT);
+	SetMainBuyButtonCommand(m_pMainMenu, "machineguns",
+		isTerrorist ? vgui2::resource_paths::kMenuBuyMachinegunsTER : vgui2::resource_paths::kMenuBuyMachinegunsCT);
+	SetMainBuyButtonCommand(m_pMainMenu, "equipment",
+		isTerrorist ? vgui2::resource_paths::kMenuBuyEquipmentTER : vgui2::resource_paths::kMenuBuyEquipmentCT);
+
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ConfigureMainBuyMenuCommands this=%p team=%d targetTeam=%s\n",
+		this, m_iTeam, isTerrorist ? "TER" : "CT");
 }
 
 void CCSBaseBuyMenu::SetupBuyPresetControls()
@@ -91,7 +126,7 @@ void CCSBaseBuyMenu::SetupBuyPresetControls()
 
 	m_pLoadout = m_pMainMenu ? dynamic_cast<BuyPresetEditPanel *>(m_pMainMenu->FindChildByName("loadoutPanel")) : NULL;
 	if (!m_pLoadout && m_pMainMenu)
-		m_pLoadout = new BuyPresetEditPanel(m_pMainMenu, "loadoutPanel", "Resource/UI/Loadout.res", 0, false);
+		m_pLoadout = new BuyPresetEditPanel(m_pMainMenu, "loadoutPanel", "resource/UI/Loadout.res", 0, false);
 
 	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
 	{
@@ -110,9 +145,9 @@ void CCSBaseBuyMenu::SetupControlSettings()
 
 
 	if (m_iTeam == TEAM_CT)
-		LoadTeamResource("BuySubMenu_CT", vgui2::resource_paths::kMenuBuyCT, TEAM_CT);
+		LoadTeamResource(TEAM_CT);
 	else
-		LoadTeamResource("BuySubMenu_TER", vgui2::resource_paths::kMenuBuyTER, TEAM_TERRORIST);
+		LoadTeamResource(TEAM_TERRORIST);
 }
 
 void CCSBaseBuyMenu::SetVisible(bool state)
@@ -152,6 +187,9 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 	}
 
 	BaseClass::ShowPanel(bShow);
+
+	if (bShow)
+		ConfigureMainBuyMenuCommands();
 
 	// if (bShow)
 	// 	UpdateBuyPresets(true);
@@ -266,6 +304,8 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 	if (!m_pMainMenu)
 		return;
 
+	Run(m_pMainMenu);
+
 	const char *resource = nullptr;
 	switch (iMenu)
 	{
@@ -295,14 +335,13 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 		m_pMainMenu->SetupNextSubPanel(resource);
 		m_pMainMenu->GotoNextSubPanel();
 	}
-
-	Run(m_pMainMenu);
 }
 
 void CCSBaseBuyMenu::ActivateMenu(int iMenu)
 {
-	GotoMenu(iMenu);
+	SetupControlSettings();
 	g_pViewport->ShowPanel(this, true);
+	GotoMenu(iMenu);
 }
 
 void CCSBaseBuyMenu::SetTeam(int iTeam)
@@ -312,9 +351,9 @@ void CCSBaseBuyMenu::SetTeam(int iTeam)
 		return;
 
 	if (newTeam == TEAM_CT)
-		LoadTeamResource("BuySubMenu_CT", vgui2::resource_paths::kMenuBuyCT, TEAM_CT);
+		LoadTeamResource(TEAM_CT);
 	else
-		LoadTeamResource("BuySubMenu_TER", vgui2::resource_paths::kMenuBuyTER, TEAM_TERRORIST);
+		LoadTeamResource(TEAM_TERRORIST);
 }
 
 void CCSBaseBuyMenu::UpdateGameMode()

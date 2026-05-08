@@ -1,8 +1,10 @@
 #include <cstdio>
 
 #include <vgui/IPanel.h>
+#include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 #include <vgui_controls/AnimationController.h>
+#include <vgui_controls/Label.h>
 #include <tier1/KeyValues.h>
 
 #include "CBackGroundPanel.h"
@@ -274,7 +276,22 @@ void CBaseViewport::OnScreenSizeChanged( int iOldWide, int iOldTall )
 
 void CBaseViewport::Paint()
 {
-	// Intentionally empty for now.
+}
+
+void CBaseViewport::MoveToCenterOfScreen()
+{
+	int wx = 0, wy = 0, ww = 0, wh = 0;
+	vgui2::surface()->GetWorkspaceBounds(wx, wy, ww, wh);
+	int x = 0, y = 0, wide = 0, tall = 0;
+	GetBounds(x, y, wide, tall);
+
+	const int centeredX = (ww - wide) / 2;
+	const int centeredY = (wh - tall) / 2;
+
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::MoveToCenterOfScreen this=%p workspace=%d,%d %dx%d bounds=%d,%d %dx%d\n",
+		this, wx, wy, ww, wh, x, y, wide, tall);
+
+	SetPos(centeredX, centeredY);
 }
 
 void CBaseViewport::Layout()
@@ -292,6 +309,7 @@ void CBaseViewport::Layout()
 		m_nRootSize[ 1 ] = tall;
 
 		SetBounds( 0, 0, wide, tall );
+		MoveToCenterOfScreen();
 		if( changed )
 		{
 			ReloadScheme();
@@ -410,6 +428,9 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 		this, (void *)pPanel, bState ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)g_pViewport);
 	if( bState )
 	{
+		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel open this=%p panel=%p active=%p last=%p parent=%p\n",
+			this, (void *)pPanel, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)pPanel->GetVPanel());
+
 		// if this is an 'active' panel, deactivate old active panel
 		if( pPanel->HasInputElements() )
 		{
@@ -450,9 +471,20 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 	}
 
 	// just show/hide panel
+	int preX = 0, preY = 0, preW = 0, preH = 0;
+	vgui2::ipanel()->GetPos( pPanel->GetVPanel(), preX, preY );
+	vgui2::ipanel()->GetSize( pPanel->GetVPanel(), preW, preH );
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel before-show this=%p panel=%p state=%d pos=%d,%d size=%dx%d visible=%d vpanel=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, preX, preY, preW, preH, pPanel->IsVisible() ? 1 : 0, (void *)pPanel->GetVPanel());
+
 		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel calling panel->ShowPanel this=%p panel=%p state=%d parent=%p\n",
 			this, (void *)pPanel, bState ? 1 : 0, (void *)pPanel->GetVPanel());
 	pPanel->ShowPanel( bState );
+	int postX = 0, postY = 0, postW = 0, postH = 0;
+	vgui2::ipanel()->GetPos( pPanel->GetVPanel(), postX, postY );
+	vgui2::ipanel()->GetSize( pPanel->GetVPanel(), postW, postH );
+	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel after-show this=%p panel=%p state=%d pos=%d,%d size=%dx%d visible=%d vpanel=%p\n",
+		this, (void *)pPanel, bState ? 1 : 0, postX, postY, postW, postH, pPanel->IsVisible() ? 1 : 0, (void *)pPanel->GetVPanel());
 	gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel panel->ShowPanel done this=%p panel=%p state=%d visible=%d active=%p last=%p\n",
 		this, (void *)pPanel, bState ? 1 : 0, pPanel->IsVisible() ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel);
 
@@ -501,6 +533,27 @@ bool CBaseViewport::IsBackGroundVisible() const
 
 void CBaseViewport::ShowBackGround( bool bState )
 {
+	int x = 0, y = 0, wide = 0, tall = 0;
+	if (m_pBackGround)
+		m_pBackGround->GetBounds(x, y, wide, tall);
+
+	gEngfuncs.Con_Printf(
+		"[VGUI2-CLIENT] CBaseViewport::ShowBackGround this=%p show=%d background=%p parent=%p parentName='%s' bounds=%d,%d %dx%d visible=%d\n",
+		this,
+		bState ? 1 : 0,
+		(void *)m_pBackGround,
+		(void *)(m_pBackGround ? m_pBackGround->GetVParent() : 0),
+		(m_pBackGround && m_pBackGround->GetParent()) ? m_pBackGround->GetParent()->GetName() : "<null>",
+		x, y, wide, tall,
+		m_pBackGround ? (m_pBackGround->IsVisible() ? 1 : 0) : 0);
+
+	// disbaled tempoarily
+	// if (bState && m_pBackGround)
+	// {
+	// 	m_pBackGround->Activate();
+	// 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() );
+	// }
+
 	m_pBackGround->SetVisible( bState );
 }
 

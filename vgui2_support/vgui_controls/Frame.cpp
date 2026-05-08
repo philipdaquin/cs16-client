@@ -31,6 +31,7 @@
 #include "MenuButton.h"
 #include "TextImage.h"
 
+#include <cstdio>
 #include <stdio.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -235,10 +236,8 @@ namespace
 			bool isSmall = ((Frame *)GetParent())->IsSmallCaption();
 
 			_marlettFont = pScheme->GetFont( isSmall ? "MarlettSmall" : "Marlett", IsProportional());
-			// SetFgColor(GetSchemeColor("FrameGrip.Color1", GetSchemeColor("BorderBright", pScheme), pScheme));
-			// SetBgColor(GetSchemeColor("FrameGrip.Color2", GetSchemeColor("BorderSelection", pScheme), pScheme));
-			SetFgColor(GetSchemeColor("FrameGrip.Color1", pScheme));
-			SetBgColor(GetSchemeColor("FrameGrip.Color2", pScheme));
+			SetFgColor(GetSchemeColor("FrameGrip.Color1", GetSchemeColor("BorderBright", pScheme), pScheme));
+			SetBgColor(GetSchemeColor("FrameGrip.Color2", GetSchemeColor("BorderSelection", pScheme), pScheme));
 
 			const char *snapRange = pScheme->GetResourceString("Frame.AutoSnapRange");
 

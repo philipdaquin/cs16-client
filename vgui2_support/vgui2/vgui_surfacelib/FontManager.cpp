@@ -247,6 +247,15 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 				}
 
                 AddEmojiFont(font, tall, weight, blur, scanlines, flags);
+                return true;
+			}
+			else if ( winFont )
+			{
+				// If the primary font loaded, keep it even when the extended fallback is
+				// unavailable.  This lets packaged fonts like Tahoma render Latin text on
+				// platforms where the locale fallback face is not installed.
+				m_FontAmalgams[font].AddFont( winFont, 0x0000, 0xFFFF );
+				AddEmojiFont(font, tall, weight, blur, scanlines, flags);
 				return true;
 			}
 			else if ( pExtendedFont )
@@ -294,6 +303,8 @@ font_t *CFontManager::CreateOrFindWin32Font(const char *windowsFontName, int tal
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
 		int memSize = 0;
 		auto pchFontData = m_pFontDataHelper( windowsFontName, memSize, NULL );
+		std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font request font='%s' tall=%d weight=%d blur=%d scanlines=%d flags=%d cache=%p size=%d\n",
+			windowsFontName ? windowsFontName : "<null>", tall, weight, blur, scanlines, flags, pchFontData, memSize);
 
 		if( !pchFontData )
 		{
@@ -302,6 +313,8 @@ font_t *CFontManager::CreateOrFindWin32Font(const char *windowsFontName, int tal
 			if( filename )
 			{
 				// ... and try to add it to the font cache.
+				std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font fallback file font='%s' file='%s'\n",
+					windowsFontName ? windowsFontName : "<null>", filename);
 				pchFontData = m_pFontDataHelper( windowsFontName, memSize, filename );
 				free( filename );
 			}
@@ -313,7 +326,14 @@ font_t *CFontManager::CreateOrFindWin32Font(const char *windowsFontName, int tal
 			if (m_Win32Fonts[i]->CreateFromMemory( windowsFontName, pchFontData, memSize, tall, weight, blur, scanlines, flags))
 			{
 				// add to the list
+				std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font success font='%s' face='%s'\n",
+					windowsFontName ? windowsFontName : "<null>", m_Win32Fonts[i]->GetFamilyName() ? m_Win32Fonts[i]->GetFamilyName() : "<null>");
 				winFont = m_Win32Fonts[i];
+			}
+			else
+			{
+				std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font create-from-memory-failed font='%s' size=%d\n",
+					windowsFontName ? windowsFontName : "<null>", memSize);
 			}
 		}
 

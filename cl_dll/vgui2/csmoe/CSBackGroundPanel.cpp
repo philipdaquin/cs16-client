@@ -1,4 +1,5 @@
 
+#include "hud.h"
 #include "vgui_int.h"
 #include <vgui/ISurface.h>
 #include "../../util_vector.h"
@@ -234,9 +235,19 @@ void CCSBackGroundPanel::Activate(void)
 	if (!m_enabled)
 		return;
 
-	SetPos(0, 0);
+	int posX = 0, posY = 0, posW = 0, posH = 0;
+	GetBounds(posX, posY, posW, posH);
+
+	gEngfuncs.Con_Printf(
+		"[VGUI2-CLIENT] CCSBackGroundPanel::Activate entry this=%p parent=%p parentName='%s' pos=%d,%d size=%dx%d visible=%d\n",
+		this,
+		(void *)GetVParent(),
+		GetParent() ? GetParent()->GetName() : "<null>",
+		posX, posY, posW, posH,
+		IsVisible() ? 1 : 0);
 
 	BaseClass::Activate();
+	MoveToCenterOfScreen();
 
 	if (IsProportional())
 	{
@@ -246,10 +257,12 @@ void CCSBackGroundPanel::Activate(void)
 		int wide, tall;
 		GetSize(wide, tall);
 
+		gEngfuncs.Con_Printf(
+			"[VGUI2-CLIENT] CCSBackGroundPanel::Activate state this=%p size=%dx%d hud=%dx%d parent=%p parentName='%s'\n",
+			this, wide, tall, screenW, screenH, (void *)GetVParent(), GetParent() ? GetParent()->GetName() : "<null>");
+
 		if (wide != screenW || tall != screenH)
 		{
-			SetSize(screenW, screenH);
-
 			wide = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(640));
 			tall = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(480));
 
@@ -270,6 +283,9 @@ void CCSBackGroundPanel::Activate(void)
 				}
 			}
 
+			gEngfuncs.Con_Printf(
+				"[VGUI2-CLIENT] CCSBackGroundPanel::Activate centered layout this=%p content=%dx%d offset=%d,%d adjusted=%d,%d\n",
+				this, wide, tall, offsetX, offsetY, screenW, screenH);
 			ResizeCSLegacyWindowControls(this, tall, wide, offsetX, offsetY);
 		}
 	}

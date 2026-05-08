@@ -7,34 +7,6 @@
 
 using namespace vgui2;
 
-static bool IsLocalPlayerTerrorist()
-{
-	return g_PlayerExtraInfo[gHUD.m_Scoreboard.m_iPlayerNum].teamnumber == TEAM_TERRORIST;
-}
-
-static const char *GetBuyMenuResourceForMenu(int iMenu)
-{
-	const bool isTerrorist = IsLocalPlayerTerrorist();
-
-	switch (iMenu)
-	{
-	case MENU_BUY_PISTOL:
-		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyPistolsCT, vgui2::resource_paths::kMenuBuyPistolsTER, isTerrorist);
-	case MENU_BUY_SHOTGUN:
-		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyShotgunsCT, vgui2::resource_paths::kMenuBuyShotgunsTER, isTerrorist);
-	case MENU_BUY_RIFLE:
-		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyRiflesCT, vgui2::resource_paths::kMenuBuyRiflesTER, isTerrorist);
-	case MENU_BUY_SUBMACHINEGUN:
-		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuySubMachinegunsCT, vgui2::resource_paths::kMenuBuySubMachinegunsTER, isTerrorist);
-	case MENU_BUY_MACHINEGUN:
-		return vgui2::resource_paths::BuyCategoryForTeam(vgui2::resource_paths::kMenuBuyMachinegunsCT, vgui2::resource_paths::kMenuBuyMachinegunsTER, isTerrorist);
-	case MENU_BUY_ITEM:
-		return vgui2::resource_paths::kMenuBuyEquipment;
-	default:
-		return nullptr;
-	}
-}
-
 CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pViewPort(pViewPort)
 {
 	SetScheme("ClientScheme");
@@ -45,6 +17,7 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 	SetProportional(true);
 
 	SetTitleBarVisible(false);
+	// SetPaintTitleWhenTitleBarHidden(true);
 	SetAutoDelete(false);
 
 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");

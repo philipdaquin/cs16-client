@@ -9,6 +9,7 @@
 #include "vgui_surfacelib/linuxfont.h"
 
 #include <assert.h>
+#include <cstdarg>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -48,9 +49,35 @@ inline int32_t FIXED6_2INT(int32_t x)   { return ( (x>>6) + ( (x&0x20) ? (x<0 ? 
 inline float   FIXED6_2FLOAT(int32_t x) { return (float)x / 64.0f; }
 inline int32_t INT_2FIXED6(int32_t x)   { return x << 6; }
 
+inline void FontLog(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	fflush(stderr);
+	va_end(args);
+}
+
 }
 
 std::set< CLinuxFont::font_name_entry > CLinuxFont::m_FriendlyNameCache;
+
+namespace
+{
+#if defined(EMSCRIPTEN)
+inline bool FontHushAsserts()
+{
+	// The wasm client does not reliably expose tier0::HushAsserts() into this
+	// side module, but this check only guards debug-only assertions here.
+	return true;
+}
+#else
+inline bool FontHushAsserts()
+{
+	return HushAsserts();
+}
+#endif
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -225,7 +252,7 @@ bool CLinuxFont::CreateFromMemory(const char *windowsFontName, const void *data,
 	m_bRotary = flags & vgui2::ISurface::FONTFLAG_ROTARY;
 	m_bAdditive = flags & vgui2::ISurface::FONTFLAG_ADDITIVE;
 
-	if ( !HushAsserts() )
+	if ( !FontHushAsserts() )
 	{
 		// These flags are NYI in Linux right now.
 		Assert( !m_bAntiAliased );
@@ -238,7 +265,7 @@ bool CLinuxFont::CreateFromMemory(const char *windowsFontName, const void *data,
 	if ( error ) 
 	{
 		// FT_Err_Unknown_File_Format?
-		Msg( "FT_New_Memory_Face failed. font:%s error:%d\n", windowsFontName, error );
+			FontLog( "[VGUI2-TRACE] FT_New_Memory_Face failed. font:%s error:%d\n", windowsFontName, error );
 		return false;
 	} 
 
@@ -250,7 +277,7 @@ bool CLinuxFont::CreateFromMemory(const char *windowsFontName, const void *data,
 			FT_Done_Face( m_face );
 			m_face = NULL;
 
-			Msg( "Font %s has no valid charmap\n", windowsFontName );
+				FontLog( "[VGUI2-TRACE] Font %s has no valid charmap\n", windowsFontName );
 			return false;
 		}
 	}
@@ -310,7 +337,7 @@ bool CLinuxFont::CreateFromMemory(const char *windowsFontName, const void *data,
 				error = FT_Request_Size( m_face, &req );
 				if ( error )
 				{
-					Msg( "FT_Request_Size failed on %s / %s\n",
+					FontLog( "[VGUI2-TRACE] FT_Request_Size failed on %s / %s\n",
 						 m_face->family_name ? m_face->family_name : "??",
 						 m_face->style_name ? m_face->style_name : "??" );
 				}
@@ -507,28 +534,101 @@ char *CLinuxFont::GetFontFileName( const char *windowsFontName, int flags )
 	bool bBold = false;
 	const char *pchFontName = windowsFontName;
 
-	if ( !Q_stricmp( pchFontName, "Tahoma" ) )
-		pchFontName = "Bitstream Vera Sans";
-	else if ( !Q_stricmp( pchFontName, "Arial Black" ) || Q_stristr( pchFontName, "bold" ) )
+	// Previous alias set:
+	// if ( Default / DefaultSmall / DefaultVerySmall / DefaultVerySmallFallBack /
+	//      MenuTitle / BrightControlText / BaseText / Label.TextColor / Label.TextBrightColor )
+	//     -> Tahoma
+	// else if ( FiraSans / Fira Sans )
+	//     -> FiraSans
+	if ( !Q_stricmp( pchFontName, "Default" ) ||
+		!Q_stricmp( pchFontName, "DefaultSmall" ) ||
+		!Q_stricmp( pchFontName, "DefaultVerySmall" ) ||
+		!Q_stricmp( pchFontName, "DefaultVerySmallFallBack" ) ||
+		!Q_stricmp( pchFontName, "MenuTitle" ) ||
+		!Q_stricmp( pchFontName, "BrightControlText" ) ||
+		!Q_stricmp( pchFontName, "BaseText" ) ||
+		!Q_stricmp( pchFontName, "Label.TextColor" ) ||
+		!Q_stricmp( pchFontName, "Label.TextBrightColor" ) ||
+		!Q_stricmp( pchFontName, "Trebuchet MS" ) ||
+		!Q_stricmp( pchFontName, "Verdana" ) )
+	{
+		pchFontName = "Tahoma";
+	}
+	else if ( !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" ) )
+	{
+		pchFontName = "FiraSans";
+	}
+
+	if ( !Q_stricmp( pchFontName, "Arial Black" ) || Q_stristr( pchFontName, "bold" ) )
 		bBold = true;
 
 
 #ifdef ANDROID
 	char *filename = FindFontAndroid( bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC );
-	Msg("Android font: %s\n", filename);
+	FontLog("[VGUI2-TRACE] Android font: %s\n", filename);
 	if( !filename ) return NULL;
 	return strdup( filename );
 #elif defined(OSX)
     const char *filename = FindFontApple( bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC );
-    Msg("Apple font: %s\n", filename);
+    FontLog("[VGUI2-TRACE] Apple font: %s\n", filename);
     if( !filename ) return NULL;
     return strdup( filename );
 #elif defined(WIN32)
 	const char* filename = FindFontWin32(bBold, flags & vgui2::ISurface::FONTFLAG_ITALIC);
-	Msg("Apple font: %s\n", filename);
+	FontLog("[VGUI2-TRACE] Windows font: %s\n", filename);
 	if (!filename) return NULL;
 	return strdup(filename);
+#elif defined(EMSCRIPTEN)
+    const char *filename = NULL;
+
+    // Previous wasm aliases:
+    // Tahoma / Default / MenuTitle / Label colors -> resource/fonts/tahoma.ttf
+    // Marlett -> resource/fonts/marlett.ttf
+    // FiraSans / Fira Sans -> resource/fonts/FiraSans-Regular.ttf
+    if ( !Q_stricmp( pchFontName, "Tahoma" ) ||
+         !Q_stricmp( pchFontName, "Default" ) ||
+         !Q_stricmp( pchFontName, "DefaultSmall" ) ||
+         !Q_stricmp( pchFontName, "DefaultVerySmall" ) ||
+         !Q_stricmp( pchFontName, "DefaultVerySmallFallBack" ) ||
+         !Q_stricmp( pchFontName, "MenuTitle" ) ||
+         !Q_stricmp( pchFontName, "BrightControlText" ) ||
+         !Q_stricmp( pchFontName, "BaseText" ) ||
+         !Q_stricmp( pchFontName, "Label.TextColor" ) ||
+         !Q_stricmp( pchFontName, "Label.TextBrightColor" ) ||
+         !Q_stricmp( pchFontName, "Trebuchet MS" ) ||
+         !Q_stricmp( pchFontName, "Verdana" ) )
+    {
+        filename = "resource/fonts/tahoma.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "game/font/tahoma.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "Marlett" ) )
+    {
+        filename = "resource/fonts/marlett.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "game/font/marlett.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" ) )
+    {
+        filename = "resource/fonts/FiraSans-Regular.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "game/font/FiraSans-Regular.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "Courier" ) || !Q_stricmp( pchFontName, "Courier New" ) )
+    {
+        filename = "resource/fonts/FiraSans-Regular.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "game/font/FiraSans-Regular.ttf";
+    }
+
+    if ( !filename )
+        return NULL;
+
+    return strdup( filename );
 #elif !defined(EMSCRIPTEN)
+	if ( !Q_stricmp( pchFontName, "Tahoma" ) )
+		pchFontName = "Bitstream Vera Sans";
+
     const int italic = ( flags & vgui2::ISurface::FONTFLAG_ITALIC ) ? FC_SLANT_ITALIC : FC_SLANT_ROMAN;
 	const int nFcWeight = bBold ? FC_WEIGHT_BOLD : FC_WEIGHT_NORMAL;
 	FcPattern *match = FontMatch( FC_FAMILY, FcTypeString, pchFontName,
@@ -555,7 +655,7 @@ char *CLinuxFont::GetFontFileName( const char *windowsFontName, int flags )
 		}
 
 		FcPatternDestroy( match );
-		Msg("Android font fc: %s", filenameret);
+		FontLog("[VGUI2-TRACE] Android font fc: %s", filenameret ? filenameret : "<null>");
 
 		return filenameret;
 	}
@@ -581,7 +681,7 @@ void CLinuxFont::GetCharRGBA( uchar32 ch, int rgbaWide, int rgbaTall, unsigned c
     FT_Error error = FT_Load_Glyph( m_face, glyph_index, FT_LOAD_RENDER | FT_LOAD_COLOR | FT_LOAD_FLAGS );
 	if ( error )
 	{
-		Msg( "Error in FL_Load_Glyph: glyph_index:%d error:%x\n", glyph_index, error );
+		FontLog( "[VGUI2-TRACE] Error in FL_Load_Glyph: glyph_index:%d error:%x\n", glyph_index, error );
 		return;
 	}
 
@@ -596,13 +696,13 @@ void CLinuxFont::GetCharRGBA( uchar32 ch, int rgbaWide, int rgbaTall, unsigned c
 	}
 	if ( nSkipRows >= rgbaTall )
 	{
-		Msg( "nSkipRows(%d) > rgbaTall(%d) ch:%d\n", nSkipRows, rgbaTall, (int)ch );
+		FontLog( "[VGUI2-TRACE] nSkipRows(%d) > rgbaTall(%d) ch:%d\n", nSkipRows, rgbaTall, (int)ch );
 		return;
 	}
 
 	if ( m_face->glyph->bitmap.width == 0 )
 	{
-		Msg( "m_face->glyph->bitmap.width is 0 for ch:%d %s\n", (int)ch, m_face->family_name ? m_face->family_name : "??" );
+		FontLog( "[VGUI2-TRACE] m_face->glyph->bitmap.width is 0 for ch:%d %s\n", (int)ch, m_face->family_name ? m_face->family_name : "??" );
 		return;
 	}
 #ifndef DISABLE_MOE_VGUI2_EXT
@@ -687,7 +787,7 @@ void CLinuxFont::GetCharRGBA( uchar32 ch, int rgbaWide, int rgbaTall, unsigned c
 	}
 	else
 	{
-		Msg( "FT_Bitmap_Convert failed: %d on %s\n", error, m_face->family_name ? m_face->family_name : "??" );
+		FontLog( "[VGUI2-TRACE] FT_Bitmap_Convert failed: %d on %s\n", error, m_face->family_name ? m_face->family_name : "??" );
 	}
 
 	FT_Bitmap_Done( ftLibrary, &bitmap );
@@ -781,7 +881,7 @@ void CLinuxFont::GetCharABCWidths(int ch, int &a, int &b, int &c)
 	FT_Error error = FT_Load_Char( m_face, ch, 0 ); 
 	if ( error )
 	{
-		Msg( "Error in FT_Load_Char: ch:%x error:%x\n", ch, error );
+		FontLog( "[VGUI2-TRACE] Error in FT_Load_Char: ch:%x error:%x\n", ch, error );
 		return;
 	}
 

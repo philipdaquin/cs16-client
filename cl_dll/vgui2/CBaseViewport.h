@@ -15,6 +15,7 @@ class IGameUIPanel;
 namespace vgui2
 {
 class AnimationController;
+class Label;
 }
 
 /**
@@ -61,6 +62,7 @@ public:
 
 	//CBaseViewport
 	virtual void Layout();
+	void MoveToCenterOfScreen();
 
 	//Panels
 	virtual void CreateDefaultPanels();

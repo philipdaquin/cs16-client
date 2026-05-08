@@ -64,7 +64,7 @@ void CSBuyMouseOverPanel::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	pricelabel->SetFgColor({ 236,224,148,255 });
 	price->SetFgColor({ 236,224,148,255 });
 
-	imageBG->SetImage("resource/Control/buybutton/blank_slot");
+	imageBG->SetImage("resource/control/buybutton/blank_slot");
 }
 
 void CSBuyMouseOverPanel::PerformLayout(void)

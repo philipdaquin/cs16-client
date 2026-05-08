@@ -1,8 +1,9 @@
 #include <cstdio>
 
 #include <KeyValues.h>
-#include <IEngineVGui.h>
 #include <vgui/IInputInternal.h>
+#include <vgui/IScheme.h>
+#include <IEngineVGui.h>
 #include <vgui/ISurface.h>
 
 #include "CHudViewPort.h"
@@ -45,6 +46,33 @@ void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 	//extern vgui2::HFont g_HudTextVgui_TextFont;
 	//g_HudTextVgui_TextFont = pScheme->GetFont("Default");
+}
+
+void CHudViewport::Paint()
+{
+	BaseClass::Paint();
+
+	static vgui2::HFont s_ProbeFont = vgui2::INVALID_FONT;
+	static bool s_ProbeFontReady = false;
+	if (s_ProbeFont == vgui2::INVALID_FONT)
+	{
+		s_ProbeFont = vgui2::surface()->CreateFont();
+	}
+	if (!s_ProbeFontReady && s_ProbeFont != vgui2::INVALID_FONT)
+	{
+		s_ProbeFontReady = vgui2::surface()->AddGlyphSetToFont(s_ProbeFont, "Default", 28, 700, 0, 0, 0, 0x0, 0xFFFF);
+	}
+
+	// Temporary probe text disabled now that font rendering is confirmed.
+	// if (s_ProbeFontReady && s_ProbeFont != vgui2::INVALID_FONT)
+	// {
+	// 	const wchar_t probeText[] = L"VIEWPORT OVERLAY PROBE";
+	// 	vgui2::surface()->DrawSetTextFont(s_ProbeFont);
+	// 	vgui2::surface()->DrawSetTextColor(0, 0, 0, 255);
+	// 	vgui2::surface()->DrawSetTextPos(36, 48);
+	// 	vgui2::surface()->DrawPrintText(probeText, (int)(sizeof(probeText) / sizeof(probeText[0]) - 1));
+	// 	vgui2::surface()->DrawFlushText();
+	// }
 }
 
 void CHudViewport::Start()
@@ -412,13 +440,29 @@ void CHudViewport::OpenBuyMenuForLocalTeam(bool equipmentMenu)
 {
 	if (cl::g_iTeamNumber == TEAM_CT)
 	{
-		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_CT : PANEL_BUY_CT,
-			equipmentMenu ? PANEL_BUY_CT : PANEL_BUY_EQUIP_CT);
+		if (equipmentMenu)
+		{
+			OpenPanelWithCheck(PANEL_BUY_EQUIP_CT, PANEL_BUY_CT);
+		}
+		else
+		{
+			CCSBaseBuyMenu *buyMenu = m_pBuyMenuCT ? m_pBuyMenuCT : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_CT));
+			if (buyMenu)
+				buyMenu->ActivateMenu(MENU_BUY);
+		}
 	}
 	else if (cl::g_iTeamNumber == TEAM_TERRORIST)
 	{
-		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_TER : PANEL_BUY_TER,
-			equipmentMenu ? PANEL_BUY_TER : PANEL_BUY_EQUIP_TER);
+		if (equipmentMenu)
+		{
+			OpenPanelWithCheck(PANEL_BUY_EQUIP_TER, PANEL_BUY_TER);
+		}
+		else
+		{
+			CCSBaseBuyMenu *buyMenu = m_pBuyMenuTER ? m_pBuyMenuTER : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_TER));
+			if (buyMenu)
+				buyMenu->ActivateMenu(MENU_BUY);
+		}
 	}
 }
 

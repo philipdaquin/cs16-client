@@ -93,13 +93,13 @@ if(OSX)
 			)
 	target_link_libraries(vgui_surfacelib PUBLIC 3rdparty-freetype)
 endif()
-if(LINUX)
+if(LINUX OR EMSCRIPTEN)
 	target_sources(vgui_surfacelib PRIVATE
 			# MoeMod : We dont use Carbon API any more...
 			#vgui2/vgui_surfacelib/osxfont.cpp
 			vgui2/vgui_surfacelib/linuxfont.cpp
 			)
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT EMSCRIPTEN)
 	find_package(Fontconfig REQUIRED)
 	target_link_libraries(vgui_surfacelib PUBLIC Fontconfig::Fontconfig)
 endif()

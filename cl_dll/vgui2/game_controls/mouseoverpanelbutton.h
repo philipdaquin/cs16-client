@@ -21,8 +21,10 @@ class MouseOverPanelButton : public vgui2::Button
 public:
     MouseOverPanelButton(vgui2::Panel *parent, const char *panelName, vgui2::EditablePanel *templatePanel) : Button(parent, panelName, "MouseOverButton")
 	{
-		m_pPanel = new vgui2::EditablePanel(parent, NULL);
-		m_pPanel ->SetVisible(false);
+			m_pPanel = new vgui2::EditablePanel(parent, NULL);
+			m_pPanel ->SetVisible(false);
+			m_pPanel->SetMouseInputEnabled(false);
+			m_pPanel->SetKeyBoardInputEnabled(false);
 
 		int x, y, wide, tall;
 		templatePanel->GetBounds(x, y, wide, tall);
@@ -45,7 +47,7 @@ public:
 
 	virtual void ShowPage(void)
 	{
-		if (g_lastPanel)
+		if (g_lastPanel && g_lastPanel->GetParent())
 		{
 			for (int i = 0; i < g_lastPanel->GetParent()->GetChildCount(); i++)
 			{

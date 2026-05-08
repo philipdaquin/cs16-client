@@ -73,8 +73,10 @@ public:
 		if (m_pPanel)
 			delete m_pPanel;
 
-		m_pPanel = new NewMouseOverPanel(parent, NULL);
-		m_pPanel ->SetVisible(false);
+			m_pPanel = new NewMouseOverPanel(parent, NULL);
+			m_pPanel ->SetVisible(false);
+			m_pPanel->SetMouseInputEnabled(false);
+			m_pPanel->SetKeyBoardInputEnabled(false);
 
 		int x, y, wide, tall;
 		templatePanel->GetBounds(x, y, wide, tall);

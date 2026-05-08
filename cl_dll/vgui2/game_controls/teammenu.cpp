@@ -65,6 +65,7 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 	SetSizeable(false);
 
 	SetTitleBarVisible(false);
+	// SetPaintTitleWhenTitleBarHidden(true);
 	SetProportional(true);
 
 	m_pPanel = new EditablePanel(this, "ClassInfo");
@@ -108,7 +109,12 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings this=%p scheme=%p mapName='%s'\n",
 		this, (void *)pScheme, m_szMapName);
 	BaseClass::ApplySchemeSettings(pScheme);
-	m_pMapInfo->SetFgColor(pScheme->GetColor("MapDescriptionText", Color(255, 255, 255, 0)));
+	Color mapInfoColor = pScheme->GetColor("MapDescriptionText", Color(255, 255, 255, 255));
+	gEngfuncs.Con_Printf(
+		"[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings mapInfoColor this=%p rgba=%d,%d,%d,%d\n",
+		this,
+		mapInfoColor[0], mapInfoColor[1], mapInfoColor[2], mapInfoColor[3]);
+	m_pMapInfo->SetFgColor(mapInfoColor);
 
 	if (*m_szMapName) {
 		LoadMapPage(m_szMapName);
@@ -131,6 +137,12 @@ void CTeamMenu::ShowPanel(bool bShow)
 	{
 		return;
 	}
+
+	int x = 0, y = 0, wide = 0, tall = 0;
+	GetBounds(x, y, wide, tall);
+	gEngfuncs.Con_Printf(
+		"[VGUI2-CLIENT] CTeamMenu::ShowPanel this=%p show=%d visible(before)=%d bounds=%d,%d %dx%d parent=%p parentName='%s'\n",
+		this, bShow ? 1 : 0, IsVisible() ? 1 : 0, x, y, wide, tall, (void *)GetVParent(), GetParent() ? GetParent()->GetName() : "<null>");
 
 	if (bShow)
 	{

@@ -21,6 +21,7 @@ class BuyMouseOverPanelButton : public NewMouseOverPanelButton
 public:
 	BuyMouseOverPanelButton(vgui2::Panel *parent, const char *panelName, vgui2::EditablePanel *panel) : BaseClass(parent, panelName, panel)
 	{
+		SetButtonActivationType(ACTIVATE_ONPRESSED);
 		m_iPrice = 0;
 		m_iPreviousPrice = 0;
 		m_iASRestrict = 0;
@@ -190,7 +191,7 @@ public:
 
 	virtual void ShowPage(void)
 	{
-		if (g_lastPanel)
+		if (g_lastPanel && g_lastPanel->GetParent())
 		{
 			for (int i = 0; i < g_lastPanel->GetParent()->GetChildCount(); ++i)
 			{

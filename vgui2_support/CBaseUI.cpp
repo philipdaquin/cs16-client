@@ -419,13 +419,42 @@ void CBaseUI::Paint(int x, int y, int right, int bottom) {
 		return;
 	}
 
-    if (staticGameUIFuncs)
+	if (staticGameUIFuncs)
 	    staticGameUIFuncs->RunFrame();
 	vgui2::ivgui()->RunFrame();
-	staticSurface->SetScreenBounds(x, y, right - x, bottom - y);
-	staticPanel->SetBounds(0, 0, right, bottom);
-	staticGameUIPanel->SetBounds(0, 0, right, bottom);
-	staticClientDLLPanel->SetBounds(0, 0, right, bottom);
+	const int wide = right - x;
+	const int tall = bottom - y;
+	int centeredX = x;
+	int centeredY = y;
+
+	if (vgui2::gEngfuncs.GetWindowCenterX)
+		centeredX = vgui2::gEngfuncs.GetWindowCenterX() - wide / 2;
+	if (vgui2::gEngfuncs.GetWindowCenterY)
+		centeredY = vgui2::gEngfuncs.GetWindowCenterY() - tall / 2;
+
+	if (centeredX < 0)
+		centeredX = 0;
+	if (centeredY < 0)
+		centeredY = 0;
+
+	int panelX = 0, panelY = 0, panelW = 0, panelH = 0;
+	int clientX = 0, clientY = 0, clientW = 0, clientH = 0;
+	int gameUiX = 0, gameUiY = 0, gameUiW = 0, gameUiH = 0;
+	staticPanel->GetBounds(panelX, panelY, panelW, panelH);
+	staticClientDLLPanel->GetBounds(clientX, clientY, clientW, clientH);
+	staticGameUIPanel->GetBounds(gameUiX, gameUiY, gameUiW, gameUiH);
+
+	// gEngfuncs.Con_Printf(
+	// 	"[VGUI2-CLIENT] CBaseUI::Paint rect=(%d,%d)-(%d,%d) size=%dx%d center=%d,%d panel=%p panelBounds=%d,%d %dx%d clientBounds=%d,%d %dx%d gameUIBounds=%d,%d %dx%d\n",
+	// 	x, y, right, bottom, wide, tall, centeredX, centeredY,
+	// 	(void *)staticPanel, panelX, panelY, panelW, panelH,
+	// 	clientX, clientY, clientW, clientH,
+	// 	gameUiX, gameUiY, gameUiW, gameUiH);
+
+	staticSurface->SetScreenBounds(0, 0, wide, tall);
+	staticPanel->SetBounds(centeredX, centeredY, wide, tall);
+	staticGameUIPanel->SetBounds(0, 0, wide, tall);
+	staticClientDLLPanel->SetBounds(0, 0, wide, tall);
 	//staticPanel->PerformApplySchemeSettings();
 	//staticPanel->InvalidateLayout(false, true);
 	static_cast<vgui2::IClientPanel*>( staticPanel )->Think();

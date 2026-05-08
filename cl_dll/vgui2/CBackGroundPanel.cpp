@@ -294,7 +294,11 @@ public:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override
 	{
 		Label::ApplySchemeSettings(pScheme);
-		SetFont(pScheme->GetFont("MenuTitle", IsProportional()));
+		HFont menuTitleFont = pScheme->GetFont("MenuTitle", IsProportional());
+		if (menuTitleFont == vgui2::INVALID_FONT)
+			menuTitleFont = pScheme->GetFont("Default", IsProportional());
+		SetFont(menuTitleFont);
+		SetFgColor(pScheme->GetColor("Label.TextColor", Color(255, 255, 255, 255)));
 	}
 };
 

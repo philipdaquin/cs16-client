@@ -219,7 +219,6 @@ public:
 	virtual bool RequestInfo(KeyValues *outputData);				// returns true if output is successfully written.  You should always chain back to the base class if info request is not handled
 	virtual bool SetInfo(KeyValues *inputData);						// sets a specified value in the control - inverse of the above
 	virtual void SetSilentMode( bool bSilent );						//change the panel's silent mode; if silent, the panel will not post any action signals
-	virtual void InstallMouseHandler( Panel *pHandler );	// mouse events will be send to handler panel instead of this panel
 
 	// drawing state
 	virtual void   SetEnabled(bool state);
@@ -267,7 +266,6 @@ public:
 
 	virtual void SetCursor(HCursor cursor);
 	virtual HCursor GetCursor();
-	virtual void SetCursorAlwaysVisible( bool visible );
 	virtual void RequestFocus(int direction = 0);
 	virtual bool HasFocus();
 	virtual void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false);
@@ -427,8 +425,6 @@ public:
 	virtual void OnKeyCodeReleased(KeyCode code);
 	virtual void OnKeyFocusTicked(); // every window gets key ticked events
 
-	virtual void OnMouseMismatchedRelease( MouseCode code, Panel* pPressedPanel );
-
 	// forwards mouse messages to the panel's parent
 	MESSAGE_FUNC( OnMouseFocusTicked, "OnMouseFocusTicked" );
 
@@ -469,13 +465,11 @@ public:
 	virtual void DrawBox(int x, int y, int wide, int tall, Color color, float normalizedAlpha, bool hollow = false );
 	virtual void DrawBoxFade(int x, int y, int wide, int tall, Color color, float normalizedAlpha, unsigned int alpha0, unsigned int alpha1, bool bHorizontal, bool hollow = false );
 	virtual void DrawHollowBox(int x, int y, int wide, int tall, Color color, float normalizedAlpha );
-	virtual void DrawHollowBox( int x, int y, int wide, int tall, Color color, float normalizedAlpha, int cornerWide, int cornerTall );
 
-	// Drag Drop Public interface
+// Drag Drop Public interface
 
 	virtual void SetDragEnabled( bool enabled );
 	virtual bool IsDragEnabled() const;
-	virtual void SetShowDragHelper( bool enabled );
 
 	// Called if drag drop is started but not dropped on top of droppable panel...
 	virtual void OnDragFailed( CUtlVector< KeyValues * >& msglist );
@@ -552,41 +546,6 @@ public:
 
 	void		DisableMouseInputForThisPanel( bool bDisable );
 	bool		IsMouseInputDisabledForThisPanel() const;
-
-	// For directional navigation between UI controls.
-	enum NAV_DIRECTION { ND_UP, ND_DOWN, ND_LEFT, ND_RIGHT, ND_BACK, ND_NONE };
-	virtual Panel* NavigateUp();
-	virtual Panel* NavigateDown();
-	virtual Panel* NavigateLeft();
-	virtual Panel* NavigateRight();
-	virtual Panel* NavigateActivate();
-	virtual Panel* NavigateBack();
-	virtual void NavigateTo();
-	virtual void NavigateFrom();
-	virtual void NavigateToChild( Panel *pNavigateTo );
-
-	Panel* SetNavUp( Panel* navUp );
-	Panel* SetNavDown( Panel* navDown );
-	Panel* SetNavLeft( Panel* navLeft );
-	Panel* SetNavRight( Panel* navRight );
-	Panel* SetNavToRelay( Panel* navToRelay );
-	Panel* SetNavActivate( Panel* navActivate );
-	Panel* SetNavBack( Panel* navBack );
-	void SetNavUp( const char* controlName );
-	void SetNavDown( const char* controlName );
-	void SetNavLeft( const char* controlName );
-	void SetNavRight( const char* controlName );
-	void SetNavToRelay( const char* controlName );
-	void SetNavActivate( const char* controlName );
-	void SetNavBack( const char* controlName );
-	NAV_DIRECTION GetLastNavDirection();
-	Panel* GetNavUp( Panel *first = NULL );
-	Panel* GetNavDown( Panel *first = NULL );
-	Panel* GetNavLeft( Panel *first = NULL );
-	Panel* GetNavRight( Panel *first = NULL );
-	Panel* GetNavToRelay( Panel *first = NULL );
-	Panel* GetNavActivate( Panel *first = NULL );
-	Panel* GetNavBack( Panel *first = NULL );
 
 // Drag Drop protected/internal interface
 protected:
@@ -736,25 +695,7 @@ private:
 	HScheme			 m_iScheme; // handle to the scheme to use
 
 	bool			m_bIsSilent; // should this panel PostActionSignals?
-	NAV_DIRECTION	m_LastNavDirection;
 
-	CUtlString		m_sNavUpName;
-	CUtlString		m_sNavDownName;
-	CUtlString		m_sNavLeftName;
-	CUtlString		m_sNavRightName;
-	CUtlString		m_sNavToRelayName;
-	CUtlString		m_sNavActivateName;
-	CUtlString		m_sNavBackName;
-
-	PHandle			m_NavUp;
-	PHandle			m_NavDown;
-	PHandle			m_NavLeft;
-	PHandle			m_NavRight;
-	PHandle			m_NavToRelay;
-	PHandle			m_NavActivate;
-	PHandle			m_NavBack;
-
-	PHandle			m_hMouseEventHandler;
 	
 	CPanelAnimationVar( float, m_flAlpha, "alpha", "255" );
 

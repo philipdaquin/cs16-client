@@ -45,7 +45,7 @@ MoeLogIn::MoeLogIn(void) : Frame(NULL, CMOELOGIN_NAME)
 
 	m_pAutoSave = new vgui2::CheckButton(this, "Password_AutoSave", "#Password_AutoSave");
 	*/
-	LoadControlSettings("resource/moelogin.res");
+	// LoadControlSettings("resource/moelogin.res");
 
 }
 

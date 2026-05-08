@@ -509,7 +509,7 @@ wchar_t *Q_ReadUToken (wchar_t *start, wchar_t *token, int tokenBufferSize, bool
 //			characters in this set are removed from the beginning and/or end of strings
 //			by Q_AggressiveStripPrecedingAndTrailingWhitespaceW() 
 //-----------------------------------------------------------------------------
-bool Q_IsMeanSpaceW(uchar32 wch)
+static bool Q_IsMeanSpaceW(uchar32 wch)
 {
 	bool bIsMean = false;
 

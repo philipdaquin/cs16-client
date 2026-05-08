@@ -150,8 +150,8 @@ void BuyPresetButton::ApplySchemeSettings(IScheme *pScheme)
 	if (!m_pSelect)
 		m_pSelect = scheme()->GetImage("resource/Control/buybutton/select", true);
 
-	m_availableColor = pScheme->GetColor("Label.TextColor", Color(0, 0, 0, 0));
-	m_unavailableColor = pScheme->GetColor("Label.DisabledFgColor2", Color(0, 0, 0, 0));
+	m_availableColor = pScheme->GetColor("Label.TextColor", Color(255, 255, 255, 255));
+	m_unavailableColor = pScheme->GetColor("Label.DisabledFgColor2", Color(255, 255, 255, 255));
 	SetFgColor(GetButtonFgColor());
 
 	if (m_iKeyOffset == -1)

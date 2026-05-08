@@ -46,7 +46,6 @@ Label::Label(Panel *parent, const char *panelName, const char *text) : Panel(par
 	SetText(text);
 	_textImageIndex = AddImage(_textImage, 0);
 }
-
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------

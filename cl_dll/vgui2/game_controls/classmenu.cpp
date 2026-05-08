@@ -40,6 +40,7 @@ CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pView
 
 	// hide the system buttons
 	SetTitleBarVisible( false );
+	// SetPaintTitleWhenTitleBarHidden(true);
 	SetProportional(true);
 
 	// info window about this class
@@ -62,6 +63,7 @@ CClassMenu::CClassMenu(IViewport* pViewPort, const char *panelName) : Frame(NULL
 
 	// hide the system buttons
 	SetTitleBarVisible( false );
+	// SetPaintTitleWhenTitleBarHidden(true);
 	SetProportional(true);
 
 	// info window about this class

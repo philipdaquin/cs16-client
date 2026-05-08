@@ -30,6 +30,7 @@ public:
 	CHudViewport() = default;
 
 	void ApplySchemeSettings(vgui2::IScheme* pScheme) override;
+	void Paint() override;
 
 	void Start() override;
 

@@ -184,6 +184,58 @@ using namespace vgui2;
 
 static BaseUISurface g_BaseUISurface;
 
+namespace
+{
+static bool g_FontBootstrapLoaded = false;
+
+static void BootstrapFontFiles()
+{
+    if ( g_FontBootstrapLoaded )
+        return;
+
+    g_FontBootstrapLoaded = true;
+
+    // Prefer the game resource fonts first; game/font is only the fallback.
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles start\n");
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/tahoma.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/tahoma.ttf" ) ? 1 : 0);
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/marlett.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/marlett.ttf" ) ? 1 : 0);
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/FiraSans-Regular.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/FiraSans-Regular.ttf" ) ? 1 : 0);
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/marlett.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/marlett.ttf" ) ? 1 : 0);
+    #ifndef DISABLE_MOE_VGUI2_EXT
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/font/Apple Color Emoji.ttc result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/font/Apple Color Emoji.ttc" ) ? 1 : 0);
+    #endif
+
+    FileFindHandle_t findHandle = NULL;
+    const char *pszFilename = vgui2::filesystem()->FindFirst("resource/fonts/*.ttf", &findHandle);
+    while (pszFilename)
+    {
+        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
+        pszFilename = vgui2::filesystem()->FindNext(findHandle);
+    }
+    vgui2::filesystem()->FindClose(findHandle);
+
+    findHandle = NULL;
+    pszFilename = vgui2::filesystem()->FindFirst("resource/font/*.ttf", &findHandle);
+    while (pszFilename)
+    {
+        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/font scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
+        pszFilename = vgui2::filesystem()->FindNext(findHandle);
+    }
+    vgui2::filesystem()->FindClose(findHandle);
+
+    findHandle = NULL;
+    pszFilename = vgui2::filesystem()->FindFirst("game/font/*.ttf", &findHandle);
+    while (pszFilename)
+    {
+        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add game/font scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
+        pszFilename = vgui2::filesystem()->FindNext(findHandle);
+    }
+    vgui2::filesystem()->FindClose(findHandle);
+
+    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles end\n");
+}
+}
+
 BaseUISurface *BaseUISurfaceSingleton()
 {
 	return &g_BaseUISurface;
@@ -254,29 +306,16 @@ void BaseUISurface::Init(vgui2::VPANEL embeddedPanel, IHTMLChromeController *pCh
     // The old font scan and HTML controller init paths can be restored once
     // we confirm they are safe in the current wasm bootstrap flow.
     m_pChromeController = pChromeController;
-    if ( !m_pChromeController )
+
+    BootstrapFontFiles();
+
+    if (!m_pChromeController)
         return;
-
-    /*
-    AddCustomFontFile( "resource/marlett.ttf" );
-    #ifndef DISABLE_MOE_VGUI2_EXT
-    AddCustomFontFile( "resource/font/Apple Color Emoji.ttc" );
-    #endif
-
-    FileFindHandle_t findHandle = NULL;
-    const char *pszFilename = vgui2::filesystem()->FindFirst("resource/font/*.ttf", &findHandle);
-    while (pszFilename)
-    {
-        AddCustomFontFile(pszFilename);
-        pszFilename = vgui2::filesystem()->FindNext(findHandle);
-    }
-    vgui2::filesystem()->FindClose(findHandle);
 
     if (pChromeController) {
         m_pChromeController->Init("htmlcache", "htmlcookies");
         m_pChromeController->SetCefThreadTargetFrameRate(60);
     }
-    */
 }
 
 void BaseUISurface::Shutdown() {
@@ -564,7 +603,9 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
             float texCoords[4];
 
             if (!m_FontTextureCache.GetTextureForChar(m_hCurrentFont, ch, &iTexId, texCoords))
+            {
                 continue;
+            }
 
             DrawSetTexture(iTexId);
 
@@ -591,7 +632,9 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
             float texCoords[4];
 
             if (!m_FontTextureCache.GetTextureForChar(m_hCurrentFont, ch, &iTexId, texCoords))
+            {
                 continue;
+            }
 
             Assert(texCoords);
 
@@ -990,10 +1033,12 @@ void BaseUISurface::SetTopLevelFocus(vgui2::VPANEL subFocus) {
 }
 
 vgui2::HFont BaseUISurface::CreateFont() {
+    BootstrapFontFiles();
     return FontManager().CreateFont();
 }
 
 bool BaseUISurface::AddGlyphSetToFont(vgui2::HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange) {
+    BootstrapFontFiles();
     return FontManager().SetFontGlyphSet(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
 }
 
@@ -1008,7 +1053,10 @@ bool BaseUISurface::AddCustomFontFile(const char *fontFileName) {
 
 #if defined(LINUX) || defined(OSX) || defined(WIN32)
     int size;
-    if ( BaseUISurface::FontDataHelper( nullptr, size, fontFileName ) )
+    const bool ok = BaseUISurface::FontDataHelper( nullptr, size, fontFileName ) != nullptr;
+    std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::AddCustomFontFile fontFile='%s' fullPath='%s' loaded=%d size=%d\n",
+        fontFileName ? fontFileName : "<null>", fullPath, ok ? 1 : 0, ok ? size : 0);
+    if ( ok )
         return true;
     return false;
 #elif defined WIN32
@@ -1426,6 +1474,8 @@ void BaseUISurface::DrawSetSubTextureRGBA(int textureID, int drawX, int drawY, c
 	*/
 	if (g_api && g_api->UploadTextureBlock)
 	{
+		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetSubTextureRGBA upload texture=%d dst=%d,%d size=%dx%d rgba=%p\n",
+			textureID, drawX, drawY, subTextureWide, subTextureTall, (const void *)rgba);
 		g_api->UploadTextureBlock(textureID, drawX, drawY, rgba, subTextureWide, subTextureTall);
 	}
 }
@@ -1682,6 +1732,9 @@ static void RemoveSpaces( CUtlString &str )
 const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, const char *fontFileName )
 {
     size = 0;
+    std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper request fontName='%s' fontFile='%s'\n",
+        pchFontName ? pchFontName : "<null>",
+        fontFileName ? fontFileName : "<null>");
 
     // redirect CSO font name
     if(pchFontName && (!Q_strcmp(pchFontName, "Verdana") || !Q_strcmp(pchFontName, "Trebuchet MS")))
@@ -1700,7 +1753,10 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
 
         if( !buffer )
         {
-            FILE *f = fopen(fontFileName, "rb");
+            char fullPath[4096];
+            vgui2::filesystem()->GetLocalPath(fontFileName, fullPath, sizeof(fullPath));
+
+            FILE *f = fopen(fullPath, "rb");
             if(f)
             {
                 fseek(f, SEEK_SET, SEEK_END);
@@ -1712,25 +1768,32 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
             }
         }
 
-	        if ( !buffer )
-	        {
-	            // Old path:
-	            // Msg( "Failed to load custom font file '%s'\n", fontFileName );
-	            gEngfuncs.Con_Printf("[VGUI2-TRACE] Failed to load custom font file '%s'\n", fontFileName);
-	            return NULL;
-	        }
+            if ( !buffer )
+            {
+                // Old path:
+                // Msg( "Failed to load custom font file '%s'\n", fontFileName );
+                gEngfuncs.Con_Printf("[VGUI2-TRACE] Failed to load custom font file '%s'\n", fontFileName);
+                std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper direct-load failed fontFile='%s' fontName='%s'\n",
+                    fontFileName ? fontFileName : "<null>",
+                    pchFontName ? pchFontName : "<null>");
+                return NULL;
+            }
 
         FT_Face face;
         const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
 
-	        if ( error  )
-	        {
-	            // FT_Err_Unknown_File_Format, etc.
-	            // Old path:
-	            // Msg( "ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName );
-	            gEngfuncs.Con_Printf("[VGUI2-TRACE] ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName);
+            if ( error  )
+            {
+                // FT_Err_Unknown_File_Format, etc.
+                // Old path:
+                // Msg( "ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName );
+                gEngfuncs.Con_Printf("[VGUI2-TRACE] ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName);
+                std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper freetype-failed error=%d fontFile='%s' fontName='%s'\n",
+                    (int)error,
+                    fontFileName ? fontFileName : "<null>",
+                    pchFontName ? pchFontName : "<null>");
 
-	            free(buffer);
+                free(buffer);
 
             return NULL;
         }
@@ -1770,6 +1833,98 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         {
             size = m_FontData[ iIndex ].size;
             return m_FontData[ iIndex ].data;
+        }
+
+        auto tryLoadDirectFont = [&]( const char *candidateFile ) -> const void *
+        {
+            if ( !candidateFile || !candidateFile[0] )
+                return NULL;
+
+            char fullPath[4096];
+            vgui2::filesystem()->GetLocalPath( candidateFile, fullPath, sizeof( fullPath ) );
+
+            FILE *f = fopen( fullPath, "rb" );
+            if ( !f )
+                return NULL;
+
+            fseek( f, SEEK_SET, SEEK_END );
+            fs_offset_t fileSize = ftell( f );
+            void *buffer = malloc( fileSize );
+            fseek( f, SEEK_SET, 0 );
+            fread( (char *)buffer, 1, fileSize, f );
+            fclose( f );
+
+            FT_Face face;
+            const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
+            if ( error )
+            {
+                free( buffer );
+                return NULL;
+            }
+
+            const char *cacheName = pchFontName;
+            if ( !cacheName )
+            {
+                cacheName = face->family_name;
+                if ( !cacheName || !cacheName[0] )
+                {
+                    cacheName = FT_Get_Postscript_Name( face );
+                }
+            }
+
+            CUtlString directFontName( cacheName ? cacheName : candidateFile );
+            RemoveSpaces( directFontName );
+
+            font_entry entry;
+            entry.size = fileSize;
+            entry.data = buffer;
+            m_FontData.Insert( directFontName.Get(), entry );
+            FT_Done_Face( face );
+
+            size = entry.size;
+            return entry.data;
+        };
+
+        const char *candidateFiles[] = {
+            "resource/fonts/tahoma.ttf",
+            "resource/fonts/marlett.ttf",
+            "resource/fonts/FiraSans-Regular.ttf",
+            "game/font/tahoma.ttf",
+            "game/font/marlett.ttf",
+            "game/font/FiraSans-Regular.ttf"
+        };
+
+        const bool wantsTahoma =
+            !Q_stricmp( pchFontName, "Tahoma" ) ||
+            !Q_stricmp( pchFontName, "Default" ) ||
+            !Q_stricmp( pchFontName, "DefaultSmall" ) ||
+            !Q_stricmp( pchFontName, "DefaultVerySmall" ) ||
+            !Q_stricmp( pchFontName, "DefaultVerySmallFallBack" ) ||
+            !Q_stricmp( pchFontName, "MenuTitle" ) ||
+            !Q_stricmp( pchFontName, "BrightControlText" ) ||
+            !Q_stricmp( pchFontName, "BaseText" ) ||
+            !Q_stricmp( pchFontName, "Label.TextColor" ) ||
+            !Q_stricmp( pchFontName, "Label.TextBrightColor" ) ||
+            !Q_stricmp( pchFontName, "Trebuchet MS" ) ||
+            !Q_stricmp( pchFontName, "Verdana" );
+        const bool wantsMarlett = !Q_stricmp( pchFontName, "Marlett" );
+        const bool wantsFira = !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" );
+        const bool wantsCourier = !Q_stricmp( pchFontName, "Courier" ) || !Q_stricmp( pchFontName, "Courier New" );
+
+        if ( wantsTahoma )
+        {
+            if ( const void *data = tryLoadDirectFont( candidateFiles[0] ) ) return data;
+            if ( const void *data = tryLoadDirectFont( candidateFiles[3] ) ) return data;
+        }
+        else if ( wantsMarlett )
+        {
+            if ( const void *data = tryLoadDirectFont( candidateFiles[1] ) ) return data;
+            if ( const void *data = tryLoadDirectFont( candidateFiles[4] ) ) return data;
+        }
+        else if ( wantsFira || wantsCourier )
+        {
+            if ( const void *data = tryLoadDirectFont( candidateFiles[2] ) ) return data;
+            if ( const void *data = tryLoadDirectFont( candidateFiles[5] ) ) return data;
         }
     }
 

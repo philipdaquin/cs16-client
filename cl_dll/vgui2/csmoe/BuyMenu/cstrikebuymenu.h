@@ -40,14 +40,14 @@ class CCSBaseBuyMenu : public CBuyMenu
 
 public:
 	CCSBaseBuyMenu(IViewport *pViewPort);
-	CCSBaseBuyMenu(IViewport *pViewPort, const char *subPanelName, const char *resourceName, int team);
+	CCSBaseBuyMenu(IViewport *pViewPort, int team);
 
 protected:
 	void SetupControlSettings();
 public:
 	void SetTeam(int iTeam);
 	void UpdateGameMode();
-	void LoadTeamResource(const char *subPanelName, const char *resourceName, int team);
+	void LoadTeamResource(int team);
 	void UpdateBuyPresets(bool showDefaultPanel = false);
 
 public:
@@ -66,6 +66,7 @@ public:
 
 private:
 	void SetupBuyPresetControls();
+	void ConfigureMainBuyMenuCommands();
 
 	bool m_backgroundLayoutFinished;
 	BuyPresetButton *m_pBuyPresetButtons[NUM_BUY_PRESET_BUTTONS];

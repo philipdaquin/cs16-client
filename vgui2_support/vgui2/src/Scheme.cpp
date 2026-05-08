@@ -742,7 +742,64 @@ void CScheme::ReloadFontGlyphs()
 			else
 			{
 				// add the new set
-				surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fontdata->GetString("name"), tall, fontdata->GetInt("weight"), blur, scanlines, flags, 0x0, 0xFFFF);
+				const char *fontFace = fontdata->GetString("name");
+				const char *resolvedFace = fontFace;
+
+				// Keep the original scheme names for logging, but resolve them to the
+				// fonts we actually ship in resource/fonts and game/font.
+				if ( fontFace )
+				{
+					if ( !Q_stricmp( fontFace, "Trebuchet MS" ) ||
+						!Q_stricmp( fontFace, "Verdana" ) ||
+						!Q_stricmp( fontFace, "Courier" ) ||
+						!Q_stricmp( fontFace, "Courier New" ) )
+					{
+						resolvedFace = "Tahoma";
+					}
+					else if ( !Q_stricmp( fontFace, "Marlett" ) )
+					{
+						resolvedFace = "Marlett";
+					}
+					else if ( !Q_stricmp( fontFace, "Fira Sans" ) ||
+						!Q_stricmp( fontFace, "FiraSans" ) )
+					{
+						resolvedFace = "FiraSans";
+					}
+				}
+
+				if ( !resolvedFace || !resolvedFace[0] )
+				{
+					resolvedFace = "Tahoma";
+				}
+
+				bool added = surface()->AddGlyphSetToFont(m_FontAliases[i]._font, resolvedFace, tall, fontdata->GetInt("weight"), blur, scanlines, flags, 0x0, 0xFFFF);
+
+				if (!added)
+				{
+					const char *fallbackFaces[] = { "Arial", "Tahoma", "DejaVu Sans" };
+					for (const char *fallbackFace : fallbackFaces)
+					{
+						if (!fallbackFace || !*fallbackFace || !Q_stricmp(fontFace, fallbackFace))
+							continue;
+
+						if (surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fallbackFace, tall, fontdata->GetInt("weight"), blur, scanlines, flags, 0x0, 0xFFFF))
+						{
+							added = true;
+							break;
+						}
+					}
+				}
+
+				if (!added)
+				{
+					std::fprintf(stderr,
+						"[VGUI2-TRACE] CScheme::ReloadFontGlyphs failed font='%s' alias='%s' tall=%d weight=%d flags=%d\n",
+						fontFace,
+						m_FontAliases[i]._fontName.String(),
+						tall,
+						fontdata->GetInt("weight"),
+						flags);
+				}
 			}
 
 			// don't add any more

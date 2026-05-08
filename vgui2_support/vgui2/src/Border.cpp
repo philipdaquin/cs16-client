@@ -94,11 +94,6 @@ void Border::Paint(int x, int y, int wide, int tall, int breakSide, int breakSta
 	for (i = 0; i < _sides[SIDE_LEFT].count; i++)
 	{
 		line_t *line = &(_sides[SIDE_LEFT].lines[i]);
-		// std::fprintf(stderr, "[BORDER-COLOR] rgba=%d %d %d %d\n",
-		// 	line->col[0],
-		// 	line->col[1],
-		// 	line->col[2],
-		// 	line->col[3]);
 		surface()->DrawSetColor(line->col[0], line->col[1], line->col[2], line->col[3]);
 
 		if (breakSide == SIDE_LEFT)
@@ -126,11 +121,6 @@ void Border::Paint(int x, int y, int wide, int tall, int breakSide, int breakSta
 	for (i = 0; i < _sides[SIDE_TOP].count; i++)
 	{
 		line_t *line = &(_sides[SIDE_TOP].lines[i]);
-		// std::fprintf(stderr, "[BORDER-COLOR] rgba=%d %d %d %d\n",
-		// 	line->col[0],
-		// 	line->col[1],
-		// 	line->col[2],
-		// 	line->col[3]);
 		surface()->DrawSetColor(line->col[0], line->col[1], line->col[2], line->col[3]);
 		
 		if (breakSide == SIDE_TOP)
@@ -158,11 +148,6 @@ void Border::Paint(int x, int y, int wide, int tall, int breakSide, int breakSta
 	for (i = 0; i < _sides[SIDE_RIGHT].count; i++)
 	{
 		line_t *line = &(_sides[SIDE_RIGHT].lines[i]);
-		// std::fprintf(stderr, "[BORDER-COLOR] rgba=%d %d %d %d\n",
-		// 	line->col[0],
-		// 	line->col[1],
-		// 	line->col[2],
-		// 	line->col[3]);
 		surface()->DrawSetColor(line->col[0], line->col[1], line->col[2], line->col[3]);
 		surface()->DrawFilledRect(wide - (i+1), y + line->startOffset, (wide - (i+1)) + 1, tall - line->endOffset);
 	}
@@ -171,11 +156,6 @@ void Border::Paint(int x, int y, int wide, int tall, int breakSide, int breakSta
 	for (i = 0; i < _sides[SIDE_BOTTOM].count; i++)
 	{
 		line_t *line = &(_sides[SIDE_BOTTOM].lines[i]);
-		// std::fprintf(stderr, "[BORDER-COLOR] rgba=%d %d %d %d\n",
-		// 	line->col[0],
-		// 	line->col[1],
-		// 	line->col[2],
-		// 	line->col[3]);
 		surface()->DrawSetColor(line->col[0], line->col[1], line->col[2], line->col[3]);
 		surface()->DrawFilledRect(x + line->startOffset, tall - (i+1), wide - line->endOffset, (tall - (i+1)) + 1);
 	}
@@ -295,3 +275,4 @@ IBorder::backgroundtype_e Border::GetBackgroundType(void)
 {
 	return m_eBackgroundType;
 }
+
