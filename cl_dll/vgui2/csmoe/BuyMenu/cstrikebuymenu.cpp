@@ -85,6 +85,8 @@ void CCSBaseBuyMenu::LoadTeamResource(int team)
 	m_pMainMenu = new CCSBuySubMenu(this, "BuySubMenu");
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource this=%p team=%d loading main='%s'\n",
 		this, m_iTeam, vgui2::resource_paths::kMenuBuyMain);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource LoadControlSettings main='%s' submenu=%p\n",
+		vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 	ConfigureMainBuyMenuCommands();
 	SetupBuyPresetControls();
@@ -203,6 +205,8 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 		{
 			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel prepare this=%p team=%d main='%s' mainPanel=%p current=%p\n",
 				this, m_iTeam, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel LoadControlSettings main='%s' submenu=%p\n",
+				vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
 			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 			ConfigureMainBuyMenuCommands();
 			SetupBuyPresetControls();

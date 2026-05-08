@@ -1,3 +1,4 @@
+#include "hud.h"
 #include <stdio.h>
 #include <wchar.h>
 #include <tier1/utlsymbol.h>
@@ -120,6 +121,12 @@ void WeaponImagePanel::BuildVanillaImagePath(const char *name, char *path, size_
 		return;
 	}
 
+	if (!strncmp(imageName, "gfx/vgui/", 9))
+	{
+		snprintf(path, pathSize, "%s", imageName);
+		return;
+	}
+
 	snprintf(path, pathSize, "gfx/vgui/%s", imageName);
 }
 
@@ -132,6 +139,11 @@ void WeaponImagePanel::SetWeapon(const char *name)
 
 	char path[MAX_PATH];
 	BuildVanillaImagePath(name, path, sizeof(path));
+	if (path[0])
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] WeaponImagePanel::SetWeapon name='%s' resolved='%s'\n",
+			name, path);
+	}
 	SetImage(path);
 
 	m_bBanned = false;

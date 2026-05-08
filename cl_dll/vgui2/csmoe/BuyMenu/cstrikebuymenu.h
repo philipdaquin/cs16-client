@@ -46,6 +46,7 @@ protected:
 	void SetupControlSettings();
 public:
 	void SetTeam(int iTeam);
+	int GetTeam() const { return m_iTeam; }
 	void UpdateGameMode();
 	void LoadTeamResource(int team);
 	void UpdateBuyPresets(bool showDefaultPanel = false);

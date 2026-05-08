@@ -168,6 +168,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		newEntry.panel = NULL;
 
 		CBuySubMenu *newMenu = CreateNewSubMenu();
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel LoadControlSettings resource='%s' submenu=%p\n",
+			fileName ? fileName : "<null>", (void *)newMenu);
 		newMenu->LoadControlSettings(fileName, "GAME");
 		m_NextPanel = newMenu;
 		Q_strncpy(newEntry.filename, fileName, sizeof(newEntry.filename));

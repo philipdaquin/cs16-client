@@ -54,13 +54,19 @@ void CBuyMenu::ShowPanel(bool bShow)
 	{
 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel open this=%p buy='%s' main='%s' mainPanel=%p current=%p\n",
 			this, vgui2::resource_paths::kMenuBuy, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel LoadControlSettings buy='%s'\n",
+			vgui2::resource_paths::kMenuBuy);
 		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 		if (!m_pMainMenu)
 			m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
 		if (m_pMainMenu)
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel LoadControlSettings main='%s' submenu=%p\n",
+				vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
 			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		}
 
 		Update();
 
