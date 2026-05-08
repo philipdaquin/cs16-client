@@ -46,7 +46,7 @@ CClassMenu::CClassMenu(IViewport* pViewPort) : Frame(NULL, PANEL_CLASS), m_pView
 	// info window about this class
 	m_pPanel = new EditablePanel( this, "ClassInfo" );
 
-	LoadControlSettings("resource/UI/ClassMenu.res", "GAME");
+	// Split CS class menus load Classmenu_CT.res/Classmenu_TER.res in their derived constructors.
 }
 
 CClassMenu::CClassMenu(IViewport* pViewPort, const char *panelName) : Frame(NULL, panelName ? panelName : PANEL_CLASS), m_pViewPort(pViewPort)

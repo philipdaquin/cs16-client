@@ -136,12 +136,16 @@ void CBuySubMenu::DeleteSubPanels(void)
 
 void CBuySubMenu::GotoNextSubPanel(void)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::GotoNextSubPanel this=%p wizard=%p next=%p\n",
+		this, (void *)GetWizardPanel(), (void *)m_NextPanel);
 	if (GetWizardPanel())
 		GetWizardPanel()->OnNextButton();
 }
 
 void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel this=%p resource='%s'\n",
+		this, fileName ? fileName : "<null>");
 	int i;
 
 	for (i = 0; i < m_SubMenus.Count(); i++)
@@ -151,6 +155,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 			m_NextPanel = m_SubMenus[i].panel;
 			Assert(m_NextPanel);
 			m_NextPanel->InvalidateLayout();
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel cached this=%p resource='%s' panel=%p\n",
+				this, fileName ? fileName : "<null>", (void *)m_NextPanel);
 			return;
 		}
 	}
@@ -167,6 +173,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		Q_strncpy(newEntry.filename, fileName, sizeof(newEntry.filename));
 		newEntry.panel = newMenu;
 		m_SubMenus.AddToTail(newEntry);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel loaded this=%p resource='%s' panel=%p\n",
+			this, fileName ? fileName : "<null>", (void *)m_NextPanel);
 	}
 }
 

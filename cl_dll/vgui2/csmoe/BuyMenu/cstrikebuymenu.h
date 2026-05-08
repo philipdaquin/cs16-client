@@ -54,6 +54,7 @@ public:
 	virtual void Init(void);
 	virtual void VidInit(void);
 	virtual void ShowPanel(bool bShow);
+	virtual void Update(void);
 	virtual void Paint(void);
 	virtual void SetVisible(bool state);
 	virtual void GotoMenu(int iMenu);

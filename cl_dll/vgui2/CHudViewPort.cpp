@@ -440,29 +440,13 @@ void CHudViewport::OpenBuyMenuForLocalTeam(bool equipmentMenu)
 {
 	if (cl::g_iTeamNumber == TEAM_CT)
 	{
-		if (equipmentMenu)
-		{
-			OpenPanelWithCheck(PANEL_BUY_EQUIP_CT, PANEL_BUY_CT);
-		}
-		else
-		{
-			CCSBaseBuyMenu *buyMenu = m_pBuyMenuCT ? m_pBuyMenuCT : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_CT));
-			if (buyMenu)
-				buyMenu->ActivateMenu(MENU_BUY);
-		}
+		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_CT : PANEL_BUY_CT,
+			equipmentMenu ? PANEL_BUY_CT : PANEL_BUY_EQUIP_CT);
 	}
 	else if (cl::g_iTeamNumber == TEAM_TERRORIST)
 	{
-		if (equipmentMenu)
-		{
-			OpenPanelWithCheck(PANEL_BUY_EQUIP_TER, PANEL_BUY_TER);
-		}
-		else
-		{
-			CCSBaseBuyMenu *buyMenu = m_pBuyMenuTER ? m_pBuyMenuTER : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_TER));
-			if (buyMenu)
-				buyMenu->ActivateMenu(MENU_BUY);
-		}
+		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_TER : PANEL_BUY_TER,
+			equipmentMenu ? PANEL_BUY_TER : PANEL_BUY_EQUIP_TER);
 	}
 }
 

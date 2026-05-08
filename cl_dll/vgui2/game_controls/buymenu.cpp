@@ -50,18 +50,25 @@ void CBuyMenu::ShowPanel(bool bShow)
 	if (BaseClass::IsVisible() == bShow)
 		return;
 
-
 	if (bShow)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel reloading base buy resources this=%p buy='%s' main='%s'\n",
-			this, vgui2::resource_paths::kMenuBuy, vgui2::resource_paths::kMenuBuyMain);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel open this=%p buy='%s' main='%s' mainPanel=%p current=%p\n",
+			this, vgui2::resource_paths::kMenuBuy, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+
+		if (!m_pMainMenu)
+			m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
+
 		if (m_pMainMenu)
 			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 
 		Update();
 
-		// Run(m_pMainMenu);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel before-run this=%p mainPanel=%p current=%p visible=%d\n",
+			this, (void *)m_pMainMenu, (void *)GetCurrentSubPanel(), m_pMainMenu ? (m_pMainMenu->IsVisible() ? 1 : 0) : -1);
+		Run(m_pMainMenu);
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel after-run this=%p mainPanel=%p current=%p visible=%d\n",
+			this, (void *)m_pMainMenu, (void *)GetCurrentSubPanel(), m_pMainMenu ? (m_pMainMenu->IsVisible() ? 1 : 0) : -1);
 
 		Activate();
 		SetMouseInputEnabled(true);

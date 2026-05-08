@@ -8,6 +8,7 @@
 #include "buypresetbutton.h"
 #include "buypreset_weaponsetlabel.h"
 #include "shared_util.h"
+#include "../vgui_int.h"
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
 #include <vgui_controls/Button.h>
@@ -125,8 +126,11 @@ void CCSBaseBuyMenu::SetupBuyPresetControls()
 		m_pMoney = new Label(m_pMainMenu, "money", "");
 
 	m_pLoadout = m_pMainMenu ? dynamic_cast<BuyPresetEditPanel *>(m_pMainMenu->FindChildByName("loadoutPanel")) : NULL;
-	if (!m_pLoadout && m_pMainMenu)
-		m_pLoadout = new BuyPresetEditPanel(m_pMainMenu, "loadoutPanel", "resource/UI/Loadout.res", 0, false);
+	if (!m_pLoadout)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::SetupBuyPresetControls no loadoutPanel in '%s'; skipping preset editor\n",
+			vgui2::resource_paths::kMenuBuyMain);
+	}
 
 	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
 	{
@@ -184,15 +188,40 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 	{
 		if (cl::gHUD.m_iIntermission || cl::gEngfuncs.IsSpectateOnly())
 			return;
+
+		int wide = 0;
+		int tall = 0;
+		GetHudSize(wide, tall);
+		SetPos(0, 0);
+		SetSize(wide, tall);
+
+		const int team = (cl::g_iTeamNumber == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
+		SetTeam(team);
+		ResetHistory();
+		ResetCurrentSubPanel();
+		if (m_pMainMenu)
+		{
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel prepare this=%p team=%d main='%s' mainPanel=%p current=%p\n",
+				this, m_iTeam, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+			ConfigureMainBuyMenuCommands();
+			SetupBuyPresetControls();
+			m_pMainMenu->InvalidateLayout();
+		}
 	}
 
 	BaseClass::ShowPanel(bShow);
 
-	if (bShow)
-		ConfigureMainBuyMenuCommands();
-
 	// if (bShow)
 	// 	UpdateBuyPresets(true);
+}
+
+void CCSBaseBuyMenu::Update(void)
+{
+	ConfigureMainBuyMenuCommands();
+	SetupBuyPresetControls();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::Update this=%p team=%d mainPanel=%p current=%p\n",
+		this, m_iTeam, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 }
 
 void CCSBaseBuyMenu::Paint(void)
@@ -297,14 +326,14 @@ void CCSBaseBuyMenu::UpdateBuyPresets(bool)
 		button->SetVisible(true);
 		button->SetEnabled(true);
 	}
+
+	Run(m_pMainMenu);
 }
 
 void CCSBaseBuyMenu::GotoMenu(int iMenu)
 {
 	if (!m_pMainMenu)
 		return;
-
-	Run(m_pMainMenu);
 
 	const char *resource = nullptr;
 	switch (iMenu)
@@ -324,6 +353,9 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 	case MENU_BUY_MACHINEGUN:
 		resource = (m_iTeam == TEAM_TERRORIST) ? vgui2::resource_paths::kMenuBuyMachinegunsTER : vgui2::resource_paths::kMenuBuyMachinegunsCT;
 		break;
+	case MENU_BUY_ITEM:
+		resource = (m_iTeam == TEAM_TERRORIST) ? vgui2::resource_paths::kMenuBuyEquipmentTER : vgui2::resource_paths::kMenuBuyEquipmentCT;
+		break;
 	case MENU_BUY:
 	default:
 		resource = nullptr;
@@ -332,6 +364,8 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 
 	if (resource)
 	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::GotoMenu this=%p menu=%d team=%d resource='%s' mainPanel=%p current=%p\n",
+			this, iMenu, m_iTeam, resource, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 		m_pMainMenu->SetupNextSubPanel(resource);
 		m_pMainMenu->GotoNextSubPanel();
 	}
@@ -339,9 +373,28 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 
 void CCSBaseBuyMenu::ActivateMenu(int iMenu)
 {
-	SetupControlSettings();
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu entry this=%p menu=%d team=%d visible=%d mainPanel=%p current=%p\n",
+		this, iMenu, m_iTeam, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 	g_pViewport->ShowPanel(this, true);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-show this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
+		this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+
+	if (iMenu == MENU_BUY)
+	{
+		if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
+		{
+			ResetHistory();
+			Run(m_pMainMenu);
+		}
+		return;
+	}
+
+	if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
+		Run(m_pMainMenu);
+
 	GotoMenu(iMenu);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-goto this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
+		this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 }
 
 void CCSBaseBuyMenu::SetTeam(int iTeam)
