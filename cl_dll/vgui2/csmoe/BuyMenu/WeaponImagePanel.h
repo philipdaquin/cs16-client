@@ -22,9 +22,6 @@ public:
 
 	virtual void PaintBackground() override;
 
-	static const char *ResolveVanillaImageName(const char *weapon);
-	static void BuildVanillaImagePath(const char *weapon, char *path, size_t pathSize);
-
 	void SetWeapon(const char *weapon);
 	void SetWeapon(nullptr_t);
 private:

@@ -1059,6 +1059,11 @@ IImage *CSchemeManager::GetImage(const char *imageName, bool hardwareFiltered)
 
 	// couldn't find the image, try and load it
 	CachedBitmapHandle_t bitmap = { new Bitmap(szFileName, hardwareFiltered) };
+	if (bitmap.bitmap && !bitmap.bitmap->IsValid() && Q_strnicmp(szFileName, "gfx/vgui/not_available", 22) != 0)
+	{
+		delete bitmap.bitmap;
+		bitmap.bitmap = new Bitmap("gfx/vgui/not_available", hardwareFiltered);
+	}
 	m_Bitmaps.Insert(bitmap);
 	return bitmap.bitmap;
 }

@@ -713,7 +713,10 @@ void BaseUISurface::DeleteHTMLWindow(class vgui2::IHTML *) {
 
 void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardwareFilter, bool forceReload) {
 	char name[512];
-	snprintf(name, sizeof(name), "%s.tga", filename);
+	if (filename && (Q_stristr(filename, ".tga") || Q_stristr(filename, ".bmp") || Q_stristr(filename, ".pic")))
+		snprintf(name, sizeof(name), "%s", filename);
+	else
+		snprintf(name, sizeof(name), "%s.tga", filename ? filename : "");
 	rgbdata_t *pic = nullptr;
 	std::fprintf(stderr,
 		"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile enter id=%d filename='%s' tga='%s' forceReload=%d hardwareFilter=%d\n",
@@ -739,24 +742,12 @@ void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardw
 	if (!pic)
 	{
 		std::fprintf(stderr,
-			"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile tga miss id=%d filename='%s' fallback='bmp'\n",
+			"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile tga miss id=%d filename='%s'\n",
 			id,
 			name);
-		snprintf(name, sizeof(name), "%s.bmp", filename);
-
-		pic = vgui2::gEngfuncs.FS_LoadImage( name, nullptr, 0 );
-
-        // pic = FS_LoadImage( name, nullptr, 0 );
-
-		if (!pic)
-		{
-			std::fprintf(stderr,
-				"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile bmp miss id=%d filename='%s'\n",
-				id,
-				name);
-			DrawSetTexture(id);
-			return;
-		}
+		static const unsigned char s_TransparentPixel[4] = {0, 0, 0, 0};
+		DrawSetTextureRGBA(id, s_TransparentPixel, 1, 1, hardwareFilter, forceReload);
+		return;
 	}
 
 	std::fprintf(stderr,

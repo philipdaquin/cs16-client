@@ -83,9 +83,8 @@ public:
 	{
 		const char *classPage = GetClassPage(GetName());
 
-		m_pPanel->LoadControlSettings(classPage, "GAME");
-
 		m_pPanel->LoadControlSettings("classes/default.res", "GAME");
+		m_pPanel->LoadControlSettings(classPage, "GAME");
 
 		return true;
 	}

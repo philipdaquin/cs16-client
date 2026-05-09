@@ -24,6 +24,26 @@
 
 using namespace vgui2;
 
+static void BuildWeaponImagePath(const char *weapon, char *buffer, size_t bufferSize)
+{
+	if (!buffer || !bufferSize)
+		return;
+
+	if (!weapon || !weapon[0])
+	{
+		buffer[0] = '\0';
+		return;
+	}
+
+	if (!strncmp(weapon, "gfx/vgui/", 9))
+	{
+		Q_strncpy(buffer, weapon, bufferSize);
+		return;
+	}
+
+	Q_snprintf(buffer, bufferSize, "gfx/vgui/%s", weapon);
+}
+
 CSBuyMouseOverPanel::CSBuyMouseOverPanel(vgui2::Panel *parent, const char *panelName) : BaseClass(parent, panelName)
 {
 	SetMouseInputEnabled(false);
@@ -107,7 +127,7 @@ void CSBuyMouseOverPanel::UpdateWeapon(const char *weapon)
 		return;
 	
 	char szBuffer[64];
-	WeaponImagePanel::BuildVanillaImagePath(weapon, szBuffer, sizeof(szBuffer));
+	BuildWeaponImagePath(weapon, szBuffer, sizeof(szBuffer));
 	classimage->SetImage(szBuffer);
 
 	std::string str1("#CStrike_");

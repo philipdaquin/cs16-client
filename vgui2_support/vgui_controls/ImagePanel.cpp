@@ -26,29 +26,45 @@ DECLARE_BUILD_FACTORY(ImagePanel);
 
 namespace
 {
-	const char *kVGuiMissingImage = "gfx/vgui/noimg";
+	const char *kMissingImagePath = "gfx/vgui/not_available";
 
-	bool IsVGuiImagePath(const char *imageName)
+	static void ResolveImagePath(const char *imageName, char *resolvedPath, size_t resolvedPathSize)
 	{
-		return imageName && !Q_strnicmp(imageName, "gfx/vgui/", 9);
+		if (!resolvedPath || !resolvedPathSize)
+			return;
+
+		if (!imageName || !imageName[0])
+		{
+			resolvedPath[0] = '\0';
+			return;
+		}
+
+		if (!Q_strnicmp(imageName, "resource/", 9) || !Q_strnicmp(imageName, "gfx/", 4) || !Q_strnicmp(imageName, "vgui/", 5))
+		{
+			Q_snprintf(resolvedPath, resolvedPathSize, "%s", imageName);
+			return;
+		}
+
+		Q_snprintf(resolvedPath, resolvedPathSize, "gfx/vgui/%s", imageName);
 	}
 
-	bool IsMissingImagePath(const char *imageName)
+	static IImage *LoadImageWithFallback(const char *imageName, bool hardwareFiltered)
 	{
-		return imageName && !Q_stricmp(imageName, kVGuiMissingImage);
-	}
+		char resolvedPath[256];
+		ResolveImagePath(imageName, resolvedPath, sizeof(resolvedPath));
 
-	IImage *LoadImageWithFallback(const char *imageName, bool scaleImage)
-	{
-		IImage *image = scheme()->GetImage(imageName, scaleImage);
+		if (!resolvedPath[0])
+			return NULL;
+
+		IImage *image = scheme()->GetImage(resolvedPath, hardwareFiltered);
 
 		int wide = 0;
 		int tall = 0;
 		if (image)
 			image->GetSize(wide, tall);
 
-		if ((!image || (wide <= 0 && tall <= 0)) && IsVGuiImagePath(imageName) && !IsMissingImagePath(imageName))
-			image = scheme()->GetImage(kVGuiMissingImage, scaleImage);
+		if ((!image || (wide <= 0 && tall <= 0)) && Q_stricmp(resolvedPath, kMissingImagePath) != 0)
+			image = scheme()->GetImage(kMissingImagePath, hardwareFiltered);
 
 		return image;
 	}
