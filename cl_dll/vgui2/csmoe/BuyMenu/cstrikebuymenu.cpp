@@ -154,6 +154,11 @@ void CCSBaseBuyMenu::SetupControlSettings()
 		LoadTeamResource(TEAM_CT);
 	else
 		LoadTeamResource(TEAM_TERRORIST);
+
+	// if (m_pMainMenu) { 
+	// 	m_pMainMenu->SetVisible(false);
+	// }
+
 }
 
 void CCSBaseBuyMenu::SetVisible(bool state)

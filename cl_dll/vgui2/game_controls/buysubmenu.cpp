@@ -39,7 +39,7 @@ Panel *CBuySubMenu::CreateControlByName(const char *controlName)
 
 		return newButton;
 	}
-	else
+	else 
 		return BaseClass::CreateControlByName(controlName);
 }
 
@@ -90,6 +90,13 @@ MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *
 
 void CBuySubMenu::OnCommand(const char *command)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::OnCommand this=%p name='%s' command='%s' current=%p next=%p visible=%d\n",
+		this,
+		GetName() ? GetName() : "<null>",
+		command ? command : "<null>",
+		(void *)m_NextPanel,
+		IsVisible() ? 1 : 0);
+
 	if (Q_strstr(command, ".res"))
 	{
 		// int i;
@@ -131,6 +138,7 @@ void CBuySubMenu::OnCommand(const char *command)
 	Close();
 
 	gEngfuncs.pfnClientCmd((char *)command);
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::OnCommand clientcmd sent command='%s'\n", command);
 
 	BaseClass::OnCommand(command);
 }

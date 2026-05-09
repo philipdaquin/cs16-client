@@ -104,8 +104,6 @@ void CCSBuySubMenu::PerformLayout()
 	if (!m_backgroundLayoutFinished)
 		ResizeWindowControls(this, GetTall(), GetWide(), offsetX, offsetY);
 	m_backgroundLayoutFinished = true;
-
-	HandleAvailability();
 }
 
 MouseOverPanelButton *CCSBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
@@ -116,14 +114,4 @@ MouseOverPanelButton *CCSBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel
 CBuySubMenu *CCSBuySubMenu::CreateNewSubMenu(const char *name)
 {
 	return new CCSBuySubMenu(this, name);
-}
-
-void CCSBuySubMenu::HandleAvailability()
-{
-	for (int i = 0; i < GetChildCount(); ++i)
-	{
-		BuyMouseOverPanelButton *button = dynamic_cast<BuyMouseOverPanelButton *>(GetChild(i));
-		if (button)
-			button->RefreshState();
-	}
 }

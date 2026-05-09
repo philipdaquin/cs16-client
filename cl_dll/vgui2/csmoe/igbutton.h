@@ -6,6 +6,8 @@
 #include <vgui_controls/Button.h>
 #include <vgui/ISurface.h>
 
+#include "shared_util.h"
+
 class IGButton : public vgui2::Button
 {
 	typedef vgui2::Button BaseClass;

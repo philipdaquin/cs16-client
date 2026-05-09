@@ -10,6 +10,8 @@
 #include <vgui/KeyCode.h>
 #include <FileSystem.h>
 
+#include "shared_util.h"
+
 class BuyPresetImagePanel;
 
 class BuyPresetButton : public vgui2::Button

@@ -23,8 +23,6 @@ protected:
 	virtual MouseOverPanelButton *CreateNewMouseOverPanelButton(vgui2::EditablePanel *panel) override;
 	virtual CBuySubMenu *CreateNewSubMenu(const char *name = "BuySubMenu") override;
 
-	void HandleAvailability();
-
 	bool m_backgroundLayoutFinished;
 };
 
