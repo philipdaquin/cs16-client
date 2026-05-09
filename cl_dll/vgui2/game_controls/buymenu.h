@@ -47,6 +47,9 @@ public:
 	virtual void OnKeyCodeTyped(vgui2::KeyCode code);
 
 protected:
+	virtual void ResetMenuState(void);
+
+protected:
 	CBuySubMenu *m_pMainMenu;
 	IViewport	*m_pViewPort;
 

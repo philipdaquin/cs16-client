@@ -2,6 +2,7 @@
 
 #include <KeyValues.h>
 #include <vgui/IInputInternal.h>
+#include <vgui/IPanel.h>
 #include <vgui/IScheme.h>
 #include <IEngineVGui.h>
 #include <vgui/ISurface.h>
@@ -431,6 +432,15 @@ void CHudViewport::UpdateGameMode()
 
 void CHudViewport::OpenPanelWithCheck(const char *panelToOpen, const char *panelToCheck)
 {
+	IViewportPanel *targetPanel = FindPanelByName(panelToOpen);
+	const bool targetFullyVisible = targetPanel ? vgui2::ipanel()->IsFullyVisible(targetPanel->GetVPanel()) : false;
+	if (targetPanel && targetFullyVisible && GetActivePanel() == targetPanel)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::OpenPanelWithCheck skip active target='%s' panel=%p active=%p fullyVisible=%d\n",
+			panelToOpen ? panelToOpen : "<null>", (void *)targetPanel, (void *)GetActivePanel(), targetFullyVisible ? 1 : 0);
+		return;
+	}
+
 	IViewportPanel *checkPanel = FindPanelByName(panelToCheck);
 	if (!checkPanel || !checkPanel->IsVisible())
 		ShowPanel(panelToOpen, true);

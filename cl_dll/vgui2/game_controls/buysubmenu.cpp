@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "../CBaseViewport.h"
+#include "buymenu.h"
 #include "buysubmenu.h"
 #include "tier1/KeyValues.h"
 #include "vgui_controls/WizardPanel.h"
@@ -64,8 +65,15 @@ void CBuySubMenu::SetVisible(bool state)
 
 void CBuySubMenu::Close(void)
 {
+	CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(GetWizardPanel());
+	if (buyMenu && g_pViewport)
+	{
+		g_pViewport->ShowPanel(buyMenu, false);
+		return;
+	}
+
 	if (GetWizardPanel())
-		GetWizardPanel()->Close();
+		GetWizardPanel()->SetVisible(false);
 
     g_pViewport->ShowBackGround(false);
 }
@@ -111,20 +119,33 @@ void CBuySubMenu::OnCommand(const char *command)
 		// }
 		SetupNextSubPanel(command);
 		GotoNextSubPanel();
+		return;
 	}
-	else
+
+	if (!Q_stricmp(command, "vguicancel"))
 	{
 		Close();
-
-		if (Q_stricmp(command, "vguicancel") != 0)
-			gEngfuncs.pfnClientCmd((char *)command);
-
-		BaseClass::OnCommand(command);
+		return;
 	}
+
+	Close();
+
+	gEngfuncs.pfnClientCmd((char *)command);
+
+	BaseClass::OnCommand(command);
 }
 
 void CBuySubMenu::DeleteSubPanels(void)
 {
+	for (int i = 0; i < m_SubMenus.Count(); ++i)
+	{
+		if (m_SubMenus[i].panel)
+		{
+			m_SubMenus[i].panel->DeleteSubPanels();
+			m_SubMenus[i].panel->SetVisible(false);
+		}
+	}
+
 	if (m_NextPanel)
 	{
 		m_NextPanel->SetVisible(false);
@@ -138,8 +159,8 @@ void CBuySubMenu::GotoNextSubPanel(void)
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::GotoNextSubPanel this=%p wizard=%p next=%p\n",
 		this, (void *)GetWizardPanel(), (void *)m_NextPanel);
-	if (GetWizardPanel())
-		GetWizardPanel()->OnNextButton();
+	if (GetWizardPanel() && m_NextPanel)
+		GetWizardPanel()->Run(m_NextPanel);
 }
 
 void CBuySubMenu::SetupNextSubPanel(const char *fileName)

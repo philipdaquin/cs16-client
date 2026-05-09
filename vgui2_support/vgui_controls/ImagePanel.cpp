@@ -24,6 +24,36 @@ using namespace vgui2;
 
 DECLARE_BUILD_FACTORY(ImagePanel);
 
+namespace
+{
+	const char *kVGuiMissingImage = "gfx/vgui/noimg";
+
+	bool IsVGuiImagePath(const char *imageName)
+	{
+		return imageName && !Q_strnicmp(imageName, "gfx/vgui/", 9);
+	}
+
+	bool IsMissingImagePath(const char *imageName)
+	{
+		return imageName && !Q_stricmp(imageName, kVGuiMissingImage);
+	}
+
+	IImage *LoadImageWithFallback(const char *imageName, bool scaleImage)
+	{
+		IImage *image = scheme()->GetImage(imageName, scaleImage);
+
+		int wide = 0;
+		int tall = 0;
+		if (image)
+			image->GetSize(wide, tall);
+
+		if ((!image || (wide <= 0 && tall <= 0)) && IsVGuiImagePath(imageName) && !IsMissingImagePath(imageName))
+			image = scheme()->GetImage(kVGuiMissingImage, scaleImage);
+
+		return image;
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -231,7 +261,7 @@ void ImagePanel::PaintBackground()
 	{
 		if (m_pszImageName && strlen(m_pszImageName) > 0)
 		{
-			SetImage(scheme()->GetImage(m_pszImageName, m_bScaleImage));
+			SetImage(LoadImageWithFallback(m_pszImageName, m_bScaleImage));
 		}
 	}
 }
@@ -323,7 +353,7 @@ void ImagePanel::ApplySchemeSettings(IScheme *pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	if (m_pszImageName && strlen(m_pszImageName) > 0)
 	{
-		SetImage(scheme()->GetImage(m_pszImageName, m_bScaleImage));
+		SetImage(LoadImageWithFallback(m_pszImageName, m_bScaleImage));
 	}
 }
 

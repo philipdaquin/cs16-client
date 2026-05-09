@@ -81,6 +81,7 @@ void CBuyMenu::ShowPanel(bool bShow)
 	}
 	else
 	{
+		ResetMenuState();
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}
@@ -95,9 +96,21 @@ void CBuyMenu::Update(void)
 
 void CBuyMenu::OnClose(void)
 {
+	ResetMenuState();
 	BaseClass::OnClose();
+	m_pViewPort->ShowBackGround(false);
+}
 
+void CBuyMenu::ResetMenuState(void)
+{
 	ResetHistory();
+	ResetCurrentSubPanel();
+
+	if (m_pMainMenu)
+	{
+		m_pMainMenu->DeleteSubPanels();
+		m_pMainMenu->SetVisible(false);
+	}
 }
 
 void CBuyMenu::OnKeyCodeTyped(KeyCode code)
