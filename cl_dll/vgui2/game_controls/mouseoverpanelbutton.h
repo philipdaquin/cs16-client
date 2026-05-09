@@ -9,7 +9,9 @@
 #include "vgui_controls/Button.h"
 #include "vgui_controls/PHandle.h"
 #include "vgui/KeyCode.h"
+#include "vgui/MouseCode.h"
 #include "FileSystem.h"
+#include "hud.h"
 
 class MouseOverPanelButton : public vgui2::Button
 {
@@ -144,6 +146,34 @@ public:
                 ShowPage();
             }
 		}
+	}
+
+	virtual void OnMousePressed(vgui2::MouseCode code)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] MouseOverPanelButton::OnMousePressed this=%p name='%s' code=%d visible=%d enabled=%d armed=%d panel=%p parent=%p\n",
+			this,
+			GetName() ? GetName() : "<null>",
+			(int)code,
+			IsVisible() ? 1 : 0,
+			IsEnabled() ? 1 : 0,
+			IsArmed() ? 1 : 0,
+			(void *)m_pPanel,
+			(void *)GetParent());
+		BaseClass::OnMousePressed(code);
+	}
+
+	virtual void OnMouseReleased(vgui2::MouseCode code)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] MouseOverPanelButton::OnMouseReleased this=%p name='%s' code=%d visible=%d enabled=%d armed=%d panel=%p parent=%p\n",
+			this,
+			GetName() ? GetName() : "<null>",
+			(int)code,
+			IsVisible() ? 1 : 0,
+			IsEnabled() ? 1 : 0,
+			IsArmed() ? 1 : 0,
+			(void *)m_pPanel,
+			(void *)GetParent());
+		BaseClass::OnMouseReleased(code);
 	}
 
 	virtual void OnKeyCodeReleased(vgui2::KeyCode code)

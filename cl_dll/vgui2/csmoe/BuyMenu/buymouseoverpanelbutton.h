@@ -12,6 +12,7 @@
 #include "shared_util.h"
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
+#include <vgui/MouseCode.h>
 #include <vgui_controls/ImagePanel.h>
 
 class BuyMouseOverPanelButton : public NewMouseOverPanelButton
@@ -21,6 +22,7 @@ class BuyMouseOverPanelButton : public NewMouseOverPanelButton
 public:
 	BuyMouseOverPanelButton(vgui2::Panel *parent, const char *panelName, vgui2::EditablePanel *panel) : BaseClass(parent, panelName, panel)
 	{
+		SetButtonActivationType(ACTIVATE_ONPRESSED);
 		m_iPrice = 0;
 		m_iASRestrict = 0;
 		m_iDEUseOnly = 0;
@@ -99,6 +101,50 @@ public:
 	virtual void PaintBackground(void)
 	{
 		BaseClass::PaintBackground();
+	}
+
+	virtual void OnMousePressed(vgui2::MouseCode code)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] BuyMouseOverPanelButton::OnMousePressed this=%p name='%s' code=%d visible=%d enabled=%d armed=%d price=%d panel=%p parent=%p\n",
+			this,
+			GetName() ? GetName() : "<null>",
+			(int)code,
+			IsVisible() ? 1 : 0,
+			IsEnabled() ? 1 : 0,
+			IsArmed() ? 1 : 0,
+			m_iPrice,
+			(void *)GetClassPanel(),
+			(void *)GetParent());
+		BaseClass::OnMousePressed(code);
+	}
+
+	virtual void OnMouseReleased(vgui2::MouseCode code)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] BuyMouseOverPanelButton::OnMouseReleased this=%p name='%s' code=%d visible=%d enabled=%d armed=%d price=%d panel=%p parent=%p\n",
+			this,
+			GetName() ? GetName() : "<null>",
+			(int)code,
+			IsVisible() ? 1 : 0,
+			IsEnabled() ? 1 : 0,
+			IsArmed() ? 1 : 0,
+			m_iPrice,
+			(void *)GetClassPanel(),
+			(void *)GetParent());
+		BaseClass::OnMouseReleased(code);
+	}
+
+	virtual void FireActionSignal(void)
+	{
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] BuyMouseOverPanelButton::FireActionSignal this=%p name='%s' price=%d armed=%d visible=%d enabled=%d panel=%p parent=%p\n",
+			this,
+			GetName() ? GetName() : "<null>",
+			m_iPrice,
+			IsArmed() ? 1 : 0,
+			IsVisible() ? 1 : 0,
+			IsEnabled() ? 1 : 0,
+			(void *)GetClassPanel(),
+			(void *)GetParent());
+		BaseClass::FireActionSignal();
 	}
 
 	void SetCurrentPrice(int iPrice)
