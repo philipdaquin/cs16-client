@@ -9,6 +9,7 @@ build-local
 *.pch
 
 /cl_dll/vgui2/cs-source 
+/cl_dll/vgui2/csmoe/original_csmoe_files
 
 
 # Compiled Dynamic libraries

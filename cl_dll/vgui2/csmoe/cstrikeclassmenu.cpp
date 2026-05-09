@@ -55,8 +55,8 @@ void CClassMenu_TER::SetupControlSettings()
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_TER::SetupControlSettings this=%p loading='%s'\n",
 		this, vgui2::resource_paths::kMenuClassTER);
-	g_lastPanel = nullptr;
-	g_lastButton = nullptr;
+	MouseOverPanelButton::s_lastPanel = nullptr;
+	MouseOverPanelButton::s_lastButton = nullptr;
 	m_mouseoverButtons.Purge();
 	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
 		m_pPanel = classInfo;
@@ -165,8 +165,8 @@ void CClassMenu_CT::SetupControlSettings()
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CClassMenu_CT::SetupControlSettings this=%p loading='%s'\n",
 		this, vgui2::resource_paths::kMenuClassCT);
-	g_lastPanel = nullptr;
-	g_lastButton = nullptr;
+	MouseOverPanelButton::s_lastPanel = nullptr;
+	MouseOverPanelButton::s_lastButton = nullptr;
 	m_mouseoverButtons.Purge();
 	if (EditablePanel *classInfo = dynamic_cast<EditablePanel *>(FindChildByName("ClassInfo")))
 		m_pPanel = classInfo;
