@@ -12,6 +12,7 @@ inline constexpr const char kMenuClassCT[] = "resource/UI/Classmenu_CT.res";
 inline constexpr const char kMenuClassTER[] = "resource/UI/Classmenu_TER.res";
 inline constexpr const char kMenuBuy[] = "resource/UI/BuyMenu.res";
 inline constexpr const char kMenuBuyMain[] = "resource/UI/MainBuyMenu.res";
+// inline constexpr const char kMenuBuyMain[] = "resource/UI/BuyPistols_CT.res";
 inline constexpr const char kMenuBuyEquipmentCT[] = "resource/UI/BuyEquipment_CT.res";
 inline constexpr const char kMenuBuyEquipmentTER[] = "resource/UI/BuyEquipment_TER.res";
 inline constexpr const char kMenuBuyPistolsCT[] = "resource/UI/BuyPistols_CT.res";
