@@ -741,6 +741,23 @@ void BaseUISurface::DrawSetTextureFile(int id, const char  * filename, int hardw
 	pic = vgui2::gEngfuncs.FS_LoadImage( name, nullptr, 0 );
 	if (!pic)
 	{
+		char lowerName[512];
+		Q_strncpy(lowerName, name, sizeof(lowerName));
+		for (char *p = lowerName; *p; ++p)
+			*p = (char)tolower((unsigned char)*p);
+
+		if (Q_stricmp(lowerName, name))
+		{
+			std::fprintf(stderr,
+				"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile retry-lower id=%d filename='%s'\n",
+				id,
+				lowerName);
+			pic = vgui2::gEngfuncs.FS_LoadImage(lowerName, nullptr, 0);
+		}
+	}
+
+	if (!pic)
+	{
 		std::fprintf(stderr,
 			"[VGUI2-TRACE] BaseUISurface::DrawSetTextureFile tga miss id=%d filename='%s'\n",
 			id,
