@@ -299,6 +299,7 @@ void WizardPanel::ActivateNextSubPanel(WizardSubPanel *subPanel)
 	_currentSubPanel = subPanel;
 	_currentSubPanel->SetParent(this);
 	_currentSubPanel->SetVisible(true);
+	_currentSubPanel->MoveToFront();
 
 	_currentSubPanel->SetWizardPanel(this);
 	_currentSubPanel->OnDisplayAsNext();
@@ -386,6 +387,7 @@ void WizardPanel::ActivatePrevSubPanel()
 
 	// show the previous panel, but don't Activate it (since it should show just what it was previously)
 	_currentSubPanel->SetVisible(true);
+	_currentSubPanel->MoveToFront();
 
 	if (!_subPanelStack.GetCount())
 	{

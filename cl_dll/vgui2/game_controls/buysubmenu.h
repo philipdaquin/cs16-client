@@ -34,6 +34,7 @@ public:
 	virtual void SetupNextSubPanel(const char *fileName);
 
 protected:
+	virtual void DisableDecorativePanels(void);
 	virtual void SetNextSubPanel(vgui2::WizardSubPanel *panel);
 	virtual vgui2::WizardSubPanel *GetNextSubPanel(void);
 	virtual vgui2::Panel *CreateControlByName(const char *controlName) override;

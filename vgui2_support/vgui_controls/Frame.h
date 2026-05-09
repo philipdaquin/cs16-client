@@ -134,6 +134,8 @@ public:
 protected:
 	// Respond to mouse presses
 	virtual void OnMousePressed(MouseCode code);
+	// Respond to mouse releases
+	virtual void OnMouseReleased(MouseCode code);
 	// Respond to Key typing
 	virtual void OnKeyCodeTyped(KeyCode code);
 	virtual void OnKeyTyped(uchar32 unichar);

@@ -19,6 +19,7 @@
 
 #include <vstdlib/IKeyValuesSystem.h>
 #include <FileSystem.h>
+#include "../../cl_dll/hud.h"
 #include "../interfaces/vgui/IPanel.h"
 #include "../interfaces/vgui/ISurface.h"
 #include "../interfaces/vgui/IBorder.h"
@@ -2722,6 +2723,14 @@ void Panel::OnCursorExited()
 
 void Panel::OnMousePressed(MouseCode code)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] Panel::OnMousePressed this=%p class='%s' name='%s' code=%d visible=%d enabled=%d parent=%p\n",
+		this,
+		GetClassName() ? GetClassName() : "<null>",
+		GetName() ? GetName() : "<null>",
+		(int)code,
+		IsVisible() ? 1 : 0,
+		IsEnabled() ? 1 : 0,
+		(void *)GetParent());
 }
 
 void Panel::OnMouseDoublePressed(MouseCode code)
@@ -2734,6 +2743,14 @@ void Panel::OnMouseTriplePressed(MouseCode code)
 
 void Panel::OnMouseReleased(MouseCode code)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] Panel::OnMouseReleased this=%p class='%s' name='%s' code=%d visible=%d enabled=%d parent=%p\n",
+		this,
+		GetClassName() ? GetClassName() : "<null>",
+		GetName() ? GetName() : "<null>",
+		(int)code,
+		IsVisible() ? 1 : 0,
+		IsEnabled() ? 1 : 0,
+		(void *)GetParent());
 }
 
 void Panel::OnMouseWheeled(int delta)

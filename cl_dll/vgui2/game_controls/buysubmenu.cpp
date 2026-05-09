@@ -11,6 +11,32 @@
 
 using namespace vgui2;
 
+static void DisableDecorativePanelTree(vgui2::Panel *panel)
+{
+	if (!panel)
+		return;
+
+	const int childCount = panel->GetChildCount();
+	for (int i = 0; i < childCount; ++i)
+	{
+		vgui2::Panel *child = panel->GetChild(i);
+		if (!child)
+			continue;
+
+		const bool keepInteractive = dynamic_cast<vgui2::Button *>(child) != NULL
+			|| dynamic_cast<MouseOverPanelButton *>(child) != NULL
+			|| dynamic_cast<CBuySubMenu *>(child) != NULL;
+
+		if (!keepInteractive)
+		{
+			child->SetMouseInputEnabled(false);
+			child->SetKeyBoardInputEnabled(false);
+		}
+
+		DisableDecorativePanelTree(child);
+	}
+}
+
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *name) : WizardSubPanel(parent, name)
 {
 	m_NextPanel = NULL;
@@ -53,10 +79,7 @@ void CBuySubMenu::SetVisible(bool state)
 
 		if (buyButton)
 		{
-			if (buyButton == m_pFirstButton && state == true)
-				buyButton->ShowPage();
-			else
-				buyButton->HidePage();
+			buyButton->HidePage();
 
 			buyButton->InvalidateLayout();
 		}
@@ -80,7 +103,10 @@ void CBuySubMenu::Close(void)
 
 CBuySubMenu *CBuySubMenu::CreateNewSubMenu(const char *name)
 {
-	return new CBuySubMenu(this, name);
+	vgui2::Panel *submenuParent = GetWizardPanel() ? (vgui2::Panel *)GetWizardPanel() : GetParent();
+	if (!submenuParent)
+		submenuParent = this;
+	return new CBuySubMenu(submenuParent, name);
 }
 
 MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
@@ -140,7 +166,8 @@ void CBuySubMenu::OnCommand(const char *command)
 	gEngfuncs.pfnClientCmd((char *)command);
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::OnCommand clientcmd sent command='%s'\n", command);
 
-	BaseClass::OnCommand(command);
+	// BaseClass::OnCommand(command);
+
 }
 
 void CBuySubMenu::DeleteSubPanels(void)
@@ -150,13 +177,15 @@ void CBuySubMenu::DeleteSubPanels(void)
 		if (m_SubMenus[i].panel)
 		{
 			m_SubMenus[i].panel->DeleteSubPanels();
-			m_SubMenus[i].panel->SetVisible(false);
+			m_SubMenus[i].panel->DeletePanel();
+			m_SubMenus[i].panel = NULL;
 		}
 	}
 
+	m_SubMenus.RemoveAll();
+
 	if (m_NextPanel)
 	{
-		m_NextPanel->SetVisible(false);
 		m_NextPanel = NULL;
 	}
 
@@ -168,7 +197,10 @@ void CBuySubMenu::GotoNextSubPanel(void)
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::GotoNextSubPanel this=%p wizard=%p next=%p\n",
 		this, (void *)GetWizardPanel(), (void *)m_NextPanel);
 	if (GetWizardPanel() && m_NextPanel)
+	{
 		GetWizardPanel()->Run(m_NextPanel);
+		DisableDecorativePanels();
+	}
 }
 
 void CBuySubMenu::SetupNextSubPanel(const char *fileName)
@@ -200,6 +232,9 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel LoadControlSettings resource='%s' submenu=%p\n",
 			fileName ? fileName : "<null>", (void *)newMenu);
 		newMenu->LoadControlSettings(fileName, "GAME");
+		newMenu->SetVisible(false);
+		newMenu->SetMouseInputEnabled(false);
+		newMenu->SetKeyBoardInputEnabled(false);
 		m_NextPanel = newMenu;
 		Q_strncpy(newEntry.filename, fileName, sizeof(newEntry.filename));
 		newEntry.panel = newMenu;
@@ -207,6 +242,20 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel loaded this=%p resource='%s' panel=%p\n",
 			this, fileName ? fileName : "<null>", (void *)m_NextPanel);
 	}
+
+	if (m_NextPanel)
+	{
+		vgui2::Panel *submenuParent = GetWizardPanel() ? (vgui2::Panel *)GetWizardPanel() : GetParent();
+		if (submenuParent && m_NextPanel->GetParent() != submenuParent)
+			m_NextPanel->SetParent(submenuParent);
+	}
+
+	DisableDecorativePanels();
+}
+
+void CBuySubMenu::DisableDecorativePanels(void)
+{
+	DisableDecorativePanelTree(this);
 }
 
 void CBuySubMenu::SetNextSubPanel(vgui2::WizardSubPanel *panel)

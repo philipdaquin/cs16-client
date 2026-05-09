@@ -23,6 +23,7 @@
 
 #include "../interfaces/vgui/IInputInternal.h"
 
+#include "../../cl_dll/hud.h"
 #include "AnimationController.h"
 #include "controls.h"
 #include "Frame.h"
@@ -2111,6 +2112,15 @@ void Frame::OnMinimizeToSysTray()
 //-----------------------------------------------------------------------------
 void Frame::OnMousePressed(MouseCode code)
 {
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] Frame::OnMousePressed this=%p class='%s' name='%s' code=%d visible=%d enabled=%d parent=%p\n",
+		this,
+		GetClassName() ? GetClassName() : "<null>",
+		GetName() ? GetName() : "<null>",
+		(int)code,
+		IsVisible() ? 1 : 0,
+		IsEnabled() ? 1 : 0,
+		(void *)GetParent());
+
 	if (!IsBuildGroupEnabled())
 	{
 		// if a child doesn't have focus, get it for ourselves
@@ -2120,8 +2130,25 @@ void Frame::OnMousePressed(MouseCode code)
 			RequestFocus();
 		}
 	}
-	
+
 	BaseClass::OnMousePressed(code);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Respond to mouse releases
+//-----------------------------------------------------------------------------
+void Frame::OnMouseReleased(MouseCode code)
+{
+	gEngfuncs.Con_Printf("[VGUI2-CLIENT] Frame::OnMouseReleased this=%p class='%s' name='%s' code=%d visible=%d enabled=%d parent=%p\n",
+		this,
+		GetClassName() ? GetClassName() : "<null>",
+		GetName() ? GetName() : "<null>",
+		(int)code,
+		IsVisible() ? 1 : 0,
+		IsEnabled() ? 1 : 0,
+		(void *)GetParent());
+
+	BaseClass::OnMouseReleased(code);
 }
 
 //-----------------------------------------------------------------------------

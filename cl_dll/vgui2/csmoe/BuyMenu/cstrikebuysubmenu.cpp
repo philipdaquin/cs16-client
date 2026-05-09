@@ -12,6 +12,65 @@
 
 using namespace vgui2;
 
+static bool EndsWith(const char *text, const char *suffix)
+{
+	if (!text || !suffix)
+		return false;
+
+	const int textLen = Q_strlen(text);
+	const int suffixLen = Q_strlen(suffix);
+	if (suffixLen > textLen)
+		return false;
+
+	return !Q_stricmp(text + textLen - suffixLen, suffix);
+}
+
+static Panel *FindWeaponCardAnchor(Panel *panel, const char *buttonName)
+{
+	if (!panel || !buttonName || !EndsWith(buttonName, "-bottom"))
+		return NULL;
+
+	char baseName[128];
+	Q_strncpy(baseName, buttonName, sizeof(baseName));
+	baseName[Q_strlen(baseName) - Q_strlen("-bottom")] = 0;
+
+	const char *suffixes[] = { "-bg", "-img", "-bgwpn" };
+	for (int i = 0; i < ARRAYSIZE(suffixes); ++i)
+	{
+		char anchorName[160];
+		Q_snprintf(anchorName, sizeof(anchorName), "%s%s", baseName, suffixes[i]);
+
+		Panel *anchor = panel->FindChildByName(anchorName);
+		if (anchor)
+			return anchor;
+	}
+
+	return NULL;
+}
+
+static void AlignBuySubMenuButtonsToCards(Panel *panel)
+{
+	if (!panel)
+		return;
+
+	for (int i = 0; i < panel->GetChildCount(); ++i)
+	{
+		Panel *child = panel->GetChild(i);
+		Button *button = dynamic_cast<Button *>(child);
+		if (!button)
+			continue;
+
+		Panel *anchor = FindWeaponCardAnchor(panel, button->GetName());
+		if (!anchor)
+			continue;
+
+		int x, y, wide, tall;
+		anchor->GetBounds(x, y, wide, tall);
+		button->SetBounds(x, y, wide, tall);
+		button->MoveToFront();
+	}
+}
+
 static const char *ResolveTeamBuyResource(const char *command)
 {
 	if (!command || !g_pViewport)
@@ -87,8 +146,6 @@ void CCSBuySubMenu::OnSizeChanged(int newWide, int newTall)
 
 void CCSBuySubMenu::PerformLayout()
 {
-	BaseClass::PerformLayout();
-
 	int screenW, screenH;
 	GetHudSize(screenW, screenH);
 
@@ -104,6 +161,9 @@ void CCSBuySubMenu::PerformLayout()
 	if (!m_backgroundLayoutFinished)
 		ResizeWindowControls(this, GetTall(), GetWide(), offsetX, offsetY);
 	m_backgroundLayoutFinished = true;
+
+	BaseClass::PerformLayout();
+	AlignBuySubMenuButtonsToCards(this);
 }
 
 MouseOverPanelButton *CCSBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
