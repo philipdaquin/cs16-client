@@ -157,39 +157,39 @@ public:
 	{
 		BaseClass::ApplySchemeSettings(pScheme);
 
-		if (!m_pKeyboard)
-			m_pKeyboard = vgui2::scheme()->GetImage("resource/Control/button_ingame/keyboard", true);
+		// if (!m_pKeyboard)
+		// 	m_pKeyboard = vgui2::scheme()->GetImage("resource/control/button_ingame/keyboard", true);
 
-		if (!m_pBlankSlot)
-			m_pBlankSlot = vgui2::scheme()->GetImage("resource/Control/buybutton/blank_slot", true);
+		// if (!m_pBlankSlot)
+		// 	m_pBlankSlot = vgui2::scheme()->GetImage("resource/control/buybutton/blank_slot", true);
 
-		if (!m_pSelect)
-			m_pSelect = vgui2::scheme()->GetImage("resource/Control/buybutton/select", true);
+		// if (!m_pSelect)
+		// 	m_pSelect = vgui2::scheme()->GetImage("resource/control/buybutton/select", true);
 
-		if (m_iKeyOffset == -1)
-		{
-			m_iKeyOffset = 3;
+		// if (m_iKeyOffset == -1)
+		// {
+		// 	m_iKeyOffset = 3;
 
-			if (IsProportional())
-				m_iKeyOffset = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), m_iKeyOffset);
-		}
+		// 	if (IsProportional())
+		// 		m_iKeyOffset = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), m_iKeyOffset);
+		// }
 
-		if (m_iKeySize == -1)
-		{
-			m_iKeySize = 18;
+		// if (m_iKeySize == -1)
+		// {
+		// 	m_iKeySize = 18;
 
-			if (IsProportional())
-				m_iKeySize = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), m_iKeySize);
-		}
+		// 	if (IsProportional())
+		// 		m_iKeySize = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), m_iKeySize);
+		// }
 
-		if (m_pFullText)
-		{
-			if (m_pKeyboard)
-			{
-				SetText(m_pText);
-				SetHotkey(m_cHotkey);
-			}
-		}
+		// if (m_pFullText)
+		// {
+		// 	if (m_pKeyboard)
+		// 	{
+		// 		SetText(m_pText);
+		// 		SetHotkey(m_cHotkey);
+		// 	}
+		// }
 
 		//SetSelectedInset(0, 0);
 	}

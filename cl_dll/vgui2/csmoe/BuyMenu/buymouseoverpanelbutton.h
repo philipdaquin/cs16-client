@@ -21,6 +21,7 @@ class BuyMouseOverPanelButton : public NewMouseOverPanelButton
 public:
 	BuyMouseOverPanelButton(vgui2::Panel *parent, const char *panelName, vgui2::EditablePanel *panel) : BaseClass(parent, panelName, panel)
 	{
+		SetDisablePageInput(false);
 		SetButtonActivationType(ACTIVATE_ONPRESSED);
 		m_iPrice = 0;
 		m_iPreviousPrice = 0;
@@ -91,15 +92,6 @@ public:
 		m_avaliableColor = pScheme->GetColor("Label.TextColor", Color(0, 0, 0, 0));
 		m_unavailableColor = pScheme->GetColor("Label.DisabledFgColor2", Color(0, 0, 0, 0));
 		m_bargainColor = Color(0, 255, 0, 192);
-
-		if (!m_pKeyboard)
-			m_pKeyboard = vgui2::scheme()->GetImage("resource/Control/button_ingame/keyboard", true);
-
-		if (!m_pBlankSlot)
-			m_pBlankSlot = vgui2::scheme()->GetImage(pScheme->GetResourceString("BuyButton.Up"), true);
-
-		if (!m_pSelect)
-			m_pSelect = vgui2::scheme()->GetImage(pScheme->GetResourceString("BuyButton.On"), true);
 
 		if (m_iKeyOffset == -1)
 		{

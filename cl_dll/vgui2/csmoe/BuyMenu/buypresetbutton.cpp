@@ -139,16 +139,16 @@ void BuyPresetButton::ApplySchemeSettings(IScheme *pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 
 	if (!m_pKeyboard)
-		m_pKeyboard = scheme()->GetImage("resource/Control/button_ingame/keyboard", true);
+		m_pKeyboard = NULL;
 
 	if (!m_pBlankSlot)
-		m_pBlankSlot = scheme()->GetImage("resource/Control/button_ingame/favoritebg", true);
+		m_pBlankSlot = NULL;
 
 	if(!m_pArmed)
-		m_pArmed = scheme()->GetImage("resource/Control/buybutton/select", true);
+		m_pArmed = NULL;
 
 	if (!m_pSelect)
-		m_pSelect = scheme()->GetImage("resource/Control/buybutton/select", true);
+		m_pSelect = NULL;
 
 	m_availableColor = pScheme->GetColor("Label.TextColor", Color(255, 255, 255, 255));
 	m_unavailableColor = pScheme->GetColor("Label.DisabledFgColor2", Color(255, 255, 255, 255));

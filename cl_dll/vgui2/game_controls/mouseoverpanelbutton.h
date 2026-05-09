@@ -10,6 +10,7 @@
 #include "vgui_controls/PHandle.h"
 #include "vgui/KeyCode.h"
 #include "FileSystem.h"
+#include <ctype.h>
 
 extern vgui2::Panel *g_lastPanel;
 extern vgui2::Button *g_lastButton;
@@ -38,18 +39,21 @@ public:
 		m_pPanel->SetBounds(x, y, wide, tall);
 		m_pPanel->SetAutoResize(templatePanel->GetPinCorner(), templatePanel->GetAutoResize(), px, py, rx, ry);
 
-		m_bPreserveArmedButtons = false;
-		m_bUpdateDefaultButtons = false;
-	}
+			m_bPreserveArmedButtons = false;
+			m_bUpdateDefaultButtons = false;
+			m_bDisablePageInput = true;
+		}
 
 	virtual void SetPreserveArmedButtons(bool bPreserve) { m_bPreserveArmedButtons = bPreserve; }
 	virtual void SetUpdateDefaultButtons(bool bUpdate) { m_bUpdateDefaultButtons = bUpdate; }
+	virtual void SetDisablePageInput(bool bDisable) { m_bDisablePageInput = bDisable; }
 
 	virtual void ShowPage(void)
 	{
 		if (m_pPanel)
 		{
-			DisableInputRecursive(m_pPanel);
+			if (m_bDisablePageInput)
+				DisableInputRecursive(m_pPanel);
 			m_pPanel->SetVisible(true);
 			m_pPanel->MoveToFront();
 			g_lastPanel = m_pPanel;
@@ -65,10 +69,54 @@ public:
 	virtual const char *GetClassPage(const char *className)
 	{
 		static char classPanel[_MAX_PATH];
-		Q_snprintf(classPanel, sizeof(classPanel), "classes/%s.res", className);
+		char normalizedName[_MAX_PATH];
+		char lowerName[_MAX_PATH];
 
-		if (g_pFullFileSystem && g_pFullFileSystem->FileExists(classPanel))
-			return classPanel;
+		auto tryResource = [&](const char *name) -> const char * {
+			if (!name || !name[0])
+				return NULL;
+
+			Q_snprintf(classPanel, sizeof(classPanel), "classes/%s.res", name);
+			if (g_pFullFileSystem && g_pFullFileSystem->FileExists(classPanel))
+				return classPanel;
+			return NULL;
+		};
+
+		Q_strncpy(normalizedName, className ? className : "", sizeof(normalizedName));
+
+		const char *suffixes[] = { "-bottom", "-text", "_cmd", "_bottom", "_text" };
+		for (const char *suffix : suffixes)
+		{
+			const size_t suffixLen = Q_strlen(suffix);
+			const size_t nameLen = Q_strlen(normalizedName);
+			if (nameLen > suffixLen && !Q_stricmp(normalizedName + nameLen - suffixLen, suffix))
+			{
+				normalizedName[nameLen - suffixLen] = '\0';
+				break;
+			}
+		}
+
+		const char *candidates[] = { className, normalizedName };
+		for (const char *candidate : candidates)
+		{
+			const char *found = tryResource(candidate);
+			if (found)
+				return found;
+
+			if (candidate && candidate[0])
+			{
+				Q_strncpy(lowerName, candidate, sizeof(lowerName));
+				for (char *p = lowerName; *p; ++p)
+					*p = (char)tolower((unsigned char)*p);
+
+				if (Q_stricmp(lowerName, candidate))
+				{
+					found = tryResource(lowerName);
+					if (found)
+						return found;
+				}
+			}
+		}
 
 		if (g_pFullFileSystem && g_pFullFileSystem->FileExists("classes/default.res"))
 		{
@@ -86,7 +134,8 @@ public:
 		if (classPage && classPage[0])
 		{
 			m_pPanel->LoadControlSettings(classPage, "GAME");
-			DisableInputRecursive(m_pPanel);
+			if (m_bDisablePageInput)
+				DisableInputRecursive(m_pPanel);
 		}
 
 		return true;
@@ -164,6 +213,7 @@ protected:
 	vgui2::EditablePanel *m_pPanel;
 	bool m_bPreserveArmedButtons;
 	bool m_bUpdateDefaultButtons;
+	bool m_bDisablePageInput;
 
 };
 
