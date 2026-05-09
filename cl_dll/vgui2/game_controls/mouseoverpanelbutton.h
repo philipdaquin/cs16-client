@@ -47,19 +47,9 @@ public:
 
 	virtual void ShowPage(void)
 	{
-		if (g_lastPanel && g_lastPanel->GetParent())
-		{
-			for (int i = 0; i < g_lastPanel->GetParent()->GetChildCount(); i++)
-			{
-                MouseOverPanelButton *pButton = dynamic_cast<MouseOverPanelButton *>(g_lastPanel->GetParent()->GetChild(i));
-
-				if (pButton)
-					pButton->HidePage();
-			}
-		}
-
 		if (m_pPanel)
 		{
+			DisableInputRecursive(m_pPanel);
 			m_pPanel->SetVisible(true);
 			m_pPanel->MoveToFront();
 			g_lastPanel = m_pPanel;
@@ -76,15 +66,28 @@ public:
 	{
 		static char classPanel[_MAX_PATH];
 		Q_snprintf(classPanel, sizeof(classPanel), "classes/%s.res", className);
-		return classPanel;
+
+		if (g_pFullFileSystem && g_pFullFileSystem->FileExists(classPanel))
+			return classPanel;
+
+		if (g_pFullFileSystem && g_pFullFileSystem->FileExists("classes/default.res"))
+		{
+			Q_snprintf(classPanel, sizeof(classPanel), "classes/default.res");
+			return classPanel;
+		}
+
+		return NULL;
 	}
 
 	virtual bool LoadClassPage(void)
 	{
 		const char *classPage = GetClassPage(GetName());
 
-		m_pPanel->LoadControlSettings("classes/default.res", "GAME");
-		m_pPanel->LoadControlSettings(classPage, "GAME");
+		if (classPage && classPage[0])
+		{
+			m_pPanel->LoadControlSettings(classPage, "GAME");
+			DisableInputRecursive(m_pPanel);
+		}
 
 		return true;
 	}
@@ -146,6 +149,18 @@ public:
 	}
 
 protected:
+	static void DisableInputRecursive(vgui2::Panel *panel)
+	{
+		if (!panel)
+			return;
+
+		panel->SetMouseInputEnabled(false);
+		panel->SetKeyBoardInputEnabled(false);
+
+		for (int i = 0; i < panel->GetChildCount(); ++i)
+			DisableInputRecursive(panel->GetChild(i));
+	}
+
 	vgui2::EditablePanel *m_pPanel;
 	bool m_bPreserveArmedButtons;
 	bool m_bUpdateDefaultButtons;
