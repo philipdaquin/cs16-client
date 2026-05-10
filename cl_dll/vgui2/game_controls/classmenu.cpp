@@ -86,6 +86,7 @@ void CClassMenu::PerformLayout(void)
 	std::fprintf(stderr, "CLASS MENU screenH: %d\n", screenH);
 
 
+	/// *** HARCODED OFFSETS*** MAKE THESE DYNAMIC BASED ON TEH VIDEO RESOLUTION.
 	const int offsetX = 454; //(screenW - 640) / 2;
 	const int offsetY = 0; // (screenH - 448) / 2;
 
