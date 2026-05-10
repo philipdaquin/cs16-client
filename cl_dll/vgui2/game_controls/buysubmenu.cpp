@@ -11,32 +11,6 @@
 
 using namespace vgui2;
 
-static void DisableDecorativePanelTree(vgui2::Panel *panel)
-{
-	if (!panel)
-		return;
-
-	const int childCount = panel->GetChildCount();
-	for (int i = 0; i < childCount; ++i)
-	{
-		vgui2::Panel *child = panel->GetChild(i);
-		if (!child)
-			continue;
-
-		const bool keepInteractive = dynamic_cast<vgui2::Button *>(child) != NULL
-			|| dynamic_cast<MouseOverPanelButton *>(child) != NULL
-			|| dynamic_cast<CBuySubMenu *>(child) != NULL;
-
-		if (!keepInteractive)
-		{
-			child->SetMouseInputEnabled(false);
-			child->SetKeyBoardInputEnabled(false);
-		}
-
-		DisableDecorativePanelTree(child);
-	}
-}
-
 CBuySubMenu::CBuySubMenu(vgui2::Panel *parent, const char *name) : WizardSubPanel(parent, name)
 {
 	m_NextPanel = NULL;
@@ -72,18 +46,6 @@ Panel *CBuySubMenu::CreateControlByName(const char *controlName)
 void CBuySubMenu::SetVisible(bool state)
 {
 	BaseClass::SetVisible(state);
-
-	for (int i = 0; i < GetChildCount(); i++)
-	{
-		MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
-
-		if (buyButton)
-		{
-			buyButton->HidePage();
-
-			buyButton->InvalidateLayout();
-		}
-	}
 }
 
 void CBuySubMenu::Close(void)
@@ -199,7 +161,6 @@ void CBuySubMenu::GotoNextSubPanel(void)
 	if (GetWizardPanel() && m_NextPanel)
 	{
 		GetWizardPanel()->Run(m_NextPanel);
-		DisableDecorativePanels();
 	}
 }
 
@@ -249,13 +210,11 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		if (submenuParent && m_NextPanel->GetParent() != submenuParent)
 			m_NextPanel->SetParent(submenuParent);
 	}
-
-	DisableDecorativePanels();
 }
 
 void CBuySubMenu::DisableDecorativePanels(void)
 {
-	DisableDecorativePanelTree(this);
+	// Intentionally left as a no-op now.
 }
 
 void CBuySubMenu::SetNextSubPanel(vgui2::WizardSubPanel *panel)
