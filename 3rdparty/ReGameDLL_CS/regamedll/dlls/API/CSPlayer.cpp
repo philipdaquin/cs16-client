@@ -549,6 +549,7 @@ void CCSPlayer::ResetVars()
 	m_szModel[0] = '\0';
 
 	m_bForceShowMenu = false;
+	BasePlayer()->m_bAwaitingMOTDOK = false;
 	m_flRespawnPending =
 		m_flSpawnProtectionEndTime = 0.0f;
 

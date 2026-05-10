@@ -27,6 +27,7 @@
 #include "vgui2_bootstrap.h"
 
 #include "vgui2/counterstrikeviewport_interface.h"
+#include "vgui2/CHudViewPort.h"
 
 //#include "vgui_TeamFortressViewport.h"
 
@@ -275,6 +276,16 @@ int CHudMenu::MsgFunc_VGUIMenu( const char *pszName, int iSize, void *pbuf )
 		return 1;
 	}
 
+	if (menuType == MENU_TEAM && static_cast<CHudViewport *>(VGUI2_GetViewportPtr())->IsMOTDActive())
+	{
+		m_bPendingVGUIMenu = true;
+		m_iPendingVGUIMenuType = menuType;
+		m_iPendingVGUIBitMask = m_bitsValidSlots;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] MsgFunc_VGUIMenu deferred team menu until MOTD closes type=%d slots=0x%x viewport=%p\n",
+			menuType, m_bitsValidSlots, VGUI2_GetViewportPtr());
+		return 1;
+	}
+
 	ShowVGUIMenu(menuType);
 	return 1;
 }
@@ -317,6 +328,16 @@ void CHudMenu::ShowVGUIMenu( int menuType )
 {
 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu type=%d ready=%d viewport=%d\n",
 		menuType, VGUI2_IsReady() ? 1 : 0, VGUI2_HasViewport() ? 1 : 0);
+
+	if (menuType == MENU_TEAM && VGUI2_HasViewport() && static_cast<CHudViewport *>(VGUI2_GetViewportPtr())->IsMOTDActive())
+	{
+		m_bPendingVGUIMenu = true;
+		m_iPendingVGUIMenuType = menuType;
+		m_iPendingVGUIBitMask = m_bitsValidSlots;
+		gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowVGUIMenu deferred team menu until MOTD closes type=%d slots=0x%x viewport=%p\n",
+			menuType, m_bitsValidSlots, VGUI2_GetViewportPtr());
+		return;
+	}
 
 	// Temporary: keep MENU_TEAM from auto-closing on the next press so we can
 	// verify the menu actually reaches the paint path.

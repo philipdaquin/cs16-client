@@ -414,6 +414,12 @@ void EXT_FUNC __API_HOOK(ShowVGUIMenu)(CBasePlayer *pPlayer, int MenuType, int B
 		return;
 	}
 
+	if (MenuType == VGUI_Menu_Team && pPlayer->m_bAwaitingMOTDOK) {
+		ALERT(at_console, "[VGUI2-SERVER] ShowVGUIMenu deferred team menu until MOTD OK player=%s type=%d bitmask=0x%x\n",
+			STRING(pPlayer->pev->netname), MenuType, BitMask);
+		return;
+	}
+
 #endif
 
 	if (pPlayer->m_bVGUIMenus || MenuType > VGUI_Menu_Buy_Item)
@@ -624,6 +630,7 @@ void EXT_FUNC ClientPutInServer(edict_t *pEntity)
 
 	pPlayer->SetCustomDecalFrames(-1);
 	pPlayer->SetPrefsFromUserinfo(GET_INFO_BUFFER(pEntity));
+	pPlayer->m_bAwaitingMOTDOK = false;
 
 	if (!g_pGameRules->IsMultiplayer())
 	{
@@ -3189,6 +3196,17 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				else
 					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
 			}
+		}
+	}
+	else if (FStrEq(pcmd, "motd_ok"))
+	{
+		ALERT(at_console, "[VGUI2-SERVER] ClientCommand motd_ok player=%s menu=%d joining=%d team=%d dead=%d\n",
+			STRING(pPlayer->pev->netname), pPlayer->m_iMenu, pPlayer->m_iJoiningState, pPlayer->m_iTeam, pPlayer->pev->deadflag);
+
+		if (pPlayer->m_bAwaitingMOTDOK)
+		{
+			pPlayer->m_bAwaitingMOTDOK = false;
+			pPlayer->ClientCommand("chooseteam");
 		}
 	}
 	else if (FStrEq(pcmd, "showbriefing"))

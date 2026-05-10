@@ -12,7 +12,9 @@
 
 #include "CClientVGUI.h"
 #include "CBaseViewport.h"
+#include "CHudViewPort.h"
 #include "vgui_resource_paths.h"
+#include "hud.h"
 
 #include "CClientMOTD.h"
 
@@ -113,6 +115,7 @@ void CClientMOTD::OnCommand( const char* command )
 {
 	if( !stricmp( command, "okay" ) )
 	{
+		gEngfuncs.pfnClientCmd("motd_ok");
 		RemoveTempFile();
 
 		Close();
@@ -125,13 +128,19 @@ void CClientMOTD::Close()
 {
 	BaseClass::Close();
 	m_pViewport->ShowBackGround( false );
+	if (auto *viewport = static_cast<CHudViewport *>(m_pViewport))
+		viewport->m_bMOTDActive = false;
+	gHUD.m_Menu.FlushPendingVGUIMenu();
 }
 
 void CClientMOTD::Activate( const char* title, const char* msg )
 {
 	m_pMessage->SetVisible(true);
 	m_pMessageHtml->SetVisible(false);
+	m_pViewport->ShowBackGround( true );
 	BaseClass::Activate();
+	SetVisible( true );
+	MoveToFront();
 
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
@@ -146,6 +155,8 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	m_pMessage->SetVisible(false);
 	m_pMessageHtml->SetVisible(true);
 	BaseClass::Activate();
+	SetVisible( true );
+	MoveToFront();
 
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
@@ -191,6 +202,8 @@ void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 	char ansiURL[ MAX_PATH ];
 
 	BaseClass::Activate();
+	SetVisible( true );
+	MoveToFront();
 
 	SetTitle( title, false );
 	m_pServerName->SetText( title );

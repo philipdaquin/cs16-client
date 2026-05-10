@@ -92,23 +92,39 @@ void CHudViewport::Start()
 int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 {
 	if (m_bGotAllMOTD)
+	{
 		m_szMOTD.clear();
+		m_bMOTDActive = false;
+	}
 
 	BufferReader buf(pszName, pbuf, iSize);
 
 	m_bGotAllMOTD = buf.ReadByte();
 
 	m_szMOTD += buf.ReadString();
-#if 0
 	CClientMOTD *panel = m_pMOTD;
 	if (panel)
 	{
+		m_bMOTDActive = true;
 		panel->Activate(gHUD.m_szServerName, m_szMOTD.c_str());
 	}
 	else
 		gEngfuncs.Con_Printf("MsgFunc_MOTD() : Error! CClientMOTD is nullptr\n");
-#endif
+
+	if (m_bGotAllMOTD)
+		m_bMOTDActive = false;
+
 	return 1;
+}
+
+bool CHudViewport::IsMOTDVisible() const
+{
+	return m_pMOTD && m_pMOTD->IsVisible();
+}
+
+bool CHudViewport::IsMOTDActive() const
+{
+	return m_bMOTDActive || IsMOTDVisible();
 }
 
 void CHudViewport::HideScoreBoard()

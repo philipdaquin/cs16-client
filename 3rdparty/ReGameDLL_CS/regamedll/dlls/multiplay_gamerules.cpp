@@ -5059,6 +5059,10 @@ void CHalfLifeMultiplay::SendMOTDToClient(edict_t *client)
 		WRITE_STRING(CVAR_GET_STRING("hostname"));
 	MESSAGE_END();
 
+	CBasePlayer *pPlayer = GET_PRIVATE<CBasePlayer>(client);
+	if (pPlayer)
+		pPlayer->m_bAwaitingMOTDOK = (aFileList && *aFileList);
+
 	// Send the message of the day
 	// read it chunk-by-chunk, and send it in parts
 	while (pFileList && *pFileList && char_count < MAX_MOTD_LENGTH)

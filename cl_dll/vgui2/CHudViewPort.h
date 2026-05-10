@@ -55,7 +55,11 @@ public:
 
 	int MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf);
 
+	bool IsMOTDVisible() const;
+	bool IsMOTDActive() const;
+
 	// MOTD
+	bool m_bMOTDActive = false;
 	bool m_bGotAllMOTD = false;
 	std::string	m_szMOTD;
 	

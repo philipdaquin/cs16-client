@@ -25,7 +25,7 @@ inline constexpr const char kMenuBuySubMachinegunsCT[] = "resource/UI/BuySubMach
 inline constexpr const char kMenuBuySubMachinegunsTER[] = "resource/UI/BuySubMachineguns_TER.res";
 inline constexpr const char kMenuBuyMachinegunsCT[] = "resource/UI/BuyMachineguns_CT.res";
 inline constexpr const char kMenuBuyMachinegunsTER[] = "resource/UI/BuyMachineguns_TER.res";
-inline constexpr const char kMenuMOTD[] = "resource/UI/MOTD.res";
+inline constexpr const char kMenuMOTD[] = "resource/MOTD.res";
 inline constexpr const char kMenuBackgroundPanel[] = "resource/UI/BackgroundPanel.res";
 
 inline constexpr const char *ClassmenuForTeam(bool isTerrorist)

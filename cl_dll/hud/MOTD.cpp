@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include "draw_util.h"
 #include "build.h"
+#include "../vgui2/counterstrikeviewport_interface.h"
+#include "../vgui2/CHudViewPort.h"
 
 #if XASH_WIN32 == 1 || XASH_PSVITA == 1
 #define strcasestr strstr
@@ -131,6 +133,11 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 {
 	if( cl_hide_motd->value )
 		return 1;
+
+	if( VGUI2_HasViewport() )
+	{
+		static_cast<CHudViewport *>( VGUI2_GetViewportPtr() )->MsgFunc_MOTD( pszName, iSize, pbuf );
+	}
 
 	if ( m_iFlags & HUD_DRAW )
 	{
