@@ -73,7 +73,7 @@ void BuyPresetEditPanel::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 	SetBgColor(Color(0, 0, 0, 0));
-	m_pBgPanel->SetBgColor(pScheme->GetColor("Button.BgColor", Color(0, 0, 0, 128)));
+	// m_pBgPanel->SetBgColor(pScheme->GetColor("Button.BgColor", Color(0, 0, 0, 128)));
 	m_pBgPanel->SetBorder(pScheme->GetBorder("BuyPresetButtonBorder"));
 }
 

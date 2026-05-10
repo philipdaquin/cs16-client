@@ -41,7 +41,7 @@ WizardSubPanel::~WizardSubPanel()
 void WizardSubPanel::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	SetBgColor(GetSchemeColor("WizardSubPanel.BgColor", GetSchemeColor("SubPanelBgColor", pScheme), pScheme));
+	// SetBgColor(GetSchemeColor("WizardSubPanel.BgColor", GetSchemeColor("SubPanelBgColor", pScheme), pScheme));
 }
 
 //-----------------------------------------------------------------------------

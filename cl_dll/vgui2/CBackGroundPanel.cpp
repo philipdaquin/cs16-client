@@ -48,7 +48,7 @@ void CBackGroundPanel::ApplySchemeSettings(vgui2::IScheme* pScheme)
 
 	const auto color = pScheme->GetColor("ViewportBG", Color(0, 0, 0, 0));
 
-	SetBgColor(color);
+	// SetBgColor(color);
 }
 
 void CBackGroundPanel::PerformLayout()

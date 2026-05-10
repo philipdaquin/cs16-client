@@ -279,9 +279,9 @@ void BuyPresetButton::Paint(void)
 void BuyPresetButton::PaintBackground(void)
 {
 	//BaseClass::PaintBackground();
-	int x, y, w, h;
-	GetBounds(x, y, w, h);
-	DrawBox(x, y, w, h, { 255,255,255,255 }, 1.0, true);
+	// int x, y, w, h;
+	// GetBounds(x, y, w, h);
+	// DrawBox(x, y, w, h, { 255,255,255,255 }, 1.0, true);
 }
 
 void BuyPresetButton::FireActionSignal(void)

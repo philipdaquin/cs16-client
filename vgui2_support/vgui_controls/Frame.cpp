@@ -1207,22 +1207,22 @@ void Frame::OnFrameFocusChanged(bool bHasFocus)
 	{
 		if (m_flFocusTransitionEffectTime)
 		{
-			GetAnimationController()->RunAnimationCommand(this, "BgColor", m_InFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
+			// GetAnimationController()->RunAnimationCommand(this, "BgColor", m_InFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
 		}
 		else
 		{
-			SetBgColor(m_InFocusBgColor);
+			// SetBgColor(m_InFocusBgColor);
 		}
 	}
 	else
 	{
 		if (m_flFocusTransitionEffectTime)
 		{
-			GetAnimationController()->RunAnimationCommand(this, "BgColor", m_OutOfFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
+			// GetAnimationController()->RunAnimationCommand(this, "BgColor", m_OutOfFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
 		}
 		else
 		{
-			SetBgColor(m_OutOfFocusBgColor);
+			// SetBgColor(m_OutOfFocusBgColor);
 		}
 	}
 
@@ -1852,7 +1852,7 @@ void Frame::ApplySchemeSettings(IScheme *pScheme)
 	}
 	
 
-	SetBgColor(m_InFocusBgColor);
+	// SetBgColor(m_InFocusBgColor);
 	SetBorder(pScheme->GetBorder("FrameBorder"));
 
 	resourceString = pScheme->GetResourceString("Frame/TopLeft");

@@ -296,11 +296,11 @@ void Button::Paint(void)
 	
 	if ( HasFocus() && IsEnabled() && IsDrawingFocusBox() )
 	{
-		int x0, y0, x1, y1;
-		int wide, tall;
-		GetSize(wide, tall);
-		x0 = 3, y0 = 3, x1 = wide - 4 , y1 = tall - 2;
-		DrawFocusBorder(x0, y0, x1, y1);
+		// int x0, y0, x1, y1;
+		// int wide, tall;
+		// GetSize(wide, tall);
+		// x0 = 3, y0 = 3, x1 = wide - 4 , y1 = tall - 2;
+		// DrawFocusBorder(x0, y0, x1, y1);
 	}
 }
 
