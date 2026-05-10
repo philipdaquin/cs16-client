@@ -167,6 +167,19 @@ void CTeamMenu::ShowPanel(bool bShow)
 	m_pViewPort->ShowBackGround(bShow);
 }
 
+void CTeamMenu::PerformLayout()
+{
+	int screenW, screenH;
+	surface()->GetScreenSize(screenW, screenH);
+
+	const int offsetX = 640; //(screenW - 840) / 2;
+	const int offsetY =  0; //(screenH - 448) / 2;
+
+	SetPos(offsetX, offsetY);
+
+	BaseClass::PerformLayout();
+}
+
 void CTeamMenu::Update(void)
 {
 	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CTeamMenu::Update this=%p mapName='%s'\n", this, m_szMapName);

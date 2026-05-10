@@ -44,6 +44,7 @@ public:
 	virtual bool NeedsUpdate(void) { return false; }
 	virtual bool HasInputElements(void) { return true; }
 	virtual void ShowPanel(bool bShow);
+	virtual void PerformLayout(void);
 	virtual bool IsDynamic(void) { return true; }
 
 public:

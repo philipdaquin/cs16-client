@@ -53,12 +53,21 @@ void CBackGroundPanel::ApplySchemeSettings(vgui2::IScheme* pScheme)
 
 void CBackGroundPanel::PerformLayout()
 {
-	int w, h;
+	int screenW, screenH;
+	surface()->GetScreenSize(screenW, screenH);
 
-	vgui2::surface()->GetScreenSize(w, h);
+	int wide, tall;
+	GetSize(wide, tall);
+	if (wide <= 0 || tall <= 0)
+	{
+		wide = 640;
+		tall = 480;
+	}
 
-	SetBounds(0, 0, w, h);
+	const int offsetX = (screenW - wide) / 2;
+	const int offsetY = (screenH - tall) / 2;
 
+	SetPos(offsetX, offsetY);
 	BaseClass::PerformLayout();
 }
 

@@ -3,6 +3,7 @@
 #include <vgui_controls/HTML.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/RichText.h>
+#include <vgui/ISurface.h>
 
 #include "tier1/interface.h"
 #include <vgui/ILocalize.h>
@@ -78,6 +79,14 @@ bool CClientMOTD::IsURL( const char* str )
 
 void CClientMOTD::PerformLayout()
 {
+	int screenW, screenH;
+	surface()->GetScreenSize(screenW, screenH);
+	
+	const int offsetX = 640; //(screenW - 640) / 2 - 39;
+	const int offsetY = 0; //(screenH - 448) / 2;
+	
+	SetPos(offsetX, offsetY);
+
 	BaseClass::PerformLayout();
 	int x, y;
 	m_pMessageHtml->GetSize(x, y);
