@@ -86,9 +86,11 @@ void CClassMenu_TER::ShowPanel(bool bShow)
 		int wide = 0;
 		int tall = 0;
 		GetHudSize(wide, tall);
-		SetPos(0, 0);
 		SetSize(wide, tall);
 		SetupControlSettings();
+
+		PerformLayout();
+
 	}
 	BaseClass::ShowPanel(bShow);
 }
@@ -204,9 +206,11 @@ void CClassMenu_CT::ShowPanel(bool bShow)
 		int wide = 0;
 		int tall = 0;
 		GetHudSize(wide, tall);
-		SetPos(0, 0);
 		SetSize(wide, tall);
 		SetupControlSettings();
+
+
+		PerformLayout();
 	}
 	BaseClass::ShowPanel(bShow);
 }

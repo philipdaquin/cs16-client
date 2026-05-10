@@ -76,6 +76,24 @@ CClassMenu::~CClassMenu(void)
 {
 }
 
+void CClassMenu::PerformLayout(void)
+{
+	int screenW, screenH;
+	surface()->GetScreenSize(screenW, screenH);
+
+
+	std::fprintf(stderr, "CLASS MENU screenW: %d\n", screenW);
+	std::fprintf(stderr, "CLASS MENU screenH: %d\n", screenH);
+
+
+	const int offsetX = 454; //(screenW - 640) / 2;
+	const int offsetY = 0; // (screenH - 448) / 2;
+
+	SetPos(offsetX, offsetY);
+
+	BaseClass::PerformLayout();
+}
+
 MouseOverPanelButton *CClassMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
 {
 	return new MouseOverPanelButton(this, "MouseOverPanelButton", panel);
