@@ -204,16 +204,16 @@ public:
 
 		if (m_pBlankSlot && m_pSelect)
 		{
-			if (IsArmed())
-			{
-				m_pSelect->SetSize(wide, tall);
-				m_pSelect->Paint();
-			}
-			else
-			{
-				m_pBlankSlot->SetSize(wide, tall);
-				m_pBlankSlot->Paint();
-			}
+			// if (IsArmed())
+			// {
+			// 	m_pSelect->SetSize(wide, tall);
+			// 	m_pSelect->Paint();
+			// }
+			// else
+			// {
+			// 	m_pBlankSlot->SetSize(wide, tall);
+			// 	m_pBlankSlot->Paint();
+			// }
 		}
 
 		if (m_pKeyboard)

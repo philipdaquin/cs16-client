@@ -346,7 +346,7 @@ void Button::PerformLayout()
 
 	// set our color
 	SetFgColor(GetButtonFgColor());
-	SetBgColor(GetButtonBgColor());
+	// SetBgColor(GetButtonBgColor());
 
 	BaseClass::PerformLayout();
 }

@@ -195,21 +195,21 @@ void BuyPresetButton::DrawBox(int x, int y, int wide, int tall, Color color, flo
 
 	if (m_pBlankSlot && m_pSelect)
 	{
-		if (IsDepressed())
-		{
-			m_pSelect->SetSize(wide, tall);
-			m_pSelect->Paint();
-		}
-		else if (IsArmed())
-		{
-			m_pArmed->SetSize(wide, tall);
-			m_pArmed->Paint();
-		}
-		else
-		{
-			m_pBlankSlot->SetSize(wide, tall);
-			m_pBlankSlot->Paint();
-		}
+		// if (IsDepressed())
+		// {
+		// 	m_pSelect->SetSize(wide, tall);
+		// 	m_pSelect->Paint();
+		// }
+		// else if (IsArmed())
+		// {
+		// 	m_pArmed->SetSize(wide, tall);
+		// 	m_pArmed->Paint();
+		// }
+		// else
+		// {
+		// 	m_pBlankSlot->SetSize(wide, tall);
+		// 	m_pBlankSlot->Paint();
+		// }
 	}
 
 	if (m_pKeyboard)
