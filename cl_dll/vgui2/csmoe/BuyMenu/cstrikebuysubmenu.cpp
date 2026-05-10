@@ -295,6 +295,30 @@ static void AlignBuySubMenuButtonsToCards(Panel *panel)
 	}
 }
 
+static void AlignBuySubMenuCancelButton(Panel *panel)
+{
+	if (!panel)
+		return;
+
+	Button *button = dynamic_cast<Button *>(panel->FindChildByName("CancelButton"));
+	if (!button)
+		return;
+
+	Panel *anchor = panel->FindChildByName("CancelButton-bg");
+	if (!anchor)
+		anchor = panel->FindChildByName("CancelButton-key");
+	if (!anchor)
+		return;
+
+	int x, y, wide, tall;
+	anchor->GetBounds(x, y, wide, tall);
+	button->SetBounds(x, y, wide, tall);
+	button->SetVisible(true);
+	button->SetEnabled(true);
+	button->SetMouseInputEnabled(true);
+	button->SetKeyBoardInputEnabled(true);
+}
+
 static const char *ResolveTeamBuyResource(const char *command)
 {
 	if (!command || !g_pViewport)
@@ -389,6 +413,7 @@ void CCSBuySubMenu::PerformLayout()
 	BaseClass::PerformLayout();
 	EnsureWeaponCardButtons(this, this);
 	AlignBuySubMenuButtonsToCards(this);
+	AlignBuySubMenuCancelButton(this);
 }
 
 MouseOverPanelButton *CCSBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)

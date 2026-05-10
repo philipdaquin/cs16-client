@@ -35,6 +35,10 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	LoadControlSettings(vgui2::resource_paths::kMenuBackgroundPanel, "GAME");
 	m_enabled = true;
 
+
+	m_pExclamationPanel->SetVisible(m_enabled);
+
+
 	m_pTopLeftPanel->SetVisible(m_enabled);
 	m_pTopRightPanel->SetVisible(m_enabled);
 	m_pBottomLeftPanel->SetVisible(m_enabled);
@@ -42,7 +46,7 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	m_pGapPanel->SetVisible(m_enabled);
 	m_pTitleLabel->SetVisible(m_enabled);
 
-	m_pExclamationPanel->SetVisible(false);
+	// m_pExclamationPanel->SetZPos(1);
 	
 }
 
@@ -235,60 +239,83 @@ void CCSBackGroundPanel::Activate(void)
 	if (!m_enabled)
 		return;
 
-	int posX = 0, posY = 0, posW = 0, posH = 0;
-	GetBounds(posX, posY, posW, posH);
 
-	gEngfuncs.Con_Printf(
-		"[VGUI2-CLIENT] CCSBackGroundPanel::Activate entry this=%p parent=%p parentName='%s' pos=%d,%d size=%dx%d visible=%d\n",
-		this,
-		(void *)GetVParent(),
-		GetParent() ? GetParent()->GetName() : "<null>",
-		posX, posY, posW, posH,
-		IsVisible() ? 1 : 0);
+	    BaseClass::Activate();
 
-	BaseClass::Activate();
-	MoveToCenterOfScreen();
+    int screenW, screenH;
+    GetHudSize(screenW, screenH);
 
-	if (IsProportional())
-	{
-		int screenW, screenH;
-		GetHudSize(screenW, screenH);
+    if (IsProportional())
+    {
+        int wide = GetCSLegacyAlternateProportionalValueFromScaled(
+            GetScheme(), scheme()->GetProportionalNormalizedValue(640));
+        int tall = GetCSLegacyAlternateProportionalValueFromScaled(
+            GetScheme(), scheme()->GetProportionalNormalizedValue(480));
 
-		int wide, tall;
-		GetSize(wide, tall);
+        // True center — don't subtract axes from each other
+        int offsetX = (screenW - wide) / 2;
+        int offsetY = (screenH - tall) / 2;
 
-		gEngfuncs.Con_Printf(
-			"[VGUI2-CLIENT] CCSBackGroundPanel::Activate state this=%p size=%dx%d hud=%dx%d parent=%p parentName='%s'\n",
-			this, wide, tall, screenW, screenH, (void *)GetVParent(), GetParent() ? GetParent()->GetName() : "<null>");
+        m_offsetX = offsetX;
+        m_offsetY = offsetY;
 
-		if (wide != screenW || tall != screenH)
-		{
-			wide = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(640));
-			tall = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(480));
+        ResizeCSLegacyWindowControls(this, tall, wide, offsetX, offsetY);
+    }
 
-			int offsetX = (screenW - wide) / 2;
-			int offsetY = (screenH - tall) / 2;
+	// int posX = 0, posY = 0, posW = 0, posH = 0;
+	// GetBounds(posX, posY, posW, posH);
 
-			if (offsetX != 0 && offsetY != 0)
-			{
-				if (offsetX > offsetY)
-				{
-					offsetX = offsetX - offsetY;
-					offsetY = 0;
-				}
-				else
-				{
-					offsetY = offsetY - offsetX;
-					offsetX = 0;
-				}
-			}
+	// gEngfuncs.Con_Printf(
+	// 	"[VGUI2-CLIENT] CCSBackGroundPanel::Activate entry this=%p parent=%p parentName='%s' pos=%d,%d size=%dx%d visible=%d\n",
+	// 	this,
+	// 	(void *)GetVParent(),
+	// 	GetParent() ? GetParent()->GetName() : "<null>",
+	// 	posX, posY, posW, posH,
+	// 	IsVisible() ? 1 : 0);
 
-			gEngfuncs.Con_Printf(
-				"[VGUI2-CLIENT] CCSBackGroundPanel::Activate centered layout this=%p content=%dx%d offset=%d,%d adjusted=%d,%d\n",
-				this, wide, tall, offsetX, offsetY, screenW, screenH);
-			ResizeCSLegacyWindowControls(this, tall, wide, offsetX, offsetY);
-		}
-	}
+	// BaseClass::Activate();
+	// MoveToCenterOfScreen();
+
+	// if (IsProportional())
+	// {
+	// 	int screenW, screenH;
+	// 	GetHudSize(screenW, screenH);
+
+	// 	int wide, tall;
+	// 	GetSize(wide, tall);
+
+	// 	gEngfuncs.Con_Printf(
+	// 		"[VGUI2-CLIENT] CCSBackGroundPanel::Activate state this=%p size=%dx%d hud=%dx%d parent=%p parentName='%s'\n",
+	// 		this, wide, tall, screenW, screenH, (void *)GetVParent(), GetParent() ? GetParent()->GetName() : "<null>");
+
+	// 	if (wide != screenW || tall != screenH)
+	// 	{
+	// 		wide = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(640));
+	// 		tall = GetCSLegacyAlternateProportionalValueFromScaled(GetScheme(), scheme()->GetProportionalNormalizedValue(480));
+
+	// 		int offsetX = (screenW - wide) / 2;
+	// 		int offsetY = (screenH - tall) / 2;
+
+	// 		if (offsetX != 0 && offsetY != 0)
+	// 		{
+	// 			if (offsetX > offsetY)
+	// 			{
+	// 				offsetX = offsetX - offsetY;
+	// 				offsetY = 0;
+	// 			}
+	// 			else
+	// 			{
+	// 				offsetY = offsetY - offsetX;
+	// 				offsetX = 0;
+	// 			}
+	// 		}
+
+	// 		gEngfuncs.Con_Printf(
+	// 			"[VGUI2-CLIENT] CCSBackGroundPanel::Activate centered layout this=%p content=%dx%d offset=%d,%d adjusted=%d,%d\n",
+	// 			this, wide, tall, offsetX, offsetY, screenW, screenH);
+	// 		ResizeCSLegacyWindowControls(this, tall, wide, offsetX, offsetY);
+	// 	}
+	// }
 }
 
 void CCSBackGroundPanel::ApplySchemeSettings(IScheme *pScheme)
