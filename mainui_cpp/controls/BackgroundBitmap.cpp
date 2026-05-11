@@ -154,8 +154,18 @@ void CMenuBackgroundBitmap::Draw()
 #else
 	p.x = p.y = 0;
 
-	// work out scaling factors
-	if( ScreenWidth * s_BackgroundImageSize.h > ScreenHeight * s_BackgroundImageSize.w )
+	// Contain the whole background instead of filling the screen and cropping it.
+	// if( ScreenWidth * s_BackgroundImageSize.h > ScreenHeight * s_BackgroundImageSize.w )
+	// {
+	// 	xScale = ScreenWidth / s_BackgroundImageSize.w;
+	// 	yScale = xScale;
+	// }
+	// else
+	// {
+	// 	yScale = ScreenHeight / s_BackgroundImageSize.h;
+	// 	xScale = yScale;
+	// }
+	if( ScreenWidth * s_BackgroundImageSize.h < ScreenHeight * s_BackgroundImageSize.w )
 	{
 		xScale = ScreenWidth / s_BackgroundImageSize.w;
 		yScale = xScale;
@@ -165,13 +175,19 @@ void CMenuBackgroundBitmap::Draw()
 		yScale = ScreenHeight / s_BackgroundImageSize.h;
 		xScale = yScale;
 	}
+
+	// Pull the background back a bit more so it breathes on larger displays.
+	// This keeps the contain-fit behavior but leaves a small margin around it.
+	const float backgroundZoom = 0.88f;
+	xScale *= backgroundZoom;
+	yScale *= backgroundZoom;
 #endif
 
-	// center wide background (for example if background is wider than our window)
+	// Center the contained background in the window.
 	int xOffset = 0, yOffset = 0;
-	if( s_BackgroundImageSize.w * xScale > ScreenWidth )
+	if( s_BackgroundImageSize.w * xScale != ScreenWidth )
 		xOffset = ( ScreenWidth - s_BackgroundImageSize.w * xScale ) / 2;
-	else if( s_BackgroundImageSize.h * yScale > ScreenHeight )
+	if( s_BackgroundImageSize.h * yScale != ScreenHeight )
 		yOffset = ( ScreenHeight - s_BackgroundImageSize.h * yScale ) / 2;
 
 	DrawBackgroundLayout( p, xOffset, yOffset, xScale, yScale );
