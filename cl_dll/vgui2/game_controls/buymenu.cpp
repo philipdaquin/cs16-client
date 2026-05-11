@@ -94,6 +94,14 @@ void CBuyMenu::Update(void)
 	NULL;
 }
 
+void CBuyMenu::PerformLayout(void)
+{
+	BaseClass::PerformLayout();
+
+	if (m_pViewPort && IsVisible())
+		m_pViewPort->ShowBackGround(true);
+}
+
 void CBuyMenu::OnClose(void)
 {
 	ResetMenuState();

@@ -93,6 +93,9 @@ void CClassMenu::PerformLayout(void)
 	SetPos(offsetX, offsetY);
 
 	BaseClass::PerformLayout();
+
+	if (m_pViewPort)
+		m_pViewPort->ShowBackGround(true);
 }
 
 MouseOverPanelButton *CClassMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)

@@ -186,6 +186,9 @@ void CTeamMenu::PerformLayout()
 	SetPos(offsetX, offsetY);
 
 	BaseClass::PerformLayout();
+
+	if (m_pViewPort)
+		m_pViewPort->ShowBackGround(true);
 }
 
 void CTeamMenu::Update(void)

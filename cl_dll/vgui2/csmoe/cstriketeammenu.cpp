@@ -157,6 +157,9 @@ void CCSTeamMenu::PerformLayout(void)
 {
 	BaseClass::PerformLayout();
 
+	if (m_pViewPort)
+		m_pViewPort->ShowBackGround(true);
+
 	// if (!m_backgroundLayoutFinished)
 	// {
 	// 	LayoutBackgroundPanel(this);

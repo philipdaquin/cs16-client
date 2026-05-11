@@ -93,6 +93,9 @@ void CClientMOTD::PerformLayout()
 	m_pMessage->SetSize(x, y);
 	m_pMessageHtml->GetPos(x, y);
 	m_pMessage->SetPos(x, y);
+
+	if (m_pViewport)
+		m_pViewport->ShowBackGround(true);
 }
 
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )

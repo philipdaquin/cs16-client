@@ -138,6 +138,9 @@ void CClassMenu_TER::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
+	if (m_pViewPort)
+		m_pViewPort->ShowBackGround(true);
+
 	if (!m_backgroundLayoutFinished)
 	{
 		LayoutBackgroundPanel(this);
@@ -249,6 +252,9 @@ void CClassMenu_CT::PaintBackground()
 void CClassMenu_CT::PerformLayout()
 {
 	BaseClass::PerformLayout();
+
+	if (m_pViewPort)
+		m_pViewPort->ShowBackGround(true);
 
 	if (!m_backgroundLayoutFinished)
 	{

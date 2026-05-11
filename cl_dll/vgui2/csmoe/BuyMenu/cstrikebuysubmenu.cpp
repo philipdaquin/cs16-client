@@ -414,6 +414,10 @@ void CCSBuySubMenu::PerformLayout()
 	EnsureWeaponCardButtons(this, this);
 	AlignBuySubMenuButtonsToCards(this);
 	AlignBuySubMenuCancelButton(this);
+
+	// Keep the shared viewport background visible whenever this submenu lays out.
+	if (g_pViewport)
+		g_pViewport->ShowBackGround(true);
 }
 
 MouseOverPanelButton *CCSBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
