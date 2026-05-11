@@ -228,6 +228,7 @@ void CTreeViewListControl::RecalculateColumns()
 
 void CTreeViewListControl::PostChildPaint()
 {
+	// Late-pass grid overlay so the cell borders stay visible over the painted children.
 	BaseClass::PostChildPaint();
 
 	// Draw the grid lines.
@@ -313,4 +314,3 @@ void CTreeViewListControl::DrawTitleBars()
 		surface()->DrawPrintText( unicodeString, strlen( pTitleString ) );
 	}
 }
-

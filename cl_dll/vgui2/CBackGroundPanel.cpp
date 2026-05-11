@@ -381,6 +381,9 @@ void ApplyBackgroundSchemeSettings(EditablePanel *pWindow, vgui2::IScheme *pSche
 	if (!pWindow || !pScheme)
 		return;
 
+	// Background opacity control:
+	// the alpha channel from BgColor is reused for the panel images.
+	// Revisit this if we want the background to be fully opaque again.
 	Color bgColor = Color(255, 255, 255, pScheme->GetColor("BgColor", Color(0, 0, 0, 0))[3]);
 	Color fgColor = pScheme->GetColor("FgColor", Color(0, 0, 0, 0));
 

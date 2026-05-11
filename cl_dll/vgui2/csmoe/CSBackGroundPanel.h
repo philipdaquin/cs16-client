@@ -17,6 +17,7 @@ public:
 
 public:
 	void PaintBackground(void);
+	void PostChildPaint(void) override;
 	void Activate(void);
 	void ApplySchemeSettings(vgui2::IScheme *pScheme);
 	void PerformLayout(void);

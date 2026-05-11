@@ -17,8 +17,12 @@ using namespace vgui2;
 
 extern engine_studio_api_t IEngineStudio;
 
+// CS viewport background panel.
+// Draw the translucent chrome in PaintBackground() and the logo in
+// PostChildPaint() so the logo stays above the chrome.
 CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 {
+	// Corner, gap, and title controls still participate in the normal layout pass.
 	m_pTopLeftPanel = new CBitmapImagePanel(this, "TopLeftPanel", "gfx/vgui/round_corner_nw");
 	m_pTopRightPanel = new CBitmapImagePanel(this, "TopRightPanel", "gfx/vgui/round_corner_ne");
 	m_pBottomLeftPanel = new CBitmapImagePanel(this, "BottomLeftPanel", "gfx/vgui/round_corner_sw");
@@ -27,7 +31,11 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	m_pGapPanel = new Panel(this, "GapPanel");
 	m_pTitleLabel = new Label(this, "CaptionLabel", "");
 
+	// Keep the logo as a child for layout, but draw it manually in PostChildPaint().
 	m_pExclamationPanel = new CBitmapImagePanel(this, "ExclamationPanel", "gfx/vgui/CS_logo");
+	// Previous stacking attempt kept here for reference:
+	// m_pExclamationPanel->SetVisible(m_enabled);
+	// m_pExclamationPanel->SetZPos(1);
 
 	m_offsetX = 0;
 	m_offsetY = 0;
@@ -35,8 +43,8 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	LoadControlSettings(vgui2::resource_paths::kMenuBackgroundPanel, "GAME");
 	m_enabled = true;
 
-
-	m_pExclamationPanel->SetVisible(m_enabled);
+	// Enable the late paint hook so the logo can be drawn after the chrome.
+	SetPostChildPaintEnabled(true);
 
 
 	m_pTopLeftPanel->SetVisible(m_enabled);
@@ -45,9 +53,6 @@ CCSBackGroundPanel::CCSBackGroundPanel(Panel *parent) : BaseClass(parent)
 	m_pBottomRightPanel->SetVisible(m_enabled);
 	m_pGapPanel->SetVisible(m_enabled);
 	m_pTitleLabel->SetVisible(m_enabled);
-
-	// m_pExclamationPanel->SetZPos(1);
-	
 }
 
 void CCSBackGroundPanel::SetTitleText(const wchar_t *text)
@@ -65,6 +70,7 @@ void CCSBackGroundPanel::PaintBackground(void)
 	if (!m_enabled)
 		return;
 
+	// Paint the translucent menu chrome first.
 	surface()->DrawSetColor(m_bgColor);
 
 	if (IEngineStudio.IsHardware())
@@ -117,6 +123,17 @@ void CCSBackGroundPanel::PaintBackground(void)
 			surface()->DrawFilledRect(x1 + m_pBottomLeftPanel->GetWide(), y1, x2, y2 + m_pBottomRightPanel->GetTall());
 		}
 	}
+}
+
+void CCSBackGroundPanel::PostChildPaint(void)
+{
+	if (!m_enabled || !m_pExclamationPanel)
+		return;
+
+	// Draw the logo after the chrome so it stays on top.
+	surface()->PushMakeCurrent(m_pExclamationPanel->GetVPanel(), false);
+	m_pExclamationPanel->PaintBackground();
+	surface()->PopMakeCurrent(m_pExclamationPanel->GetVPanel());
 }
 
 static int GetAlternateProportionalValueFromNormal(int normalizedValue)

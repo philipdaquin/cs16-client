@@ -1172,10 +1172,8 @@ void Panel::Paint()
 //-----------------------------------------------------------------------------
 void Panel::PostChildPaint()
 {
-	// Empty on purpose
-	// This is called if _postChildPaintEnabled is true and allows painting to
-	//  continue on the surface after all of the panel's children have painted 
-	//  themselves.  Allows drawing an overlay on top of the children, etc.
+	// Default late-pass hook. Subclasses override this to draw overlays after
+	// their children have finished painting.
 }
 
 //-----------------------------------------------------------------------------
@@ -6119,6 +6117,8 @@ VPANEL CDragDropHelperPanel::IsWithinTraverse(int x, int y, bool traversePopups)
 
 void CDragDropHelperPanel::PostChildPaint()
 {
+	// Late-pass drag/drop overlay. Paints helper visuals after the source panels
+	// so the drop state is always drawn on top.
 	int c = m_PaintList.Count();
 	for ( int i = c - 1; i >= 0 ; --i )
 	{

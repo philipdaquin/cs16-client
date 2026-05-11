@@ -1204,6 +1204,7 @@ void HTML::NewWindowsOnly( bool state )
 //-----------------------------------------------------------------------------
 void HTML::PostChildPaint()
 {
+	// Restore the embedded browser paint path after children have finished drawing.
 	BaseClass::PostChildPaint();
 	// TODO::STYLE
 	//m_pInteriorPanel->SetPaintAppearanceEnabled( true ); // turn painting back on so the IE hwnd can render this border
