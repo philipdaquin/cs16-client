@@ -41,11 +41,13 @@ public:
 
 	void SetPicture( EDefaultBtns ID );
 	void SetPicture( const char *filename, int hotkey = 0 );
+	void SetTextHeight( int textHeight ) { m_iTextHeightOverride = textHeight; }
 
 	bool bEnableTransitions;
 	bool bPulse;
 private:
 	bool bRollOver;
+	int m_iTextHeightOverride;
 
 	void CheckWindowChanged( void );
 	void _Event( int ev ) override;

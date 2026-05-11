@@ -104,6 +104,7 @@ CMenuPicButton::CMenuPicButton() : BaseClass()
 	bEnableTransitions = true;
 	eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
 	iFlags = QMF_DROPSHADOW;
+	m_iTextHeightOverride = -1;
 
 	iFocusStartTime = 0;
 
@@ -118,7 +119,8 @@ CMenuPicButton::CMenuPicButton() : BaseClass()
 
 	SetSize( UI_BUTTONS_WIDTH, UI_BUTTONS_HEIGHT );
 
-	SetCharSize( QM_DEFAULTFONT );
+	// SetCharSize( QM_DEFAULTFONT );
+	SetCharSize( QM_SMALLFONT );
 }
 
 /*
@@ -318,71 +320,62 @@ void CMenuPicButton::Draw( )
 	}
 	else if( !uiStatic.lowmemory )
 	{
-		const uint heavy_blur_flags = ETF_NOSIZELIMIT | ETF_FORCECOL;
-		const uint light_blur_flags = ETF_NOSIZELIMIT | ETF_FORCECOL | ETF_ADDITIVE;
-		CColor light_blur_color, heavy_blur_color = colorBase;
-		Point pos = m_scPos;
+		// Old glow/blur text path kept for reference:
+		// const uint heavy_blur_flags = ETF_NOSIZELIMIT | ETF_FORCECOL;
+		// const uint light_blur_flags = ETF_NOSIZELIMIT | ETF_FORCECOL | ETF_ADDITIVE;
+		// ...
 
-		if( iFlags & QMF_GRAYED )
-			light_blur_color = InterpColor( uiColorBlack, colorBase, 0.333f ); // because additive, tone down all channels
-		else
-			light_blur_color = colorBase;
+		uint textflags = ETF_NOSIZELIMIT | ETF_FORCECOL;
+		CColor plainColor = ( iFlags & QMF_GRAYED ) ? uiColorDkGrey : uiColorWhite;
+		const int buttonTextHeight = ( m_iTextHeightOverride > 0 ) ? m_iTextHeightOverride : m_scChSize;
 
-		pos.x += 7 * uiStatic.scaleX;
-		pos.y -= uiStatic.scaleY;
+		if( a > 0 && !( iFlags & QMF_GRAYED ) )
+			plainColor = PackAlpha( plainColor, a );
 
 		if( this != m_pParent->ItemAtCursor() )
 		{
-			if( a > 0 )
-			{
-				UI_DrawString( uiStatic.hHeavyBlur, pos, m_scSize, szName,
-					PackAlpha( heavy_blur_color, a ), m_scChSize, eTextAlignment, heavy_blur_flags );
-			}
-			UI_DrawString( uiStatic.hLightBlur, pos, m_scSize, szName, light_blur_color, m_scChSize, eTextAlignment, light_blur_flags );
+			UI_DrawString( font, m_scPos, m_scSize, szName, plainColor, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( m_bPressed )
 		{
-			UI_DrawString( uiStatic.hHeavyBlur, pos, m_scSize, szName, heavy_blur_color, m_scChSize, eTextAlignment, heavy_blur_flags );
-			UI_DrawString( uiStatic.hLightBlur, pos, m_scSize, szName, 0xFF000000, m_scChSize, eTextAlignment, light_blur_flags & ( ~ETF_ADDITIVE ));
+			UI_DrawString( font, m_scPos, m_scSize, szName, uiPromptTextColor, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS )
 		{
-			UI_DrawString( uiStatic.hHeavyBlur, pos, m_scSize, szName, heavy_blur_color, m_scChSize, eTextAlignment, heavy_blur_flags );
-			UI_DrawString( uiStatic.hLightBlur, pos, m_scSize, szName, light_blur_color, m_scChSize, eTextAlignment, light_blur_flags );
+			UI_DrawString( font, m_scPos, m_scSize, szName, uiPromptTextColor, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( eFocusAnimation == QM_PULSEIFFOCUS )
 		{
 			float pulsar = 0.5f + 0.5f * sin( (float)uiStatic.realTime / UI_PULSE_DIVISOR );
-
-			UI_DrawString( uiStatic.hHeavyBlur, pos, m_scSize, szName,
-				InterpColor( uiColorBlack, heavy_blur_color, pulsar ), m_scChSize, eTextAlignment, heavy_blur_flags );
-			UI_DrawString( uiStatic.hLightBlur, pos, m_scSize, szName, light_blur_color, m_scChSize, eTextAlignment, light_blur_flags );
+			UI_DrawString( font, m_scPos, m_scSize, szName,
+				InterpColor( plainColor, uiPromptTextColor, pulsar ), buttonTextHeight, eTextAlignment, textflags );
 		}
 	}
 	else
 	{
+		const int buttonTextHeight = ( m_iTextHeightOverride > 0 ) ? m_iTextHeightOverride : UI_SMALL_CHAR_HEIGHT;
 		uint textflags = ETF_NOSIZELIMIT | ETF_FORCECOL;
 
 		SetBits( textflags, (iFlags & QMF_DROPSHADOW) ? ETF_SHADOW : 0 );
 
 		if( iFlags & QMF_GRAYED )
 		{
-			UI_DrawString( font, m_scPos, m_scSize, szName, uiColorDkGrey, m_scChSize, eTextAlignment, textflags );
+			UI_DrawString( font, m_scPos, m_scSize, szName, uiColorDkGrey, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( this != m_pParent->ItemAtCursor() )
 		{
-			UI_DrawString( font, m_scPos, m_scSize, szName, colorBase, m_scChSize, eTextAlignment, textflags );
+			UI_DrawString( font, m_scPos, m_scSize, szName, colorBase, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( eFocusAnimation == QM_HIGHLIGHTIFFOCUS )
 		{
-			UI_DrawString( font, m_scPos, m_scSize, szName, colorFocus, m_scChSize, eTextAlignment, textflags );
+			UI_DrawString( font, m_scPos, m_scSize, szName, colorFocus, buttonTextHeight, eTextAlignment, textflags );
 		}
 		else if( eFocusAnimation == QM_PULSEIFFOCUS )
 		{
 			float pulsar = 0.5f + 0.5f * sin( (float)uiStatic.realTime / UI_PULSE_DIVISOR );
 
 			UI_DrawString( font, m_scPos, m_scSize, szName,
-				InterpColor( colorBase, colorFocus, pulsar ), m_scChSize, eTextAlignment, textflags );
+				InterpColor( colorBase, colorFocus, pulsar ), buttonTextHeight, eTextAlignment, textflags );
 		}
 	}
 

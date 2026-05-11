@@ -69,6 +69,7 @@ private:
 	CMenuPicButton	configuration;
 	CMenuPicButton	saveRestore;
 	CMenuPicButton	multiPlayer;
+	CMenuPicButton	findServers;
 	CMenuPicButton	customGame;
 	CMenuPicButton	readme;
 	CMenuPicButton	previews;
@@ -98,11 +99,17 @@ void CMenuMain::QuitDialogCb()
 
 void CMenuMain::DisconnectCb()
 {
+	// EngFuncs::ClientCmd( false, "disconnect\n" );
 	EngFuncs::ClientCmd( false, "disconnect\n" );
 	VidInit( false );
 	CalcPosition();
 	CalcSizes();
 	VidInitItems();
+
+	// Return straight to the root game menu after disconnecting.
+	UI_CloseMenu();
+	UI_SetActiveMenu( TRUE );
+	UI_Main_Menu();
 }
 
 void CMenuMain::DisconnectDialogCb()
@@ -185,94 +192,76 @@ void CMenuMain::_Init( void )
 		EngFuncs::KEY_SetDest( KEY_CONSOLE );
 	});
 
-	resumeGame.SetNameAndStatus( L( "GameUI_GameMenu_ResumeGame" ), L( "StringsList_188" ) );
+	// resumeGame.SetNameAndStatus( L( "GameUI_GameMenu_ResumeGame" ), L( "StringsList_188" ) );
+	resumeGame.SetNameAndStatus( L( "GameUI_GameMenu_ResumeGame" ), NULL );
 	resumeGame.SetPicture( PC_RESUME_GAME );
 	resumeGame.iFlags |= QMF_NOTIFY;
+	// resumeGame.charSize = 6;
+	// resumeGame.SetTextHeight( 10 );
+	// resumeGame.SetTextHeight( 8 );
+	resumeGame.SetTextHeight( 6 );
 	resumeGame.onReleased = UI_CloseMenu;
 
-	disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), L( "Disconnect from server." ) );
+	// disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), L( "Disconnect from server." ) );
+	disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), NULL );
 	disconnect.SetPicture( PC_DISCONNECT );
 	disconnect.iFlags |= QMF_NOTIFY;
+	// disconnect.charSize = 6;
+	// disconnect.SetTextHeight( 10 );
+	// disconnect.SetTextHeight( 8 );
+	disconnect.SetTextHeight( 6 );
 	disconnect.onReleased = VoidCb( &CMenuMain::DisconnectDialogCb );
 
-	newGame.SetNameAndStatus( L( "GameUI_NewGame" ), L( "StringsList_189" ) );
-	newGame.SetPicture( PC_NEW_GAME );
-	newGame.iFlags |= QMF_NOTIFY;
-	newGame.onReleased = UI_NewGame_Menu;
-
-	hazardCourse.SetNameAndStatus( L( "GameUI_TrainingRoom" ), L( "StringsList_190" ) );
-	hazardCourse.SetPicture( PC_HAZARD_COURSE );
-	hazardCourse.iFlags |= QMF_NOTIFY;
-	hazardCourse.onReleasedClActive = VoidCb( &CMenuMain::HazardCourseDialogCb );
-	hazardCourse.onReleased = VoidCb( &CMenuMain::HazardCourseCb );
-
-	multiPlayer.SetNameAndStatus( L( "GameUI_Multiplayer" ), L( "StringsList_198" ) );
+	// multiPlayer.SetNameAndStatus( "New Multiplayer Game", L( "StringsList_198" ) );
+	multiPlayer.SetNameAndStatus( "New Multiplayer Game", NULL );
 	multiPlayer.SetPicture( PC_MULTIPLAYER );
 	multiPlayer.iFlags |= QMF_NOTIFY;
+	// multiPlayer.charSize = 6;
+	// multiPlayer.SetTextHeight( 10 );
+	// multiPlayer.SetTextHeight( 8 );
+	multiPlayer.SetTextHeight( 6 );
 	multiPlayer.onReleased = UI_MultiPlayer_Menu;
 
-	configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
+	// findServers.SetNameAndStatus( "Find Servers", L( "StringsList_198" ) );
+	findServers.SetNameAndStatus( "Find Servers", NULL );
+	findServers.SetPicture( PC_FIND );
+	findServers.iFlags |= QMF_NOTIFY;
+	// findServers.charSize = 6;
+	// findServers.SetTextHeight( 10 );
+	// findServers.SetTextHeight( 8 );
+	findServers.SetTextHeight( 6 );
+	findServers.onReleased = UI_InternetGames_Menu;
+
+	// configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
+	configuration.SetNameAndStatus( L( "GameUI_Options" ), NULL );
 	configuration.SetPicture( PC_CONFIG );
 	configuration.iFlags |= QMF_NOTIFY;
+	// configuration.charSize = 6;
+	// configuration.SetTextHeight( 10 );
+	// configuration.SetTextHeight( 8 );
+	configuration.SetTextHeight( 6 );
 	configuration.onReleased = UI_Options_Menu;
 
-	saveRestore.iFlags |= QMF_NOTIFY;
-
-	customGame.SetNameAndStatus( L( "GameUI_ChangeGame" ), L( "StringsList_530" ) );
-	customGame.SetPicture( PC_CUSTOM_GAME );
-	customGame.iFlags |= QMF_NOTIFY;
-	customGame.onReleased = UI_CustomGame_Menu;
-
-	// TODO: add readme screen later
-	readme.SetNameAndStatus( L("View Readme"), L( "StringsList_194" ) );
-	readme.SetPicture( PC_VIEW_README );
-	readme.iFlags |= QMF_NOTIFY;
-
-	previews.SetNameAndStatus( L( "Previews" ), L( "StringsList_400" ) );
-	previews.SetPicture( PC_PREVIEWS );
-	previews.iFlags |= QMF_NOTIFY;
-	SET_EVENT( previews.onReleased, EngFuncs::ShellExecute( MenuStrings[ IDS_MEDIA_PREVIEWURL ], NULL, false ) );
-
-	quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
+	// quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
+	quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), NULL );
 	quit.SetPicture( PC_QUIT );
 	quit.iFlags |= QMF_NOTIFY;
+	// quit.charSize = 6;
+	// quit.SetTextHeight( 10 );
+	// quit.SetTextHeight( 8 );
+	quit.SetTextHeight( 6 );
 	quit.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
 
-	quitButton.SetPicture( ART_CLOSEBTN_N, ART_CLOSEBTN_F, ART_CLOSEBTN_D );
-	quitButton.iFlags = QMF_MOUSEONLY;
-	quitButton.eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
-	quitButton.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
+	// Top-right window controls are disabled for the classic main menu layout.
+	// quitButton.SetPicture( ART_CLOSEBTN_N, ART_CLOSEBTN_F, ART_CLOSEBTN_D );
+	// quitButton.iFlags = QMF_MOUSEONLY;
+	// quitButton.eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
+	// quitButton.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
 
-	minimizeBtn.SetPicture( ART_MINIMIZE_N, ART_MINIMIZE_F, ART_MINIMIZE_D );
-	minimizeBtn.iFlags = QMF_MOUSEONLY;
-	minimizeBtn.eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
-	minimizeBtn.onReleased.SetCommand( FALSE, "minimize\n" );
-
-	if ( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY || gMenu.m_gameinfo.startmap[0] == 0 )
-		newGame.SetGrayed( true );
-
-	if ( gMenu.m_gameinfo.gamemode == GAME_SINGLEPLAYER_ONLY )
-		multiPlayer.SetGrayed( true );
-
-	// if ( gMenu.m_gameinfo.gamemode == GAME_MULTIPLAYER_ONLY )
-	// {
-	// 	saveRestore.SetGrayed( true );
-	// 	hazardCourse.SetGrayed( true );
-	// }
-
-	// too short execute string - not a real command
-	if( strlen( MenuStrings[IDS_MEDIA_PREVIEWURL] ) <= 3 )
-	{
-		previews.SetGrayed( true );
-	}
-
-	// server.dll needs for reading savefiles or startup newgame
-	if( !EngFuncs::CheckGameDll( ))
-	{
-		saveRestore.SetGrayed( true );
-		hazardCourse.SetGrayed( true );
-		newGame.SetGrayed( true );
-	}
+	// minimizeBtn.SetPicture( ART_MINIMIZE_N, ART_MINIMIZE_F, ART_MINIMIZE_D );
+	// minimizeBtn.iFlags = QMF_MOUSEONLY;
+	// minimizeBtn.eFocusAnimation = QM_HIGHLIGHTIFFOCUS;
+	// minimizeBtn.onReleased.SetCommand( FALSE, "minimize\n" );
 
 	if( FBitSet( gMenu.m_gameinfo.flags, GFL_ANIMATED_TITLE ))
 	{
@@ -290,23 +279,12 @@ void CMenuMain::_Init( void )
 	AddItem( console );
 	AddItem( disconnect );
 	AddItem( resumeGame );
-	AddItem( newGame );
-
-	if ( bTrainMap )
-		AddItem( hazardCourse );
-
-	AddItem( configuration );
-	AddItem( saveRestore );
 	AddItem( multiPlayer );
-
-	if ( bCustomGame )
-		AddItem( customGame );
-
-	AddItem( readme );
-	AddItem( previews );
+	AddItem( findServers );
+	AddItem( configuration );
 	AddItem( quit );
-	AddItem( minimizeBtn );
-	AddItem( quitButton );
+	// AddItem( minimizeBtn );
+	// AddItem( quitButton );
 }
 
 /*
@@ -316,87 +294,37 @@ UI_Main_Init
 */
 void CMenuMain::VidInit( bool connected )
 {
-	int hoffset = ( 70 / 640.0 ) * 1024.0;
+	int hoffset = ( 70 / 640.0 ) * 1024.0 - 30;
 
 	// in original menu Previews is located at specific point
-	int previews_voffset = ( 404 / 480.0 ) * 768.0;
-
-	// no visible console button gap
-	int ygap = (( 404 - 373 ) / 480.0 ) * 768.0;
+	int topY = ( 404 / 480.0 ) * 768.0 + 50;
+	// int ygap = (( 404 - 373 ) / 480.0 ) * 768.0;
+	int ygap = 36;
 
 	// statically positioned items
 	minimizeBtn.SetRect( uiStatic.width - 72, 13, 32, 32 );
 	quitButton.SetRect( uiStatic.width - 36, 13, 32, 32 );
 
-	previews.SetCoord( hoffset, previews_voffset );
-	quit.SetCoord( hoffset, previews_voffset + ygap );
-
-	// let's start calculating positions
-	int yoffset = previews_voffset - ygap;
-
-	readme.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
-
-	if( bCustomGame )
-	{
-		customGame.SetCoord( hoffset, yoffset );
-		yoffset -= ygap;
-	}
-
-	multiPlayer.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
-
-	bool single = gpGlobals->maxClients < 2;
-
-	saveRestore.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
-
-	configuration.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
-
-	if( bTrainMap )
-	{
-		hazardCourse.SetCoord( hoffset, yoffset );
-		yoffset -= ygap;
-	}
-
-	newGame.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
+	// Match the classic CS ordering from top to bottom:
+	// New Multiplayer Game, Find Servers, Options, Quit.
+	quit.SetCoord( hoffset, topY );
+	configuration.SetCoord( hoffset, topY - ygap );
+	findServers.SetCoord( hoffset, topY - ygap * 2 );
+	multiPlayer.SetCoord( hoffset, topY - ygap * 3 );
 
 	if( connected )
 	{
-		resumeGame.SetCoord( hoffset, yoffset );
-		yoffset -= ygap;
-
-		if( !single )
-		{
-			disconnect.SetCoord( hoffset, yoffset );
-			yoffset -= ygap;
-		}
+		disconnect.SetCoord( hoffset, topY - ygap * 4 );
+		resumeGame.SetCoord( hoffset, topY - ygap * 5 );
 	}
-
-	console.SetCoord( hoffset, yoffset );
-	yoffset -= ygap;
 
 	// now figure out what's visible
+	console.SetVisibility( false );
 	resumeGame.SetVisibility( connected );
-	disconnect.SetVisibility( connected && !single );
-
-	// they exist in the original and can be mistakenly clicked
-	newGame.SetVisibility( false );
-
-	if( connected && single )
-	{
-		saveRestore.SetNameAndStatus( L( "Save\\Load Game" ), L( "StringsList_192" ) );
-		saveRestore.SetPicture( PC_SAVE_LOAD_GAME );
-		saveRestore.onReleased = UI_SaveLoad_Menu;
-	}
-	else
-	{
-		saveRestore.SetNameAndStatus( L( "GameUI_LoadGame" ), L( "StringsList_191" ) );
-		saveRestore.SetPicture( PC_LOAD_GAME );
-		saveRestore.onReleased = UI_LoadGame_Menu;
-	}
+	disconnect.SetVisibility( connected );
+	multiPlayer.SetVisibility( true );
+	findServers.SetVisibility( true );
+	configuration.SetVisibility( true );
 }
 
 void CMenuMain::_VidInit()
@@ -406,16 +334,19 @@ void CMenuMain::_VidInit()
 
 void CMenuMain::Think()
 {
-	if( gpGlobals->developer )
-	{
-		if( !console.IsVisible( ))
-			console.Show();
-	}
-	else
-	{
-		if( console.IsVisible( ))
-			console.Hide();
-	}
+	// The classic CS main menu does not expose the developer console button here.
+	// if( gpGlobals->developer )
+	// {
+	// 	if( !console.IsVisible( ))
+	// 		console.Show();
+	// }
+	// else
+	// {
+	// 	if( console.IsVisible( ))
+	// 		console.Hide();
+	// }
+	if( console.IsVisible( ))
+		console.Hide();
 
 	CMenuFramework::Think();
 }
