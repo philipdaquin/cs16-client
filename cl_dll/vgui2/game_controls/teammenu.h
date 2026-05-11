@@ -64,8 +64,8 @@ protected:
 
 protected:
 	IViewport* m_pViewPort;
-	vgui2::RichText *m_pMapInfo;
-	vgui2::HTML *m_pMapInfoHTML;
+	vgui2::RichText *m_pMapInfo = nullptr;
+	vgui2::HTML *m_pMapInfoHTML = nullptr;
 	char m_szMapName[MAX_PATH];
 	vgui2::EditablePanel *m_pPanel;
 	CUtlVector<MouseOverPanelButton *> m_mouseoverButtons;

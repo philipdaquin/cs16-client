@@ -72,6 +72,7 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 	// Displays the team menu map description text from the map info file.
 	// Commented out because this panel is being disabled for now, while the rest of the menu still loads.
 	// m_pMapInfo = new RichText(this, "MapInfo");
+	m_pMapInfo = nullptr;
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML = new HTML(this, "MapInfoHTML");
 #endif
@@ -116,10 +117,12 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 		"[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings mapInfoColor this=%p rgba=%d,%d,%d,%d\n",
 		this,
 		mapInfoColor[0], mapInfoColor[1], mapInfoColor[2], mapInfoColor[3]);
-	if (m_pMapInfo)
-	{
-		m_pMapInfo->SetFgColor(mapInfoColor);
-	}
+	// The RichText panel is intentionally disabled right now, but the original
+	// color setup is kept here for reference.
+	// if (m_pMapInfo)
+	// {
+	// 	m_pMapInfo->SetFgColor(mapInfoColor);
+	// }
 
 	if (*m_szMapName) {
 		LoadMapPage(m_szMapName);
@@ -201,13 +204,14 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 	Q_strncpy(m_szMapName, mapName, strlen(mapName) + 1);
 
 	char mapRES[MAX_PATH];
-	
-	if (m_pMapInfo)
-	{
-		m_pMapInfo->SetVisible(true);
-	}
+	// The RichText panel is intentionally disabled right now, so its visibility
+	// and content updates are preserved here as comments only.
+	// if (m_pMapInfo)
+	// {
+	// 	m_pMapInfo->SetVisible(true);
+	// }
 #if defined (ENABLE_HTML_WINDOW)
-	m_pMapInfoHTML->SetVisible(false);
+	// m_pMapInfoHTML->SetVisible(false);
 #endif
 	
 	Q_snprintf(mapRES, sizeof(mapRES), "maps/%s.txt", mapName);
@@ -220,10 +224,10 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 		}
 		else
 		{
-			if (m_pMapInfo)
-			{
-				m_pMapInfo->SetText("");
-			}
+			// if (m_pMapInfo)
+			// {
+			// 	m_pMapInfo->SetText("");
+			// }
 			return;
 		}
 	}
@@ -254,15 +258,15 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 	byteSwap.SetTargetBigEndian(false);
 	byteSwap.SwapBufferToTargetEndian(memBlock, memBlock, dataSize / sizeof(wchar_t));
 
-	if (m_pMapInfo)
-	{
-		if (memBlock[0] != 0xFEFF)
-			m_pMapInfo->SetText(reinterpret_cast<char *>(memBlock));
-		else
-			m_pMapInfo->SetText(memBlock + 1);
-
-		m_pMapInfo->GotoTextStart();
-	}
+	// if (m_pMapInfo)
+	// {
+	// 	if (memBlock[0] != 0xFEFF)
+	// 		m_pMapInfo->SetText(reinterpret_cast<char *>(memBlock));
+	// 	else
+	// 		m_pMapInfo->SetText(memBlock + 1);
+	//
+	// 	m_pMapInfo->GotoTextStart();
+	// }
 
 	filesystem()->Close(f);
 	free(memBlock);
