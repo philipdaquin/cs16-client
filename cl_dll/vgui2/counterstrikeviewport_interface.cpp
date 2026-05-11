@@ -69,7 +69,7 @@ void VGUI2_HideAllGameMenus()
 
 bool VGUI2_ShouldCaptureInput()
 {
-	return g_pViewport && g_pViewport->GetActivePanel() != nullptr;
+	return g_pViewport && (g_pViewport->GetActivePanel() != nullptr || g_pViewport->IsBackGroundVisible());
 }
 
 int VGUI2_GetLocalPlayerTeam()

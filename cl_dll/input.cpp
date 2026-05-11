@@ -729,6 +729,10 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	if ( GetClientVoice()->IsInSquelchMode() )
 		cmd->buttons &= ~IN_ATTACK;
 
+	// Visible VGUI menus/backgrounds own mouse input; don't let clicks leak into weapons.
+	if ( VGUI2_ShouldCaptureInput() )
+		cmd->buttons &= ~( IN_ATTACK | IN_ATTACK2 );
+
 	// Using joystick?
 	if ( in_joystick->value )
 	{
