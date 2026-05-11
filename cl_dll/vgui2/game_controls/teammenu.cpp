@@ -69,7 +69,9 @@ CTeamMenu::CTeamMenu(IViewport* pViewPort) : Frame(NULL, PANEL_TEAM), m_pViewPor
 	SetProportional(true);
 
 	m_pPanel = new EditablePanel(this, "ClassInfo");
-	m_pMapInfo = new RichText(this, "MapInfo");
+	// Displays the team menu map description text from the map info file.
+	// Commented out because this panel is being disabled for now, while the rest of the menu still loads.
+	// m_pMapInfo = new RichText(this, "MapInfo");
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML = new HTML(this, "MapInfoHTML");
 #endif
@@ -114,7 +116,10 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 		"[VGUI2-CLIENT] CTeamMenu::ApplySchemeSettings mapInfoColor this=%p rgba=%d,%d,%d,%d\n",
 		this,
 		mapInfoColor[0], mapInfoColor[1], mapInfoColor[2], mapInfoColor[3]);
-	m_pMapInfo->SetFgColor(mapInfoColor);
+	if (m_pMapInfo)
+	{
+		m_pMapInfo->SetFgColor(mapInfoColor);
+	}
 
 	if (*m_szMapName) {
 		LoadMapPage(m_szMapName);
@@ -197,7 +202,10 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 
 	char mapRES[MAX_PATH];
 	
-	m_pMapInfo->SetVisible(true);
+	if (m_pMapInfo)
+	{
+		m_pMapInfo->SetVisible(true);
+	}
 #if defined (ENABLE_HTML_WINDOW)
 	m_pMapInfoHTML->SetVisible(false);
 #endif
@@ -212,7 +220,10 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 		}
 		else
 		{
-			m_pMapInfo->SetText("");
+			if (m_pMapInfo)
+			{
+				m_pMapInfo->SetText("");
+			}
 			return;
 		}
 	}
@@ -243,12 +254,15 @@ void CTeamMenu::LoadMapPage(const char *mapName)
 	byteSwap.SetTargetBigEndian(false);
 	byteSwap.SwapBufferToTargetEndian(memBlock, memBlock, dataSize / sizeof(wchar_t));
 
-	if (memBlock[0] != 0xFEFF)
-		m_pMapInfo->SetText(reinterpret_cast<char *>(memBlock));
-	else
-		m_pMapInfo->SetText(memBlock + 1);
+	if (m_pMapInfo)
+	{
+		if (memBlock[0] != 0xFEFF)
+			m_pMapInfo->SetText(reinterpret_cast<char *>(memBlock));
+		else
+			m_pMapInfo->SetText(memBlock + 1);
 
-	m_pMapInfo->GotoTextStart();
+		m_pMapInfo->GotoTextStart();
+	}
 
 	filesystem()->Close(f);
 	free(memBlock);
