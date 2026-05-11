@@ -100,16 +100,16 @@ void CMenuMain::QuitDialogCb()
 void CMenuMain::DisconnectCb()
 {
 	// EngFuncs::ClientCmd( false, "disconnect\n" );
-	EngFuncs::ClientCmd( false, "disconnect\n" );
-	VidInit( false );
-	CalcPosition();
-	CalcSizes();
-	VidInitItems();
+	// VidInit( false );
+	// CalcPosition();
+	// CalcSizes();
+	// VidInitItems();
 
 	// Return straight to the root game menu after disconnecting.
 	UI_CloseMenu();
-	UI_SetActiveMenu( TRUE );
-	UI_Main_Menu();
+	EngFuncs::KEY_SetDest( KEY_GAME );
+
+	EngFuncs::ClientCmd( false, "disconnect\n" );
 }
 
 void CMenuMain::DisconnectDialogCb()
