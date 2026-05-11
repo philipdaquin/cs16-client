@@ -77,14 +77,38 @@ bool CClientMOTD::IsURL( const char* str )
 	return strncmp( str, "http://", 7 ) == 0;
 }
 
+// void CClientMOTD::PerformLayout()
+// {
+// 	int screenW, screenH;
+// 	surface()->GetScreenSize(screenW, screenH);
+// 	
+// 	const int offsetX = 640; //(screenW - 640) / 2 - 39;
+// 	const int offsetY = 0; //(screenH - 448) / 2;
+// 	
+// 	SetPos(offsetX, offsetY);
+//
+// 	BaseClass::PerformLayout();
+// 	int x, y;
+// 	m_pMessageHtml->GetSize(x, y);
+// 	m_pMessage->SetSize(x, y);
+// 	m_pMessageHtml->GetPos(x, y);
+// 	m_pMessage->SetPos(x, y);
+//
+// 	if (m_pViewport)
+// 		m_pViewport->ShowBackGround(true);
+// }
+
 void CClientMOTD::PerformLayout()
 {
 	int screenW, screenH;
 	surface()->GetScreenSize(screenW, screenH);
-	
-	const int offsetX = 640; //(screenW - 640) / 2 - 39;
-	const int offsetY = 0; //(screenH - 448) / 2;
-	
+
+	const int menuW = scheme()->GetProportionalScaledValue(494);
+	const int menuH = scheme()->GetProportionalScaledValue(480);
+
+	const int offsetX = ((screenW - menuW) / 2) + 5;
+	const int offsetY = (screenH - menuH) / 2;
+
 	SetPos(offsetX, offsetY);
 
 	BaseClass::PerformLayout();

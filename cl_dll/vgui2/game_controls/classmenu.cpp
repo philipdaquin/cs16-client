@@ -76,19 +76,38 @@ CClassMenu::~CClassMenu(void)
 {
 }
 
+// void CClassMenu::PerformLayout(void)
+// {
+// 	int screenW, screenH;
+// 	surface()->GetScreenSize(screenW, screenH);
+
+
+// 	std::fprintf(stderr, "CLASS MENU screenW: %d\n", screenW);
+// 	std::fprintf(stderr, "CLASS MENU screenH: %d\n", screenH);
+
+
+// 	/// *** HARCODED OFFSETS*** MAKE THESE DYNAMIC BASED ON TEH VIDEO RESOLUTION.
+// 	const int offsetX = 454; //(screenW - 640) / 2;
+// 	const int offsetY = 0; // (screenH - 448) / 2;
+
+// 	SetPos(offsetX, offsetY);
+
+// 	BaseClass::PerformLayout();
+
+// 	if (m_pViewPort)
+// 		m_pViewPort->ShowBackGround(true);
+// }
+
 void CClassMenu::PerformLayout(void)
 {
 	int screenW, screenH;
 	surface()->GetScreenSize(screenW, screenH);
 
+	const int menuW = scheme()->GetProportionalScaledValue(640);
+	const int menuH = scheme()->GetProportionalScaledValue(480);
 
-	std::fprintf(stderr, "CLASS MENU screenW: %d\n", screenW);
-	std::fprintf(stderr, "CLASS MENU screenH: %d\n", screenH);
-
-
-	/// *** HARCODED OFFSETS*** MAKE THESE DYNAMIC BASED ON TEH VIDEO RESOLUTION.
-	const int offsetX = 454; //(screenW - 640) / 2;
-	const int offsetY = 0; // (screenH - 448) / 2;
+	const int offsetX = ((screenW - menuW) / 2) + 5;
+	const int offsetY = (screenH - menuH) / 2;
 
 	SetPos(offsetX, offsetY);
 
@@ -97,6 +116,7 @@ void CClassMenu::PerformLayout(void)
 	if (m_pViewPort)
 		m_pViewPort->ShowBackGround(true);
 }
+
 
 MouseOverPanelButton *CClassMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
 {

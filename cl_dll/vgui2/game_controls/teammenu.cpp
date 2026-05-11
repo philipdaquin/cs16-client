@@ -175,13 +175,32 @@ void CTeamMenu::ShowPanel(bool bShow)
 	m_pViewPort->ShowBackGround(bShow);
 }
 
+// void CTeamMenu::PerformLayout()
+// {
+// 	int screenW, screenH;
+// 	surface()->GetScreenSize(screenW, screenH);
+//
+// 	const int offsetX = 640; //(screenW - 840) / 2;
+// 	const int offsetY =  0; //(screenH - 448) / 2;
+//
+// 	SetPos(offsetX, offsetY);
+//
+// 	BaseClass::PerformLayout();
+//
+// 	if (m_pViewPort)
+// 		m_pViewPort->ShowBackGround(true);
+// }
+
 void CTeamMenu::PerformLayout()
 {
 	int screenW, screenH;
 	surface()->GetScreenSize(screenW, screenH);
 
-	const int offsetX = 640; //(screenW - 840) / 2;
-	const int offsetY =  0; //(screenH - 448) / 2;
+	const int menuW = scheme()->GetProportionalScaledValue(494);
+	const int menuH = scheme()->GetProportionalScaledValue(480);
+
+	const int offsetX = ((screenW - menuW) / 2) + 5;
+	const int offsetY = (screenH - menuH) / 2;
 
 	SetPos(offsetX, offsetY);
 
