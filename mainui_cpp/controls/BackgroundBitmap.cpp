@@ -59,7 +59,9 @@ void CMenuBackgroundBitmap::VidInit()
 
 void CMenuBackgroundBitmap::DrawInGameBackground()
 {
-	UI_FillRect( m_scPos, m_scSize, uiColorBlack );
+	// Keep the game visible behind the menu, but dim it enough for readability.
+	// UI_FillRect( m_scPos, m_scSize, uiColorBlack );
+	UI_FillRect( m_scPos, m_scSize, 0x40000000 );
 }
 
 void CMenuBackgroundBitmap::DrawColor()
