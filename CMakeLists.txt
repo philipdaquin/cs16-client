@@ -66,7 +66,7 @@ endif()
 if(BUILD_MAINUI)
 #	set(CS16CLIENT ON)
 	# set(XASH_SDK ../../)
-	add_subdirectory(3rdparty/mainui_cpp)
+	add_subdirectory(mainui_cpp)
 endif()
 
 set(GRAPHS_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/graphs")

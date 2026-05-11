@@ -18,11 +18,11 @@ file(GLOB CS_STUDIO_SRC "studio/*.cpp")
 file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
 file(GLOB CS_GAMSH_SRC "../game_shared/*.cpp")
-file(GLOB MINIUTL_SRC "../3rdparty/mainui_cpp/miniutl/*.cpp")
+file(GLOB MINIUTL_SRC "../mainui_cpp/miniutl/*.cpp")
 list(REMOVE_ITEM MINIUTL_SRC
-	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/strtools.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/utlbuffer.cpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mainui_cpp/miniutl/utlstring.cpp")
+	"${CMAKE_CURRENT_SOURCE_DIR}/../mainui_cpp/miniutl/strtools.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../mainui_cpp/miniutl/utlbuffer.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../mainui_cpp/miniutl/utlstring.cpp")
 
 list(REMOVE_ITEM CS_CLIENT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/ev_hldm.cpp")
 list(REMOVE_ITEM CS_INPUT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/input/input_sdl.cpp")
@@ -206,10 +206,10 @@ include_directories(
 	../3rdparty/ReGameDLL_CS/regamedll/common
 	../3rdparty/ReGameDLL_CS/regamedll/game_shared
 	../../xash3d-fwgs/engine
-	../3rdparty/mainui_cpp
-	../3rdparty/mainui_cpp/controls
-	../3rdparty/mainui_cpp/menus
-	../3rdparty/mainui_cpp/miniutl)
+	../mainui_cpp
+	../mainui_cpp/controls
+	../mainui_cpp/menus
+	../mainui_cpp/miniutl)
 
 add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL -DSTDINT_H=<cstdint>)
 add_definitions(-DSOURCE_SDK_GFX_PATH=\"gfx/vgui2\")
