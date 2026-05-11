@@ -428,6 +428,18 @@ void CBaseViewport::ShowPanel( IViewportPanel* pPanel, bool bState )
 		this, (void *)pPanel, bState ? 1 : 0, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)g_pViewport);
 	if( bState )
 	{
+		// Prevent stacked viewport menus: only one visible panel may be opened at a time.
+		for( int i = 0; i < m_Panels.Count(); ++i )
+		{
+			IViewportPanel *pVisiblePanel = m_Panels[i];
+			if( pVisiblePanel && pVisiblePanel != pPanel && pVisiblePanel->IsVisible() )
+			{
+				gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBaseViewport::ShowPanel blocked open this=%p requested=%p visiblePanel=%p active=%p last=%p\n",
+					this, (void *)pPanel, (void *)pVisiblePanel, (void *)m_pActivePanel, (void *)m_pLastActivePanel);
+				return;
+			}
+		}
+
 		gEngfuncs.Con_Printf("[phase4][VGUI2-CLIENT] CBaseViewport::ShowPanel open this=%p panel=%p active=%p last=%p parent=%p\n",
 			this, (void *)pPanel, (void *)m_pActivePanel, (void *)m_pLastActivePanel, (void *)pPanel->GetVPanel());
 
