@@ -208,19 +208,8 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 	{
 		if( !strncmp(menustring, "#Radio", 6 ) )
 		{
-			if( menustring[6] == 'A' )
-			{
-				ShowVGUIMenu(MENU_RADIOA); return 1;
-			}
-			else if( menustring[6] == 'B' )
-			{
-				ShowVGUIMenu(MENU_RADIOB); return 1;
-			}
-			else if( menustring[6] == 'C' )
-			{
-				ShowVGUIMenu(MENU_RADIOC); return 1;
-			}
-			else ShowVGUIMenu( MENU_NUMERICAL_MENU ); // we just show touch screen numbers
+			gEngfuncs.Con_Printf("[VGUI2-CLIENT] ShowMenu keeping classic radio HUD text for '%s'\n",
+				menustring);
 		}
 		else ShowVGUIMenu(MENU_NUMERICAL_MENU);
 	}
