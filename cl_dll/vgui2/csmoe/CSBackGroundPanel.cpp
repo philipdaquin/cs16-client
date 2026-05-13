@@ -339,20 +339,31 @@ void CCSBackGroundPanel::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 
+	// m_bgColor = pScheme->GetColor("BgColor", Color(0, 0, 0, 200));
+	// m_titleColor = pScheme->GetColor("TitleIcon", Color(0, 0, 0, 200));
+	// m_borderColor = Color(0, 0, 0, 200);
 	m_titleColor = pScheme->GetColor("TitleIcon", Color(0, 0, 0, 200));
-	m_bgColor = pScheme->GetColor("BgColor", Color(0, 0, 0, 200));
-	m_borderColor = Color(0, 0, 0, 200);
+	m_bgColor = Color(0, 0, 0, 255);
+	m_borderColor = Color(0, 0, 0, 255);
 
 	if (!IEngineStudio.IsHardware())
 	{
-		m_pTopLeftPanel->setImageColor(pScheme->GetColor("BorderBright", Color(0, 0, 0, 0)));
-		m_pTopRightPanel->setImageColor(Color(0, 0, 0, 0));
-		m_pBottomLeftPanel->setImageColor(Color(0, 0, 0, 0));
-		m_pBottomRightPanel->setImageColor(Color(0, 0, 0, 0));
+
+
+		
+		// m_pTopLeftPanel->setImageColor(pScheme->GetColor("BorderBright", Color(0, 0, 0, 0)));
+		// m_pTopRightPanel->setImageColor(Color(0, 0, 0, 0));
+		// m_pBottomLeftPanel->setImageColor(Color(0, 0, 0, 0));
+		// m_pBottomRightPanel->setImageColor(Color(0, 0, 0, 0));
+		m_pTopLeftPanel->setImageColor(Color(255, 255, 255, 255));
+		m_pTopRightPanel->setImageColor(Color(255, 255, 255, 255));
+		m_pBottomLeftPanel->setImageColor(Color(255, 255, 255, 255));
+		m_pBottomRightPanel->setImageColor(Color(255, 255, 255, 255));
 	}
 	else
 	{
-		Color bgColor = Color(255, 255, 255, pScheme->GetColor("BgColor", Color(0, 0, 0, 0))[3]);
+		// Color bgColor = Color(255, 255, 255, pScheme->GetColor("BgColor", Color(0, 0, 0, 0))[3]);
+		Color bgColor = Color(255, 255, 255, 255);
 
 		m_pTopLeftPanel->setImageColor(bgColor);
 		m_pTopRightPanel->setImageColor(bgColor);
