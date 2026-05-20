@@ -13,7 +13,7 @@ cvar_t *g_psv_maxvelocity = nullptr;
 
 cvar_t displaysoundlist      = { "displaysoundlist", "0", 0, 0.0f, nullptr };
 cvar_t timelimit             = { "mp_timelimit", "0", FCVAR_SERVER, 0.0f, nullptr };
-cvar_t flashlight            = { "mp_flashlight", "0", FCVAR_SERVER, 0.0f, nullptr };
+cvar_t flashlight            = { "mp_flashlight", "1", FCVAR_SERVER, 0.0f, nullptr };
 cvar_t decalfrequency        = { "decalfrequency", "30", FCVAR_SERVER, 0.0f, nullptr };
 cvar_t fadetoblack           = { "mp_fadetoblack", "0", FCVAR_SERVER, 0.0f, nullptr };
 
