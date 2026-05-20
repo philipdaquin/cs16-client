@@ -323,6 +323,19 @@ static const char *KnownFontFileForFace( const std::string &normalizedFace, bool
     };
 
     static const KnownFont kKnownFonts[] = {
+        { "default", "Tahoma.ttf" },
+        { "defaultsmall", "Tahoma.ttf" },
+        { "default very small", "Tahoma.ttf" },
+        { "defaultverysmall", "Tahoma.ttf" },
+        { "default very small fallback", "Tahoma.ttf" },
+        { "defaultverysmallfallback", "Tahoma.ttf" },
+        { "menutitle", "Tahoma.ttf" },
+        { "brightcontroltext", "Tahoma.ttf" },
+        { "basetext", "Tahoma.ttf" },
+        { "label.textcolor", "Tahoma.ttf" },
+        { "label.textbrightcolor", "Tahoma.ttf" },
+        { "label textcolor", "Tahoma.ttf" },
+        { "label textbrightcolor", "Tahoma.ttf" },
         { "tahoma", "Tahoma.ttf" },
         { "tahoma regular", "Tahoma.ttf" },
         { "tahoma bold", "TahomaBd.ttf" },
@@ -377,10 +390,11 @@ static bool FindBundledFont( const char *filename, std::string &path )
     if ( FindIndexedFont( g_BundledFontFiles, filename, path ) )
         return true;
 
-    const std::array<const char *, 2> dirs = { "game/font", "game/fonts" };
+    const std::array<const char *, 1> dirs = { "game/font" };
     for ( const char *dir : dirs )
     {
         const std::string candidate = MakeFontPath( dir, filename );
+        std::fprintf( stderr, "[VGUI2-FONT] trying bundled font: %s\n", candidate.c_str() );
         if ( FontPathExists( candidate.c_str() ) )
         {
             IndexFontFile( g_BundledFontFiles, candidate );
@@ -427,7 +441,8 @@ static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, in
         weight,
         symbol ? 1 : 0 );
 
-    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
+    const char *knownFile = KnownFontFileForFace( normalizedFace, symbol );
+    if ( knownFile )
     {
         if ( FindBundledFont( knownFile, path ) )
         {
@@ -443,19 +458,10 @@ static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, in
         return true;
     }
 
-    if ( !faceFile.empty() && FindResourceFont( faceFile.c_str(), path ) )
+    if ( !knownFile && !faceFile.empty() && FindResourceFont( faceFile.c_str(), path ) )
     {
         std::fprintf( stderr, "[VGUI2-FONT] loaded resource font: %s\n", path.c_str() );
         return true;
-    }
-
-    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
-    {
-        if ( FindResourceFont( knownFile, path ) )
-        {
-            std::fprintf( stderr, "[VGUI2-FONT] loaded resource font: %s\n", path.c_str() );
-            return true;
-        }
     }
 
     const char *fallbackFile = symbol ? "marlett.ttf" : "Tahoma.ttf";
@@ -482,7 +488,6 @@ static void BootstrapFontFiles()
 
     std::fprintf(stderr, "[VGUI2-FONT] BootstrapFontFiles start\n");
     ScanFontDirectory( "game/font", g_BundledFontFiles );
-    ScanFontDirectory( "game/fonts", g_BundledFontFiles );
     ScanFontDirectory( "resource/fonts", g_ResourceFontFiles );
     ScanFontDirectory( "resource/font", g_ResourceFontFiles );
 

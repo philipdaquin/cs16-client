@@ -580,48 +580,66 @@ char *CLinuxFont::GetFontFileName( const char *windowsFontName, int flags )
 	return strdup(filename);
 #elif defined(EMSCRIPTEN)
     const char *filename = NULL;
+    auto pickExistingFont = []( const char *const *candidates, size_t candidateCount ) -> const char *
+    {
+        for ( size_t i = 0; i < candidateCount; ++i )
+        {
+            const char *candidate = candidates[i];
+            if ( candidate && access( candidate, R_OK ) == 0 )
+                return candidate;
+        }
+
+        return NULL;
+    };
 
     if ( !Q_stricmp( pchFontName, "Tahoma" ) )
     {
-        filename = "game/font/Tahoma.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/Tahoma.ttf";
+        const char *candidates[] = {
+            "game/font/Tahoma.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "Tahoma Bold" ) || !Q_stricmp( pchFontName, "tahoma Bold" ) )
     {
-        filename = "game/font/TahomaBd.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/TahomaBd.ttf";
+        const char *candidates[] = {
+            "game/font/TahomaBd.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "Marlett" ) )
     {
-        filename = "game/font/marlett.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/marlett.ttf";
+        const char *candidates[] = {
+            "game/font/marlett.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" ) )
     {
-        filename = "game/font/FiraSans-Regular.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/FiraSans-Regular.ttf";
+        const char *candidates[] = {
+            "game/font/FiraSans-Regular.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "Arial" ) )
     {
-        filename = "game/font/Arial.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/Arial.ttf";
+        const char *candidates[] = {
+            "game/font/Arial.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "Verdana" ) )
     {
-        filename = "game/font/Verdana.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/Verdana.ttf";
+        const char *candidates[] = {
+            "game/font/Verdana.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
     else if ( !Q_stricmp( pchFontName, "Courier" ) || !Q_stricmp( pchFontName, "Courier New" ) )
     {
-        filename = "game/font/FiraSans-Regular.ttf";
-        if ( access( filename, R_OK ) != 0 )
-            filename = "resource/fonts/FiraSans-Regular.ttf";
+        const char *candidates[] = {
+            "game/font/FiraSans-Regular.ttf",
+        };
+        filename = pickExistingFont( candidates, sizeof( candidates ) / sizeof( candidates[0] ) );
     }
 
     if ( !filename )
