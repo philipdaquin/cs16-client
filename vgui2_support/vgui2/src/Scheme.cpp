@@ -1224,6 +1224,6 @@ const char *CScheme::LookupSchemeSetting(const char *pchSetting)
 //-----------------------------------------------------------------------------
 int CScheme::GetMinimumFontHeightForCurrentLanguage()
 {
-	// schinese
+	// english
 	return 13;
 }

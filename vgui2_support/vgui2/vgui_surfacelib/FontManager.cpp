@@ -175,7 +175,7 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 				!V_stricmp( m_szLanguage, "japanese" ) ||
 				!V_stricmp( m_szLanguage, "korean" ) ||
 				!V_stricmp( m_szLanguage, "portuguese" ) ||
-				!V_stricmp( m_szLanguage, "schinese" ) ||
+				!V_stricmp( m_szLanguage, "english" ) ||
 				!V_stricmp( m_szLanguage, "tchinese" ) )
 			{
 				windowsFontName = GetForeignFallbackFontName();

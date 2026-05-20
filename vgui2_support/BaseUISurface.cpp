@@ -280,7 +280,7 @@ BaseUISurface::BaseUISurface() {
 	_drawTextPos[0] = _drawTextPos[1] = 0;
 	_translateX = _translateY = 0;
 
-    FontManager().SetLanguage("schinese");
+    FontManager().SetLanguage("english");
 #if defined(LINUX) || defined(OSX) || defined(WIN32)
     FontManager().SetFontDataHelper( &BaseUISurface::FontDataHelper );
 #endif

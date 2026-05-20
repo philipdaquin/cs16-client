@@ -300,9 +300,15 @@ bool CLocalizedStringTable::AddFile( IFileSystem *fileSystem, const char *fileNa
 	}
 
 	auto hFile = fileSystem->Open( szFileName, "rb" );
+	const bool traceCstrikeEnglish = ( Q_strstr( szFileName, "cstrike_english.txt" ) != nullptr );
+
+	if( traceCstrikeEnglish )
+		vgui2::ivgui()->DPrintf( "[localize] open %s\n", szFileName );
 
 	if( FILESYSTEM_INVALID_HANDLE == hFile )
 	{
+		if( traceCstrikeEnglish )
+			vgui2::ivgui()->DPrintf( "[localize] fail %s\n", szFileName );
 		vgui2::ivgui()->DPrintf(
 			"ILocalize::AddFile() failed to load file \"%s\".\n",
 			fileName
@@ -327,6 +333,8 @@ bool CLocalizedStringTable::AddFile( IFileSystem *fileSystem, const char *fileNa
 	m_LocalizationFiles.AddToTail( m_CurrentFile );
 
 	const auto size = fileSystem->Size( hFile );
+	if( traceCstrikeEnglish )
+		vgui2::ivgui()->DPrintf( "[localize] ok %s (%u bytes)\n", szFileName, size );
 
 	auto data = reinterpret_cast<ucs2*>( malloc( size + 2 ) );
 
@@ -463,7 +471,7 @@ bool CLocalizedStringTable::AddFile( IFileSystem *fileSystem, const char *fileNa
 								{
 									// the language symbols are true if we are in that language
 									// english is assumed when no language is present
-									const char *pLanguageString = "schinese";
+									const char *pLanguageString = "english";
 									bool bMatched = ( !V_stricmp( pszKey, pLanguageString ) );
 									bAccepted = (bMatched && !bNot) || (!bMatched && bNot);
 								}

@@ -251,7 +251,7 @@ void CBaseUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion) 
 	staticPanel->SetZPos(0);
 
 	staticSurface->Init(staticPanel->GetVPanel(), chromeController);
-	staticSurface->SetLanguage("schinese");
+	staticSurface->SetLanguage("english");
 	staticSurface->IgnoreMouseVisibility(true);
 
 	staticClientDLLPanel = new CEnginePanel(staticPanel, "BaseClientPanel");

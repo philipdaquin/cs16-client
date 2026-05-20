@@ -243,7 +243,7 @@ void CGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	if (!vgui2::VGuiControls_Init("GameUI", factories, count))
 		return;
 
-    vgui2::surface()->SetLanguage("schinese");
+    vgui2::surface()->SetLanguage("english");
 	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/gameui_%language%.txt");
 	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/valve_%language%.txt");
 	vgui2::localize()->AddFile(vgui2::filesystem(), "resource/vgui_%language%.txt");

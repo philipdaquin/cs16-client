@@ -17,7 +17,6 @@ CUtlVector<char *> g_vLanguageList;
 const char *g_LanguageList[] =
 {
 	"english",
-	"schinese",
 	"tchinese",
 	"macedonian"
 };
