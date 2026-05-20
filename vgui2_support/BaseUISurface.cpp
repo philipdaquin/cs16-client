@@ -15,9 +15,14 @@
 
 #include <tier1/utlbuffer.h>
 
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 //#define USE_IMGUI_SURFACE
 #ifdef USE_IMGUI_SURFACE
@@ -187,6 +192,286 @@ static BaseUISurface g_BaseUISurface;
 namespace
 {
 static bool g_FontBootstrapLoaded = false;
+static std::unordered_map<std::string, std::string> g_BundledFontFiles;
+static std::unordered_map<std::string, std::string> g_ResourceFontFiles;
+
+static std::string ToLowerAscii( const char *text )
+{
+    std::string out;
+    if ( !text )
+        return out;
+
+    for ( const unsigned char *p = reinterpret_cast<const unsigned char *>( text ); *p; ++p )
+    {
+        out.push_back( static_cast<char>( std::tolower( *p ) ) );
+    }
+
+    return out;
+}
+
+static std::string NormalizeFaceName( const char *text )
+{
+    std::string out;
+    bool pendingSpace = false;
+
+    if ( !text )
+        return out;
+
+    for ( const unsigned char *p = reinterpret_cast<const unsigned char *>( text ); *p; ++p )
+    {
+        const char ch = static_cast<char>( *p );
+        if ( std::isspace( *p ) || ch == '-' || ch == '_' )
+        {
+            pendingSpace = !out.empty();
+            continue;
+        }
+
+        if ( pendingSpace )
+        {
+            out.push_back( ' ' );
+            pendingSpace = false;
+        }
+
+        out.push_back( static_cast<char>( std::tolower( *p ) ) );
+    }
+
+    return out;
+}
+
+static std::string FontFileNameKey( const char *path )
+{
+    if ( !path )
+        return {};
+
+    const char *fileName = path;
+    for ( const char *p = path; *p; ++p )
+    {
+        if ( *p == '/' || *p == '\\' )
+            fileName = p + 1;
+    }
+
+    return ToLowerAscii( fileName );
+}
+
+static std::string MakeFontPath( const char *dir, const char *filename )
+{
+    if ( !filename || !filename[0] )
+        return {};
+
+    if ( std::strchr( filename, '/' ) || std::strchr( filename, '\\' ) )
+        return filename;
+
+    std::string path = dir ? dir : "";
+    if ( !path.empty() && path.back() != '/' )
+        path.push_back( '/' );
+    path += filename;
+    return path;
+}
+
+static bool FontPathExists( const char *path )
+{
+    if ( !path || !path[0] )
+        return false;
+
+    char fullPath[4096];
+    vgui2::filesystem()->GetLocalPath( path, fullPath, sizeof( fullPath ) );
+
+    FILE *f = std::fopen( fullPath, "rb" );
+    if ( !f )
+        return false;
+
+    std::fclose( f );
+    return true;
+}
+
+static void IndexFontFile( std::unordered_map<std::string, std::string> &index, const std::string &path )
+{
+    const std::string key = FontFileNameKey( path.c_str() );
+    if ( key.empty() || index.find( key ) != index.end() )
+        return;
+
+    index.emplace( key, path );
+}
+
+static void ScanFontDirectory( const char *dir, std::unordered_map<std::string, std::string> &index )
+{
+    char pattern[256];
+    Q_snprintf( pattern, sizeof( pattern ), "%s/*.ttf", dir );
+
+    FileFindHandle_t findHandle = NULL;
+    const char *pszFilename = vgui2::filesystem()->FindFirst( pattern, &findHandle );
+    while ( pszFilename )
+    {
+        const std::string path = MakeFontPath( dir, pszFilename );
+        IndexFontFile( index, path );
+        std::fprintf( stderr, "[VGUI2-FONT] indexed font: %s\n", path.c_str() );
+        g_BaseUISurface.AddCustomFontFile( path.c_str() );
+        pszFilename = vgui2::filesystem()->FindNext( findHandle );
+    }
+    vgui2::filesystem()->FindClose( findHandle );
+}
+
+static const char *KnownFontFileForFace( const std::string &normalizedFace, bool symbol )
+{
+    if ( symbol || normalizedFace == "marlett" )
+        return "marlett.ttf";
+
+    struct KnownFont
+    {
+        const char *face;
+        const char *file;
+    };
+
+    static const KnownFont kKnownFonts[] = {
+        { "tahoma", "Tahoma.ttf" },
+        { "tahoma regular", "Tahoma.ttf" },
+        { "tahoma bold", "TahomaBd.ttf" },
+        { "arial", "Arial.ttf" },
+        { "arial regular", "Arial.ttf" },
+        { "arial bold", "ArialBd.ttf" },
+        { "arial italic", "ArialIt.ttf" },
+        { "arial bold italic", "ArialBdIt.ttf" },
+        { "verdana", "Verdana.ttf" },
+        { "verdana regular", "Verdana.ttf" },
+        { "verdana bold", "VerdanaBd.ttf" },
+        { "verdana italic", "VerdanaIt.ttf" },
+        { "verdana bold italic", "VerdanaBdIt.ttf" },
+        { "firasans", "FiraSans-Regular.ttf" },
+        { "firasans regular", "FiraSans-Regular.ttf" },
+        { "firasans bold", "FiraSans-Bold.ttf" },
+        { "firasans semibold", "FiraSans-SemiBold.ttf" },
+        { "firasans medium", "FiraSans-Medium.ttf" },
+        { "firasans light", "FiraSans-Light.ttf" },
+        { "fira sans", "FiraSans-Regular.ttf" },
+        { "fira sans regular", "FiraSans-Regular.ttf" },
+        { "fira sans bold", "FiraSans-Bold.ttf" },
+        { "fira sans semibold", "FiraSans-SemiBold.ttf" },
+        { "fira sans medium", "FiraSans-Medium.ttf" },
+        { "fira sans light", "FiraSans-Light.ttf" },
+    };
+
+    for ( const KnownFont &knownFont : kKnownFonts )
+    {
+        if ( normalizedFace == knownFont.face )
+            return knownFont.file;
+    }
+
+    return nullptr;
+}
+
+static bool FindIndexedFont( const std::unordered_map<std::string, std::string> &index, const char *filename, std::string &path )
+{
+    if ( !filename || !filename[0] )
+        return false;
+
+    const auto it = index.find( FontFileNameKey( filename ) );
+    if ( it == index.end() )
+        return false;
+
+    path = it->second;
+    return true;
+}
+
+static bool FindBundledFont( const char *filename, std::string &path )
+{
+    if ( FindIndexedFont( g_BundledFontFiles, filename, path ) )
+        return true;
+
+    const std::array<const char *, 2> dirs = { "game/font", "game/fonts" };
+    for ( const char *dir : dirs )
+    {
+        const std::string candidate = MakeFontPath( dir, filename );
+        if ( FontPathExists( candidate.c_str() ) )
+        {
+            IndexFontFile( g_BundledFontFiles, candidate );
+            path = candidate;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool FindResourceFont( const char *filename, std::string &path )
+{
+    if ( FindIndexedFont( g_ResourceFontFiles, filename, path ) )
+        return true;
+
+    const std::array<const char *, 2> dirs = { "resource/fonts", "resource/font" };
+    for ( const char *dir : dirs )
+    {
+        const std::string candidate = MakeFontPath( dir, filename );
+        if ( FontPathExists( candidate.c_str() ) )
+        {
+            IndexFontFile( g_ResourceFontFiles, candidate );
+            path = candidate;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, int flags, std::string &path )
+{
+    const bool symbol = ( flags & vgui2::ISurface::FONTFLAG_SYMBOL ) != 0;
+    const std::string normalizedFace = NormalizeFaceName( requestedFaceName );
+    const bool explicitBold = normalizedFace.find( "bold" ) != std::string::npos;
+    const bool explicitItalic = normalizedFace.find( "italic" ) != std::string::npos;
+
+    std::fprintf( stderr,
+        "[VGUI2-FONT] normalized face=%s explicitBold=%d explicitItalic=%d weight=%d symbol=%d\n",
+        normalizedFace.empty() ? "<empty>" : normalizedFace.c_str(),
+        explicitBold ? 1 : 0,
+        explicitItalic ? 1 : 0,
+        weight,
+        symbol ? 1 : 0 );
+
+    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
+    {
+        if ( FindBundledFont( knownFile, path ) )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] loaded %s font: %s\n", symbol ? "symbol" : "bundled", path.c_str() );
+            return true;
+        }
+    }
+
+    const std::string faceFile = normalizedFace.empty() ? std::string() : normalizedFace + ".ttf";
+    if ( !faceFile.empty() && FindBundledFont( faceFile.c_str(), path ) )
+    {
+        std::fprintf( stderr, "[VGUI2-FONT] loaded bundled font: %s\n", path.c_str() );
+        return true;
+    }
+
+    if ( !faceFile.empty() && FindResourceFont( faceFile.c_str(), path ) )
+    {
+        std::fprintf( stderr, "[VGUI2-FONT] loaded resource font: %s\n", path.c_str() );
+        return true;
+    }
+
+    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
+    {
+        if ( FindResourceFont( knownFile, path ) )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] loaded resource font: %s\n", path.c_str() );
+            return true;
+        }
+    }
+
+    const char *fallbackFile = symbol ? "marlett.ttf" : "Tahoma.ttf";
+    if ( FindBundledFont( fallbackFile, path ) )
+    {
+        std::fprintf( stderr,
+            "[VGUI2-FONT] missing requested face=%s weight=%d symbol=%d\n",
+            requestedFaceName ? requestedFaceName : "<null>",
+            weight,
+            symbol ? 1 : 0 );
+        std::fprintf( stderr, "[VGUI2-FONT] fallback to bundled font: %s\n", path.c_str() );
+        return true;
+    }
+
+    return false;
+}
 
 static void BootstrapFontFiles()
 {
@@ -195,44 +480,18 @@ static void BootstrapFontFiles()
 
     g_FontBootstrapLoaded = true;
 
-    // Prefer the game resource fonts first; game/font is only the fallback.
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles start\n");
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/tahoma.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/tahoma.ttf" ) ? 1 : 0);
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/marlett.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/marlett.ttf" ) ? 1 : 0);
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts/FiraSans-Regular.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/fonts/FiraSans-Regular.ttf" ) ? 1 : 0);
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/marlett.ttf result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/marlett.ttf" ) ? 1 : 0);
-    #ifndef DISABLE_MOE_VGUI2_EXT
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/font/Apple Color Emoji.ttc result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/font/Apple Color Emoji.ttc" ) ? 1 : 0);
-    #endif
+    std::fprintf(stderr, "[VGUI2-FONT] BootstrapFontFiles start\n");
+    ScanFontDirectory( "game/font", g_BundledFontFiles );
+    ScanFontDirectory( "game/fonts", g_BundledFontFiles );
+    ScanFontDirectory( "resource/fonts", g_ResourceFontFiles );
+    ScanFontDirectory( "resource/font", g_ResourceFontFiles );
 
-    FileFindHandle_t findHandle = NULL;
-    const char *pszFilename = vgui2::filesystem()->FindFirst("resource/fonts/*.ttf", &findHandle);
-    while (pszFilename)
-    {
-        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/fonts scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
-        pszFilename = vgui2::filesystem()->FindNext(findHandle);
-    }
-    vgui2::filesystem()->FindClose(findHandle);
+#ifndef DISABLE_MOE_VGUI2_EXT
+    std::fprintf(stderr, "[VGUI2-FONT] BootstrapFontFiles add emoji result=%d\n", g_BaseUISurface.AddCustomFontFile( "resource/font/Apple Color Emoji.ttc" ) ? 1 : 0);
+#endif
 
-    findHandle = NULL;
-    pszFilename = vgui2::filesystem()->FindFirst("resource/font/*.ttf", &findHandle);
-    while (pszFilename)
-    {
-        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add resource/font scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
-        pszFilename = vgui2::filesystem()->FindNext(findHandle);
-    }
-    vgui2::filesystem()->FindClose(findHandle);
-
-    findHandle = NULL;
-    pszFilename = vgui2::filesystem()->FindFirst("game/font/*.ttf", &findHandle);
-    while (pszFilename)
-    {
-        std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles add game/font scan '%s' result=%d\n", pszFilename, g_BaseUISurface.AddCustomFontFile(pszFilename) ? 1 : 0);
-        pszFilename = vgui2::filesystem()->FindNext(findHandle);
-    }
-    vgui2::filesystem()->FindClose(findHandle);
-
-    std::fprintf(stderr, "[VGUI2-TRACE] BootstrapFontFiles end\n");
+    std::fprintf(stderr, "[VGUI2-FONT] BootstrapFontFiles end bundled=%zu resource=%zu\n",
+        g_BundledFontFiles.size(), g_ResourceFontFiles.size());
 }
 }
 
@@ -1061,7 +1320,7 @@ bool BaseUISurface::AddCustomFontFile(const char *fontFileName) {
 
 #if defined(LINUX) || defined(OSX) || defined(WIN32)
     int size;
-    const bool ok = BaseUISurface::FontDataHelper( nullptr, size, fontFileName ) != nullptr;
+    const bool ok = BaseUISurface::FontDataHelper( nullptr, size, fontFileName, 0, 0 ) != nullptr;
     std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::AddCustomFontFile fontFile='%s' fullPath='%s' loaded=%d size=%d\n",
         fontFileName ? fontFileName : "<null>", fullPath, ok ? 1 : 0, ok ? size : 0);
     if ( ok )
@@ -1722,219 +1981,104 @@ bool BaseUISurface::IsEmojiChar(uchar32 ch)
 
 #if defined(LINUX) || defined(OSX) || defined(WIN32)
 
-static void RemoveSpaces( CUtlString &str )
-{
-    char *dst = str.GetForModify();
-
-    for( int i = 0; i < str.Length(); i++ )
-    {
-        if( ( str[ i ] != ' ' ) && ( str[ i ] != '-' ) )
-        {
-            *dst++ = str[ i ];
-        }
-    }
-
-    *dst = 0;
-}
-
-const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, const char *fontFileName )
+const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, const char *fontFileName, int weight, int flags )
 {
     size = 0;
-    std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper request fontName='%s' fontFile='%s'\n",
+    std::fprintf(stderr, "[VGUI2-FONT] FontDataHelper request fontName='%s' fontFile='%s' weight=%d flags=%d\n",
         pchFontName ? pchFontName : "<null>",
-        fontFileName ? fontFileName : "<null>");
+        fontFileName ? fontFileName : "<null>",
+        weight,
+        flags);
 
-    // redirect CSO font name
-    if(pchFontName && (!Q_strcmp(pchFontName, "Verdana") || !Q_strcmp(pchFontName, "Trebuchet MS")))
+    auto findCachedFont = [&]( const std::string &cacheKey ) -> const void *
     {
-        pchFontName = "DFYuanW9-GB";
-    }
+        if ( cacheKey.empty() )
+            return nullptr;
 
-    if( fontFileName )
-    {
-        // If we were given a fontFileName, then load that bugger and shove it in the cache.
-
-        // Just load the font data, decrypt in memory and register for this process]
-
-        void *buffer = nullptr;
-        fs_offset_t fileSize = 0;
-
-        if( !buffer )
+        int iIndex = m_FontData.Find( cacheKey.c_str() );
+        if ( iIndex == m_FontData.InvalidIndex() )
         {
-            char fullPath[4096];
-            vgui2::filesystem()->GetLocalPath(fontFileName, fullPath, sizeof(fullPath));
-
-            FILE *f = fopen(fullPath, "rb");
-            if(f)
-            {
-                fseek(f, SEEK_SET, SEEK_END);
-                fileSize = ftell(f);
-                buffer = malloc(fileSize);
-                fseek(f, SEEK_SET, 0);
-                fread((char *)buffer, 1, fileSize, f);
-                fclose(f);
-            }
+            return nullptr;
         }
 
-            if ( !buffer )
-            {
-                // Old path:
-                // Msg( "Failed to load custom font file '%s'\n", fontFileName );
-                gEngfuncs.Con_Printf("[VGUI2-TRACE] Failed to load custom font file '%s'\n", fontFileName);
-                std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper direct-load failed fontFile='%s' fontName='%s'\n",
-                    fontFileName ? fontFileName : "<null>",
-                    pchFontName ? pchFontName : "<null>");
-                return NULL;
-            }
+        size = m_FontData[ iIndex ].size;
+        return m_FontData[ iIndex ].data;
+    };
+
+    auto insertCacheAlias = [&]( const std::string &cacheKey, const font_entry &entry )
+    {
+        if ( cacheKey.empty() || m_FontData.Find( cacheKey.c_str() ) != m_FontData.InvalidIndex() )
+            return;
+
+        m_FontData.Insert( cacheKey.c_str(), entry );
+    };
+
+    auto loadFontFile = [&]( const char *path, const std::string &primaryCacheKey, const char *requestedFaceName ) -> const void *
+    {
+        if ( const void *cached = findCachedFont( primaryCacheKey ) )
+            return cached;
+
+        char fullPath[4096];
+        vgui2::filesystem()->GetLocalPath( path, fullPath, sizeof( fullPath ) );
+
+        FILE *f = fopen( fullPath, "rb" );
+        if ( !f )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] failed to open font file: %s fullPath=%s\n", path ? path : "<null>", fullPath );
+            return nullptr;
+        }
+
+        fseek( f, SEEK_SET, SEEK_END );
+        fs_offset_t fileSize = ftell( f );
+        void *buffer = malloc( fileSize );
+        fseek( f, SEEK_SET, 0 );
+        fread( (char *)buffer, 1, fileSize, f );
+        fclose( f );
 
         FT_Face face;
         const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
-
-            if ( error  )
-            {
-                // FT_Err_Unknown_File_Format, etc.
-                // Old path:
-                // Msg( "ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName );
-                gEngfuncs.Con_Printf("[VGUI2-TRACE] ERROR %d: UNABLE TO LOAD FONT FILE %s\n", error, fontFileName);
-                std::fprintf(stderr, "[VGUI2-TRACE] FontDataHelper freetype-failed error=%d fontFile='%s' fontName='%s'\n",
-                    (int)error,
-                    fontFileName ? fontFileName : "<null>",
-                    pchFontName ? pchFontName : "<null>");
-
-                free(buffer);
-
-            return NULL;
-        }
-
-        if( !pchFontName )
+        if ( error )
         {
-            // If we weren't passed a font name for this thing, then use the one from the face.
-            pchFontName = face->family_name;
-            if ( !pchFontName || !pchFontName[ 0 ] )
-            {
-                pchFontName = FT_Get_Postscript_Name( face );
-            }
+            std::fprintf( stderr, "[VGUI2-FONT] freetype failed error=%d fontFile=%s face=%s\n",
+                static_cast<int>( error ),
+                path ? path : "<null>",
+                requestedFaceName ? requestedFaceName : "<null>" );
+            free( buffer );
+            return nullptr;
         }
-
-        // Replace spaces and dashes with underscores.
-        CUtlString strFontName( pchFontName );
-        RemoveSpaces( strFontName );
 
         font_entry entry;
         entry.size = fileSize;
         entry.data = buffer;
-        m_FontData.Insert( strFontName.Get(), entry );
 
+        insertCacheAlias( primaryCacheKey, entry );
+        insertCacheAlias( std::string( "path:" ) + ToLowerAscii( path ), entry );
+        insertCacheAlias( std::string( "file:" ) + FontFileNameKey( path ), entry );
+        if ( requestedFaceName && requestedFaceName[0] )
+            insertCacheAlias( std::string( "face:" ) + NormalizeFaceName( requestedFaceName ), entry );
+
+        std::fprintf( stderr, "[VGUI2-FONT] cached font path=%s family=%s size=%d\n",
+            path ? path : "<null>",
+            face->family_name ? face->family_name : "<null>",
+            entry.size );
         FT_Done_Face( face );
 
         size = entry.size;
         return entry.data;
-    }
-    else
+    };
+
+    if( fontFileName && fontFileName[0] )
     {
-        // Replace spaces and dashes with underscores.
-        CUtlString strFontName( pchFontName );
-        RemoveSpaces( strFontName );
-
-        int iIndex = m_FontData.Find( strFontName.Get() );
-        if ( iIndex != m_FontData.InvalidIndex() )
-        {
-            size = m_FontData[ iIndex ].size;
-            return m_FontData[ iIndex ].data;
-        }
-
-        auto tryLoadDirectFont = [&]( const char *candidateFile ) -> const void *
-        {
-            if ( !candidateFile || !candidateFile[0] )
-                return NULL;
-
-            char fullPath[4096];
-            vgui2::filesystem()->GetLocalPath( candidateFile, fullPath, sizeof( fullPath ) );
-
-            FILE *f = fopen( fullPath, "rb" );
-            if ( !f )
-                return NULL;
-
-            fseek( f, SEEK_SET, SEEK_END );
-            fs_offset_t fileSize = ftell( f );
-            void *buffer = malloc( fileSize );
-            fseek( f, SEEK_SET, 0 );
-            fread( (char *)buffer, 1, fileSize, f );
-            fclose( f );
-
-            FT_Face face;
-            const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
-            if ( error )
-            {
-                free( buffer );
-                return NULL;
-            }
-
-            const char *cacheName = pchFontName;
-            if ( !cacheName )
-            {
-                cacheName = face->family_name;
-                if ( !cacheName || !cacheName[0] )
-                {
-                    cacheName = FT_Get_Postscript_Name( face );
-                }
-            }
-
-            CUtlString directFontName( cacheName ? cacheName : candidateFile );
-            RemoveSpaces( directFontName );
-
-            font_entry entry;
-            entry.size = fileSize;
-            entry.data = buffer;
-            m_FontData.Insert( directFontName.Get(), entry );
-            FT_Done_Face( face );
-
-            size = entry.size;
-            return entry.data;
-        };
-
-        const char *candidateFiles[] = {
-            "resource/fonts/tahoma.ttf",
-            "resource/fonts/marlett.ttf",
-            "resource/fonts/FiraSans-Regular.ttf",
-            "game/font/tahoma.ttf",
-            "game/font/marlett.ttf",
-            "game/font/FiraSans-Regular.ttf"
-        };
-
-        const bool wantsTahoma =
-            !Q_stricmp( pchFontName, "Tahoma" ) ||
-            !Q_stricmp( pchFontName, "Default" ) ||
-            !Q_stricmp( pchFontName, "DefaultSmall" ) ||
-            !Q_stricmp( pchFontName, "DefaultVerySmall" ) ||
-            !Q_stricmp( pchFontName, "DefaultVerySmallFallBack" ) ||
-            !Q_stricmp( pchFontName, "MenuTitle" ) ||
-            !Q_stricmp( pchFontName, "BrightControlText" ) ||
-            !Q_stricmp( pchFontName, "BaseText" ) ||
-            !Q_stricmp( pchFontName, "Label.TextColor" ) ||
-            !Q_stricmp( pchFontName, "Label.TextBrightColor" ) ||
-            !Q_stricmp( pchFontName, "Trebuchet MS" ) ||
-            !Q_stricmp( pchFontName, "Verdana" );
-        const bool wantsMarlett = !Q_stricmp( pchFontName, "Marlett" );
-        const bool wantsFira = !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" );
-        const bool wantsCourier = !Q_stricmp( pchFontName, "Courier" ) || !Q_stricmp( pchFontName, "Courier New" );
-
-        if ( wantsTahoma )
-        {
-            if ( const void *data = tryLoadDirectFont( candidateFiles[0] ) ) return data;
-            if ( const void *data = tryLoadDirectFont( candidateFiles[3] ) ) return data;
-        }
-        else if ( wantsMarlett )
-        {
-            if ( const void *data = tryLoadDirectFont( candidateFiles[1] ) ) return data;
-            if ( const void *data = tryLoadDirectFont( candidateFiles[4] ) ) return data;
-        }
-        else if ( wantsFira || wantsCourier )
-        {
-            if ( const void *data = tryLoadDirectFont( candidateFiles[2] ) ) return data;
-            if ( const void *data = tryLoadDirectFont( candidateFiles[5] ) ) return data;
-        }
+        return loadFontFile( fontFileName, std::string( "path:" ) + ToLowerAscii( fontFileName ), pchFontName );
     }
+
+    const std::string faceCacheKey = std::string( "face:" ) + NormalizeFaceName( pchFontName );
+    if ( const void *cached = findCachedFont( faceCacheKey ) )
+        return cached;
+
+    std::string resolvedPath;
+    if ( ResolveFontFaceToFile( pchFontName, weight, flags, resolvedPath ) )
+        return loadFontFile( resolvedPath.c_str(), faceCacheKey, pchFontName );
 
     return NULL;
 }

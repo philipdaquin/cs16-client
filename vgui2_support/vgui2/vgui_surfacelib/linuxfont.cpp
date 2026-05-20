@@ -581,44 +581,47 @@ char *CLinuxFont::GetFontFileName( const char *windowsFontName, int flags )
 #elif defined(EMSCRIPTEN)
     const char *filename = NULL;
 
-    // Previous wasm aliases:
-    // Tahoma / Default / MenuTitle / Label colors -> resource/fonts/tahoma.ttf
-    // Marlett -> resource/fonts/marlett.ttf
-    // FiraSans / Fira Sans -> resource/fonts/FiraSans-Regular.ttf
-    if ( !Q_stricmp( pchFontName, "Tahoma" ) ||
-         !Q_stricmp( pchFontName, "Default" ) ||
-         !Q_stricmp( pchFontName, "DefaultSmall" ) ||
-         !Q_stricmp( pchFontName, "DefaultVerySmall" ) ||
-         !Q_stricmp( pchFontName, "DefaultVerySmallFallBack" ) ||
-         !Q_stricmp( pchFontName, "MenuTitle" ) ||
-         !Q_stricmp( pchFontName, "BrightControlText" ) ||
-         !Q_stricmp( pchFontName, "BaseText" ) ||
-         !Q_stricmp( pchFontName, "Label.TextColor" ) ||
-         !Q_stricmp( pchFontName, "Label.TextBrightColor" ) ||
-         !Q_stricmp( pchFontName, "Trebuchet MS" ) ||
-         !Q_stricmp( pchFontName, "Verdana" ) )
+    if ( !Q_stricmp( pchFontName, "Tahoma" ) )
     {
-        filename = "resource/fonts/tahoma.ttf";
+        filename = "game/font/Tahoma.ttf";
         if ( access( filename, R_OK ) != 0 )
-            filename = "game/font/tahoma.ttf";
+            filename = "resource/fonts/Tahoma.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "Tahoma Bold" ) || !Q_stricmp( pchFontName, "tahoma Bold" ) )
+    {
+        filename = "game/font/TahomaBd.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "resource/fonts/TahomaBd.ttf";
     }
     else if ( !Q_stricmp( pchFontName, "Marlett" ) )
     {
-        filename = "resource/fonts/marlett.ttf";
+        filename = "game/font/marlett.ttf";
         if ( access( filename, R_OK ) != 0 )
-            filename = "game/font/marlett.ttf";
+            filename = "resource/fonts/marlett.ttf";
     }
     else if ( !Q_stricmp( pchFontName, "FiraSans" ) || !Q_stricmp( pchFontName, "Fira Sans" ) )
     {
-        filename = "resource/fonts/FiraSans-Regular.ttf";
+        filename = "game/font/FiraSans-Regular.ttf";
         if ( access( filename, R_OK ) != 0 )
-            filename = "game/font/FiraSans-Regular.ttf";
+            filename = "resource/fonts/FiraSans-Regular.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "Arial" ) )
+    {
+        filename = "game/font/Arial.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "resource/fonts/Arial.ttf";
+    }
+    else if ( !Q_stricmp( pchFontName, "Verdana" ) )
+    {
+        filename = "game/font/Verdana.ttf";
+        if ( access( filename, R_OK ) != 0 )
+            filename = "resource/fonts/Verdana.ttf";
     }
     else if ( !Q_stricmp( pchFontName, "Courier" ) || !Q_stricmp( pchFontName, "Courier New" ) )
     {
-        filename = "resource/fonts/FiraSans-Regular.ttf";
+        filename = "game/font/FiraSans-Regular.ttf";
         if ( access( filename, R_OK ) != 0 )
-            filename = "game/font/FiraSans-Regular.ttf";
+            filename = "resource/fonts/FiraSans-Regular.ttf";
     }
 
     if ( !filename )

@@ -22,7 +22,7 @@
 #endif
 #include <ft2build.h>
 #include FT_FREETYPE_H
-typedef const void *(*FontDataHelper)( const char *pchFontName, int &size, const char *fontFileName );
+typedef const void *(*FontDataHelper)( const char *pchFontName, int &size, const char *fontFileName, int weight, int flags );
 #endif
 
 #ifdef CreateFont

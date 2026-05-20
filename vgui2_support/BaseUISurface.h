@@ -220,7 +220,7 @@ protected:
 
     static CUtlDict< font_entry, unsigned short > m_FontData;
 
-    static const void *FontDataHelper( const char *pchFontName, int &size, const char *fontFileName );
+    static const void *FontDataHelper( const char *pchFontName, int &size, const char *fontFileName, int weight, int flags );
 #endif
 
 private:

@@ -741,63 +741,28 @@ void CScheme::ReloadFontGlyphs()
 			}
 			else
 			{
-				// add the new set
-				const char *fontFace = fontdata->GetString("name");
-				const char *resolvedFace = fontFace;
+				const char *fontFace = fontdata->GetString("name", "Tahoma");
+				const int weight = fontdata->GetInt("weight");
+				const bool symbol = ( flags & ISurface::FONTFLAG_SYMBOL ) != 0;
 
-				// Keep the original scheme names for logging, but resolve them to the
-				// fonts we actually ship in resource/fonts and game/font.
-				if ( fontFace )
-				{
-					if ( !Q_stricmp( fontFace, "Trebuchet MS" ) ||
-						!Q_stricmp( fontFace, "Verdana" ) ||
-						!Q_stricmp( fontFace, "Courier" ) ||
-						!Q_stricmp( fontFace, "Courier New" ) )
-					{
-						resolvedFace = "Tahoma";
-					}
-					else if ( !Q_stricmp( fontFace, "Marlett" ) )
-					{
-						resolvedFace = "Marlett";
-					}
-					else if ( !Q_stricmp( fontFace, "Fira Sans" ) ||
-						!Q_stricmp( fontFace, "FiraSans" ) )
-					{
-						resolvedFace = "FiraSans";
-					}
-				}
+				std::fprintf(stderr,
+					"[VGUI2-FONT] scheme alias=%s face=%s tall=%d weight=%d symbol=%d\n",
+					m_FontAliases[i]._trueFontName.String(),
+					fontFace ? fontFace : "<null>",
+					tall,
+					weight,
+					symbol ? 1 : 0);
 
-				if ( !resolvedFace || !resolvedFace[0] )
-				{
-					resolvedFace = "Tahoma";
-				}
-
-				bool added = surface()->AddGlyphSetToFont(m_FontAliases[i]._font, resolvedFace, tall, fontdata->GetInt("weight"), blur, scanlines, flags, 0x0, 0xFFFF);
-
-				if (!added)
-				{
-					const char *fallbackFaces[] = { "Arial", "Tahoma", "DejaVu Sans" };
-					for (const char *fallbackFace : fallbackFaces)
-					{
-						if (!fallbackFace || !*fallbackFace || !Q_stricmp(fontFace, fallbackFace))
-							continue;
-
-						if (surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fallbackFace, tall, fontdata->GetInt("weight"), blur, scanlines, flags, 0x0, 0xFFFF))
-						{
-							added = true;
-							break;
-						}
-					}
-				}
+				bool added = surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fontFace, tall, weight, blur, scanlines, flags, 0x0, 0xFFFF);
 
 				if (!added)
 				{
 					std::fprintf(stderr,
-						"[VGUI2-TRACE] CScheme::ReloadFontGlyphs failed font='%s' alias='%s' tall=%d weight=%d flags=%d\n",
+						"[VGUI2-FONT] CScheme::ReloadFontGlyphs failed font='%s' alias='%s' tall=%d weight=%d flags=%d\n",
 						fontFace,
 						m_FontAliases[i]._fontName.String(),
 						tall,
-						fontdata->GetInt("weight"),
+						weight,
 						flags);
 				}
 			}

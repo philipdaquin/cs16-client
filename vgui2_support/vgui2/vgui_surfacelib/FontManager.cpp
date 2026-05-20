@@ -302,7 +302,7 @@ font_t *CFontManager::CreateOrFindWin32Font(const char *windowsFontName, int tal
 
 #if defined(LINUX) || defined(OSX) || defined(_WIN32)
 		int memSize = 0;
-		auto pchFontData = m_pFontDataHelper( windowsFontName, memSize, NULL );
+		auto pchFontData = m_pFontDataHelper( windowsFontName, memSize, NULL, weight, flags );
 		std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font request font='%s' tall=%d weight=%d blur=%d scanlines=%d flags=%d cache=%p size=%d\n",
 			windowsFontName ? windowsFontName : "<null>", tall, weight, blur, scanlines, flags, pchFontData, memSize);
 
@@ -315,7 +315,7 @@ font_t *CFontManager::CreateOrFindWin32Font(const char *windowsFontName, int tal
 				// ... and try to add it to the font cache.
 				std::fprintf(stderr, "[VGUI2-TRACE] FontManager::CreateOrFindWin32Font fallback file font='%s' file='%s'\n",
 					windowsFontName ? windowsFontName : "<null>", filename);
-				pchFontData = m_pFontDataHelper( windowsFontName, memSize, filename );
+				pchFontData = m_pFontDataHelper( windowsFontName, memSize, filename, weight, flags );
 				free( filename );
 			}
 		}
