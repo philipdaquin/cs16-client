@@ -164,7 +164,8 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		int length = 0;
 		
 		m_iMaxLength = 0;
-		m_iFlags |= HUD_DRAW;
+			// Legacy HUD MOTD drawing is disabled; VGUI2 ClientMOTD handles MOTD display now.
+			// m_iFlags |= HUD_DRAW;
 
 
 		for ( char *sz = m_szMOTD; *sz != 0; sz++ )  // count the number of lines in the MOTD
