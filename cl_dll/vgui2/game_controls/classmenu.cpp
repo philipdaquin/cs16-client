@@ -12,6 +12,8 @@
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
+#include "../../../vgui2_support/vgui_controls/controls.h"
+#include <vgui/IInputInternal.h>
 
 #include "mouseoverpanelbutton.h"
 #include "../vgui_resource_paths.h"
@@ -178,6 +180,9 @@ void CClassMenu::OnCommand(const char *command)
 
 	m_pViewPort->ShowBackGround(false);
 
+	if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+		vgui2::input()->ReleaseAppModalSurface();
+
 	BaseClass::OnCommand(command);
 }
 
@@ -193,6 +198,7 @@ void CClassMenu::ShowPanel(bool bShow)
 	if ( bShow )
 	{
 		Activate();
+		vgui2::input()->SetAppModalSurface(GetVPanel());
 		SetMouseInputEnabled( true );
 
 		// load a default class page
@@ -216,6 +222,9 @@ void CClassMenu::ShowPanel(bool bShow)
 	}
 	else
 	{
+		if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+			vgui2::input()->ReleaseAppModalSurface();
+
 		SetVisible( false );
 		SetMouseInputEnabled( false );
 	}

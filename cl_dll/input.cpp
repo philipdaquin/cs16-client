@@ -367,7 +367,7 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
-	if (VGUI2_HandleModalBuyInput(down, keynum))
+	if (VGUI2_HandleModalGameMenuInput(down, keynum))
 		return 0;
 
 	return 1;

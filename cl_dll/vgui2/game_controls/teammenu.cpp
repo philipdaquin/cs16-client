@@ -20,6 +20,8 @@
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/RichText.h>
+#include "../../../vgui2_support/vgui_controls/controls.h"
+#include <vgui/IInputInternal.h>
 
 #include "mouseoverpanelbutton.h"
 
@@ -155,6 +157,7 @@ void CTeamMenu::ShowPanel(bool bShow)
 	if (bShow)
 	{
 		Activate();
+		vgui2::input()->SetAppModalSurface(GetVPanel());
 
 		SetMouseInputEnabled(true);
 
@@ -168,6 +171,9 @@ void CTeamMenu::ShowPanel(bool bShow)
 	}
 	else
 	{
+		if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+			vgui2::input()->ReleaseAppModalSurface();
+
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}

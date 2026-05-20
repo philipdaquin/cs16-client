@@ -2,7 +2,9 @@
 
 #include "CHudViewPort.h"
 #include "CBaseViewport.h"
+#include "game_controls/classmenu.h"
 #include "game_controls/buymenu.h"
+#include "game_controls/teammenu.h"
 #include "hud.h"
 #include "keydefs.h"
 #include "../../vgui2_support/vgui_controls/controls.h"
@@ -23,6 +25,36 @@ static CBuyMenu *VGUI2_GetActiveBuyMenu()
 		return nullptr;
 
 	return buyMenu;
+}
+
+static vgui2::Panel *VGUI2_GetActiveModalGameMenu()
+{
+	if (!g_pViewport)
+		return nullptr;
+
+	IViewportPanel *activePanel = g_pViewport->GetActivePanel();
+
+	if (!activePanel)
+		return nullptr;
+
+	if (CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(activePanel))
+		return buyMenu->IsVisible() ? buyMenu : nullptr;
+
+	if (CTeamMenu *teamMenu = dynamic_cast<CTeamMenu *>(activePanel))
+		return teamMenu->IsVisible() ? teamMenu : nullptr;
+
+	if (CClassMenu *classMenu = dynamic_cast<CClassMenu *>(activePanel))
+		return classMenu->IsVisible() ? classMenu : nullptr;
+
+	return nullptr;
+}
+
+static vgui2::Panel *VGUI2_GetModalGameMenuFocusPanel(vgui2::Panel *menu)
+{
+	if (CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(menu))
+		return buyMenu->GetInputFocusPanel();
+
+	return menu;
 }
 
 static bool VGUI2_GetMouseCodeForKey(int keynum, vgui2::MouseCode &mouseCode)
@@ -139,11 +171,16 @@ bool VGUI2_IsModalBuyInputActive()
 	return VGUI2_GetActiveBuyMenu() != nullptr;
 }
 
-bool VGUI2_HandleModalBuyInput(int down, int keynum)
+bool VGUI2_IsModalGameMenuInputActive()
 {
-	CBuyMenu *buyMenu = VGUI2_GetActiveBuyMenu();
+	return VGUI2_GetActiveModalGameMenu() != nullptr;
+}
 
-	if (!buyMenu)
+bool VGUI2_HandleModalGameMenuInput(int down, int keynum)
+{
+	vgui2::Panel *menu = VGUI2_GetActiveModalGameMenu();
+
+	if (!menu)
 		return false;
 
 	vgui2::IInputInternal *input = vgui2::input();
@@ -151,9 +188,9 @@ bool VGUI2_HandleModalBuyInput(int down, int keynum)
 	if (!input)
 		return true;
 
-	input->SetAppModalSurface(buyMenu->GetVPanel());
+	input->SetAppModalSurface(menu->GetVPanel());
 
-	vgui2::Panel *focusPanel = buyMenu->GetInputFocusPanel();
+	vgui2::Panel *focusPanel = VGUI2_GetModalGameMenuFocusPanel(menu);
 
 	if (focusPanel)
 		focusPanel->RequestFocus();
