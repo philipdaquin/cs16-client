@@ -46,6 +46,7 @@ public:
 public:
 	virtual void OnClose(void);
 	virtual void OnKeyCodeTyped(vgui2::KeyCode code);
+	virtual vgui2::Panel *GetInputFocusPanel(void);
 
 protected:
 	virtual void ResetMenuState(void);

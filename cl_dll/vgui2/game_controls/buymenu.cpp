@@ -4,6 +4,9 @@
 #include "buysubmenu.h"
 #include "mouseoverpanelbutton.h"
 #include "../vgui_resource_paths.h"
+#include "../../../vgui2_support/vgui_controls/controls.h"
+#include <vgui/IInput.h>
+#include <vgui/IInputInternal.h>
 
 using namespace vgui2;
 
@@ -77,10 +80,14 @@ void CBuyMenu::ShowPanel(bool bShow)
 			this, (void *)m_pMainMenu, (void *)GetCurrentSubPanel(), m_pMainMenu ? (m_pMainMenu->IsVisible() ? 1 : 0) : -1);
 
 		Activate();
+		vgui2::input()->SetAppModalSurface(GetVPanel());
 		SetMouseInputEnabled(true);
 	}
 	else
 	{
+		if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+			vgui2::input()->ReleaseAppModalSurface();
+
 		ResetMenuState();
 		SetVisible(false);
 		SetMouseInputEnabled(false);
@@ -104,6 +111,9 @@ void CBuyMenu::PerformLayout(void)
 
 void CBuyMenu::OnClose(void)
 {
+	if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+		vgui2::input()->ReleaseAppModalSurface();
+
 	ResetMenuState();
 	BaseClass::OnClose();
 	m_pViewPort->ShowBackGround(false);
@@ -119,6 +129,16 @@ void CBuyMenu::ResetMenuState(void)
 		m_pMainMenu->DeleteSubPanels();
 		m_pMainMenu->SetVisible(false);
 	}
+}
+
+vgui2::Panel *CBuyMenu::GetInputFocusPanel(void)
+{
+	vgui2::WizardSubPanel *currentSubPanel = GetCurrentSubPanel();
+
+	if (currentSubPanel && currentSubPanel->IsVisible())
+		return currentSubPanel;
+
+	return this;
 }
 
 void CBuyMenu::OnKeyCodeTyped(KeyCode code)

@@ -2,7 +2,69 @@
 
 #include "CHudViewPort.h"
 #include "CBaseViewport.h"
+#include "game_controls/buymenu.h"
 #include "hud.h"
+#include "keydefs.h"
+#include "../../vgui2_support/vgui_controls/controls.h"
+#include "vgui2/vgui_key_translation.h"
+#include <vgui/IInput.h>
+#include <vgui/IInputInternal.h>
+#include <vgui/KeyCode.h>
+#include <vgui/MouseCode.h>
+
+static CBuyMenu *VGUI2_GetActiveBuyMenu()
+{
+	if (!g_pViewport)
+		return nullptr;
+
+	CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(g_pViewport->GetActivePanel());
+
+	if (!buyMenu || !buyMenu->IsVisible())
+		return nullptr;
+
+	return buyMenu;
+}
+
+static bool VGUI2_GetMouseCodeForKey(int keynum, vgui2::MouseCode &mouseCode)
+{
+	switch (keynum)
+	{
+	case K_MOUSE1:
+		mouseCode = vgui2::MOUSE_LEFT;
+		return true;
+	case K_MOUSE2:
+		mouseCode = vgui2::MOUSE_RIGHT;
+		return true;
+	case K_MOUSE3:
+		mouseCode = vgui2::MOUSE_MIDDLE;
+		return true;
+	case K_MOUSE4:
+		mouseCode = vgui2::MOUSE_4;
+		return true;
+	case K_MOUSE5:
+		mouseCode = vgui2::MOUSE_5;
+		return true;
+	default:
+		return false;
+	}
+}
+
+static bool VGUI2_GetWheelDeltaForKey(int keynum, int &delta)
+{
+	if (keynum == K_MWHEELUP)
+	{
+		delta = 1;
+		return true;
+	}
+
+	if (keynum == K_MWHEELDOWN)
+	{
+		delta = -1;
+		return true;
+	}
+
+	return false;
+}
 
 bool VGUI2_HasViewport()
 {
@@ -70,6 +132,68 @@ void VGUI2_HideAllGameMenus()
 bool VGUI2_ShouldCaptureInput()
 {
 	return g_pViewport && (g_pViewport->GetActivePanel() != nullptr || g_pViewport->IsBackGroundVisible());
+}
+
+bool VGUI2_IsModalBuyInputActive()
+{
+	return VGUI2_GetActiveBuyMenu() != nullptr;
+}
+
+bool VGUI2_HandleModalBuyInput(int down, int keynum)
+{
+	CBuyMenu *buyMenu = VGUI2_GetActiveBuyMenu();
+
+	if (!buyMenu)
+		return false;
+
+	vgui2::IInputInternal *input = vgui2::input();
+
+	if (!input)
+		return true;
+
+	input->SetAppModalSurface(buyMenu->GetVPanel());
+
+	vgui2::Panel *focusPanel = buyMenu->GetInputFocusPanel();
+
+	if (focusPanel)
+		focusPanel->RequestFocus();
+
+	vgui2::MouseCode mouseCode = vgui2::MOUSE_LEFT;
+
+	if (VGUI2_GetMouseCodeForKey(keynum, mouseCode))
+	{
+		if (down)
+			input->InternalMousePressed(mouseCode);
+		else
+			input->InternalMouseReleased(mouseCode);
+
+		return true;
+	}
+
+	int wheelDelta = 0;
+
+	if (down && VGUI2_GetWheelDeltaForKey(keynum, wheelDelta))
+	{
+		input->InternalMouseWheeled(wheelDelta);
+		return true;
+	}
+
+	vgui2::KeyCode keyCode = KeyCode_EngineKeyToVGUI(keynum);
+
+	if (keyCode != vgui2::KEY_NONE)
+	{
+		if (down)
+		{
+			input->InternalKeyCodePressed(keyCode);
+			input->InternalKeyCodeTyped(keyCode);
+		}
+		else
+		{
+			input->InternalKeyCodeReleased(keyCode);
+		}
+	}
+
+	return true;
 }
 
 int VGUI2_GetLocalPlayerTeam()

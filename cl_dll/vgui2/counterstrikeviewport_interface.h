@@ -10,6 +10,8 @@ void VGUI2_ShowBuyMenu();
 void VGUI2_ShowBuySubMenu(int category);
 void VGUI2_HideAllGameMenus();
 bool VGUI2_ShouldCaptureInput();
+bool VGUI2_IsModalBuyInputActive();
+bool VGUI2_HandleModalBuyInput(int down, int keynum);
 int VGUI2_GetLocalPlayerTeam();
 void VGUI2_RunClientCommand(const char *command);
 
