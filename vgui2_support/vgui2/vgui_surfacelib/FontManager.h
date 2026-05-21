@@ -47,6 +47,7 @@ public:
 	void ClearAllFonts();
 
 	HFont CreateFont();
+	void ClearFontGlyphSet(HFont font);
 	bool SetFontGlyphSet(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags);
 	bool SetFontGlyphSet(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int nRangeMin, int nRangeMax);
 	const char *GetFontName( HFont font );

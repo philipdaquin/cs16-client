@@ -123,6 +123,17 @@ vgui2::HFont CFontManager::CreateFont()
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Clears the glyph ranges for one VGUI font handle before rebuilding it.
+//-----------------------------------------------------------------------------
+void CFontManager::ClearFontGlyphSet(HFont font)
+{
+	if ( font < static_cast<HFont>( m_FontAmalgams.Count() ) )
+	{
+		m_FontAmalgams[font].RemoveAll();
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Sets the valid glyph ranges for a font created by CreateFont()
 //-----------------------------------------------------------------------------
 bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags)
@@ -151,12 +162,17 @@ bool CFontManager::IsEmojiChar(uchar32 ch)  const
 //-----------------------------------------------------------------------------
 bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int nRangeMin, int nRangeMax)
 {
-	// ignore all but the first font added
-	// need to rev vgui versions and change the name of this function
-	if ( m_FontAmalgams[font].GetCount() > 0 )
+	int nMin = nRangeMin;
+	int nMax = nRangeMax;
+	if ( nMin == 0 && nMax == 0 )
 	{
-		// clear any existing fonts
-		m_FontAmalgams[font].RemoveAll();
+		nMax = 0xFFFF;
+	}
+	else if ( nMin > nMax )
+	{
+		int nTemp = nMin;
+		nMin = nMax;
+		nMax = nTemp;
 	}
 
 	bool bForceSingleFontForXbox = false;
@@ -194,7 +210,7 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 			if ( winFont )
 			{
 				// font supports the full range of characters
-				m_FontAmalgams[font].AddFont( winFont, 0x0000, 0xFFFF );
+				m_FontAmalgams[font].AddFont( winFont, nMin, nMax );
                 AddEmojiFont(font, tall, weight, blur, scanlines, flags);
 				return true;
 			}
@@ -207,7 +223,7 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 			if ( winFont && !stricmp( localizedFontName, windowsFontName ) )
 			{
 				// it's the same font and can support the full range
-				m_FontAmalgams[font].AddFont( winFont, 0x0000, 0xFFFF );
+				m_FontAmalgams[font].AddFont( winFont, nMin, nMax );
                 AddEmojiFont(font, tall, weight, blur, scanlines, flags);
 				return true;
 			}
@@ -217,23 +233,6 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 			if ( winFont && pExtendedFont )
 			{
 				// use the normal font for english characters, and the extended font for the rest
-				int nMin = 0x0000, nMax = 0x00FF;
-
-				// did we specify a range?
-				if ( nRangeMin > 0 || nRangeMax > 0 )
-				{
-					nMin = nRangeMin;
-					nMax = nRangeMax;
-
-					// make sure they're in the correct order
-					if ( nMin > nMax )
-					{
-						int nTemp = nMin;
-						nMin = nMax;
-						nMax = nTemp;
-					}
-				}
-
 				if ( nMin > 0 )
 				{
 					m_FontAmalgams[font].AddFont( pExtendedFont, 0x0000, nMin - 1 );
@@ -254,7 +253,7 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 				// If the primary font loaded, keep it even when the extended fallback is
 				// unavailable.  This lets packaged fonts like Tahoma render Latin text on
 				// platforms where the locale fallback face is not installed.
-				m_FontAmalgams[font].AddFont( winFont, 0x0000, 0xFFFF );
+				m_FontAmalgams[font].AddFont( winFont, nMin, nMax );
 				AddEmojiFont(font, tall, weight, blur, scanlines, flags);
 				return true;
 			}
@@ -262,7 +261,7 @@ bool CFontManager::SetFontGlyphSet(HFont font, const char *windowsFontName, int 
 			{
 				// the normal font failed to create
 				// just use the extended font for the full range
-				m_FontAmalgams[font].AddFont( pExtendedFont, 0x0000, 0xFFFF );
+				m_FontAmalgams[font].AddFont( pExtendedFont, nMin, nMax );
                 AddEmojiFont(font, tall, weight, blur, scanlines, flags);
 				return true;
 			}

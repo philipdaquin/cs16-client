@@ -25,12 +25,38 @@
 #include "Border.h"
 #include "Bitmap.h"
 #include "filesystem.h"
+#include "vgui_surfacelib/FontManager.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
 using namespace vgui2;
 #define FONT_ALIAS_NAME_LENGTH 64
+
+static void ParseFontRange( KeyValues *fontdata, int &lowRange, int &highRange )
+{
+	lowRange = 0x0;
+	highRange = 0xFFFF;
+
+	const char *range = fontdata->GetString( "range", "" );
+	if ( !range || !range[0] )
+		return;
+
+	int parsedLow = 0;
+	int parsedHigh = 0;
+	if ( sscanf( range, "%i %i", &parsedLow, &parsedHigh ) != 2 )
+		return;
+
+	if ( parsedLow > parsedHigh )
+	{
+		int temp = parsedLow;
+		parsedLow = parsedHigh;
+		parsedHigh = temp;
+	}
+
+	lowRange = parsedLow;
+	highRange = parsedHigh;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Implementation of global scheme interface
@@ -649,8 +675,11 @@ void CScheme::ReloadFontGlyphs()
 	for (int i = 0; i < m_FontAliases.Count(); i++)
 	{
 		KeyValues *kv = fonts->FindKey(m_FontAliases[i]._trueFontName.String(), true);
-	
-		// walk through creating adding the first matching glyph set to the font
+
+		FontManager().ClearFontGlyphSet( m_FontAliases[i]._font );
+
+		// Add every matching glyph set. Later entries act as fallbacks for
+		// characters not covered by earlier entries.
 		for (KeyValues *fontdata = kv->GetFirstSubKey(); fontdata != NULL; fontdata = fontdata->GetNextKey())
 		{
 			// skip over fonts not meant for this resolution
@@ -744,31 +773,35 @@ void CScheme::ReloadFontGlyphs()
 				const char *fontFace = fontdata->GetString("name", "Tahoma");
 				const int weight = fontdata->GetInt("weight");
 				const bool symbol = ( flags & ISurface::FONTFLAG_SYMBOL ) != 0;
+				int lowRange = 0x0;
+				int highRange = 0xFFFF;
+				ParseFontRange( fontdata, lowRange, highRange );
 
 				std::fprintf(stderr,
-					"[VGUI2-FONT] scheme alias=%s face=%s tall=%d weight=%d symbol=%d\n",
+					"[VGUI2-FONT] scheme alias=%s face=%s tall=%d weight=%d symbol=%d range=0x%04x-0x%04x\n",
 					m_FontAliases[i]._trueFontName.String(),
 					fontFace ? fontFace : "<null>",
 					tall,
 					weight,
-					symbol ? 1 : 0);
+					symbol ? 1 : 0,
+					lowRange,
+					highRange);
 
-				bool added = surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fontFace, tall, weight, blur, scanlines, flags, 0x0, 0xFFFF);
+				bool added = surface()->AddGlyphSetToFont(m_FontAliases[i]._font, fontFace, tall, weight, blur, scanlines, flags, lowRange, highRange);
 
 				if (!added)
 				{
 					std::fprintf(stderr,
-						"[VGUI2-FONT] CScheme::ReloadFontGlyphs failed font='%s' alias='%s' tall=%d weight=%d flags=%d\n",
+						"[VGUI2-FONT] CScheme::ReloadFontGlyphs failed font='%s' alias='%s' tall=%d weight=%d flags=%d range=0x%04x-0x%04x\n",
 						fontFace,
 						m_FontAliases[i]._fontName.String(),
 						tall,
 						weight,
-						flags);
+						flags,
+						lowRange,
+						highRange);
 				}
 			}
-
-			// don't add any more
-			break;
 		}
 	}
 }
