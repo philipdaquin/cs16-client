@@ -382,7 +382,7 @@ static bool FindBundledFont( const char *filename, std::string &path )
     if ( FindIndexedFont( g_BundledFontFiles, filename, path ) )
         return true;
 
-    const std::array<const char *, 1> dirs = { "game/font" };
+    const std::array<const char *, 2> dirs = { "game/font", "font" };
     for ( const char *dir : dirs )
     {
         const std::string candidate = MakeFontPath( dir, filename );
@@ -480,6 +480,7 @@ static void BootstrapFontFiles()
 
     std::fprintf(stderr, "[VGUI2-FONT] BootstrapFontFiles start\n");
     ScanFontDirectory( "game/font", g_BundledFontFiles );
+    ScanFontDirectory( "font", g_BundledFontFiles );
     ScanFontDirectory( "resource/fonts", g_ResourceFontFiles );
     ScanFontDirectory( "resource/font", g_ResourceFontFiles );
 
