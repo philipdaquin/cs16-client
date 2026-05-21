@@ -273,15 +273,7 @@ static bool FontPathExists( const char *path )
     if ( !path || !path[0] )
         return false;
 
-    char fullPath[4096];
-    vgui2::filesystem()->GetLocalPath( path, fullPath, sizeof( fullPath ) );
-
-    FILE *f = std::fopen( fullPath, "rb" );
-    if ( !f )
-        return false;
-
-    std::fclose( f );
-    return true;
+    return vgui2::filesystem()->FileExists( path );
 }
 
 static void IndexFontFile( std::unordered_map<std::string, std::string> &index, const std::string &path )
@@ -2023,22 +2015,39 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         if ( const void *cached = findCachedFont( primaryCacheKey ) )
             return cached;
 
-        char fullPath[4096];
-        vgui2::filesystem()->GetLocalPath( path, fullPath, sizeof( fullPath ) );
-
-        FILE *f = fopen( fullPath, "rb" );
-        if ( !f )
+        FileHandle_t file = vgui2::filesystem()->Open( path, "rb" );
+        if ( !file )
         {
-            std::fprintf( stderr, "[VGUI2-FONT] failed to open font file: %s fullPath=%s\n", path ? path : "<null>", fullPath );
+            std::fprintf( stderr, "[VGUI2-FONT] failed to open font file: %s\n", path ? path : "<null>" );
             return nullptr;
         }
 
-        fseek( f, SEEK_SET, SEEK_END );
-        fs_offset_t fileSize = ftell( f );
+        const unsigned fileSize = vgui2::filesystem()->Size( file );
+        if ( !fileSize )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] empty font file: %s\n", path ? path : "<null>" );
+            vgui2::filesystem()->Close( file );
+            return nullptr;
+        }
+
         void *buffer = malloc( fileSize );
-        fseek( f, SEEK_SET, 0 );
-        fread( (char *)buffer, 1, fileSize, f );
-        fclose( f );
+        if ( !buffer )
+        {
+            vgui2::filesystem()->Close( file );
+            return nullptr;
+        }
+
+        const int bytesRead = vgui2::filesystem()->Read( buffer, fileSize, file );
+        vgui2::filesystem()->Close( file );
+        if ( bytesRead != static_cast<int>( fileSize ) )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] short read font file: %s read=%d size=%u\n",
+                path ? path : "<null>",
+                bytesRead,
+                fileSize );
+            free( buffer );
+            return nullptr;
+        }
 
         FT_Face face;
         const FT_Error error = FT_New_Memory_Face( FontManager().GetFontLibraryHandle(), (const FT_Byte *)buffer, fileSize, 0, &face );
