@@ -219,7 +219,7 @@ void CMenuMain::_Init( void )
 	// multiPlayer.charSize = 6;
 	// multiPlayer.SetTextHeight( 10 );
 	// multiPlayer.SetTextHeight( 8 );
-	multiPlayer.SetTextHeight( 6 );
+	multiPlayer.SetTextHeight( 20 );
 	multiPlayer.onReleased = UI_MultiPlayer_Menu;
 
 	// findServers.SetNameAndStatus( "Find Servers", L( "StringsList_198" ) );
@@ -229,7 +229,7 @@ void CMenuMain::_Init( void )
 	// findServers.charSize = 6;
 	// findServers.SetTextHeight( 10 );
 	// findServers.SetTextHeight( 8 );
-	findServers.SetTextHeight( 6 );
+	findServers.SetTextHeight( 20 );
 	findServers.onReleased = UI_InternetGames_Menu;
 
 	// configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
@@ -239,7 +239,7 @@ void CMenuMain::_Init( void )
 	// configuration.charSize = 6;
 	// configuration.SetTextHeight( 10 );
 	// configuration.SetTextHeight( 8 );
-	configuration.SetTextHeight( 6 );
+	configuration.SetTextHeight( 20 );
 	configuration.onReleased = UI_Options_Menu;
 
 	// quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
