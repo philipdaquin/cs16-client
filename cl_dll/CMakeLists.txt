@@ -18,6 +18,7 @@ file(GLOB CS_STUDIO_SRC "studio/*.cpp")
 file(GLOB CS_INPUT_SRC "input/*.cpp")
 file(GLOB CS_PM_SRC "../pm_shared/*.cpp")
 file(GLOB CS_GAMSH_SRC "../game_shared/*.cpp")
+file(GLOB VGUI2_EMBEDDED_FONT_FILES "../game/font/*.ttf")
 file(GLOB MINIUTL_SRC "../mainui_cpp/miniutl/*.cpp")
 list(REMOVE_ITEM MINIUTL_SRC
 	"${CMAKE_CURRENT_SOURCE_DIR}/../mainui_cpp/miniutl/strtools.cpp"
@@ -145,6 +146,21 @@ list(APPEND CS_CLIENT_SRC ${CS_VGUI2_CSMOE_SRC})
 list(REMOVE_ITEM CS_CLIENT_SRC ${CS_VGUI2_CSMOE_ZOMBIE_SRC})
 list(APPEND CS_CLIENT_SRC ${MINIUTL_SRC})
 list(APPEND CS_CLIENT_SRC ${VGUI2_SDK_MATHLIB_WASM_SOURCES})
+
+set(VGUI2_EMBEDDED_FONTS_CPP "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedVGUIFonts.cpp")
+add_custom_command(
+	OUTPUT "${VGUI2_EMBEDDED_FONTS_CPP}"
+	COMMAND ${Python_EXECUTABLE}
+		"${CMAKE_CURRENT_SOURCE_DIR}/../scripts/embed_vgui_fonts.py"
+		"${VGUI2_EMBEDDED_FONTS_CPP}"
+		${VGUI2_EMBEDDED_FONT_FILES}
+	DEPENDS
+		"${CMAKE_CURRENT_SOURCE_DIR}/../scripts/embed_vgui_fonts.py"
+		${VGUI2_EMBEDDED_FONT_FILES}
+	COMMENT "Embedding bundled VGUI font files"
+	VERBATIM
+)
+list(APPEND CS_CLIENT_SRC "${VGUI2_EMBEDDED_FONTS_CPP}")
 
 # Keep the live TeamMenu / BuyMenu / class menu path, but leave the zombie-mode
 # csmoe sources in-tree for future restoration if needed.

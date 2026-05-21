@@ -2,6 +2,7 @@
 #include "BaseUISurface.h"
 
 #include <FileSystem.h>
+#include "EmbeddedVGUIFonts.h"
 #include "render_api.h"
 #include "triangleapi.h"
 
@@ -416,6 +417,24 @@ static bool FindResourceFont( const char *filename, std::string &path )
     }
 
     return false;
+}
+
+static const EmbeddedVGUIFontFile *FindEmbeddedFont( const char *filename )
+{
+    if ( !filename || !filename[0] )
+        return nullptr;
+
+    size_t embeddedFontCount = 0;
+    const EmbeddedVGUIFontFile *embeddedFonts = VGUI2_GetEmbeddedFontFiles( &embeddedFontCount );
+    const std::string key = FontFileNameKey( filename );
+
+    for ( size_t i = 0; i < embeddedFontCount; ++i )
+    {
+        if ( key == FontFileNameKey( embeddedFonts[i].filename ) )
+            return &embeddedFonts[i];
+    }
+
+    return nullptr;
 }
 
 static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, int flags, std::string &path )
@@ -2082,9 +2101,58 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         return entry.data;
     };
 
+    auto loadEmbeddedFontFile = [&]( const char *filename, const std::string &primaryCacheKey, const char *requestedFaceName ) -> const void *
+    {
+        if ( const void *cached = findCachedFont( primaryCacheKey ) )
+            return cached;
+
+        const EmbeddedVGUIFontFile *embeddedFont = FindEmbeddedFont( filename );
+        if ( !embeddedFont )
+            return nullptr;
+
+        FT_Face face;
+        const FT_Error error = FT_New_Memory_Face(
+            FontManager().GetFontLibraryHandle(),
+            (const FT_Byte *)embeddedFont->data,
+            embeddedFont->size,
+            0,
+            &face );
+        if ( error )
+        {
+            std::fprintf( stderr, "[VGUI2-FONT] freetype failed error=%d embeddedFont=%s face=%s\n",
+                static_cast<int>( error ),
+                embeddedFont->filename ? embeddedFont->filename : "<null>",
+                requestedFaceName ? requestedFaceName : "<null>" );
+            return nullptr;
+        }
+
+        font_entry entry;
+        entry.size = static_cast<int>( embeddedFont->size );
+        entry.data = embeddedFont->data;
+
+        insertCacheAlias( primaryCacheKey, entry );
+        insertCacheAlias( std::string( "embedded:" ) + FontFileNameKey( embeddedFont->filename ), entry );
+        insertCacheAlias( std::string( "file:" ) + FontFileNameKey( embeddedFont->filename ), entry );
+        if ( requestedFaceName && requestedFaceName[0] )
+            insertCacheAlias( std::string( "face:" ) + NormalizeFaceName( requestedFaceName ), entry );
+
+        std::fprintf( stderr, "[VGUI2-FONT] loaded embedded bundled font: %s family=%s size=%d\n",
+            embeddedFont->filename ? embeddedFont->filename : "<null>",
+            face->family_name ? face->family_name : "<null>",
+            entry.size );
+        FT_Done_Face( face );
+
+        size = entry.size;
+        return entry.data;
+    };
+
     if( fontFileName && fontFileName[0] )
     {
-        return loadFontFile( fontFileName, std::string( "path:" ) + ToLowerAscii( fontFileName ), pchFontName );
+        const std::string pathCacheKey = std::string( "path:" ) + ToLowerAscii( fontFileName );
+        if ( const void *loaded = loadFontFile( fontFileName, pathCacheKey, pchFontName ) )
+            return loaded;
+
+        return loadEmbeddedFontFile( fontFileName, pathCacheKey, pchFontName );
     }
 
     const std::string faceCacheKey = std::string( "face:" ) + NormalizeFaceName( pchFontName );
@@ -2093,7 +2161,32 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
 
     std::string resolvedPath;
     if ( ResolveFontFaceToFile( pchFontName, weight, flags, resolvedPath ) )
-        return loadFontFile( resolvedPath.c_str(), faceCacheKey, pchFontName );
+    {
+        if ( const void *loaded = loadFontFile( resolvedPath.c_str(), faceCacheKey, pchFontName ) )
+            return loaded;
+
+        if ( const void *embedded = loadEmbeddedFontFile( resolvedPath.c_str(), faceCacheKey, pchFontName ) )
+            return embedded;
+    }
+
+    const bool symbol = ( flags & vgui2::ISurface::FONTFLAG_SYMBOL ) != 0;
+    const std::string normalizedFace = NormalizeFaceName( pchFontName );
+    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
+    {
+        if ( const void *embedded = loadEmbeddedFontFile( knownFile, faceCacheKey, pchFontName ) )
+            return embedded;
+    }
+
+    const std::string faceFile = normalizedFace.empty() ? std::string() : normalizedFace + ".ttf";
+    if ( const void *embedded = loadEmbeddedFontFile( faceFile.c_str(), faceCacheKey, pchFontName ) )
+        return embedded;
+
+    const char *fallbackFile = symbol ? "marlett.ttf" : "Tahoma.ttf";
+    if ( const void *embedded = loadEmbeddedFontFile( fallbackFile, faceCacheKey, pchFontName ) )
+    {
+        std::fprintf( stderr, "[VGUI2-FONT] fallback to embedded bundled font: %s\n", fallbackFile );
+        return embedded;
+    }
 
     return NULL;
 }
