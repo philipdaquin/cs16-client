@@ -199,7 +199,7 @@ void CMenuMain::_Init( void )
 	// resumeGame.charSize = 6;
 	// resumeGame.SetTextHeight( 10 );
 	// resumeGame.SetTextHeight( 8 );
-	resumeGame.SetTextHeight( 6 );
+	resumeGame.SetTextHeight( 20 );
 	resumeGame.onReleased = UI_CloseMenu;
 
 	// disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), L( "Disconnect from server." ) );
@@ -209,7 +209,7 @@ void CMenuMain::_Init( void )
 	// disconnect.charSize = 6;
 	// disconnect.SetTextHeight( 10 );
 	// disconnect.SetTextHeight( 8 );
-	disconnect.SetTextHeight( 6 );
+	disconnect.SetTextHeight( 20 );
 	disconnect.onReleased = VoidCb( &CMenuMain::DisconnectDialogCb );
 
 	// multiPlayer.SetNameAndStatus( "New Multiplayer Game", L( "StringsList_198" ) );
@@ -249,7 +249,7 @@ void CMenuMain::_Init( void )
 	// quit.charSize = 6;
 	// quit.SetTextHeight( 10 );
 	// quit.SetTextHeight( 8 );
-	quit.SetTextHeight( 6 );
+	quit.SetTextHeight( 20 );
 	quit.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
 
 	// Top-right window controls are disabled for the classic main menu layout.
