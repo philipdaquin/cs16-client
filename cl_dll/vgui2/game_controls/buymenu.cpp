@@ -17,12 +17,15 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 	SetScheme("ClientScheme");
 	SetTitle("#Cstrike_Buy_Menu", true);
 
+
+
+gEngfuncs.Con_Printf("[CBuyMenu::CBuyMenu]");
+
 	SetMoveable(false);
 	SetSizeable(false);
 	SetProportional(true);
 
 	SetTitleBarVisible(false);
-	// SetPaintTitleWhenTitleBarHidden(true);
 	SetAutoDelete(false);
 
 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
@@ -57,11 +60,7 @@ void CBuyMenu::ShowPanel(bool bShow)
 
 	if (bShow)
 	{
-		int wide = 0;
-		int tall = 0;
-		GetHudSize(wide, tall);
-		SetPos(0, 0);
-		SetSize(wide, tall);
+	
 		// m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 
 		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
@@ -76,15 +75,14 @@ void CBuyMenu::ShowPanel(bool bShow)
 
 		Run(m_pMainMenu);
 
-		Activate();
-		vgui2::input()->SetAppModalSurface(GetVPanel());
+		// Activate();
 		SetMouseInputEnabled(true);
 	}
 	else
 	{
 
 
-		ResetMenuState();
+		// ResetMenuState();
 		SetVisible(false);
 		SetMouseInputEnabled(false);
 	}
@@ -99,6 +97,14 @@ void CBuyMenu::Update(void)
 
 void CBuyMenu::PerformLayout(void)
 {
+
+	int wide = 0;
+	int tall = 0;
+	GetHudSize(wide, tall);
+	// SetPos(0, 0);
+	SetSize(wide, tall);
+
+
 	// int screenW, screenH;
 	// surface()->GetScreenSize(screenW, screenH);
 
@@ -121,21 +127,27 @@ void CBuyMenu::OnClose(void)
 	if (vgui2::input()->GetAppModalSurface() == GetVPanel())
 		vgui2::input()->ReleaseAppModalSurface();
 
-	ResetMenuState();
+
+	ResetHistory();
+
+	// ResetMenuState();
 	BaseClass::OnClose();
 	m_pViewPort->ShowBackGround(false);
 }
 
+
+
+// deprecated - expensive during re-rendering
 void CBuyMenu::ResetMenuState(void)
 {
-	ResetHistory();
-	ResetCurrentSubPanel();
+	// ResetHistory();
+	// ResetCurrentSubPanel();
 
-	if (m_pMainMenu)
-	{
-		m_pMainMenu->DeleteSubPanels();
-		m_pMainMenu->SetVisible(false);
-	}
+	// if (m_pMainMenu)
+	// {
+	// 	m_pMainMenu->DeleteSubPanels();
+	// 	m_pMainMenu->SetVisible(false);
+	// }
 }
 
 vgui2::Panel *CBuyMenu::GetInputFocusPanel(void)

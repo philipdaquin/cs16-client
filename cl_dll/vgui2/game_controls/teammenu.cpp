@@ -157,7 +157,6 @@ void CTeamMenu::ShowPanel(bool bShow)
 	if (bShow)
 	{
 		Activate();
-		vgui2::input()->SetAppModalSurface(GetVPanel());
 
 		SetMouseInputEnabled(true);
 

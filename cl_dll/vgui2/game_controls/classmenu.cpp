@@ -198,7 +198,6 @@ void CClassMenu::ShowPanel(bool bShow)
 	if ( bShow )
 	{
 		Activate();
-		vgui2::input()->SetAppModalSurface(GetVPanel());
 		SetMouseInputEnabled( true );
 
 		// load a default class page
