@@ -32,6 +32,7 @@ public:
 	virtual void Close(void);
 	virtual void GotoNextSubPanel(void);
 	virtual void SetupNextSubPanel(const char *fileName);
+	virtual void OnMessage(const KeyValues *params, vgui2::VPANEL fromPanel) override;
 
 protected:
 	virtual void DisableDecorativePanels(void);

@@ -50,17 +50,29 @@ void CBuySubMenu::SetVisible(bool state)
 
 void CBuySubMenu::Close(void)
 {
-	CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(GetWizardPanel());
-	if (buyMenu && g_pViewport)
+	if (g_pViewport)
 	{
-		g_pViewport->ShowPanel(buyMenu, false);
+		g_pViewport->HideAllVGUIMenu();
 		return;
 	}
 
 	if (GetWizardPanel())
 		GetWizardPanel()->SetVisible(false);
 
-    g_pViewport->ShowBackGround(false);
+	if (g_pViewport)
+		g_pViewport->ShowBackGround(false);
+}
+
+void CBuySubMenu::OnMessage(const KeyValues *params, vgui2::VPANEL fromPanel)
+{
+	if (params)
+	{
+		const char *messageName = params->GetName();
+		if (!Q_stricmp(messageName, "UpdateClass") || !Q_stricmp(messageName, "SetAsCurrentDefaultButton"))
+			return;
+	}
+
+	BaseClass::OnMessage(params, fromPanel);
 }
 
 CBuySubMenu *CBuySubMenu::CreateNewSubMenu(const char *name)
