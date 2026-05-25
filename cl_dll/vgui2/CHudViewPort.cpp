@@ -147,7 +147,7 @@ void CHudViewport::HideClientUI()
 
 void CHudViewport::CreateDefaultPanels()
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::CreateDefaultPanels resetting cached panel pointers this=%p\n",
+	gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreateDefaultPanels resetting cached panel pointers this=%p\n",
 		this);
 	m_pMOTD = nullptr;
 	m_pTeamMenu = nullptr;
@@ -171,6 +171,8 @@ void CHudViewport::CreateDefaultPanels()
     AddNewPanel(CreatePanelByName(PANEL_BUY_EQUIP_CT));
     AddNewPanel(CreatePanelByName(PANEL_BUY_EQUIP_TER));
     //AddNewPanel(CreatePanelByName(VIEWPORT_PANEL_SCORE));
+	gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreateDefaultPanels done this=%p buyCT=%p buyTER=%p equipCT=%p equipTER=%p\n",
+		this, (void *)m_pBuyMenuCT, (void *)m_pBuyMenuTER, (void *)m_pBuyEquipMenuCT, (void *)m_pBuyEquipMenuTER);
 
 	// Temporarily disabled for startup isolation.
 	// AddNewGameUIPanel(CreateGameUIPanelByName("GameUITestPanel"));
@@ -179,6 +181,8 @@ void CHudViewport::CreateDefaultPanels()
 IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
 {
 	IViewportPanel* pPanel = nullptr;
+	gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreatePanelByName entry this=%p name='%s' team=%d\n",
+		this, pszName ? pszName : "<null>", cl::g_iTeamNumber);
 	
 	if (Q_strcmp("ClientMOTD", pszName) == 0)
 	{
@@ -217,29 +221,37 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
         }
         pPanel = m_pClassMenuTER;
     }
-    else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
-    {
-        pPanel = (cl::g_iTeamNumber == TEAM_TERRORIST) ? CreatePanelByName(PANEL_CLASS_TER) : CreatePanelByName(PANEL_CLASS_CT);
-    }
-	else if (Q_strcmp(PANEL_BUY, pszName) == 0)
-	{
-		if(!m_pBuyMenu)
-        {
-            m_pBuyMenu = new CCSBaseBuyMenu(this);
-            m_pBuyMenu->UpdateGameMode();
-        }
-		pPanel = m_pBuyMenu;
-	}
+    // else if (Q_strcmp(PANEL_CLASS, pszName) == 0)
+    // {
+    //     pPanel = (cl::g_iTeamNumber == TEAM_TERRORIST) ? CreatePanelByName(PANEL_CLASS_TER) : CreatePanelByName(PANEL_CLASS_CT);
+    // }
+	// else if (Q_strcmp(PANEL_BUY, pszName) == 0)
+	// {
+	// 	if(!m_pBuyMenu)
+    //     {
+    //         m_pBuyMenu = new CCSBaseBuyMenu(this);
+    //         m_pBuyMenu->UpdateGameMode();
+    //     }
+	// 	pPanel = m_pBuyMenu;
+	// }
 	else if (Q_strcmp(PANEL_BUY_CT, pszName) == 0)
 	{
-		if (!m_pBuyMenuCT)
+		// if (!m_pBuyMenuCT)
+		// {
+			gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreatePanelByName creating PANEL_BUY_CT this=%p\n",
+				this);
 			m_pBuyMenuCT = new CCSBuyMenu_CT(this);
+		// }
 		pPanel = m_pBuyMenuCT;
 	}
 	else if (Q_strcmp(PANEL_BUY_TER, pszName) == 0)
 	{
-		if (!m_pBuyMenuTER)
+		// if (!m_pBuyMenuTER)
+		// {
+			gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreatePanelByName creating PANEL_BUY_TER this=%p\n",
+				this);
 			m_pBuyMenuTER = new CCSBuyMenu_TER(this);
+		// }
 		pPanel = m_pBuyMenuTER;
 	}
 	else if (Q_strcmp(PANEL_BUY_EQUIP_CT, pszName) == 0)
@@ -305,7 +317,7 @@ IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 
 bool CHudViewport::ShowVGUIMenu(int iMenu)
 {
-    gEngfuncs.Con_Printf("[VGUI2-CLIENT] CHudViewport::ShowVGUIMenu menu=%d team=%d viewport=%p classCT=%p classTER=%p\n",
+    gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::ShowVGUIMenu menu=%d team=%d viewport=%p classCT=%p classTER=%p\n",
         iMenu, cl::g_iTeamNumber, (void *)this, (void *)m_pClassMenuCT, (void *)m_pClassMenuTER);
 
     IViewportPanel *panel = NULL;
@@ -354,12 +366,15 @@ bool CHudViewport::ShowVGUIMenu(int iMenu)
 			CCSBaseBuyMenu *buyMenu = nullptr;
 			if (cl::g_iTeamNumber == TEAM_CT)
 			{
-				buyMenu = m_pBuyMenuCT ? m_pBuyMenuCT : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_CT));
-			}
+				gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::ShowVGUIMenu selecting PANEL_BUY_CT team=%d buyCT=%p\n",
+					cl::g_iTeamNumber, (void *)m_pBuyMenuCT);
+
+				buyMenu = m_pBuyMenuCT ? m_pBuyMenuCT : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_CT));			}
 			else if (cl::g_iTeamNumber == TEAM_TERRORIST)
 			{
-				buyMenu = m_pBuyMenuTER ? m_pBuyMenuTER : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_TER));
-			}
+				gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::ShowVGUIMenu selecting PANEL_BUY_TER team=%d buyTER=%p\n",
+					cl::g_iTeamNumber, (void *)m_pBuyMenuTER);
+				buyMenu = m_pBuyMenuTER ? m_pBuyMenuTER : static_cast<CCSBaseBuyMenu *>(CreatePanelByName(PANEL_BUY_TER));			}
 			else
 			{
 				buyMenu = m_pBuyMenu;
@@ -464,20 +479,34 @@ void CHudViewport::OpenPanelWithCheck(const char *panelToOpen, const char *panel
 
 void CHudViewport::OpenBuyMenuForLocalTeam(bool equipmentMenu)
 {
+	gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::OpenBuyMenuForLocalTeam entry this=%p team=%d equipment=%d\n",
+		this, cl::g_iTeamNumber, equipmentMenu ? 1 : 0);
 	if (cl::g_iTeamNumber == TEAM_CT)
 	{
-		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_CT : PANEL_BUY_CT,
-			equipmentMenu ? PANEL_BUY_CT : PANEL_BUY_EQUIP_CT);
+		gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::OpenBuyMenuForLocalTeam CT open='%s'\n",
+			equipmentMenu ? PANEL_BUY_EQUIP_CT : PANEL_BUY_CT);
+		IViewportPanel *buyPanel = equipmentMenu
+			? (m_pBuyEquipMenuCT ? m_pBuyEquipMenuCT : CreatePanelByName(PANEL_BUY_EQUIP_CT))
+			: (m_pBuyMenuCT ? m_pBuyMenuCT : CreatePanelByName(PANEL_BUY_CT));
+		if (buyPanel)
+			ShowPanel(buyPanel, true);
 	}
 	else if (cl::g_iTeamNumber == TEAM_TERRORIST)
 	{
-		OpenPanelWithCheck(equipmentMenu ? PANEL_BUY_EQUIP_TER : PANEL_BUY_TER,
-			equipmentMenu ? PANEL_BUY_TER : PANEL_BUY_EQUIP_TER);
+		gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::OpenBuyMenuForLocalTeam TER open='%s'\n",
+			equipmentMenu ? PANEL_BUY_EQUIP_TER : PANEL_BUY_TER);
+		IViewportPanel *buyPanel = equipmentMenu
+			? (m_pBuyEquipMenuTER ? m_pBuyEquipMenuTER : CreatePanelByName(PANEL_BUY_EQUIP_TER))
+			: (m_pBuyMenuTER ? m_pBuyMenuTER : CreatePanelByName(PANEL_BUY_TER));
+		if (buyPanel)
+			ShowPanel(buyPanel, true);
 	}
 }
 
 bool CHudViewport::ShowVGUIMenuByName(const char* szName)
 {
+	gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::ShowVGUIMenuByName entry this=%p name='%s' team=%d\n",
+		this, szName ? szName : "<null>", cl::g_iTeamNumber);
     auto pPanel = FindPanelByName(szName);
     if (pPanel == nullptr)
         pPanel = CreatePanelByName(szName);
