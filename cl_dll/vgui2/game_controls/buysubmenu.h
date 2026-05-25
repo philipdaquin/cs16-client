@@ -23,6 +23,7 @@ public:
 
 public:
 	virtual void SetVisible(bool state);
+	virtual void PerformLayout(void) override;
 	virtual void DeleteSubPanels(void);
 
 public:

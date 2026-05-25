@@ -48,6 +48,25 @@ void CBuySubMenu::SetVisible(bool state)
 	BaseClass::SetVisible(state);
 }
 
+void CBuySubMenu::PerformLayout(void)
+{
+	BaseClass::PerformLayout();
+
+	for (int i = 0; i < GetChildCount(); ++i)
+	{
+		MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
+		if (!buyButton)
+			continue;
+
+		if (buyButton == m_pFirstButton)
+			buyButton->ShowPage();
+		else
+			buyButton->HidePage();
+
+		buyButton->InvalidateLayout();
+	}
+}
+
 void CBuySubMenu::Close(void)
 {
 	if (g_pViewport)

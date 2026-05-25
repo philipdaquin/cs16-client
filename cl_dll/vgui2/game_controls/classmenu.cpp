@@ -222,9 +222,6 @@ void CClassMenu::ShowPanel(bool bShow)
 	}
 	else
 	{
-		if (vgui2::input()->GetAppModalSurface() == GetVPanel())
-			vgui2::input()->ReleaseAppModalSurface();
-
 		SetVisible( false );
 		SetMouseInputEnabled( false );
 	}

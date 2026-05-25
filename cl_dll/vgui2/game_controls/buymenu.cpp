@@ -4,7 +4,9 @@
 #include "buysubmenu.h"
 #include "mouseoverpanelbutton.h"
 #include "../vgui_resource_paths.h"
+#include "../csmoe/vgui_int.h"
 #include "../../../vgui2_support/vgui_controls/controls.h"
+#include <vgui/ISurface.h>
 #include <vgui/IInput.h>
 #include <vgui/IInputInternal.h>
 
@@ -55,29 +57,24 @@ void CBuyMenu::ShowPanel(bool bShow)
 
 	if (bShow)
 	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel open this=%p buy='%s' main='%s' mainPanel=%p current=%p\n",
-			this, vgui2::resource_paths::kMenuBuy, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel LoadControlSettings buy='%s'\n",
-			vgui2::resource_paths::kMenuBuy);
+		int wide = 0;
+		int tall = 0;
+		GetHudSize(wide, tall);
+		SetPos(0, 0);
+		SetSize(wide, tall);
+		// m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+
 		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 		if (!m_pMainMenu)
 			m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
-		if (m_pMainMenu)
-		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel LoadControlSettings main='%s' submenu=%p\n",
-				vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
-			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
-		}
+		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+
 
 		Update();
 
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel before-run this=%p mainPanel=%p current=%p visible=%d\n",
-			this, (void *)m_pMainMenu, (void *)GetCurrentSubPanel(), m_pMainMenu ? (m_pMainMenu->IsVisible() ? 1 : 0) : -1);
 		Run(m_pMainMenu);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuyMenu::ShowPanel after-run this=%p mainPanel=%p current=%p visible=%d\n",
-			this, (void *)m_pMainMenu, (void *)GetCurrentSubPanel(), m_pMainMenu ? (m_pMainMenu->IsVisible() ? 1 : 0) : -1);
 
 		Activate();
 		vgui2::input()->SetAppModalSurface(GetVPanel());
@@ -85,8 +82,7 @@ void CBuyMenu::ShowPanel(bool bShow)
 	}
 	else
 	{
-		if (vgui2::input()->GetAppModalSurface() == GetVPanel())
-			vgui2::input()->ReleaseAppModalSurface();
+
 
 		ResetMenuState();
 		SetVisible(false);
@@ -103,9 +99,20 @@ void CBuyMenu::Update(void)
 
 void CBuyMenu::PerformLayout(void)
 {
+	// int screenW, screenH;
+	// surface()->GetScreenSize(screenW, screenH);
+
+	// const int menuW = scheme()->GetProportionalScaledValue(640);
+	// const int menuH = scheme()->GetProportionalScaledValue(480);
+
+	// const int offsetX = ((screenW - menuW) / 2) + 5;
+	// const int offsetY = (screenH - menuH) / 2;
+
+	// SetPos(offsetX, offsetY);
+
 	BaseClass::PerformLayout();
 
-	if (m_pViewPort && IsVisible())
+	if (m_pViewPort)
 		m_pViewPort->ShowBackGround(true);
 }
 
