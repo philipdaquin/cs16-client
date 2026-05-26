@@ -54,6 +54,9 @@ protected:
 
 	int m_iTeam;
 	int m_iClass;
+
+private:
+	void ResetMenuState(void);
 };
 
 #endif
