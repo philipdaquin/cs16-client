@@ -85,14 +85,19 @@ void CBuySubMenu::PerformLayout(void)
 
 void CBuySubMenu::Close(void)
 {
-	if (g_pViewport)
+	CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(GetWizardPanel());
+	if (buyMenu)
 	{
-		g_pViewport->HideAllVGUIMenu();
+		buyMenu->ShowPanel(false);
 		return;
 	}
 
 	if (GetWizardPanel())
+	{
 		GetWizardPanel()->SetVisible(false);
+		GetWizardPanel()->SetMouseInputEnabled(false);
+		GetWizardPanel()->SetKeyBoardInputEnabled(false);
+	}
 
 	if (g_pViewport)
 		g_pViewport->ShowBackGround(false);
