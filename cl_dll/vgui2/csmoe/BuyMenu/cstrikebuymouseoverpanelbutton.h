@@ -26,11 +26,6 @@ public:
 	virtual void Paint() override;
 	virtual void PerformLayout() override;
 
-	void SetTeam(TeamName team)
-	{
-		m_iTeam = team;
-	}
-    TeamName m_iTeam;
 	void UpdateWeapon(const char *weapon = "");
 	void SetBanWeapon(const char* weapon = "", int iLevel = 0);
 
@@ -41,6 +36,8 @@ public:
 	vgui2::ImagePanel* m_pBlankBg;
 
 	vgui2::Label* m_pLevelText;
+
+	TeamName m_iTeam;
 };
 
 #endif

@@ -32,6 +32,7 @@ const Color COL_TR = { 216, 182, 183, 255 };
 
 CSBuyMouseOverPanelButton::CSBuyMouseOverPanelButton(vgui2::Panel *parent, const char *panelName, vgui2::EditablePanel *panel)
 	: BaseClass(parent, panelName, panel)
+	, m_iTeam(static_cast<TeamName>(TEAM_CT))
 {
 	if (m_pPanel)
 		delete m_pPanel;
