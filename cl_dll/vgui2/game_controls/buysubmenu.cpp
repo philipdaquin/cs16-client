@@ -46,6 +46,22 @@ Panel *CBuySubMenu::CreateControlByName(const char *controlName)
 void CBuySubMenu::SetVisible(bool state)
 {
 	BaseClass::SetVisible(state);
+
+	// for( int i = 0; i< GetChildCount(); i++ ) // get all the buy buttons to performlayout
+	// {
+	// 	MouseOverPanelButton *buyButton = dynamic_cast<MouseOverPanelButton *>(GetChild(i));
+	// 	if ( buyButton )
+	// 	{
+	// 		if( buyButton == m_pFirstButton && state == true )
+	// 			buyButton->ShowPage();
+	// 		else
+	// 			buyButton->HidePage();
+
+	// 		buyButton->InvalidateLayout();
+	// 	}
+	// }
+
+
 }
 
 void CBuySubMenu::PerformLayout(void)
@@ -100,6 +116,10 @@ CBuySubMenu *CBuySubMenu::CreateNewSubMenu(const char *name)
 	if (!submenuParent)
 		submenuParent = this;
 	return new CBuySubMenu(submenuParent, name);
+
+	// return new CBuySubMenu( this );
+
+
 }
 
 MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *panel)
@@ -109,12 +129,12 @@ MouseOverPanelButton *CBuySubMenu::CreateNewMouseOverPanelButton(EditablePanel *
 
 void CBuySubMenu::OnCommand(const char *command)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::OnCommand this=%p name='%s' command='%s' current=%p next=%p visible=%d\n",
-		this,
-		GetName() ? GetName() : "<null>",
-		command ? command : "<null>",
-		(void *)m_NextPanel,
-		IsVisible() ? 1 : 0);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::OnCommand this=%p name='%s' command='%s' current=%p next=%p visible=%d\n",
+	// 	this,
+	// 	GetName() ? GetName() : "<null>",
+	// 	command ? command : "<null>",
+	// 	(void *)m_NextPanel,
+	// 	IsVisible() ? 1 : 0);
 
 	if (Q_strstr(command, ".res"))
 	{
@@ -197,8 +217,8 @@ void CBuySubMenu::GotoNextSubPanel(void)
 
 void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel this=%p resource='%s'\n",
-		this, fileName ? fileName : "<null>");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel this=%p resource='%s'\n",
+	// 	this, fileName ? fileName : "<null>");
 	int i;
 
 	for (i = 0; i < m_SubMenus.Count(); i++)
@@ -208,8 +228,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 			m_NextPanel = m_SubMenus[i].panel;
 			Assert(m_NextPanel);
 			m_NextPanel->InvalidateLayout();
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel cached this=%p resource='%s' panel=%p\n",
-				this, fileName ? fileName : "<null>", (void *)m_NextPanel);
+			// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel cached this=%p resource='%s' panel=%p\n",
+			// 	this, fileName ? fileName : "<null>", (void *)m_NextPanel);
 			return;
 		}
 	}
@@ -221,8 +241,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		newEntry.panel = NULL;
 
 		CBuySubMenu *newMenu = CreateNewSubMenu();
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel LoadControlSettings resource='%s' submenu=%p\n",
-			fileName ? fileName : "<null>", (void *)newMenu);
+		// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel LoadControlSettings resource='%s' submenu=%p\n",
+		// 	fileName ? fileName : "<null>", (void *)newMenu);
 		newMenu->LoadControlSettings(fileName, "GAME");
 		newMenu->SetVisible(false);
 		newMenu->SetMouseInputEnabled(false);
@@ -231,8 +251,8 @@ void CBuySubMenu::SetupNextSubPanel(const char *fileName)
 		Q_strncpy(newEntry.filename, fileName, sizeof(newEntry.filename));
 		newEntry.panel = newMenu;
 		m_SubMenus.AddToTail(newEntry);
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel loaded this=%p resource='%s' panel=%p\n",
-			this, fileName ? fileName : "<null>", (void *)m_NextPanel);
+		// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CBuySubMenu::SetupNextSubPanel loaded this=%p resource='%s' panel=%p\n",
+		// 	this, fileName ? fileName : "<null>", (void *)m_NextPanel);
 	}
 
 	if (m_NextPanel)
