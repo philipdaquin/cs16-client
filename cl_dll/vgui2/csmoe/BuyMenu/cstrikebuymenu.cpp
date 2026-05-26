@@ -97,53 +97,53 @@ void CCSBaseBuyMenu::LoadTeamResource(int team)
 
 void CCSBaseBuyMenu::ConfigureMainBuyMenuCommands()
 {
-	if (!m_pMainMenu)
-		return;
+	// if (!m_pMainMenu)
+	// 	return;
 
-	const bool isTerrorist = (m_iTeam == TEAM_TERRORIST);
+	// const bool isTerrorist = (m_iTeam == TEAM_TERRORIST);
 
-	SetMainBuyButtonCommand(m_pMainMenu, "pistols",
-		isTerrorist ? vgui2::resource_paths::kMenuBuyPistolsTER : vgui2::resource_paths::kMenuBuyPistolsCT);
-	SetMainBuyButtonCommand(m_pMainMenu, "shotguns",
-		isTerrorist ? vgui2::resource_paths::kMenuBuyShotgunsTER : vgui2::resource_paths::kMenuBuyShotgunsCT);
-	SetMainBuyButtonCommand(m_pMainMenu, "submachineguns",
-		isTerrorist ? vgui2::resource_paths::kMenuBuySubMachinegunsTER : vgui2::resource_paths::kMenuBuySubMachinegunsCT);
-	SetMainBuyButtonCommand(m_pMainMenu, "rifles",
-		isTerrorist ? vgui2::resource_paths::kMenuBuyRiflesTER : vgui2::resource_paths::kMenuBuyRiflesCT);
-	SetMainBuyButtonCommand(m_pMainMenu, "machineguns",
-		isTerrorist ? vgui2::resource_paths::kMenuBuyMachinegunsTER : vgui2::resource_paths::kMenuBuyMachinegunsCT);
-	SetMainBuyButtonCommand(m_pMainMenu, "equipment",
-		isTerrorist ? vgui2::resource_paths::kMenuBuyEquipmentTER : vgui2::resource_paths::kMenuBuyEquipmentCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "pistols",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuyPistolsTER : vgui2::resource_paths::kMenuBuyPistolsCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "shotguns",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuyShotgunsTER : vgui2::resource_paths::kMenuBuyShotgunsCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "submachineguns",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuySubMachinegunsTER : vgui2::resource_paths::kMenuBuySubMachinegunsCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "rifles",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuyRiflesTER : vgui2::resource_paths::kMenuBuyRiflesCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "machineguns",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuyMachinegunsTER : vgui2::resource_paths::kMenuBuyMachinegunsCT);
+	// SetMainBuyButtonCommand(m_pMainMenu, "equipment",
+	// 	isTerrorist ? vgui2::resource_paths::kMenuBuyEquipmentTER : vgui2::resource_paths::kMenuBuyEquipmentCT);
 
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ConfigureMainBuyMenuCommands this=%p team=%d targetTeam=%s\n",
-		this, m_iTeam, isTerrorist ? "TER" : "CT");
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ConfigureMainBuyMenuCommands this=%p team=%d targetTeam=%s\n",
+	// 	this, m_iTeam, isTerrorist ? "TER" : "CT");
 }
 
 void CCSBaseBuyMenu::SetupBuyPresetControls()
 {
-	m_pMainBackground = m_pMainMenu ? dynamic_cast<Panel *>(m_pMainMenu->FindChildByName("mainBackground")) : NULL;
-	if (!m_pMainBackground && m_pMainMenu)
-		m_pMainBackground = new Panel(m_pMainMenu, "mainBackground");
+	// m_pMainBackground = m_pMainMenu ? dynamic_cast<Panel *>(m_pMainMenu->FindChildByName("mainBackground")) : NULL;
+	// if (!m_pMainBackground && m_pMainMenu)
+	// 	m_pMainBackground = new Panel(m_pMainMenu, "mainBackground");
 
-	m_pMoney = m_pMainMenu ? dynamic_cast<Label *>(m_pMainMenu->FindChildByName("money")) : NULL;
-	if (!m_pMoney && m_pMainMenu)
-		m_pMoney = new Label(m_pMainMenu, "money", "");
+	// m_pMoney = m_pMainMenu ? dynamic_cast<Label *>(m_pMainMenu->FindChildByName("money")) : NULL;
+	// if (!m_pMoney && m_pMainMenu)
+	// 	m_pMoney = new Label(m_pMainMenu, "money", "");
 
-	m_pLoadout = m_pMainMenu ? dynamic_cast<BuyPresetEditPanel *>(m_pMainMenu->FindChildByName("loadoutPanel")) : NULL;
-	if (!m_pLoadout)
-	{
-		gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::SetupBuyPresetControls no loadoutPanel in '%s'; skipping preset editor\n",
-			vgui2::resource_paths::kMenuBuyMain);
-	}
+	// m_pLoadout = m_pMainMenu ? dynamic_cast<BuyPresetEditPanel *>(m_pMainMenu->FindChildByName("loadoutPanel")) : NULL;
+	// if (!m_pLoadout)
+	// {
+	// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::SetupBuyPresetControls no loadoutPanel in '%s'; skipping preset editor\n",
+	// 		vgui2::resource_paths::kMenuBuyMain);
+	// }
 
-	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
-	{
-		char name[32];
-		Q_snprintf(name, sizeof(name), "BuyPresetButton%c", 'A' + i);
-		m_pBuyPresetButtons[i] = m_pMainMenu ? dynamic_cast<BuyPresetButton *>(m_pMainMenu->FindChildByName(name)) : NULL;
-		if (!m_pBuyPresetButtons[i] && m_pMainMenu)
-			m_pBuyPresetButtons[i] = new BuyPresetButton(m_pMainMenu, name);
-	}
+	// for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
+	// {
+	// 	char name[32];
+	// 	Q_snprintf(name, sizeof(name), "BuyPresetButton%c", 'A' + i);
+	// 	m_pBuyPresetButtons[i] = m_pMainMenu ? dynamic_cast<BuyPresetButton *>(m_pMainMenu->FindChildByName(name)) : NULL;
+	// 	if (!m_pBuyPresetButtons[i] && m_pMainMenu)
+	// 		m_pBuyPresetButtons[i] = new BuyPresetButton(m_pMainMenu, name);
+	// }
 }
 
 void CCSBaseBuyMenu::SetupControlSettings()
@@ -172,9 +172,6 @@ void CCSBaseBuyMenu::SetVisible(bool state)
 		Panel *defaultButton = FindChildByName("CancelButton");
 		if (!defaultButton && m_pMainMenu)
 			defaultButton = m_pMainMenu->FindChildByName("CancelButton");
-
-		if (defaultButton)
-			defaultButton->RequestFocus();
 
 		SetMouseInputEnabled(true);
 		if (m_pMainMenu)
@@ -229,21 +226,21 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 
 void CCSBaseBuyMenu::Update(void)
 {
-	ConfigureMainBuyMenuCommands();
-	SetupBuyPresetControls();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::Update this=%p team=%d mainPanel=%p current=%p\n",
-		this, m_iTeam, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+	// ConfigureMainBuyMenuCommands();
+	// SetupBuyPresetControls();
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::Update this=%p team=%d mainPanel=%p current=%p\n",
+	// 	this, m_iTeam, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 }
 
 void CCSBaseBuyMenu::Paint(void)
 {
-	if (m_pMoney && m_lastMoney != cl::gHUD.m_Money.m_iMoneyCount)
-	{
-		m_lastMoney = cl::gHUD.m_Money.m_iMoneyCount;
-		char money[64];
-		Q_snprintf(money, sizeof(money), "$%d", m_lastMoney);
-		m_pMoney->SetText(money);
-	}
+	// if (m_pMoney && m_lastMoney != cl::gHUD.m_Money.m_iMoneyCount)
+	// {
+	// 	m_lastMoney = cl::gHUD.m_Money.m_iMoneyCount;
+	// 	char money[64];
+	// 	Q_snprintf(money, sizeof(money), "$%d", m_lastMoney);
+	// 	m_pMoney->SetText(money);
+	// }
 
 	BaseClass::Paint();
 }
