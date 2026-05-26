@@ -49,9 +49,6 @@ public:
 	virtual vgui2::Panel *GetInputFocusPanel(void);
 
 protected:
-	virtual void ResetMenuState(void);
-
-protected:
 	CBuySubMenu *m_pMainMenu;
 	IViewport	*m_pViewPort;
 

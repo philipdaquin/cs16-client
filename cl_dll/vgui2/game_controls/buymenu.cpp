@@ -81,7 +81,6 @@ void CBuyMenu::ShowPanel(bool bShow)
 	else
 	{
 
-
 		// ResetMenuState();
 		SetVisible(false);
 		SetMouseInputEnabled(false);
@@ -97,24 +96,16 @@ void CBuyMenu::Update(void)
 
 void CBuyMenu::PerformLayout(void)
 {
+	int screenW, screenH;
+	surface()->GetScreenSize(screenW, screenH);
 
-	int wide = 0;
-	int tall = 0;
-	GetHudSize(wide, tall);
-	// SetPos(0, 0);
-	SetSize(wide, tall);
+	const int menuW = scheme()->GetProportionalScaledValue(640);
+	const int menuH = scheme()->GetProportionalScaledValue(480);
 
+	const int offsetX = ((screenW - menuW) / 2) + 5;
+	const int offsetY = (screenH - menuH) / 2;
 
-	// int screenW, screenH;
-	// surface()->GetScreenSize(screenW, screenH);
-
-	// const int menuW = scheme()->GetProportionalScaledValue(640);
-	// const int menuH = scheme()->GetProportionalScaledValue(480);
-
-	// const int offsetX = ((screenW - menuW) / 2) + 5;
-	// const int offsetY = (screenH - menuH) / 2;
-
-	// SetPos(offsetX, offsetY);
+	SetPos(offsetX, offsetY);
 
 	BaseClass::PerformLayout();
 
@@ -124,30 +115,9 @@ void CBuyMenu::PerformLayout(void)
 
 void CBuyMenu::OnClose(void)
 {
-	// if (vgui2::input()->GetAppModalSurface() == GetVPanel())
-	// 	vgui2::input()->ReleaseAppModalSurface();
-
-
 	ResetHistory();
-
-	// ResetMenuState();
 	BaseClass::OnClose();
 	m_pViewPort->ShowBackGround(false);
-}
-
-
-
-// deprecated - expensive during re-rendering
-void CBuyMenu::ResetMenuState(void)
-{
-	// ResetHistory();
-	// ResetCurrentSubPanel();
-
-	// if (m_pMainMenu)
-	// {
-	// 	m_pMainMenu->DeleteSubPanels();
-	// 	m_pMainMenu->SetVisible(false);
-	// }
 }
 
 vgui2::Panel *CBuyMenu::GetInputFocusPanel(void)
