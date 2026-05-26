@@ -180,8 +180,8 @@ void CClassMenu::OnCommand(const char *command)
 
 	m_pViewPort->ShowBackGround(false);
 
-	if (vgui2::input()->GetAppModalSurface() == GetVPanel())
-		vgui2::input()->ReleaseAppModalSurface();
+	// if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+	// 	vgui2::input()->ReleaseAppModalSurface();
 
 	BaseClass::OnCommand(command);
 }

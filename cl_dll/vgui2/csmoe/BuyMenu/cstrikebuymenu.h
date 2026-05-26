@@ -39,7 +39,6 @@ class CCSBaseBuyMenu : public CBuyMenu
 	typedef CBuyMenu BaseClass;
 
 public:
-	CCSBaseBuyMenu(IViewport *pViewPort);
 	CCSBaseBuyMenu(IViewport *pViewPort, int team);
 
 protected:
@@ -48,12 +47,12 @@ public:
 	void SetTeam(int iTeam);
 	int GetTeam() const { return m_iTeam; }
 	void UpdateGameMode();
-	void LoadTeamResource(int team);
+	// void LoadTeamResource(int team);
 	void UpdateBuyPresets(bool showDefaultPanel = false);
 
 public:
 	virtual void Init(void);
-	virtual void VidInit(void);
+	// virtual void VidInit(void);
 	virtual void ShowPanel(bool bShow);
 	virtual void Update(void);
 	virtual void Paint(void);

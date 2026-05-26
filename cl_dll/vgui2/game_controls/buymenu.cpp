@@ -63,12 +63,12 @@ void CBuyMenu::ShowPanel(bool bShow)
 	
 		// m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 
-		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+		// LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
-		if (!m_pMainMenu)
-			m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
+		// if (!m_pMainMenu)
+		// 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
-		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		// m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 
 
 		Update();
@@ -124,8 +124,8 @@ void CBuyMenu::PerformLayout(void)
 
 void CBuyMenu::OnClose(void)
 {
-	if (vgui2::input()->GetAppModalSurface() == GetVPanel())
-		vgui2::input()->ReleaseAppModalSurface();
+	// if (vgui2::input()->GetAppModalSurface() == GetVPanel())
+	// 	vgui2::input()->ReleaseAppModalSurface();
 
 
 	ResetHistory();

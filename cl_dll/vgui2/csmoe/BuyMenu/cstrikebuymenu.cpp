@@ -18,6 +18,11 @@
 #include "../../CBackGroundPanel.h"
 #include "../../vgui_resource_paths.h"
 
+
+
+#define USE_BUY_PRESETS 1
+
+
 using namespace vgui2;
 
 static void SetMainBuyButtonCommand(Panel *panel, const char *buttonName, const char *command)
@@ -30,35 +35,36 @@ static void SetMainBuyButtonCommand(Panel *panel, const char *buttonName, const 
 CCSBuyMenu_CT::CCSBuyMenu_CT(IViewport *pViewPort)
 	: CCSBaseBuyMenu(pViewPort, TEAM_CT)
 {
+	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+	m_pMainMenu->SetVisible( false );
+
 }
 
 CCSBuyMenu_TER::CCSBuyMenu_TER(IViewport *pViewPort)
 	: CCSBaseBuyMenu(pViewPort, TEAM_TERRORIST)
 {
+	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+	m_pMainMenu->SetVisible( false );
+
+
 }
 
-CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort)
-	: CBuyMenu(pViewPort)
-{
-	SetTitle("#Cstrike_Buy_Menu", true);
-	SetProportional(true);
-	// CreateBackground(this);
-	m_backgroundLayoutFinished = false;
-	m_pMoney = NULL;
-	m_pMainBackground = NULL;
-	m_pLoadout = NULL;
-	m_lastMoney = -1;
-	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
-		m_pBuyPresetButtons[i] = NULL;
-	UpdateGameMode();
-}
+
 
 CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, int team)
 	: CBuyMenu(pViewPort)
 {
+
+
+gEngfuncs.Con_Printf("[CCSBaseBuyMenu::CCSBaseBuyMenu] (IViewport *pViewPort, int team)");
+
 	SetTitle("#Cstrike_Buy_Menu", true);
 	SetProportional(true);
-	// CreateBackground(this);
+
+
+	m_pMainMenu = new CCSBuySubMenu( this, team == TEAM_CT ? PANEL_BUY_CT : PANEL_BUY_TER );
+
+	// CreateBackground(this); 
 	m_backgroundLayoutFinished = false;
 	m_pMoney = NULL;
 	m_pMainBackground = NULL;
@@ -66,32 +72,32 @@ CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort, int team)
 	m_lastMoney = -1;
 	for (int i = 0; i < NUM_BUY_PRESET_BUTTONS; ++i)
 		m_pBuyPresetButtons[i] = NULL;
-	LoadTeamResource(team);
+	// LoadTeamResource(team);
 }
 
-void CCSBaseBuyMenu::LoadTeamResource(int team)
-{
-	m_iTeam = team;
+// void CCSBaseBuyMenu::LoadTeamResource(int team)
+// {
+// 	m_iTeam = team;
 
-	ResetHistory();
-	ResetCurrentSubPanel();
+// 	ResetHistory();
+// 	ResetCurrentSubPanel();
 
-	if (m_pMainMenu)
-	{
-		m_pMainMenu->DeletePanel();
-		m_pMainMenu = nullptr;
-	}
+// 	if (m_pMainMenu)
+// 	{
+// 		m_pMainMenu->DeletePanel();
+// 		m_pMainMenu = nullptr;
+// 	}
 
-	m_pMainMenu = new CCSBuySubMenu(this, "BuySubMenu");
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource this=%p team=%d loading main='%s'\n",
-		this, m_iTeam, vgui2::resource_paths::kMenuBuyMain);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource LoadControlSettings main='%s' submenu=%p\n",
-		vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
-	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
-	ConfigureMainBuyMenuCommands();
-	SetupBuyPresetControls();
-	m_pMainMenu->SetVisible(false);
-}
+// 	m_pMainMenu = new CCSBuySubMenu(this, "BuySubMenu");
+// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource this=%p team=%d loading main='%s'\n",
+// 		this, m_iTeam, vgui2::resource_paths::kMenuBuyMain);
+// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::LoadTeamResource LoadControlSettings main='%s' submenu=%p\n",
+// 		vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
+// 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+// 	ConfigureMainBuyMenuCommands();
+// 	SetupBuyPresetControls();
+// 	m_pMainMenu->SetVisible(false);
+// }
 
 void CCSBaseBuyMenu::ConfigureMainBuyMenuCommands()
 {
@@ -150,10 +156,10 @@ void CCSBaseBuyMenu::SetupControlSettings()
 	// LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 
-	if (m_iTeam == TEAM_CT)
-		LoadTeamResource(TEAM_CT);
-	else
-		LoadTeamResource(TEAM_TERRORIST);
+	// if (m_iTeam == TEAM_CT)
+	// 	LoadTeamResource(TEAM_CT);
+	// else
+	// 	LoadTeamResource(TEAM_TERRORIST);
 
 	// if (m_pMainMenu) { 
 	// 	m_pMainMenu->SetVisible(false);
@@ -184,10 +190,10 @@ void CCSBaseBuyMenu::Init(void)
 {
 }
 
-void CCSBaseBuyMenu::VidInit(void)
-{
-	SetVisible(false);
-}
+// void CCSBaseBuyMenu::VidInit(void)
+// {
+// 	SetVisible(false);
+// }
 
 void CCSBaseBuyMenu::ShowPanel(bool bShow)
 {
@@ -201,20 +207,25 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 void CCSBaseBuyMenu::Update(void)
 {
 	ConfigureMainBuyMenuCommands();
-	SetupBuyPresetControls();
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::Update this=%p team=%d mainPanel=%p current=%p\n",
-		this, m_iTeam, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+	// SetupBuyPresetControls();
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::Update this=%p team=%d mainPanel=%p current=%p\n",
+	// 	this, m_iTeam, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 }
 
 void CCSBaseBuyMenu::Paint(void)
 {
-	if (m_pMoney && m_lastMoney != cl::gHUD.m_Money.m_iMoneyCount)
-	{
-		m_lastMoney = cl::gHUD.m_Money.m_iMoneyCount;
-		char money[64];
-		Q_snprintf(money, sizeof(money), "$%d", m_lastMoney);
-		m_pMoney->SetText(money);
-	}
+
+// #if USE_BUY_PRESETS {
+// 	if (m_pMoney && m_lastMoney != cl::gHUD.m_Money.m_iMoneyCount)
+// 	{
+// 		m_lastMoney = cl::gHUD.m_Money.m_iMoneyCount;
+// 		char money[64];
+// 		Q_snprintf(money, sizeof(money), "$%d", m_lastMoney);
+// 		m_pMoney->SetText(money);
+// 	}
+// }
+
+
 
 	BaseClass::Paint();
 }
@@ -355,44 +366,44 @@ void CCSBaseBuyMenu::GotoMenu(int iMenu)
 
 void CCSBaseBuyMenu::ActivateMenu(int iMenu)
 {
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu entry this=%p menu=%d team=%d visible=%d mainPanel=%p current=%p\n",
-		this, iMenu, m_iTeam, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
-	g_pViewport->ShowPanel(this, true);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-show this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
-		this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu entry this=%p menu=%d team=%d visible=%d mainPanel=%p current=%p\n",
+	// 	this, iMenu, m_iTeam, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+	// g_pViewport->ShowPanel(this, true);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-show this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
+	// 	this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 
-	if (iMenu == MENU_BUY)
-	{
-		if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
-		{
-			ResetHistory();
-			Run(m_pMainMenu);
-		}
-		return;
-	}
+	// if (iMenu == MENU_BUY)
+	// {
+	// 	if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
+	// 	{
+	// 		ResetHistory();
+	// 		Run(m_pMainMenu);
+	// 	}
+	// 	return;
+	// }
 
-	if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
-		Run(m_pMainMenu);
+	// if (m_pMainMenu && GetCurrentSubPanel() != m_pMainMenu)
+	// 	Run(m_pMainMenu);
 
-	GotoMenu(iMenu);
-	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-goto this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
-		this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+	// GotoMenu(iMenu);
+	// gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ActivateMenu after-goto this=%p menu=%d visible=%d mainPanel=%p current=%p\n",
+	// 	this, iMenu, IsVisible() ? 1 : 0, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
 }
 
 void CCSBaseBuyMenu::SetTeam(int iTeam)
 {
-	const int newTeam = (iTeam == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
-	if (newTeam == m_iTeam && m_pMainMenu)
-		return;
+	// const int newTeam = (iTeam == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
+	// if (newTeam == m_iTeam && m_pMainMenu)
+	// 	return;
 
-	if (newTeam == TEAM_CT)
-		LoadTeamResource(TEAM_CT);
-	else
-		LoadTeamResource(TEAM_TERRORIST);
+	// if (newTeam == TEAM_CT)
+	// 	LoadTeamResource(TEAM_CT);
+	// else
+	// 	LoadTeamResource(TEAM_TERRORIST);
 }
 
 void CCSBaseBuyMenu::UpdateGameMode()
 {
-	const int team = (cl::g_iTeamNumber == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
-	SetTeam(team);
+	// const int team = (cl::g_iTeamNumber == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
+	// SetTeam(team);
 }
