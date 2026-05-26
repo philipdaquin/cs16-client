@@ -69,7 +69,7 @@ void CBuyMenu::ShowPanel(bool bShow)
 		Update();
 
 		Run(m_pMainMenu);
-			m_pMainMenu->InvalidateLayout();
+		m_pMainMenu->InvalidateLayout();
 
 		Activate();
 		SetMouseInputEnabled(true);
