@@ -30,11 +30,13 @@ static void SetMainBuyButtonCommand(Panel *panel, const char *buttonName, const 
 CCSBuyMenu_CT::CCSBuyMenu_CT(IViewport *pViewPort)
 	: CCSBaseBuyMenu(pViewPort, TEAM_CT)
 {
+		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 }
 
 CCSBuyMenu_TER::CCSBuyMenu_TER(IViewport *pViewPort)
 	: CCSBaseBuyMenu(pViewPort, TEAM_TERRORIST)
 {
+		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 }
 
 CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort)
@@ -193,30 +195,30 @@ void CCSBaseBuyMenu::ShowPanel(bool bShow)
 {
 	if (bShow)
 	{
-		if (cl::gHUD.m_iIntermission || cl::gEngfuncs.IsSpectateOnly())
-			return;
+		// if (cl::gHUD.m_iIntermission || cl::gEngfuncs.IsSpectateOnly())
+		// 	return;
 
-		int wide = 0;
-		int tall = 0;
-		GetHudSize(wide, tall);
-		SetPos(0, 0);
-		SetSize(wide, tall);
+		// int wide = 0;
+		// int tall = 0;
+		// GetHudSize(wide, tall);
+		// SetPos(0, 0);
+		// SetSize(wide, tall);
 
-		const int team = (cl::g_iTeamNumber == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
-		SetTeam(team);
-		ResetHistory();
-		ResetCurrentSubPanel();
-		if (m_pMainMenu)
-		{
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel prepare this=%p team=%d main='%s' mainPanel=%p current=%p\n",
-				this, m_iTeam, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
-			gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel LoadControlSettings main='%s' submenu=%p\n",
-				vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
-			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
-			ConfigureMainBuyMenuCommands();
-			SetupBuyPresetControls();
-			m_pMainMenu->InvalidateLayout();
-		}
+		// const int team = (cl::g_iTeamNumber == TEAM_CT) ? TEAM_CT : TEAM_TERRORIST;
+		// SetTeam(team);
+		// ResetHistory();
+		// ResetCurrentSubPanel();
+		// if (m_pMainMenu)
+		// {
+		// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel prepare this=%p team=%d main='%s' mainPanel=%p current=%p\n",
+		// 		this, m_iTeam, vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu, (void *)GetCurrentSubPanel());
+		// 	gEngfuncs.Con_Printf("[VGUI2-CLIENT] CCSBaseBuyMenu::ShowPanel LoadControlSettings main='%s' submenu=%p\n",
+		// 		vgui2::resource_paths::kMenuBuyMain, (void *)m_pMainMenu);
+		// 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		// 	ConfigureMainBuyMenuCommands();
+		// 	SetupBuyPresetControls();
+		// 	m_pMainMenu->InvalidateLayout();
+		// }
 	}
 
 	BaseClass::ShowPanel(bShow);
