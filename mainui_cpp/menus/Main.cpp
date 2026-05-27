@@ -186,6 +186,7 @@ void CMenuMain::_Init( void )
 	console.iFlags |= QMF_NOTIFY;
 	console.SetPicture( PC_CONSOLE );
 	console.SetVisibility( gpGlobals->developer );
+	console.SetCharSize( QM_DEFAULTFONT );
 	SET_EVENT_MULTI( console.onReleased,
 	{
 		UI_SetActiveMenu( FALSE );
@@ -199,7 +200,8 @@ void CMenuMain::_Init( void )
 	// resumeGame.charSize = 6;
 	// resumeGame.SetTextHeight( 10 );
 	// resumeGame.SetTextHeight( 8 );
-	resumeGame.SetTextHeight( 20 );
+	resumeGame.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	resumeGame.SetCharSize( QM_DEFAULTFONT );
 	resumeGame.onReleased = UI_CloseMenu;
 
 	// disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), L( "Disconnect from server." ) );
@@ -209,7 +211,8 @@ void CMenuMain::_Init( void )
 	// disconnect.charSize = 6;
 	// disconnect.SetTextHeight( 10 );
 	// disconnect.SetTextHeight( 8 );
-	disconnect.SetTextHeight( 20 );
+	disconnect.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	disconnect.SetCharSize( QM_DEFAULTFONT );
 	disconnect.onReleased = VoidCb( &CMenuMain::DisconnectDialogCb );
 
 	// multiPlayer.SetNameAndStatus( "New Multiplayer Game", L( "StringsList_198" ) );
@@ -219,7 +222,8 @@ void CMenuMain::_Init( void )
 	// multiPlayer.charSize = 6;
 	// multiPlayer.SetTextHeight( 10 );
 	// multiPlayer.SetTextHeight( 8 );
-	multiPlayer.SetTextHeight( 20 );
+	multiPlayer.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	multiPlayer.SetCharSize( QM_DEFAULTFONT );
 	multiPlayer.onReleased = UI_MultiPlayer_Menu;
 
 	// findServers.SetNameAndStatus( "Find Servers", L( "StringsList_198" ) );
@@ -229,7 +233,8 @@ void CMenuMain::_Init( void )
 	// findServers.charSize = 6;
 	// findServers.SetTextHeight( 10 );
 	// findServers.SetTextHeight( 8 );
-	findServers.SetTextHeight( 20 );
+	findServers.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	findServers.SetCharSize( QM_DEFAULTFONT );
 	findServers.onReleased = UI_InternetGames_Menu;
 
 	// configuration.SetNameAndStatus( L( "GameUI_Options" ), L( "StringsList_193" ) );
@@ -239,7 +244,8 @@ void CMenuMain::_Init( void )
 	// configuration.charSize = 6;
 	// configuration.SetTextHeight( 10 );
 	// configuration.SetTextHeight( 8 );
-	configuration.SetTextHeight( 20 );
+	configuration.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	configuration.SetCharSize( QM_DEFAULTFONT );
 	configuration.onReleased = UI_Options_Menu;
 
 	// quit.SetNameAndStatus( L( "GameUI_GameMenu_Quit" ), L( "GameUI_QuitConfirmationText" ) );
@@ -249,7 +255,8 @@ void CMenuMain::_Init( void )
 	// quit.charSize = 6;
 	// quit.SetTextHeight( 10 );
 	// quit.SetTextHeight( 8 );
-	quit.SetTextHeight( 20 );
+	quit.SetTextHeight( UI_MED_CHAR_HEIGHT );
+	quit.SetCharSize( QM_DEFAULTFONT );
 	quit.onReleased = VoidCb( &CMenuMain::QuitDialogCb );
 
 	// Top-right window controls are disabled for the classic main menu layout.

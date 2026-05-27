@@ -16,6 +16,7 @@ GNU General Public License for more details.
 #include "FontManager.h"
 #include "BaseMenu.h"
 #include "Utils.h"
+#include "EmbeddedVGUIFonts.h"
 
 #include "BaseFontBackend.h"
 
@@ -29,7 +30,30 @@ GNU General Public License for more details.
 
 #include "BitmapFont.h"
 
-#define DEFAULT_MENUFONT "Trebuchet MS"
+static const EmbeddedVGUIFontFile *FindEmbeddedFontFile( const char *vfspath )
+{
+	if( !vfspath || !vfspath[0] )
+		return NULL;
+
+	const char *filename = vfspath;
+	for( const char *p = vfspath; *p; ++p )
+	{
+		if( *p == '/' || *p == '\\' )
+			filename = p + 1;
+	}
+
+	size_t count = 0;
+	const EmbeddedVGUIFontFile *fonts = VGUI2_GetEmbeddedFontFiles( &count );
+	for( size_t i = 0; i < count; ++i )
+	{
+		if( !stricmp( filename, fonts[i].filename ))
+			return &fonts[i];
+	}
+
+	return NULL;
+}
+
+#define DEFAULT_MENUFONT "Tahoma"
 #define DEFAULT_CONFONT  "Tahoma"
 #define DEFAULT_WEIGHT   500
 
@@ -539,14 +563,14 @@ HFont CFontBuilder::Create()
 
 bool CFontManager::FindFontDataFile( const char *name, int tall, int weight, int flags, char *dataFile, size_t dataFileChars )
 {
-	if( !strcmp( name, "Trebuchet MS" ))
+	if( !strcmp( name, "Trebuchet MS" ) || !strcmp( name, "FiraSans" ) || !strcmp( name, "FireSans" ) || !strcmp( name, "Fira Sans" ))
 	{
-		Q_strncpy( dataFile, "gfx/fonts/FiraSans-Regular.ttf", dataFileChars );
+		Q_strncpy( dataFile, "game/font/FiraSans-Regular.ttf", dataFileChars );
 		return true;
 	}
 	else if( !strcmp( name, "Tahoma" ))
 	{
-		Q_strncpy( dataFile, "gfx/fonts/tahoma.ttf", dataFileChars );
+		Q_strncpy( dataFile, "game/font/Tahoma.ttf", dataFileChars );
 		return true;
 	}
 
@@ -572,6 +596,17 @@ byte *CFontManager::LoadFontDataFile( const char *vfspath, int *plen )
 
 		font_file file = { len, p };
 		m_FontFiles.Insert( vfspath, file );
+	}
+	else
+	{
+		const EmbeddedVGUIFontFile *embeddedFont = FindEmbeddedFontFile( vfspath );
+		if( embeddedFont )
+		{
+			if( plen )
+				*plen = static_cast<int>( embeddedFont->size );
+
+			return const_cast<byte *>( embeddedFont->data );
+		}
 	}
 
 	return p;

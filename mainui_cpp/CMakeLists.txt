@@ -37,6 +37,22 @@ file(GLOB MAINUI_CONTROLS_SOURCES "controls/*.cpp")
 file(GLOB MAINUI_MENUS_SOURCES "menus/*.cpp" "menus/dynamic/*.cpp")
 file(GLOB MAINUI_FONT_RENDER_SOURCES "font/*.cpp")
 file(GLOB MAINUI_SOURCES "miniutl/*.cpp" "*.cpp")
+file(GLOB MAINUI_EMBEDDED_FONT_FILES "../game/font/*.ttf")
+
+set(MAINUI_EMBEDDED_FONTS_CPP "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedVGUIFonts.cpp")
+add_custom_command(
+	OUTPUT "${MAINUI_EMBEDDED_FONTS_CPP}"
+	COMMAND ${Python_EXECUTABLE}
+		"${CMAKE_CURRENT_SOURCE_DIR}/../scripts/embed_vgui_fonts.py"
+		"${MAINUI_EMBEDDED_FONTS_CPP}"
+		${MAINUI_EMBEDDED_FONT_FILES}
+	DEPENDS
+		"${CMAKE_CURRENT_SOURCE_DIR}/../scripts/embed_vgui_fonts.py"
+		${MAINUI_EMBEDDED_FONT_FILES}
+	COMMENT "Embedding bundled mainui font files"
+	VERBATIM
+)
+list(APPEND MAINUI_SOURCES "${MAINUI_EMBEDDED_FONTS_CPP}")
 
 if(XASH_EMSCRIPTEN)
 	add_executable(menu ${MAINUI_CONTROLS_SOURCES} ${MAINUI_MENUS_SOURCES} ${MAINUI_FONT_RENDER_SOURCES} ${MAINUI_SOURCES})
@@ -63,7 +79,7 @@ if(ANDROID)
 	set(MAINUI_USE_STB TRUE)
 endif()
 
-include_directories(${XASH_SDK}/common ${XASH_SDK}/engine ${XASH_SDK}/pm_shared ${XASH_SDK}/public . controls/ menus/ miniutl/ font/ model/)
+include_directories(${XASH_SDK}/common ${XASH_SDK}/engine ${XASH_SDK}/pm_shared ${XASH_SDK}/public . controls/ menus/ miniutl/ font/ model/ ../vgui2_support)
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
