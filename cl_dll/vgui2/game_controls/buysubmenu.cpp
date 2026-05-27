@@ -92,12 +92,12 @@ void CBuySubMenu::Close(void)
 		return;
 	}
 
-	if (GetWizardPanel())
-	{
-		GetWizardPanel()->SetVisible(false);
-		GetWizardPanel()->SetMouseInputEnabled(false);
-		GetWizardPanel()->SetKeyBoardInputEnabled(false);
-	}
+	// if (GetWizardPanel())
+	// {
+	// 	GetWizardPanel()->SetVisible(false);
+	// 	GetWizardPanel()->SetMouseInputEnabled(false);
+	// 	GetWizardPanel()->SetKeyBoardInputEnabled(false);
+	// }
 
 	if (g_pViewport)
 		g_pViewport->ShowBackGround(false);

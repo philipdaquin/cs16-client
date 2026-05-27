@@ -167,6 +167,7 @@ void CBaseViewport::HideAllVGUIMenu()
 {
 	// Hide-all is terminal; do not restore a previous active panel while closing.
 	m_pLastActivePanel = NULL;
+	m_bClosingAllMenus = true;
 
     for (int i = 0; i < m_Panels.Count(); i++)
     {
@@ -176,6 +177,7 @@ void CBaseViewport::HideAllVGUIMenu()
 
     m_pActivePanel = NULL;
     m_pLastActivePanel = NULL;
+	m_bClosingAllMenus = false;
 }
 
 void CBaseViewport::ActivateClientUI()
@@ -545,9 +547,11 @@ bool CBaseViewport::IsBackGroundVisible() const
 
 void CBaseViewport::ShowBackGround( bool bState )
 {
+	if (!m_pBackGround)
+		return;
+
 	int x = 0, y = 0, wide = 0, tall = 0;
-	if (m_pBackGround)
-		m_pBackGround->GetBounds(x, y, wide, tall);
+	m_pBackGround->GetBounds(x, y, wide, tall);
 
 	gEngfuncs.Con_Printf(
 		"[VGUI2-CLIENT] CBaseViewport::ShowBackGround this=%p show=%d background=%p parent=%p parentName='%s' bounds=%d,%d %dx%d visible=%d\n",
@@ -565,6 +569,13 @@ void CBaseViewport::ShowBackGround( bool bState )
 	// 	m_pBackGround->Activate();
 	// 	vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() );
 	// }
+
+	if (!bState && !m_bClosingAllMenus)
+	{
+		// When the background goes away, collapse any other visible viewport
+		// menus so we do not leave orphaned panels rendering on top.
+		HideAllVGUIMenu();
+	}
 
 	m_pBackGround->SetVisible( bState );
 }
