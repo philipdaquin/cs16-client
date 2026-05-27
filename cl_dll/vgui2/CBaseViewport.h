@@ -139,6 +139,7 @@ private:
 	int m_nRootSize[ 2 ] = { -1, -1 };
 
 	CBackGroundPanel* m_pBackGround = nullptr;
+	bool m_bClosingAllMenus = false;
 
 	CUtlVector<IGameUIPanel*> m_GameUIPanels;
 
