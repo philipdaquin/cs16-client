@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static void ApplyMainMenuTextStyle( CMenuPicButton &button )
 {
-	button.font = CFontBuilder( "Tahoma", 12, 600 ).Create();
+	button.font = CFontBuilder( "Tahoma", 20, 600 ).Create();
 	button.charSize = 12;
 	button.SetTextHeight( 12 );
 }
@@ -303,12 +303,12 @@ UI_Main_Init
 */
 void CMenuMain::VidInit( bool connected )
 {
-	int hoffset = ( 70 / 640.0 ) * 1024.0 - 30;
+	int hoffset = ( 70 / 640.0 ) * 1024.0 - 10;
 
 	// in original menu Previews is located at specific point
 	int topY = ( 404 / 480.0 ) * 768.0 + 50;
 	// int ygap = (( 404 - 373 ) / 480.0 ) * 768.0;
-	int ygap = 36;
+	int ygap = 25;
 
 	// statically positioned items
 	minimizeBtn.SetRect( uiStatic.width - 72, 13, 32, 32 );
