@@ -108,6 +108,7 @@ public:
 
 	//BackGround
 	virtual bool IsBackGroundVisible() const;
+	bool HasBackGroundPanel() const { return m_pBackGround != nullptr; }
 
 	void ShowBackGround( bool bState ) override;
 

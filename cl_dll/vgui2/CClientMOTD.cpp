@@ -3,6 +3,7 @@
 #include <vgui_controls/HTML.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/RichText.h>
+#include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 
 #include "tier1/interface.h"
@@ -122,6 +123,11 @@ void CClientMOTD::PerformLayout()
 		m_pViewport->ShowBackGround(true);
 }
 
+void CClientMOTD::OnMousePressed( vgui2::MouseCode code )
+{
+	OnCommand( "okay" );
+}
+
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
 {
 	if( key == KEY_PAD_ENTER || key == KEY_ENTER )
@@ -162,6 +168,15 @@ void CClientMOTD::OnCommand( const char* command )
 
 void CClientMOTD::Close()
 {
+	if( auto *input = vgui2::input() )
+	{
+		if( input->GetAppModalSurface() == GetVPanel() )
+			input->ReleaseAppModalSurface();
+	}
+
+	SetMouseInputEnabled( false );
+	SetKeyBoardInputEnabled( false );
+
 	BaseClass::Close();
 	m_pViewport->ShowBackGround( false );
 	if (auto *viewport = static_cast<CHudViewport *>(m_pViewport))
@@ -177,6 +192,13 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 	BaseClass::Activate();
 	SetVisible( true );
 	MoveToFront();
+	SetMouseInputEnabled( true );
+	SetKeyBoardInputEnabled( true );
+
+	if( auto *input = vgui2::input() )
+		input->SetAppModalSurface( GetVPanel() );
+
+	RequestFocus();
 
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
@@ -193,6 +215,13 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	BaseClass::Activate();
 	SetVisible( true );
 	MoveToFront();
+	SetMouseInputEnabled( true );
+	SetKeyBoardInputEnabled( true );
+
+	if( auto *input = vgui2::input() )
+		input->SetAppModalSurface( GetVPanel() );
+
+	RequestFocus();
 
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
@@ -297,9 +326,22 @@ void CClientMOTD::ShowPanel( bool state )
 		Update();
 
 		BaseClass::Activate();
+		SetMouseInputEnabled( true );
+		SetKeyBoardInputEnabled( true );
+
+		if( auto *input = vgui2::input() )
+			input->SetAppModalSurface( GetVPanel() );
+
+		RequestFocus();
 	}
 	else
 	{
+		if( auto *input = vgui2::input() )
+		{
+			if( input->GetAppModalSurface() == GetVPanel() )
+				input->ReleaseAppModalSurface();
+		}
+
 		BaseClass::SetVisible( false );
 		SetMouseInputEnabled( false );
 		SetKeyBoardInputEnabled( false );

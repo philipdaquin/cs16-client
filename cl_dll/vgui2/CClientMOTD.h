@@ -29,6 +29,7 @@ public:
 	virtual bool IsURL( const char* str );
 
 	void PerformLayout() override;
+	void OnMousePressed( vgui2::MouseCode code ) override;
 	void OnKeyCodeTyped( vgui2::KeyCode key ) override;
 	void OnCommand( const char* command ) override;
 
