@@ -44,6 +44,11 @@ void CBuyMenu::Init(void)
 {
 }
 
+void CBuyMenu::ClearDefaultButtonState(void)
+{
+	GetFocusNavGroup().SetCurrentDefaultButton(NULL, false);
+}
+
 void CBuyMenu::VidInit(void)
 {
 	SetVisible(false);
@@ -108,9 +113,21 @@ void CBuyMenu::PerformLayout(void)
 
 void CBuyMenu::OnClose(void)
 {
+	ClearDefaultButtonState();
 	ResetHistory();
 	BaseClass::OnClose();
 	m_pViewPort->ShowBackGround(false);
+}
+
+void CBuyMenu::OnCurrentDefaultButtonSet(vgui2::Panel *defaultButton)
+{
+	if (!defaultButton)
+	{
+		ClearDefaultButtonState();
+		return;
+	}
+
+	GetFocusNavGroup().SetCurrentDefaultButton(defaultButton->GetVPanel(), false);
 }
 
 void CBuyMenu::ResetMenuState(void)

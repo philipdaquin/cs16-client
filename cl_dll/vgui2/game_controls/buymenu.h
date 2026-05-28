@@ -47,6 +47,8 @@ public:
 	virtual void OnClose(void);
 	virtual void OnKeyCodeTyped(vgui2::KeyCode code);
 	virtual vgui2::Panel *GetInputFocusPanel(void);
+	MESSAGE_FUNC_PTR( OnCurrentDefaultButtonSet, "CurrentDefaultButtonSet", button );
+	void ClearDefaultButtonState(void);
 
 protected:
 	CBuySubMenu *m_pMainMenu;

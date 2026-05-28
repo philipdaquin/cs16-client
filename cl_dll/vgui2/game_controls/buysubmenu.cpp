@@ -179,6 +179,9 @@ void CBuySubMenu::OnCommand(const char *command)
 		return;
 	}
 
+	if (CBuyMenu *buyMenu = dynamic_cast<CBuyMenu *>(GetWizardPanel()))
+		buyMenu->ClearDefaultButtonState();
+
 	Close();
 
 	gEngfuncs.pfnClientCmd((char *)command);
