@@ -670,7 +670,7 @@ public:
 	int	XPosition( float x, int width, int lineWidth );
 	int YPosition( float y, int height );
 
-		void MessageAdd( const char *pName, float time );
+		void MessageAdd( const char *pName, float time, bool isHint = false );
 		void MessageAdd(client_textmessage_t * newMessage );
 		void DebugShowMessage( const char *text );
 		void MessageDrawScan( client_textmessage_t *pMessage, float time );
