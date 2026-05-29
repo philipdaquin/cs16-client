@@ -804,11 +804,6 @@ void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, CUtlVector<
 
 	if (args)
 	{
-		ALERT(at_console, "[HUD-DBG] UTIL_ShowMessageArgs -> HudTextArgs msg=%s buyHint=%d hint=%d args=%d player=%s\n",
-			pString ? pString : "<null>",
-			(pString && !Q_stricmp(pString, "#Hint_press_buy_to_purchase")) ? 1 : 0,
-			int(isHint), args->Count(),
-			(pPlayer && pPlayer->pev) ? STRING(pPlayer->pev->netname) : "<null>");
 		MESSAGE_BEGIN(MSG_ONE, gmsgHudTextArgs, nullptr, pPlayer->pev);
 			WRITE_STRING(pString);
 			WRITE_BYTE(isHint);
@@ -821,11 +816,6 @@ void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, CUtlVector<
 	}
 	else
 	{
-		ALERT(at_console, "[HUD-DBG] UTIL_ShowMessageArgs -> HudTextPro msg=%s buyHint=%d hint=%d player=%s\n",
-			pString ? pString : "<null>",
-			(pString && !Q_stricmp(pString, "#Hint_press_buy_to_purchase")) ? 1 : 0,
-			int(isHint),
-			(pPlayer && pPlayer->pev) ? STRING(pPlayer->pev->netname) : "<null>");
 		MESSAGE_BEGIN(MSG_ONE, gmsgHudTextPro, nullptr, pPlayer->pev);
 			WRITE_STRING(pString);
 			WRITE_BYTE(isHint);
