@@ -670,11 +670,12 @@ public:
 	int	XPosition( float x, int width, int lineWidth );
 	int YPosition( float y, int height );
 
-	void MessageAdd( const char *pName, float time );
-	void MessageAdd(client_textmessage_t * newMessage );
-	void MessageDrawScan( client_textmessage_t *pMessage, float time );
-	void MessageScanStart( void );
-	void MessageScanNextChar( void );
+		void MessageAdd( const char *pName, float time );
+		void MessageAdd(client_textmessage_t * newMessage );
+		void DebugShowMessage( const char *text );
+		void MessageDrawScan( client_textmessage_t *pMessage, float time );
+		void MessageScanStart( void );
+		void MessageScanNextChar( void );
 	void Reset( void );
 
 	client_textmessage_t *AllocMessage( const char *text = NULL, client_textmessage_t *copyFrom = NULL );

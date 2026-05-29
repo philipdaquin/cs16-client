@@ -288,7 +288,7 @@ void CHud :: Init( void )
 
 	CVAR_CREATE( "_vgui_menus", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	CVAR_CREATE( "_cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
-	CVAR_CREATE( "_ah", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
+	CVAR_CREATE( "_ah", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
 	// TODO remove hack later
 	CVAR_CREATE( "numericalmenu", "1", FCVAR_ARCHIVE );

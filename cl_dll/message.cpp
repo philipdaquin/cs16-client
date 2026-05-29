@@ -26,6 +26,17 @@
 #include "vgui_parser.h"
 #include "draw_util.h"
 
+static void Cmd_TestAutoHelpHint()
+{
+	gHUD.m_Message.DebugShowMessage( "Auto-help hint render test: HUD message path works." );
+	gEngfuncs.Con_Printf( "cl_test_autohelp_hint: queued test message (_ah=%s)\n", CVAR_GET_STRING( "_ah" ) );
+}
+
+static void Cmd_TestAutoHelpTitleHint()
+{
+	gHUD.m_Message.DebugShowMessage( "#Hint_press_buy_to_purchase" );
+	gEngfuncs.Con_Printf( "cl_test_autohelp_title_hint: queued #Hint_press_buy_to_purchase (_ah=%s)\n", CVAR_GET_STRING( "_ah" ) );
+}
 
 int CHudMessage::Init(void)
 {
@@ -33,6 +44,8 @@ int CHudMessage::Init(void)
 	HOOK_MESSAGE( gHUD.m_Message, GameTitle );
 	HOOK_MESSAGE( gHUD.m_Message, HudTextPro );
 	HOOK_MESSAGE( gHUD.m_Message, HudTextArgs );
+	gEngfuncs.pfnAddCommand( "cl_test_autohelp_hint", Cmd_TestAutoHelpHint );
+	gEngfuncs.pfnAddCommand( "cl_test_autohelp_title_hint", Cmd_TestAutoHelpTitleHint );
 
 	gHUD.AddHudElem(this);
 	Reset();
@@ -532,6 +545,12 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 	}
 }
 
+void CHudMessage::DebugShowMessage( const char *text )
+{
+	MessageAdd( text, gHUD.m_flTime );
+	m_iFlags |= HUD_DRAW;
+}
+
 
 int CHudMessage::MsgFunc_HudText( const char *pszName,  int iSize, void *pbuf )
 {
@@ -603,6 +622,8 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 	sz = reader.ReadString();
 	hint = reader.ReadByte();
 
+	gEngfuncs.Con_Printf( "[HUD-DBG] HudTextPro recv: msg=%s buyHint=%d hint=%d\n",
+		sz ? sz : "<null>", (sz && !strcmp(sz, "#Hint_press_buy_to_purchase")) ? 1 : 0, hint );
 	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
 
 	// Remember the time -- to fix up level transitions
@@ -615,20 +636,24 @@ int CHudMessage::MsgFunc_HudTextPro( const char *pszName, int iSize, void *pbuf 
 
 int CHudMessage::MsgFunc_HudTextArgs( const char *pszName, int iSize, void *pbuf )
 {
-	/*BufferReader reader( pszName, pbuf, iSize );
+	BufferReader reader( pszName, pbuf, iSize );
 
 	const char *sz = reader.ReadString();
 	int hint = reader.ReadByte();
+	int argCount = reader.ReadByte();
 
-	MessageAdd(sz, gHUD.m_flTime, hint, Newfont); // TODO
+	for ( int i = 0; i < argCount; ++i )
+		reader.ReadString();
+
+	gEngfuncs.Con_Printf( "[HUD-DBG] HudTextArgs recv: msg=%s buyHint=%d hint=%d args=%d\n",
+		sz ? sz : "<null>", (sz && !strcmp(sz, "#Hint_press_buy_to_purchase")) ? 1 : 0, hint, argCount );
+	MessageAdd(sz, gHUD.m_flTime/*, hint, Newfont*/); // TODO
 
 	// Remember the time -- to fix up level transitions
 	m_parms.time = gHUD.m_flTime;
 
 	// Turn on drawing
-	if ( !(m_iFlags & HUD_ACTIVE) )
-		m_iFlags |= HUD_ACTIVE;*/
-
+	m_iFlags |= HUD_DRAW;
 	return 1;
 }
 
@@ -650,7 +675,7 @@ client_textmessage_t *CHudMessage::AllocMessage( const char *text, client_textme
 	if( text )
 	{
 		int len = strlen( text );
-		char *szCustomText = new char[len];
+		char *szCustomText = new char[len + 1];
 		strcpy( szCustomText, text );
 
 		ret->pName = "Custom";
