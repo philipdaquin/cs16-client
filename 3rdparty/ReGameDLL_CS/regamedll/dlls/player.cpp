@@ -8035,11 +8035,24 @@ LINK_HOOK_CLASS_CHAIN(bool, CBasePlayer, HintMessageEx, (const char *pMessage, f
 
 bool EXT_FUNC CBasePlayer::__API_HOOK(HintMessageEx)(const char *pMessage, float duration, bool bDisplayIfPlayerDead, bool bOverride)
 {
+	const char *dbgMessage = pMessage ? pMessage : "<null>";
+	const bool dbgIsBuyHint = pMessage && !Q_stricmp(pMessage, "#Hint_press_buy_to_purchase");
+
 	if (!bDisplayIfPlayerDead && !IsAlive())
+	{
+		ALERT(at_console, "[HUD-DBG] HintMessageEx skip: dead player, msg=%s buyHint=%d\n", dbgMessage, int(dbgIsBuyHint));
 		return false;
+	}
 
 	if (bOverride || m_bShowHints)
+	{
+		ALERT(at_console, "[HUD-DBG] HintMessageEx queue: msg=%s buyHint=%d duration=%.2f override=%d showHints=%d\n",
+			dbgMessage, int(dbgIsBuyHint), duration, int(bOverride), int(m_bShowHints));
 		return m_hintMessageQueue.AddMessage(pMessage, duration, true, nullptr);
+	}
+
+	ALERT(at_console, "[HUD-DBG] HintMessageEx block: msg=%s buyHint=%d duration=%.2f override=%d showHints=%d\n",
+		dbgMessage, int(dbgIsBuyHint), duration, int(bOverride), int(m_bShowHints));
 
 	return true;
 }

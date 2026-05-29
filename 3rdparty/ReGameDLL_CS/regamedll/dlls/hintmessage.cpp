@@ -26,6 +26,9 @@ CHintMessage::~CHintMessage()
 
 void CHintMessage::Send(CBaseEntity *client)
 {
+	ALERT(at_console, "[HUD-DBG] CHintMessage::Send msg=%s duration=%.2f isHint=%d client=%s\n",
+		m_hintString ? m_hintString : "<null>", m_duration, int(m_isHint),
+		(client && client->edict()) ? STRING(client->pev->netname) : "<null>");
 	UTIL_ShowMessageArgs(m_hintString, client, &m_args, m_isHint);
 }
 
@@ -45,6 +48,7 @@ void CHintMessageQueue::Update(CBaseEntity *client)
 
 	CHintMessage *msg = m_messages[0];
 	m_tmMessageEnd = gpGlobals->time + msg->GetDuration();
+	ALERT(at_console, "[HUD-DBG] CHintMessageQueue::Update sending msg after wait=%.2f\n", msg->GetDuration());
 	msg->Send(client);
 	delete msg;
 	m_messages.Remove(0);
@@ -54,6 +58,10 @@ bool CHintMessageQueue::AddMessage(const char *message, float duration, bool isH
 {
 	CHintMessage *msg = new CHintMessage(message, isHint, args, duration);
 	m_messages.AddToTail(msg);
+	ALERT(at_console, "[HUD-DBG] CHintMessageQueue::AddMessage queued msg=%s buyHint=%d duration=%.2f isHint=%d args=%d\n",
+		message ? message : "<null>",
+		(message && !Q_stricmp(message, "#Hint_press_buy_to_purchase")) ? 1 : 0,
+		duration, int(isHint), args ? args->Count() : 0);
 
 	return true;
 }
