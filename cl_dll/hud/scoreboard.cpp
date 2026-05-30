@@ -96,6 +96,9 @@ static const int SCOREBOARD_DIVIDER_INSET_Y = 2;
 
 static void EnsureScoreboardFonts()
 {
+
+
+	// Body Label
 	if ( g_ScoreboardBodyFont == vgui2::INVALID_FONT )
 	{
 		g_ScoreboardBodyFont = vgui2::surface()->CreateFont();
@@ -106,12 +109,15 @@ static void EnsureScoreboardFonts()
 		}
 	}
 
+
+
+	// Headers
 	if ( g_ScoreboardTitleFont == vgui2::INVALID_FONT )
 	{
 		g_ScoreboardTitleFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardTitleFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 20, 600, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Title", 20, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -546,7 +552,7 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		list_slot += 0.55f;
 		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * ROW_GAP) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
 
-		list_slot += 0.4f;
+		list_slot += 0.1f;
 		// draw all the players that belong to this team, indented slightly
 		list_slot = DrawPlayers( list_slot, 25, team_info->name );
 	}
