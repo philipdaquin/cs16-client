@@ -101,7 +101,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardBodyFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardBodyFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 26, 950, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 24, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -111,7 +111,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardTitleFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardTitleFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 24, 950, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 24, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -281,7 +281,8 @@ bool CHudScoreboard :: ShouldDrawScoreboard() const
 }
 
 // Y positions
-#define ROW_GAP  24
+#define ROW_GAP  36
+#define ROW_FILL_HEIGHT 36
 
 int CHudScoreboard :: Draw( float flTime )
 {
@@ -334,15 +335,15 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	g_Columns[COL_KILLS].start = g_Columns[COL_DEATHS].end - 30;
 	g_Columns[COL_KILLS].name = "Score";
 	g_Columns[COL_KILLS].end = g_Columns[COL_KILLS].start - ScoreboardTextWidth( titleFont, g_Columns[COL_KILLS].name );
-	g_Columns[COL_MONEY].start = g_Columns[COL_KILLS].end;
-	g_Columns[COL_MONEY].name = nullptr;
-	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start;
-	g_Columns[COL_HP].start = g_Columns[COL_MONEY].end;
-	g_Columns[COL_HP].name = nullptr;
-	g_Columns[COL_HP].end = g_Columns[COL_HP].start;
-	g_Columns[COL_ATTRIB].start = g_Columns[COL_HP].end;
-	g_Columns[COL_ATTRIB].name = nullptr;
-	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start;
+	g_Columns[COL_MONEY].start = g_Columns[COL_KILLS].end - 30;
+	g_Columns[COL_MONEY].name = Localize( "          " );//Localize( "#Cstrike_ACCOUNT" );
+	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start - ScoreboardTextWidth( titleFont, g_Columns[COL_MONEY].name );
+	g_Columns[COL_HP].start = g_Columns[COL_MONEY].end - 30;
+	g_Columns[COL_HP].name = Localize( "          " ); // Localize( "#Cstrike_HEALTH" );
+	g_Columns[COL_HP].end = g_Columns[COL_HP].start - ScoreboardTextWidth( titleFont, g_Columns[COL_HP].name );
+	g_Columns[COL_ATTRIB].start = g_Columns[COL_HP].end - 30;
+	g_Columns[COL_ATTRIB].name = Localize( "          " ); //Localize( "#Cstrike_DEFUSE_KIT" );
+	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start - ScoreboardTextWidth( titleFont, g_Columns[COL_ATTRIB].name );
 	g_Columns[COL_NAME].start = xstart + leftPad;
 	g_Columns[COL_NAME].name = nullptr;
 	g_Columns[COL_NAME].end = g_Columns[COL_KILLS].start - 16;
@@ -363,13 +364,16 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
 
 	DrawScoreboardTextClipped( titleFont, g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, ServerName, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_MONEY].start, ypos, g_Columns[COL_MONEY].name, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_HP].start, ypos, g_Columns[COL_HP].name, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].name, 255, 255, 255 );
 	DrawScoreboardTextRight( titleFont, g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].name, 255, 255, 255 );
 	DrawScoreboardTextRight( titleFont, g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].name, 255, 255, 255 );
 	DrawScoreboardTextRight( titleFont, g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].name, 255, 255, 255 );
 
 	list_slot += 2;
 	ypos = ystart + (list_slot * ROW_GAP);
-	FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ypos + SCOREBOARD_DIVIDER_INSET_Y, wide - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
+	// FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ypos + SCOREBOARD_DIVIDER_INSET_Y, wide - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
 
 	list_slot += 0.8;
 
@@ -599,10 +603,50 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 
 		if(pl_info->thisplayer) // hey, it's me!
 		{
-			FillRGBABlend( xstart, ypos, xend - xstart, ROW_GAP, 255, 255, 255, 15 );
+	FillRGBABlend( xstart, ypos, xend - xstart, ROW_FILL_HEIGHT, 255, 255, 255, 15 );
 		}
 
 		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + nameoffset, ypos, g_Columns[COL_NAME].end, pl_info->name, r, g, b );
+
+		if( cl_showplayerversion->value == 0.0f )
+		{
+			if( team && stricmp( team, "SPECTATOR" ))
+			{
+				// draw bomb( if player have the bomb )
+				if( g_PlayerExtraInfo[best_player].dead )
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_DEAD" ), r, g, b );
+				else if( g_PlayerExtraInfo[best_player].has_c4 )
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_BOMB" ), r, g, b );
+				else if( g_PlayerExtraInfo[best_player].vip )
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_VIP" ),  r, g, b );
+				else if (g_PlayerExtraInfo[best_player].has_defuse_kit )
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_DEFUSE_KIT" ),  r, g, b );
+			}
+			else
+			{
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
+			}
+		}
+
+		if ( g_PlayerExtraInfo[best_player].sb_health >= 0 && !g_PlayerExtraInfo[best_player].dead )
+		{
+			if ( gHUD.m_pShowHealth->value )
+			{
+				static char buf[64];
+				sprintf( buf, "%d", g_PlayerExtraInfo[best_player].sb_health );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_HP].start, ypos, buf, r, g, b );
+			}
+		}
+
+		if ( g_PlayerExtraInfo[best_player].sb_account >= 0 )
+		{
+			if ( gHUD.m_pShowMoney->value )
+			{
+				static char buf[64];
+				sprintf( buf, "$%d", g_PlayerExtraInfo[best_player].sb_account );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_MONEY].start, ypos, buf, r, g, b );
+			}
+		}
 
 		// draw kills (right to left)
 		if( team && stricmp( team, "SPECTATOR" ) )
