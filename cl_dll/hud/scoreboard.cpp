@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <vgui/ISurface.h>
 #include "draw_util.h"
 #include "vgui_parser.h"
 #include "vgui2/CBackGroundPanel.h"
@@ -88,6 +89,131 @@ static struct Column
 	}
 } g_Columns[TOTAL_COLUMNS];
 
+static vgui2::HFont g_ScoreboardBodyFont = vgui2::INVALID_FONT;
+static vgui2::HFont g_ScoreboardTitleFont = vgui2::INVALID_FONT;
+static const int SCOREBOARD_DIVIDER_INSET_X = 8;
+static const int SCOREBOARD_DIVIDER_INSET_Y = 2;
+
+static void EnsureScoreboardFonts()
+{
+	if ( g_ScoreboardBodyFont == vgui2::INVALID_FONT )
+	{
+		g_ScoreboardBodyFont = vgui2::surface()->CreateFont();
+		if ( g_ScoreboardBodyFont != vgui2::INVALID_FONT )
+		{
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 26, 950, 0, 0,
+				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
+		}
+	}
+
+	if ( g_ScoreboardTitleFont == vgui2::INVALID_FONT )
+	{
+		g_ScoreboardTitleFont = vgui2::surface()->CreateFont();
+		if ( g_ScoreboardTitleFont != vgui2::INVALID_FONT )
+		{
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 24, 950, 0, 0,
+				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
+		}
+	}
+}
+
+static int ScoreboardTextLen( const char *text, uchar32 *out, int outCount )
+{
+	if ( !text || !out || outCount <= 0 )
+	{
+		if ( out && outCount > 0 )
+			out[0] = 0;
+		return 0;
+	}
+
+	const int bytes = Q_UTF8ToUTF32( text, out, outCount * (int)sizeof( uchar32 ), STRINGCONVERT_REPLACE );
+	if ( bytes <= 0 )
+	{
+		out[0] = 0;
+		return 0;
+	}
+
+	return bytes / (int)sizeof( uchar32 ) - 1;
+}
+
+static int ScoreboardTextWidth( vgui2::HFont font, const char *text )
+{
+	EnsureScoreboardFonts();
+
+	if ( font == vgui2::INVALID_FONT )
+		return DrawUtils::HudStringLen( text );
+
+	uchar32 utf32[256];
+	const int len = ScoreboardTextLen( text, utf32, ARRAYSIZE( utf32 ) );
+	int width = 0;
+
+	for ( int i = 0; i < len; ++i )
+		width += vgui2::surface()->GetCharacterWidth( font, utf32[i] );
+
+	return width;
+}
+
+static void DrawScoreboardText( vgui2::HFont font, int x, int y, const char *text, int r, int g, int b )
+{
+	EnsureScoreboardFonts();
+
+	if ( font == vgui2::INVALID_FONT )
+	{
+		DrawUtils::DrawHudString( x, y, 99999, text, r, g, b );
+		return;
+	}
+
+	uchar32 utf32[256];
+	const int len = ScoreboardTextLen( text, utf32, ARRAYSIZE( utf32 ) );
+	if ( len <= 0 )
+		return;
+
+	vgui2::surface()->DrawSetTextFont( font );
+	vgui2::surface()->DrawSetTextColor( r, g, b, 255 );
+	vgui2::surface()->DrawSetTextPos( x, y );
+	vgui2::surface()->DrawPrintText( utf32, len );
+}
+
+static void DrawScoreboardTextClipped( vgui2::HFont font, int x, int y, int maxX, const char *text, int r, int g, int b )
+{
+	EnsureScoreboardFonts();
+
+	if ( font == vgui2::INVALID_FONT )
+	{
+		DrawUtils::DrawHudString( x, y, maxX, text, r, g, b );
+		return;
+	}
+
+	uchar32 utf32[256];
+	const int len = ScoreboardTextLen( text, utf32, ARRAYSIZE( utf32 ) );
+	if ( len <= 0 )
+		return;
+
+	int visibleLen = 0;
+	int curX = x;
+	for ( int i = 0; i < len; ++i )
+	{
+		curX += vgui2::surface()->GetCharacterWidth( font, utf32[i] );
+		if ( curX > maxX )
+			break;
+		++visibleLen;
+	}
+
+	if ( visibleLen <= 0 )
+		return;
+
+	vgui2::surface()->DrawSetTextFont( font );
+	vgui2::surface()->DrawSetTextColor( r, g, b, 255 );
+	vgui2::surface()->DrawSetTextPos( x, y );
+	vgui2::surface()->DrawPrintText( utf32, visibleLen );
+}
+
+static void DrawScoreboardTextRight( vgui2::HFont font, int rightX, int y, const char *text, int r, int g, int b )
+{
+	const int width = ScoreboardTextWidth( font, text );
+	DrawScoreboardText( font, rightX - width, y, text, r, g, b );
+}
+
 //#include "vgui_TeamFortressViewport.h"
 
 int CHudScoreboard :: Init( void )
@@ -115,10 +241,8 @@ int CHudScoreboard :: Init( void )
 
 int CHudScoreboard :: VidInit( void )
 {
-	xstart = ScreenWidth * 0.125f;
-	xend = ScreenWidth - xstart;
-	ystart = 100;
-	yend = ScreenHeight - ystart;
+	EnsureScoreboardFonts();
+
 	m_bForceDraw = false;
 
 	// Load sprites here
@@ -157,7 +281,7 @@ bool CHudScoreboard :: ShouldDrawScoreboard() const
 }
 
 // Y positions
-#define ROW_GAP  15
+#define ROW_GAP  24
 
 int CHudScoreboard :: Draw( float flTime )
 {
@@ -193,19 +317,35 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	// just sort the list on the fly
 	// list is sorted first by frags, then by deaths
 	float list_slot = 0;
+	EnsureScoreboardFonts();
+
+	const vgui2::HFont bodyFont = g_ScoreboardBodyFont;
+	const vgui2::HFont titleFont = g_ScoreboardTitleFont;
+	const int leftPad = 16;
+	const int rightPad = 16;
 
 	// calculate columns sizes
-	g_Columns[COL_PING] = Column( xend - 15, Localize( "#PlayerPing" ) );
-	g_Columns[COL_DEATHS] = Column( g_Columns[COL_PING].end - 10, Localize( "#PlayerDeath" ) );
-	g_Columns[COL_KILLS] = Column( g_Columns[COL_DEATHS].end - 10, Localize( "#PlayerScore" ) );
-	g_Columns[COL_MONEY] = Column( g_Columns[COL_KILLS].end - 10, Localize( "#Cstrike_ACCOUNT" ) );
-	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start - DrawUtils::HudStringLen( "$16000" );
-	g_Columns[COL_HP] = Column( g_Columns[COL_MONEY].end - 10, Localize( "#Cstrike_HEALTH" ) );
-	g_Columns[COL_HP].end = g_Columns[COL_HP].start - DrawUtils::HudStringLen( "100" );
-	g_Columns[COL_ATTRIB] = Column( g_Columns[COL_HP].end - 10 );
-	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start - DrawUtils::HudStringLen( "#Cstrike_DEFUSE_KIT" );
-	g_Columns[COL_NAME] = Column( xstart + 15, nullptr, false );
-	g_Columns[COL_NAME].end = g_Columns[COL_ATTRIB].end - 10;
+	g_Columns[COL_PING].start = xend - rightPad;
+	g_Columns[COL_PING].name = "Latency";
+	g_Columns[COL_PING].end = g_Columns[COL_PING].start - ScoreboardTextWidth( titleFont, g_Columns[COL_PING].name );
+	g_Columns[COL_DEATHS].start = g_Columns[COL_PING].end - 30;
+	g_Columns[COL_DEATHS].name = "Deaths";
+	g_Columns[COL_DEATHS].end = g_Columns[COL_DEATHS].start - ScoreboardTextWidth( titleFont, g_Columns[COL_DEATHS].name );
+	g_Columns[COL_KILLS].start = g_Columns[COL_DEATHS].end - 30;
+	g_Columns[COL_KILLS].name = "Score";
+	g_Columns[COL_KILLS].end = g_Columns[COL_KILLS].start - ScoreboardTextWidth( titleFont, g_Columns[COL_KILLS].name );
+	g_Columns[COL_MONEY].start = g_Columns[COL_KILLS].end;
+	g_Columns[COL_MONEY].name = nullptr;
+	g_Columns[COL_MONEY].end = g_Columns[COL_MONEY].start;
+	g_Columns[COL_HP].start = g_Columns[COL_MONEY].end;
+	g_Columns[COL_HP].name = nullptr;
+	g_Columns[COL_HP].end = g_Columns[COL_HP].start;
+	g_Columns[COL_ATTRIB].start = g_Columns[COL_HP].end;
+	g_Columns[COL_ATTRIB].name = nullptr;
+	g_Columns[COL_ATTRIB].end = g_Columns[COL_ATTRIB].start;
+	g_Columns[COL_NAME].start = xstart + leftPad;
+	g_Columns[COL_NAME].name = nullptr;
+	g_Columns[COL_NAME].end = g_Columns[COL_KILLS].start - 16;
 
 	// print the heading line
 	const int wide = xend - xstart;
@@ -222,16 +362,14 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	else
 		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
 
-	DrawUtils::DrawHudString( g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, ServerName, 255, 255, 255 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_HP].start, ypos, g_Columns[COL_HP].end, "", 255, 255, 255 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_MONEY].start, ypos, g_Columns[COL_MONEY].end, g_Columns[COL_MONEY].name, 255, 255, 255 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, g_Columns[COL_KILLS].name, 255, 255, 255 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].end, g_Columns[COL_DEATHS].name, 255, 255, 255 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, g_Columns[COL_PING].name, 255, 255, 255 );
+	DrawScoreboardTextClipped( titleFont, g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, ServerName, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].name, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].name, 255, 255, 255 );
+	DrawScoreboardTextRight( titleFont, g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].name, 255, 255, 255 );
 
 	list_slot += 2;
 	ypos = ystart + (list_slot * ROW_GAP);
-	FillRGBA( xstart, ypos, xend - xstart, 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
+	FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ypos + SCOREBOARD_DIVIDER_INSET_Y, wide - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
 
 	list_slot += 0.8;
 
@@ -369,11 +507,19 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		{
 		case TEAM_TERRORIST:
 			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_Ter" ), numPlayers );
-			DrawUtils::DrawHudNumberString( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, team_info->frags, r, g, b );
+			{
+				char buf[32];
+				snprintf( buf, sizeof( buf ), "%d", team_info->frags );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_KILLS].start, ypos, buf, r, g, b );
+			}
 			break;
 		case TEAM_CT:
 			snprintf( teamName, sizeof( teamName ), fmtString, Localize( "#Cstrike_ScoreBoard_CT" ), numPlayers );
-			DrawUtils::DrawHudNumberString( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, team_info->frags, r, g, b );
+			{
+				char buf[32];
+				snprintf( buf, sizeof( buf ), "%d", team_info->frags );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_KILLS].start, ypos, buf, r, g, b );
+			}
 			break;
 		case TEAM_SPECTATOR:
 		case TEAM_UNASSIGNED:
@@ -381,14 +527,18 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 			break;
 		}
 
-		DrawUtils::DrawHudString( g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, teamName, r, g, b );
-		DrawUtils::DrawHudNumberString( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, team_info->sumping / team_info->players, r, g, b );
+		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, teamName, r, g, b );
+		{
+			char buf[32];
+			snprintf( buf, sizeof( buf ), "%d", team_info->sumping / team_info->players );
+			DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
+		}
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
 		// draw underline
 		list_slot += 1.2f;
-		FillRGBA( xstart, ystart + (list_slot * ROW_GAP), xend - xstart, 1, r, g, b, 255);
+		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * ROW_GAP) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
 
 		list_slot += 0.4f;
 		// draw all the players that belong to this team, indented slightly
@@ -452,55 +602,23 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			FillRGBABlend( xstart, ypos, xend - xstart, ROW_GAP, 255, 255, 255, 15 );
 		}
 
-		DrawUtils::DrawHudString( g_Columns[COL_NAME].start + nameoffset, ypos, g_Columns[COL_NAME].start + 350, pl_info->name, r, g, b );
-
-		if( cl_showplayerversion->value == 0.0f )
-		{
-			if( team && stricmp( team, "SPECTATOR" ))
-			{
-				// draw bomb( if player have the bomb )
-				if( g_PlayerExtraInfo[best_player].dead )
-					DrawUtils::DrawHudStringReverse( g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].end, Localize( "#Cstrike_DEAD" ), r, g, b );
-				else if( g_PlayerExtraInfo[best_player].has_c4 )
-					DrawUtils::DrawHudStringReverse( g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].end, Localize( "#Cstrike_BOMB" ), r, g, b );
-				else if( g_PlayerExtraInfo[best_player].vip )
-					DrawUtils::DrawHudStringReverse( g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].end, Localize( "#Cstrike_VIP" ),  r, g, b );
-				else if (g_PlayerExtraInfo[best_player].has_defuse_kit )
-					DrawUtils::DrawHudStringReverse( g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].end, Localize( "#Cstrike_DEFUSE_KIT" ),  r, g, b );
-			}
-		}
-		else
-		{
-			DrawUtils::DrawHudStringReverse( g_Columns[COL_ATTRIB].start, ypos, g_Columns[COL_ATTRIB].end, gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
-		}
-
-		if ( g_PlayerExtraInfo[best_player].sb_health >= 0 && !g_PlayerExtraInfo[best_player].dead )
-		{
-			if ( gHUD.m_pShowHealth->value )
-			{
-				static char buf[64];
-				sprintf( buf, "%d", g_PlayerExtraInfo[best_player].sb_health );
-				DrawUtils::DrawHudStringReverse( g_Columns[COL_HP].start, ypos, g_Columns[COL_HP].end, buf, r, g, b );
-			}
-		}
-
-		if ( g_PlayerExtraInfo[best_player].sb_account >= 0 )
-		{
-			if ( gHUD.m_pShowMoney->value )
-			{
-				static char buf[64];
-				sprintf( buf, "$%d", g_PlayerExtraInfo[best_player].sb_account );
-				DrawUtils::DrawHudStringReverse( g_Columns[COL_MONEY].start, ypos, g_Columns[COL_MONEY].end, buf, r, g, b );
-			}
-		}
+		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + nameoffset, ypos, g_Columns[COL_NAME].end, pl_info->name, r, g, b );
 
 		// draw kills (right to left)
 		if( team && stricmp( team, "SPECTATOR" ) )
 		{
-			DrawUtils::DrawHudNumberString( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, g_PlayerExtraInfo[best_player].frags, r, g, b );
+				{
+					char buf[32];
+					snprintf( buf, sizeof( buf ), "%d", g_PlayerExtraInfo[best_player].frags );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_KILLS].start, ypos, buf, r, g, b );
+				}
 
-			// draw deaths
-			DrawUtils::DrawHudNumberString( g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].end, g_PlayerExtraInfo[best_player].deaths, r, g, b );
+				// draw deaths
+				{
+					char buf[32];
+					snprintf( buf, sizeof( buf ), "%d", g_PlayerExtraInfo[best_player].deaths );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_DEATHS].start, ypos, buf, r, g, b );
+				}
 		}
 
 		// draw ping & packetloss
@@ -509,14 +627,14 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			&& ( value = gEngfuncs.PlayerInfo_ValueForKey( best_player, "*bot" ) )
 			&& atoi( value ) > 0 )
 		{
-			DrawUtils::DrawHudStringReverse( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, "BOT", r, g, b );
-		}
-		else
-		{
-			static char buf[64];
-			sprintf( buf, "%d", pl_info->ping );
-			DrawUtils::DrawHudStringReverse( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, buf, r, g, b );
-		}
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, "BOT", r, g, b );
+			}
+			else
+			{
+				static char buf[64];
+				sprintf( buf, "%d", pl_info->ping );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
+			}
 
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
 		list_slot++;
