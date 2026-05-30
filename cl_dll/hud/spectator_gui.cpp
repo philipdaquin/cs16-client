@@ -47,6 +47,16 @@ version.
 #define INT_XPOS(x) int(XPOS(x) * ScreenWidth)
 #define INT_YPOS(y) int(YPOS(y) * ScreenHeight)
 
+static inline int ResX( int x )
+{
+	return ( x * ScreenWidth ) / 640;
+}
+
+static inline int ResY( int y )
+{
+	return ( y * ScreenHeight ) / 480;
+}
+
 int CHudSpectatorGui::Init()
 {
 	if( !g_iXash )
@@ -129,57 +139,76 @@ int CHudSpectatorGui::Draw( float flTime )
 	// function name says it
 	CalcAllNeededData( );
 
-	// int r = 255, g = 140, b = 0;
-	int r = 255, g = 255, b = 255; // spectator chrome is white now
+	// Spectator GUI scheme values from the resource design, applied directly in HUD code.
+	const int whiteR = 255;
+	const int whiteG = 255;
+	const int whiteB = 255;
+	const int barAlpha = 153;
 
-	// at first, draw these silly black bars
-	int startpos = 0;
-	if( gHUD.m_Spectator.m_pip->value != INSET_OFF ) // pip adjust
+	const int topBarH = ResY( 52 );
+	const int bottomBarY = ResY( 429 );
+	const int bottomBarH = ResY( 52 );
+	const int extrainfoLeft = ScreenWidth - ResX( 56 );
+	const int extrainfoRight = extrainfoLeft + ResX( 44 );
+	const int timerLeft = ScreenWidth - ResX( 42 );
+	const int timerRight = timerLeft + ResX( 40 );
+	const int timerImageLeft = ScreenWidth - ResX( 56 );
+	const int timerImageRight = timerImageLeft + ResX( 12 );
+	const int ctLabelLeft = ScreenWidth - ResX( 233 );
+	const int ctLabelRight = ctLabelLeft + ResX( 150 );
+	const int ctValueLeft = ScreenWidth - ResX( 80 );
+	const int ctValueRight = ctValueLeft + ResX( 10 );
+	const int terLabelLeft = ctLabelLeft;
+	const int terLabelRight = ctLabelRight;
+	const int terValueLeft = ctValueLeft;
+	const int terValueRight = ctValueRight;
+	const int playerLabelLeft = ( ScreenWidth - ResX( 216 ) ) / 2;
+	const int playerLabelRight = playerLabelLeft + ResX( 216 );
+
+	// Top and bottom translucent bars.
+	FillRGBABlend( 0, 0, ScreenWidth, topBarH, 0, 0, 0, barAlpha );
+	FillRGBABlend( 0, bottomBarY, ScreenWidth, bottomBarH, 0, 0, 0, barAlpha );
+	// "bottombarblank" from the design is represented here as a transparent overlay region.
+	FillRGBABlend( 0, bottomBarY, ScreenWidth, bottomBarH, 0, 0, 0, 0 );
+
+	// DividerBar
+	FillRGBABlend( ScreenWidth - ResX( 64 ), ResY( 12 ), 1, ResY( 30 ), whiteR, whiteG, whiteB, 255 );
+
+	// Extrainfo and timer area
+	DrawUtils::DrawHudString( extrainfoLeft, ResY( 12 ), extrainfoRight, label.m_szMap, whiteR, whiteG, whiteB );
+	if( !m_bBombPlanted )
 	{
-		startpos = XRES(gHUD.m_Spectator.m_OverviewData.insetWindowWidth) + XRES(gHUD.m_Spectator.m_OverviewData.insetWindowX);
-		startpos *= ScreenWidth / TrueWidth; // hud_scale adjust
-	}
-	FillRGBABlend(startpos, 0, ScreenWidth - startpos, INT_YPOS(2), 0, 0, 0, 153);
-	FillRGBABlend(0, ScreenHeight - INT_YPOS(2), ScreenWidth, INT_YPOS(2), 0, 0, 0, 153);
-
-	// divider
-	FillRGBABlend( INT_XPOS(12.5), INT_YPOS(2) * 0.25, 1, INT_YPOS(2) * 0.5, r, g, b, 255 );
-
-	{ // mapname. extradata
-		DrawUtils::DrawHudString( INT_XPOS(12.5) + 10, INT_YPOS(2) * 0.25, ScreenWidth, label.m_szMap, r, g, b );
-
-		if( !m_bBombPlanted ) // timer remaining
+		if( m_hTimerTexture )
 		{
-			if( m_hTimerTexture )
-			{
-				gRenderAPI.GL_SelectTexture( 0 );
-				gRenderAPI.GL_Bind(0, m_hTimerTexture);
-				gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-				// gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				DrawUtils::Draw2DQuad( (INT_XPOS(12.5) + 10) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5) * gHUD.m_flScale,
-									   (INT_XPOS(12.5) + 10 + gHUD.GetCharHeight() ) * gHUD.m_flScale,
-									   (INT_YPOS(2) * 0.5 + gHUD.GetCharHeight() ) * gHUD.m_flScale );
-				// gEngfuncs.pTriAPI->End();
-			}
-			DrawUtils::DrawHudString( INT_XPOS(12.5) + gHUD.GetCharHeight() * 1.5 + gHUD.GetCharWidth('M') , INT_YPOS(2) * 0.5, ScreenWidth,
-									  label.m_szTimer, r, g, b );
+			gRenderAPI.GL_SelectTexture( 0 );
+			gRenderAPI.GL_Bind( 0, m_hTimerTexture );
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+			DrawUtils::Draw2DQuad( timerImageLeft, ResY( 26 ), timerImageRight, ResY( 38 ) );
 		}
+		DrawUtils::DrawHudString( timerLeft, ResY( 24 ), timerRight, label.m_szTimer, whiteR, whiteG, whiteB );
 	}
 
-
-	{ // draw team here
-		int iLen = DrawUtils::HudStringLen("Counter-Terrorists:" );
-
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50 , INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, "Counter-Terrorists:", r, g, b );
-		DrawUtils::DrawHudString( INT_XPOS(12.5) - iLen - 50, INT_YPOS(2) * 0.5, INT_XPOS(12.5) - 50, "Terrorists:", r, g, b );
-		// count
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.25, INT_XPOS(12.5) - 50, label.m_iCounterTerrorists, r, g, b );
-		DrawUtils::DrawHudNumberString( INT_XPOS(12.5) - 10, INT_YPOS(2) * 0.5,  INT_XPOS(12.5) - 50, label.m_iTerrorists,        r, g, b );
+	// CT/Terrorist score block
+	DrawUtils::DrawHudStringReverse( ctLabelRight, ResY( 12 ), ctLabelLeft,
+									 Localize( "#Cstrike_Spec_CT_Score" ), whiteR, whiteG, whiteB );
+	{
+		char szScore[16];
+		snprintf( szScore, sizeof( szScore ), "%d", label.m_iCounterTerrorists );
+		DrawUtils::DrawHudString( ctValueLeft, ResY( 12 ), ctValueRight, szScore, whiteR, whiteG, whiteB );
+	}
+	DrawUtils::DrawHudStringReverse( terLabelRight, ResY( 24 ), terLabelLeft,
+									 Localize( "#Cstrike_Spec_Ter_Score" ), whiteR, whiteG, whiteB );
+	{
+		char szScore[16];
+		snprintf( szScore, sizeof( szScore ), "%d", label.m_iTerrorists );
+		DrawUtils::DrawHudString( terValueLeft, ResY( 24 ), terValueRight, szScore, whiteR, whiteG, whiteB );
 	}
 
 	if( m_menuFlags & ROOT_MENU )
 	{
+		const int r = whiteR;
+		const int g = whiteG;
+		const int b = whiteB;
 		// draw the root menu
 		DrawButtonWithText(INT_XPOS(0.5),  INT_YPOS(8.5), INT_XPOS(4), INT_YPOS(1), "Options", r, g, b);
 		DrawButtonWithText(INT_XPOS(5),    INT_YPOS(8.5), INT_XPOS(1), INT_YPOS(1), "<", r, g, b);
@@ -219,10 +248,16 @@ int CHudSpectatorGui::Draw( float flTime )
 
 	//if( !label.m_szNameAndHealth[0] )
 	//{
-		int iLen = DrawUtils::HudStringLen( label.m_szNameAndHealth );
-		GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
-		DrawUtils::DrawHudString( ScreenWidth * 0.5 - iLen * 0.5, INT_YPOS(9) - gHUD.GetCharHeight() * 0.5 , ScreenWidth,
-								  label.m_szNameAndHealth, r, g, b );
+		if( label.m_szNameAndHealth[0] )
+		{
+			int playerLabelWidth = DrawUtils::HudStringLen( label.m_szNameAndHealth );
+			int playerLabelX = ( ScreenWidth - playerLabelWidth ) / 2;
+			int r = whiteR, g = whiteG, b = whiteB;
+			if( g_iUser2 > 0 && g_iUser2 < MAX_PLAYERS )
+				GetTeamColor( r, g, b, g_PlayerExtraInfo[ g_iUser2 ].teamnumber );
+			DrawUtils::DrawHudString( playerLabelX, ResY( 441 ), playerLabelRight,
+									  label.m_szNameAndHealth, r, g, b );
+		}
 	//}
 
 	return 1;
