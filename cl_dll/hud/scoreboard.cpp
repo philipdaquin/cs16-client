@@ -101,7 +101,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardBodyFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardBodyFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 24, 600, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 20, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -111,7 +111,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardTitleFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardTitleFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 24, 600, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Default", 20, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -533,7 +533,7 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 			break;
 		}
 
-		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, teamName, r, g, b );
+		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + 25, ypos, g_Columns[COL_NAME].end, teamName, r, g, b );
 		{
 			char buf[32];
 			snprintf( buf, sizeof( buf ), "%d", team_info->sumping / team_info->players );
@@ -543,12 +543,12 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
 		// draw underline
-		list_slot += 1.2f;
+		list_slot += 0.55f;
 		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * ROW_GAP) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
 
 		list_slot += 0.4f;
 		// draw all the players that belong to this team, indented slightly
-		list_slot = DrawPlayers( list_slot, 10, team_info->name );
+		list_slot = DrawPlayers( list_slot, 25, team_info->name );
 	}
 
 	// draw all the players who are not in a team
