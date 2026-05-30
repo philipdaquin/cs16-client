@@ -129,7 +129,8 @@ int CHudSpectatorGui::Draw( float flTime )
 	// function name says it
 	CalcAllNeededData( );
 
-	int r = 255, g = 140, b = 0;
+	// int r = 255, g = 140, b = 0;
+	int r = 255, g = 255, b = 255; // spectator chrome is white now
 
 	// at first, draw these silly black bars
 	int startpos = 0;
