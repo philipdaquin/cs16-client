@@ -73,11 +73,15 @@ void CBackGroundPanel::PerformLayout()
 
 
 //-----------------------------------------------------------------------------
-void DrawRoundedBackground(Color bgColor, int wide, int tall)
+void DrawRoundedBackground(Color bgColor, int xOrigin, int yOrigin, int wide, int tall)
 {
 	int x1, x2, y1, y2;
 	surface()->DrawSetColor(bgColor);
 	surface()->DrawSetTextColor(bgColor);
+	auto drawFilledRect = [xOrigin, yOrigin]( int x1, int y1, int x2, int y2 )
+	{
+		surface()->DrawFilledRect( xOrigin + x1, yOrigin + y1, xOrigin + x2, yOrigin + y2 );
+	};
 	// top-left corner --------------------------------------------------------
 	int xDir = 1;
 	int yDir = -1;
@@ -93,7 +97,7 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 		x2 = std::max(x + coord[xIndex] * xMult, x + coord[xIndex + 1] * xMult);
 		y1 = std::max(y + coord[yIndex] * yMult, y + coord[yIndex + 1] * yMult);
 		y2 = y + coord[NumSegments];
-		surface()->DrawFilledRect(x1, y1, x2, y2);
+		drawFilledRect( x1, y1, x2, y2 );
 
 		xIndex += xDir;
 		yIndex += yDir;
@@ -113,7 +117,7 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 		x2 = std::max(x + coord[xIndex] * xMult, x + coord[xIndex + 1] * xMult);
 		y1 = std::max(y + coord[yIndex] * yMult, y + coord[yIndex + 1] * yMult);
 		y2 = y + coord[NumSegments];
-		surface()->DrawFilledRect(x1, y1, x2, y2);
+		drawFilledRect( x1, y1, x2, y2 );
 		xIndex += xDir;
 		yIndex += yDir;
 	}
@@ -132,7 +136,7 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 		x2 = std::max(x + coord[xIndex] * xMult, x + coord[xIndex + 1] * xMult);
 		y1 = y - coord[NumSegments];
 		y2 = std::min(y + coord[yIndex] * yMult, y + coord[yIndex + 1] * yMult);
-		surface()->DrawFilledRect(x1, y1, x2, y2);
+		drawFilledRect( x1, y1, x2, y2 );
 		xIndex += xDir;
 		yIndex += yDir;
 	}
@@ -151,7 +155,7 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 		x2 = std::max(x + coord[xIndex] * xMult, x + coord[xIndex + 1] * xMult);
 		y1 = y - coord[NumSegments];
 		y2 = std::min(y + coord[yIndex] * yMult, y + coord[yIndex + 1] * yMult);
-		surface()->DrawFilledRect(x1, y1, x2, y2);
+		drawFilledRect( x1, y1, x2, y2 );
 		xIndex += xDir;
 		yIndex += yDir;
 	}
@@ -161,14 +165,14 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 	x2 = coord[NumSegments];
 	y1 = coord[NumSegments];
 	y2 = tall - coord[NumSegments];
-	surface()->DrawFilledRect(x1, y1, x2, y2);
+	drawFilledRect( x1, y1, x2, y2 );
 
 	// left -------------------------------------------------------------------
 	x1 = coord[NumSegments];
 	x2 = wide - coord[NumSegments];
 	y1 = 0;
 	y2 = tall;
-	surface()->DrawFilledRect(x1, y1, x2, y2);
+	drawFilledRect( x1, y1, x2, y2 );
 
 
 	// right ------------------------------------------------------------------
@@ -176,7 +180,7 @@ void DrawRoundedBackground(Color bgColor, int wide, int tall)
 	x2 = wide;
 	y1 = coord[NumSegments];
 	y2 = tall - coord[NumSegments];
-	surface()->DrawFilledRect(x1, y1, x2, y2);
+	drawFilledRect( x1, y1, x2, y2 );
 }
 
 void DrawRoundedBorder(Color borderColor, int wide, int tall)
@@ -291,6 +295,11 @@ void DrawRoundedBorder(Color borderColor, int wide, int tall)
 	y1 = coord[NumSegments];
 	y2 = tall - coord[NumSegments];
 	surface()->DrawFilledRect(x1, y1, x2, y2);
+}
+
+void DrawRoundedBackground(Color bgColor, int wide, int tall)
+{
+	DrawRoundedBackground( bgColor, 0, 0, wide, tall );
 }
 
 class CaptionLabel : public Label

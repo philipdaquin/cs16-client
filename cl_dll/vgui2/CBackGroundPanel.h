@@ -28,6 +28,7 @@ void LayoutBackgroundPanel(vgui2::EditablePanel *pWindow);
 void ApplyBackgroundSchemeSettings(vgui2::EditablePanel *pWindow, vgui2::IScheme *pScheme);
 void ResizeWindowControls(vgui2::EditablePanel *pWindow, int tall, int wide, int offsetX, int offsetY);
 int GetAlternateProportionalValueFromScaled(vgui2::HScheme scheme, int scaledValue);
+void DrawRoundedBackground(Color bgColor, int x, int y, int wide, int tall);
 void DrawRoundedBackground(Color bgColor, int wide, int tall);
 void DrawRoundedBorder(Color borderColor, int wide, int tall);
 

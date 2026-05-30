@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include "draw_util.h"
 #include "vgui_parser.h"
+#include "vgui2/CBackGroundPanel.h"
 #include <ctype.h>
 
 hud_player_info_t   g_PlayerInfoList[MAX_PLAYERS+1]; // player info from the engine
@@ -173,7 +174,6 @@ int CHudScoreboard :: Draw( float flTime )
 		m_colors.g = 0;
 		m_colors.b = 0;
 		m_colors.a = 153;
-		m_bDrawStroke = true;
 	}
 
 	return DrawScoreboard(flTime);
@@ -208,9 +208,11 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	g_Columns[COL_NAME].end = g_Columns[COL_ATTRIB].end - 10;
 
 	// print the heading line
+	const int wide = xend - xstart;
+	const int tall = yend - ystart;
+	const Color bgColor( m_colors.r, m_colors.g, m_colors.b, m_colors.a );
 
-	DrawUtils::DrawRectangle(xstart, ystart, xend - xstart, yend - ystart,
-		m_colors.r, m_colors.g, m_colors.b, m_colors.a, m_bDrawStroke);
+	DrawRoundedBackground( bgColor, xstart, ystart, wide, tall );
 
 	int ypos = ystart + (list_slot * ROW_GAP) + 5;
 
@@ -220,16 +222,16 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	else
 		strncpy( ServerName, gHUD.m_Teamplay ? "TEAMS" : "PLAYERS", 80 );
 
-	DrawUtils::DrawHudString( g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, ServerName, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_HP].start, ypos, g_Columns[COL_HP].end, g_Columns[COL_HP].name, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_MONEY].start, ypos, g_Columns[COL_MONEY].end, g_Columns[COL_MONEY].name, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, g_Columns[COL_KILLS].name, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].end, g_Columns[COL_DEATHS].name, 255, 140, 0 );
-	DrawUtils::DrawHudStringReverse( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, g_Columns[COL_PING].name, 255, 140, 0 );
+	DrawUtils::DrawHudString( g_Columns[COL_NAME].start, ypos, g_Columns[COL_NAME].end, ServerName, 255, 255, 255 );
+	DrawUtils::DrawHudStringReverse( g_Columns[COL_HP].start, ypos, g_Columns[COL_HP].end, "", 255, 255, 255 );
+	DrawUtils::DrawHudStringReverse( g_Columns[COL_MONEY].start, ypos, g_Columns[COL_MONEY].end, g_Columns[COL_MONEY].name, 255, 255, 255 );
+	DrawUtils::DrawHudStringReverse( g_Columns[COL_KILLS].start, ypos, g_Columns[COL_KILLS].end, g_Columns[COL_KILLS].name, 255, 255, 255 );
+	DrawUtils::DrawHudStringReverse( g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].end, g_Columns[COL_DEATHS].name, 255, 255, 255 );
+	DrawUtils::DrawHudStringReverse( g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].end, g_Columns[COL_PING].name, 255, 255, 255 );
 
 	list_slot += 2;
 	ypos = ystart + (list_slot * ROW_GAP);
-	FillRGBA( xstart, ypos, xend - xstart, 1, 255, 140, 0, 255);  // draw the separator line
+	FillRGBA( xstart, ypos, xend - xstart, 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
 
 	list_slot += 0.8;
 
