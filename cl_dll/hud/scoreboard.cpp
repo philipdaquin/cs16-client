@@ -93,6 +93,8 @@ static vgui2::HFont g_ScoreboardBodyFont = vgui2::INVALID_FONT;
 static vgui2::HFont g_ScoreboardTitleFont = vgui2::INVALID_FONT;
 static const int SCOREBOARD_DIVIDER_INSET_X = 8;
 static const int SCOREBOARD_DIVIDER_INSET_Y = 2;
+#define ROW_GAP  36
+#define ROW_FILL_HEIGHT 36
 
 static void EnsureScoreboardFonts()
 {
@@ -157,6 +159,17 @@ static int ScoreboardTextWidth( vgui2::HFont font, const char *text )
 		width += vgui2::surface()->GetCharacterWidth( font, utf32[i] );
 
 	return width;
+}
+
+static int ScoreboardRowTextY( vgui2::HFont font, int rowTopY )
+{
+	EnsureScoreboardFonts();
+
+	if ( font == vgui2::INVALID_FONT )
+		return rowTopY;
+
+	const int fontTall = vgui2::surface()->GetFontTall( font );
+	return rowTopY + ( ( ROW_FILL_HEIGHT - fontTall ) / 2 );
 }
 
 static void DrawScoreboardText( vgui2::HFont font, int x, int y, const char *text, int r, int g, int b )
@@ -285,10 +298,6 @@ bool CHudScoreboard :: ShouldDrawScoreboard() const
 
 	return false;
 }
-
-// Y positions
-#define ROW_GAP  36
-#define ROW_FILL_HEIGHT 36
 
 int CHudScoreboard :: Draw( float flTime )
 {
@@ -608,13 +617,14 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		r *= colors[0];
 		g *= colors[1];
 		b *= colors[2];
+		const int textY = ScoreboardRowTextY( g_ScoreboardBodyFont, ypos );
 
 		if(pl_info->thisplayer) // hey, it's me!
 		{
-	FillRGBABlend( xstart, ypos, xend - xstart, ROW_FILL_HEIGHT, 255, 255, 255, 15 );
+			FillRGBABlend( xstart, ypos, xend - xstart, ROW_FILL_HEIGHT, 255, 255, 255, 15 );
 		}
 
-		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + nameoffset, ypos, g_Columns[COL_NAME].end, pl_info->name, r, g, b );
+		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + nameoffset, textY, g_Columns[COL_NAME].end, pl_info->name, r, g, b );
 
 		if( cl_showplayerversion->value == 0.0f )
 		{
@@ -622,17 +632,17 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			{
 				// draw bomb( if player have the bomb )
 				if( g_PlayerExtraInfo[best_player].dead )
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_DEAD" ), r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, textY, Localize( "#Cstrike_DEAD" ), r, g, b );
 				else if( g_PlayerExtraInfo[best_player].has_c4 )
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_BOMB" ), r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, textY, Localize( "#Cstrike_BOMB" ), r, g, b );
 				else if( g_PlayerExtraInfo[best_player].vip )
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_VIP" ),  r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, textY, Localize( "#Cstrike_VIP" ),  r, g, b );
 				else if (g_PlayerExtraInfo[best_player].has_defuse_kit )
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, Localize( "#Cstrike_DEFUSE_KIT" ),  r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, textY, Localize( "#Cstrike_DEFUSE_KIT" ),  r, g, b );
 			}
 			else
 			{
-				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, ypos, gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_ATTRIB].start, textY, gEngfuncs.PlayerInfo_ValueForKey( best_player, "cscl_ver" ),  r, g, b );
 			}
 		}
 
@@ -642,7 +652,7 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			{
 				static char buf[64];
 				sprintf( buf, "%d", g_PlayerExtraInfo[best_player].sb_health );
-				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_HP].start, ypos, buf, r, g, b );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_HP].start, textY, buf, r, g, b );
 			}
 		}
 
@@ -652,7 +662,7 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			{
 				static char buf[64];
 				sprintf( buf, "$%d", g_PlayerExtraInfo[best_player].sb_account );
-				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_MONEY].start, ypos, buf, r, g, b );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_MONEY].start, textY, buf, r, g, b );
 			}
 		}
 
@@ -662,14 +672,14 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 				{
 					char buf[32];
 					snprintf( buf, sizeof( buf ), "%d", g_PlayerExtraInfo[best_player].frags );
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_KILLS].start, ypos, buf, r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_KILLS].start, textY, buf, r, g, b );
 				}
 
 				// draw deaths
 				{
 					char buf[32];
 					snprintf( buf, sizeof( buf ), "%d", g_PlayerExtraInfo[best_player].deaths );
-					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_DEATHS].start, ypos, buf, r, g, b );
+					DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_DEATHS].start, textY, buf, r, g, b );
 				}
 		}
 
@@ -679,13 +689,13 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 			&& ( value = gEngfuncs.PlayerInfo_ValueForKey( best_player, "*bot" ) )
 			&& atoi( value ) > 0 )
 		{
-				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, "BOT", r, g, b );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, textY, "BOT", r, g, b );
 			}
 			else
 			{
 				static char buf[64];
 				sprintf( buf, "%d", pl_info->ping );
-				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, textY, buf, r, g, b );
 			}
 
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
