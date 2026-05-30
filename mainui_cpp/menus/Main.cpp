@@ -303,7 +303,7 @@ UI_Main_Init
 */
 void CMenuMain::VidInit( bool connected )
 {
-	int hoffset = ( 70 / 640.0 ) * 1024.0 - 30;
+	int hoffset = ( 70 / 640.0 ) * 1024.0 - 50;
 
 	// int hoffset = ( 30 / 640.0 ) * 1024.0 - 50;
 	// in original menu Previews is located at specific point
