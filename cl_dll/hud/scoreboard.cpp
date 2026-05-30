@@ -371,8 +371,10 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	DrawScoreboardTextRight( titleFont, g_Columns[COL_DEATHS].start, ypos, g_Columns[COL_DEATHS].name, 255, 255, 255 );
 	DrawScoreboardTextRight( titleFont, g_Columns[COL_PING].start, ypos, g_Columns[COL_PING].name, 255, 255, 255 );
 
-	list_slot += 2;
+	// Controls the gap between the headers adn the playlist 
+	list_slot += 0.5; // default is 2 with the diviider line 
 	ypos = ystart + (list_slot * ROW_GAP);
+	// Divider line 
 	// FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ypos + SCOREBOARD_DIVIDER_INSET_Y, wide - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
 
 	list_slot += 0.8;
