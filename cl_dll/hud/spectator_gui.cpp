@@ -150,11 +150,12 @@ int CHudSpectatorGui::Draw( float flTime )
 	const int bottomBarH = ResY( 52 );
 	const int extrainfoLeft = ScreenWidth - ResX( 56 );
 	const int extrainfoRight = extrainfoLeft + ResX( 44 );
-	const int timerLeft = ScreenWidth - ResX( 42 );
-	const int timerRight = timerLeft + ResX( 40 );
 	const int timerImageLeft = ScreenWidth - ResX( 56 );
 	const int timerImageSize = ResY( 12 );
 	const int timerImageRight = timerImageLeft + timerImageSize;
+	const int timerTextX = timerImageRight + ResX( 2 );
+	const int timerTextY = ResY( 24 ) + ResY( 5 );
+	const int timerRight = timerTextX + ResX( 40 );
 	const int ctLabelLeft = ScreenWidth - ResX( 233 );
 	const int ctLabelRight = ctLabelLeft + ResX( 150 );
 	const int ctValueLeft = ScreenWidth - ResX( 80 );
@@ -186,7 +187,7 @@ int CHudSpectatorGui::Draw( float flTime )
 			gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 			DrawUtils::Draw2DQuad( timerImageLeft, ResY( 26 ), timerImageRight, ResY( 26 ) + timerImageSize );
 		}
-		DrawUtils::DrawHudString( timerLeft - 15, ResY( 24 ) + 15, timerRight, label.m_szTimer, whiteR, whiteG, whiteB );
+		DrawUtils::DrawHudString( timerTextX, timerTextY, timerRight, label.m_szTimer, whiteR, whiteG, whiteB );
 	}
 
 	// CT/Terrorist score block
