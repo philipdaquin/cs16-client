@@ -256,7 +256,6 @@ void CCSBackGroundPanel::Activate(void)
 	if (!m_enabled)
 		return;
 
-
 	    BaseClass::Activate();
 
     int screenW, screenH;

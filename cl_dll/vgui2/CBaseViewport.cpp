@@ -315,6 +315,13 @@ void CBaseViewport::Layout()
 		if( changed )
 		{
 			ReloadScheme();
+
+			if( m_pBackGround )
+			{
+				m_pBackGround->InvalidateLayout( true, true );
+				m_pBackGround->PerformLayout();
+				vgui2::ipanel()->MoveToBack( m_pBackGround->GetVPanel() );
+			}
 		}
 	}
 }
