@@ -391,9 +391,9 @@ void CBaseFont::ApplyOutline(Point pt, Size rgbaSz, byte *rgba)
 	uint *tmp = new uint[rgbaSz.w * rgbaSz.h]; // matrix where we accumulate alpha values
 	memset( tmp, 0, sizeof( *tmp ) * rgbaSz.w * rgbaSz.h );
 
-	for( int y = pt.x; y < rgbaSz.h; y++ )
+	for( int y = pt.y; y < rgbaSz.h; y++ )
 	{
-		for( int x = pt.y; x < rgbaSz.w; x++ )
+		for( int x = pt.x; x < rgbaSz.w; x++ )
 		{
 			byte *src = &rgba[(x + (y * rgbaSz.w)) * 4];
 
@@ -415,9 +415,9 @@ void CBaseFont::ApplyOutline(Point pt, Size rgbaSz, byte *rgba)
 	// find total amount of adjacent pixels
 	int total = m_iOutlineSize * 4 + m_iOutlineSize * m_iOutlineSize * 4;
 
-	for( int y = pt.x; y < rgbaSz.h; y++ )
+	for( int y = pt.y; y < rgbaSz.h; y++ )
 	{
-		for( int x = pt.y; x < rgbaSz.w; x++ )
+		for( int x = pt.x; x < rgbaSz.w; x++ )
 		{
 			byte *src = &rgba[(x + (y * rgbaSz.w)) * 4];
 			uint *dst = &tmp[(x + (y * rgbaSz.w))];

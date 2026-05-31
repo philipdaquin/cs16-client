@@ -6,6 +6,8 @@
 
 extern BaseUISurface* staticSurface;
 
+static constexpr int FONT_GLYPH_PADDING = 1;
+
 CFontTextureCache::CFontTextureCache()
 {
 
@@ -17,8 +19,6 @@ CFontTextureCache::~CFontTextureCache()
 
 bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pageIndex, int& drawX, int& drawY, int& twide, int& ttall)
 {
-	pageIndex = m_PageList.size() - 1;
-
 	int iHeight;
 
 	if (charTall <= 16)
@@ -56,46 +56,54 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
         }
     }
 
-    if (iWidth > 256)
-    {
-        return false;
-    }
-
-	page_t* pPage;
-
-	if (pageIndex < 0 ||
-		(pPage = &m_PageList[pageIndex], pPage->fontHeight != iHeight) ||
-		(((pPage->nextY + iHeight) >= pPage->tall) && (pPage->nextX + iWidth) >= pPage->wide))
+	if (iWidth > 256)
 	{
-        m_PageList.push_back({});
-		pageIndex = m_PageList.size() - 1;
+		return false;
+	}
 
-		pPage = &m_PageList[pageIndex];
+	auto CreatePage = [&]()
+	{
+		m_PageList.push_back({});
+		pageIndex = static_cast<int>( m_PageList.size() ) - 1;
 
-		pPage->textureID = staticSurface->CreateNewTextureID(false);
-
-		pPage->fontHeight = iHeight;
-		pPage->wide = 512;
-		pPage->tall = 512;
-		pPage->nextX = 0;
-		pPage->nextY = 0;
+		page_t *pNewPage = &m_PageList[pageIndex];
+		pNewPage->textureID = staticSurface->CreateNewTextureID(false);
+		pNewPage->fontHeight = iHeight;
+		pNewPage->wide = 512;
+		pNewPage->tall = 512;
+		pNewPage->nextX = 0;
+		pNewPage->nextY = 0;
 
 		static byte rgba[512 * 512 * 4];
-
 		memset(rgba, 0, sizeof(rgba));
 
 		staticSurface->DrawSetTextureRGBAWithAlphaChannel(
-			pPage->textureID,
+			pNewPage->textureID,
 			rgba,
-			pPage->wide, pPage->tall,
+			pNewPage->wide, pNewPage->tall,
 			false
 		);
+
+		return pNewPage;
+	};
+
+	pageIndex = static_cast<int>( m_PageList.size() ) - 1;
+	page_t *pPage = ( pageIndex >= 0 ) ? &m_PageList[pageIndex] : nullptr;
+
+	if( !pPage || pPage->fontHeight != iHeight )
+	{
+		pPage = CreatePage();
 	}
 
-	if (pPage->nextX + iWidth >= pPage->tall)
+	if( pPage->nextX + iWidth > pPage->wide )
 	{
 		pPage->nextX = 0;
 		pPage->nextY += pPage->fontHeight;
+	}
+
+	if( pPage->nextY + iHeight > pPage->tall )
+	{
+		pPage = CreatePage();
 	}
 
 	drawX = pPage->nextX;
@@ -132,19 +140,35 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 			fontWide = a + b + c;
 		}
 
+		const int paddedWide = fontWide + FONT_GLYPH_PADDING * 2;
+		const int paddedTall = fontTall + FONT_GLYPH_PADDING * 2;
+
 		int page, drawX, drawY, twide, ttall;
 
-		if (!AllocatePageForChar(fontWide, fontTall, page, drawX, drawY, twide, ttall))
+		if (!AllocatePageForChar(paddedWide, paddedTall, page, drawX, drawY, twide, ttall))
 			return false;
 
 		const auto size = 4 * fontWide * fontTall;
+		const auto paddedSize = 4 * paddedWide * paddedTall;
 
 		auto pDest = reinterpret_cast<byte*>(MemAlloc_AllocAligned(size, 16));
+		auto pPaddedDest = reinterpret_cast<byte*>(MemAlloc_AllocAligned(paddedSize, 16));
 
 		if (size >= 4)
 			memset(pDest, 0, size);
+		if (paddedSize >= 4)
+			memset(pPaddedDest, 0, paddedSize);
 
 		pFont->GetCharRGBA(wch, fontWide, fontTall, pDest);
+
+		for (int y = 0; y < fontTall; ++y)
+		{
+			memcpy(
+				pPaddedDest + 4 * ((y + FONT_GLYPH_PADDING) * paddedWide + FONT_GLYPH_PADDING),
+				pDest + 4 * y * fontWide,
+				4 * fontWide
+			);
+		}
 
 		auto& pageData = m_PageList[page];
 
@@ -153,11 +177,12 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 		staticSurface->DrawSetSubTextureRGBA(
 			pageData.textureID,
 			drawX, drawY,
-			pDest,
-			fontWide, fontTall
+			pPaddedDest,
+			paddedWide, paddedTall
 		);
 
         MemAlloc_FreeAligned(pDest);
+        MemAlloc_FreeAligned(pPaddedDest);
 
         cacheentry_t cacheitem;
 
@@ -167,10 +192,10 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
         cacheitem.wch = wch;
 		cacheitem.page = page;
 
-		cacheitem.texCoords[0] = static_cast<double>(drawX) / twide;
-		cacheitem.texCoords[1] = static_cast<double>(drawY) / ttall;
-		cacheitem.texCoords[2] = static_cast<double>(drawX + fontWide) / twide;
-		cacheitem.texCoords[3] = static_cast<double>(drawY + fontTall) / ttall;
+		cacheitem.texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
+		cacheitem.texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
+		cacheitem.texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
+		cacheitem.texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
 
 		index = m_CharCache.emplace(std::make_pair(font, wch), cacheitem).first;
 	}
