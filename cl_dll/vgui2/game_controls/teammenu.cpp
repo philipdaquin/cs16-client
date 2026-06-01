@@ -138,6 +138,17 @@ void CTeamMenu::AutoAssign(void)
 	OnClose();
 }
 
+void CTeamMenu::OnKeyCodeTyped(KeyCode code)
+{
+	if (code == KEY_ESCAPE || code == KEY_0 || code == KEY_PAD_0)
+	{
+		OnCommand("vguicancel");
+		return;
+	}
+
+	BaseClass::OnKeyCodeTyped(code);
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: shows the team menu
 //-----------------------------------------------------------------------------

@@ -36,6 +36,7 @@ public:
 	virtual void Init(void) {}
 	virtual void VidInit(void) {}
 	virtual void Reset(void);
+	virtual void OnKeyCodeTyped(vgui2::KeyCode code);
 
 public:
 	virtual const char *GetName(void) { return PANEL_TEAM; }
