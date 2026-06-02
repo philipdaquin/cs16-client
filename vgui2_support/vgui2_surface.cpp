@@ -26,7 +26,7 @@ extern "C" void EXPORT VGUI2_Draw_Init()
             vgui2::surface()->AddGlyphSetToFont(
                 _consoleFont,
                 "Verdana Bold",
-                18,
+                20,
                 700,
                 0,
                 0,

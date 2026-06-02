@@ -156,10 +156,10 @@ public:
 			gEngfuncs.pfnDrawConsoleStringLen( szIt, width, height );
 	}
 
-	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f, bool hintFont = false, byte a = 255 )
+	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f, bool hintFont = false, byte a = 255, bool vguiConsoleFont = false )
 	{
 		int ret;
-		if ( gHUD.hud_textmode->value )
+		if ( gHUD.hud_textmode->value || vguiConsoleFont )
 			ret = hintFont ? VGUI2_Surface_DrawHintChar( x, y, number, (byte)r, (byte)g, (byte)b, a )
 				: VGUI2_Surface_DrawChar( x, y, number, (byte)r, (byte)g, (byte)b, a );
 		else if( scale && g_iMobileAPIVersion )

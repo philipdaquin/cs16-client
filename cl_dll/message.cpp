@@ -69,6 +69,16 @@ static inline int HintTextHeight()
 	return gHUD.hud_textmode->value ? VGUI2_Surface_GetHintCharHeight() : gHUD.GetCharHeight();
 }
 
+static inline int MessageTextWidth( int ch, bool useVGUIFont )
+{
+	return useVGUIFont ? VGUI2_Surface_GetCharWidth( ch ) : gHUD.GetCharWidth( ch );
+}
+
+static inline int MessageTextHeight( bool useVGUIFont )
+{
+	return useVGUIFont ? VGUI2_Surface_GetCharHeight() : gHUD.GetCharHeight();
+}
+
 int CHudMessage::Init(void)
 {
 	HOOK_MESSAGE( gHUD.m_Message, HudText );
@@ -287,6 +297,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	int i, j, length, width;
 	const char *pText;
 	unsigned char line[80];
+	const bool useVGUIConsoleFont = pMessage && pMessage->pName && !strcmp( pMessage->pName, "CenterPrint" );
 
 	pText = pMessage->pMessage;
 	// Count lines
@@ -315,13 +326,13 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 				pText++;
 				continue;
 			}
-			width += gHUD.GetCharWidth( uch );
+			width += MessageTextWidth( uch, useVGUIConsoleFont );
 		}
 		pText++;
 		length++;
 	}
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.GetCharHeight());
+	m_parms.totalHeight = (m_parms.lines * MessageTextHeight( useVGUIConsoleFont ));
 
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
@@ -347,7 +358,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 				pText++;
 				continue;
 			}
-			m_parms.width += gHUD.GetCharWidth( uch );
+			m_parms.width += MessageTextWidth( uch, useVGUIConsoleFont );
 			pText++;
 		}
 		pText++;		// Skip LF
@@ -358,14 +369,14 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		for ( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = line[j];
-			int next = m_parms.x + gHUD.GetCharWidth( m_parms.text );
+			int next = m_parms.x + MessageTextWidth( m_parms.text, useVGUIConsoleFont );
 			MessageScanNextChar();
 			
 			if ( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				m_parms.x += DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
+				m_parms.x += DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b, 0.0f, false, 255, useVGUIConsoleFont );
 		}
 
-		m_parms.y += gHUD.GetCharHeight();
+		m_parms.y += MessageTextHeight( useVGUIConsoleFont );
 	}
 }
 

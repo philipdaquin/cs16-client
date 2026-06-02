@@ -218,9 +218,32 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 		int len = DrawUtils::ConsoleStringLen( psz );
 
-		DrawUtils::DrawConsoleString( (ScreenWidth - len) / 2, ScreenHeight / 3, psz );
+		static char s_centerPrintText[MAX_TEXTMSG_STRING];
+		static client_textmessage_t s_centerPrintMessage = {};
 
-		CenterPrint( psz );
+		strncpy( s_centerPrintText, psz, sizeof( s_centerPrintText ) );
+		s_centerPrintText[ sizeof( s_centerPrintText ) - 1 ] = 0;
+
+		s_centerPrintMessage.effect = 0;
+		s_centerPrintMessage.r1 = 255;
+		s_centerPrintMessage.g1 = 160;
+		s_centerPrintMessage.b1 = 0;
+		s_centerPrintMessage.a1 = 255;
+		s_centerPrintMessage.r2 = 255;
+		s_centerPrintMessage.g2 = 160;
+		s_centerPrintMessage.b2 = 0;
+		s_centerPrintMessage.a2 = 255;
+		s_centerPrintMessage.x = -1.0f;
+		s_centerPrintMessage.y = 1.0f / 3.0f;
+		s_centerPrintMessage.fadein = 0.0f;
+		s_centerPrintMessage.fadeout = 0.0f;
+		s_centerPrintMessage.holdtime = 5.0f;
+		s_centerPrintMessage.fxtime = 0.0f;
+		s_centerPrintMessage.pName = "CenterPrint";
+		s_centerPrintMessage.pMessage = s_centerPrintText;
+
+		gHUD.m_Message.MessageAdd( gHUD.m_Message.AllocMessage( NULL, &s_centerPrintMessage ) );
+
 		break;
 	}
 	case HUD_PRINTNOTIFY:
