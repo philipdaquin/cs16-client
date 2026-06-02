@@ -226,11 +226,11 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 		s_centerPrintMessage.effect = 0;
 		s_centerPrintMessage.r1 = 255;
-		s_centerPrintMessage.g1 = 160;
+		s_centerPrintMessage.g1 = 178;
 		s_centerPrintMessage.b1 = 0;
 		s_centerPrintMessage.a1 = 255;
 		s_centerPrintMessage.r2 = 255;
-		s_centerPrintMessage.g2 = 160;
+		s_centerPrintMessage.g2 = 178;
 		s_centerPrintMessage.b2 = 0;
 		s_centerPrintMessage.a2 = 255;
 		s_centerPrintMessage.x = -1.0f;
