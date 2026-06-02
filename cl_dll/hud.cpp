@@ -301,7 +301,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "menu_bg_fill", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "buymenu_stayon", "0", FCVAR_ARCHIVE );
 
-	hud_textmode = CVAR_CREATE( "hud_textmode", "0", FCVAR_ARCHIVE );
+	hud_textmode = CVAR_CREATE( "hud_textmode", "1", FCVAR_ARCHIVE );
 	hud_colored  = CVAR_CREATE( "hud_colored", "0", FCVAR_ARCHIVE );
 	cl_righthand = CVAR_CREATE( "cl_righthand", "1", FCVAR_ARCHIVE );
 	cl_weather   = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE );

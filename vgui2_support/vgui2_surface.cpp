@@ -19,16 +19,21 @@ extern "C" void EXPORT VGUI2_Draw_Init()
     if (_consoleFont != NULL_HANDLE)
         return;
 
-    auto schemeMgr = vgui2::scheme();
-    if (!schemeMgr)
+    _consoleFont = vgui2::surface()->CreateFont();
+    if (_consoleFont == NULL_HANDLE)
         return;
 
-    auto schemeHandle = schemeMgr->GetDefaultScheme();
-    auto scheme = schemeMgr->GetIScheme(schemeHandle);
-    if (!scheme)
-        return;
-
-    _consoleFont = scheme->GetFont("Default");
+    // Keep HUD/chat text on the bundled bold Verdana face.
+    vgui2::surface()->AddGlyphSetToFont(
+        _consoleFont,
+        "Verdana Bold",
+        18,
+        700,
+        0,
+        0,
+        vgui2::ISurface::FONTFLAG_ANTIALIAS,
+        0x0,
+        0xFFFF );
 }
 
 int VGUI2_GetFontWide( int ch, unsigned int font )

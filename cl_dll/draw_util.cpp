@@ -59,6 +59,14 @@ qboolean g_accept_utf8;
 cvar_t *con_charset;
 cvar_t *cl_charset;
 
+static inline int GetHudTextCharWidth( int ch )
+{
+	if ( gHUD.hud_textmode->value )
+		return VGUI2_Surface_GetCharWidth( ch );
+
+	return gHUD.GetCharWidth( ch );
+}
+
 /*
 ============================
 Con_UtfProcessChar
@@ -122,7 +130,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 				//if ( drawing )
 					//return xpos;
 				//return DrawHudStringReverse( iMaxX, ypos, first_xpos, ++szIt, r, g, b, scale, true ); // set 'drawing' to true, to stop when '\R' is catched
-				xpos = iMaxX - gHUD.GetCharWidth( 'M' ) * 10;
+				xpos = iMaxX - GetHudTextCharWidth( 'M' ) * 10;
 				++szIt;
 			}
 		}
@@ -143,7 +151,7 @@ int DrawUtils::DrawHudString( int xpos, int ypos, int iMaxX, const char *str, in
 		//if ( !uch )
 			//continue;
 
-		int next = xpos + gHUD.GetCharWidth( uch ); // variable-width fonts look cool
+		int next = xpos + GetHudTextCharWidth( uch ); // variable-width fonts look cool
 
 		if ( next > iMaxX )
 			return xpos;
@@ -208,7 +216,7 @@ int DrawUtils::DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *
 		/*if ( !uch )
 			continue;*/
 
-		int next = xpos - gHUD.GetCharWidth( uch ); // variable-width fonts look cool
+		int next = xpos - GetHudTextCharWidth( uch ); // variable-width fonts look cool
 
 		if ( next < iMinX )
 			return xpos;
@@ -385,7 +393,7 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 		if ( !uch )
 			continue;
 
-		l += gHUD.GetCharWidth( uch );
+		l += GetHudTextCharWidth( uch );
 	}
 
 	return l;
