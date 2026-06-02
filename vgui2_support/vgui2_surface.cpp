@@ -14,6 +14,8 @@
 static vgui2::HFont _consoleFont = NULL_HANDLE;
 static vgui2::HFont _hintFont = NULL_HANDLE;
 extern rgba_t g_color_table[8];
+static constexpr bool kConsoleFontDropShadow = true;
+static constexpr bool kHintFontDropShadow = false;
 
 extern "C" void EXPORT VGUI2_Draw_Init()
 {
@@ -30,7 +32,7 @@ extern "C" void EXPORT VGUI2_Draw_Init()
                 700,
                 0,
                 0,
-                vgui2::ISurface::FONTFLAG_ANTIALIAS,
+                vgui2::ISurface::FONTFLAG_ANTIALIAS | ( kConsoleFontDropShadow ? vgui2::ISurface::FONTFLAG_DROPSHADOW : 0 ),
                 0x0,
                 0xFFFF );
         }
@@ -49,7 +51,7 @@ extern "C" void EXPORT VGUI2_Draw_Init()
                 700,
                 0,
                 0,
-                vgui2::ISurface::FONTFLAG_ANTIALIAS,
+                vgui2::ISurface::FONTFLAG_ANTIALIAS | ( kHintFontDropShadow ? vgui2::ISurface::FONTFLAG_DROPSHADOW : 0 ),
                 0x0,
                 0xFFFF );
         }
