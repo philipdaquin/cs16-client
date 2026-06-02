@@ -106,7 +106,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardBodyFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardBodyFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Default", 20, 600, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardBodyFont, "Verdana Bold", 20, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
@@ -119,7 +119,7 @@ static void EnsureScoreboardFonts()
 		g_ScoreboardTitleFont = vgui2::surface()->CreateFont();
 		if ( g_ScoreboardTitleFont != vgui2::INVALID_FONT )
 		{
-			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Title", 20, 600, 0, 0,
+			vgui2::surface()->AddGlyphSetToFont( g_ScoreboardTitleFont, "Verdana Bold", 20, 600, 0, 0,
 				vgui2::ISurface::FONTFLAG_ANTIALIAS, 0x0, 0xFFFF );
 		}
 	}
