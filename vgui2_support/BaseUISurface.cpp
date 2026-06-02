@@ -845,8 +845,10 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
     int x, y;
     DrawGetTextPos(x, y);
 
-    x += _translateX;
-    y += _translateY;
+    const int textStartX = x;
+    const int textStartY = y;
+    int drawX = x + _translateX;
+    int drawY = y + _translateY;
 
     int iTall = GetFontTall(m_hCurrentFont);
     int iLastTexId = -1;
@@ -870,7 +872,7 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
         if (bUnderlined)
         {
             iWide += (abcA + abcC);
-            x-= abcA;
+            drawX-= abcA;
         }
 #ifndef DISABLE_MOE_VGUI2_EXT
         if(IsEmojiChar(ch))
@@ -888,8 +890,8 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
             vpoint_t ul;
             vpoint_t lr;
 
-            ul.point[0] = x + iTotalWidth;
-            ul.point[1] = y + iTall / 2 - iWide / 2;
+            ul.point[0] = drawX + iTotalWidth;
+            ul.point[1] = drawY + iTall / 2 - iWide / 2;
             lr.point[0] = ul.point[0] + iWide;
             lr.point[1] = ul.point[1] + iWide;
 
@@ -930,8 +932,8 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
             vpoint_t &lr = pQuads[2 * iCount + 1];
             iCount++;
 
-            ul.point[0] = x + iTotalWidth;
-            ul.point[1] = y;
+            ul.point[0] = drawX + iTotalWidth;
+            ul.point[1] = drawY;
             lr.point[0] = ul.point[0] + iWide;
             lr.point[1] = ul.point[1] + iTall;
 
@@ -955,7 +957,7 @@ void BaseUISurface::DrawPrintText(const uchar32 *text, int textlen) {
         DrawQuadArray(iCount, pQuads, _drawTextColor);
     }
 
-    DrawSetTextPos(x + iTotalWidth, y);
+    DrawSetTextPos(textStartX + iTotalWidth, textStartY);
     stackfree(pQuads);
 }
 
@@ -1059,6 +1061,11 @@ void BaseUISurface::DrawSetTextureRGBA(int id, const unsigned char *rgba, int wi
 		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetTextureRGBA missing uploader id=%d size=%dx%d\n", id, wide, tall);
 		return;
 	}
+
+	DrawFlushText();
+#ifdef USE_IMGUI_SURFACE
+	ImGui_Surface_Flush();
+#endif
 
 	g_api->UploadTexture(id, (const char *)rgba, wide, tall);
 	DrawSetTexture(id);
@@ -1323,6 +1330,7 @@ vgui2::HFont BaseUISurface::CreateFont() {
 
 bool BaseUISurface::AddGlyphSetToFont(vgui2::HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange) {
     BootstrapFontFiles();
+    m_FontTextureCache.InvalidateFont(font);
     return FontManager().SetFontGlyphSet(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
 }
 
@@ -1758,6 +1766,14 @@ void BaseUISurface::DrawSetSubTextureRGBA(int textureID, int drawX, int drawY, c
 	*/
 	if (g_api && g_api->UploadTextureBlock)
 	{
+		DrawFlushText();
+#ifdef USE_IMGUI_SURFACE
+		ImGui_Surface_Flush();
+#endif
+
+		g_api->BindTexture(textureID);
+		m_iCurrentTexture = textureID;
+
 		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetSubTextureRGBA upload texture=%d dst=%d,%d size=%dx%d rgba=%p\n",
 			textureID, drawX, drawY, subTextureWide, subTextureTall, (const void *)rgba);
 		g_api->UploadTextureBlock(textureID, drawX, drawY, rgba, subTextureWide, subTextureTall);

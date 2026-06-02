@@ -37,6 +37,7 @@ public:
 	bool AllocatePageForChar(int charWide, int charTall, int& pageIndex, int& drawX, int& drawY, int& twide, int& ttall);
 
 	bool GetTextureForChar(vgui2::HFont font, uchar32 wch, int* textureID, float* texCoords);
+	void InvalidateFont(vgui2::HFont font);
 
 private:
 	static bool CacheEntryLessFunc(const cacheentry_t& lhs, const cacheentry_t& rhs);

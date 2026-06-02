@@ -17,6 +17,17 @@ CFontTextureCache::~CFontTextureCache()
 {
 }
 
+void CFontTextureCache::InvalidateFont(vgui2::HFont font)
+{
+	for (auto it = m_CharCache.begin(); it != m_CharCache.end(); )
+	{
+		if (it->first.first == font)
+			it = m_CharCache.erase(it);
+		else
+			++it;
+	}
+}
+
 bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pageIndex, int& drawX, int& drawY, int& twide, int& ttall)
 {
 	int iHeight;
@@ -171,8 +182,6 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 		}
 
 		auto& pageData = m_PageList[page];
-
-		staticSurface->DrawSetTexture(pageData.textureID);
 
 		staticSurface->DrawSetSubTextureRGBA(
 			pageData.textureID,
