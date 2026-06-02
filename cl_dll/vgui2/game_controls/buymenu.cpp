@@ -61,17 +61,17 @@ void CBuyMenu::ShowPanel(bool bShow)
 
 	if (bShow)
 	{
-		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+		// LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
-		if (!m_pMainMenu)
-			m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
+		// if (!m_pMainMenu)
+		// 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
-		if (m_pMainMenu)
-		{
-			m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
-		}
+		// if (m_pMainMenu)
+		// {
+		// 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		// }
 
-		Update();
+		// Update();
 
 		Run(m_pMainMenu);
 		m_pMainMenu->InvalidateLayout();
