@@ -673,6 +673,7 @@ public:
 		void MessageAdd( const char *pName, float time, bool isHint = false );
 		void MessageAdd(client_textmessage_t * newMessage );
 		void DebugShowMessage( const char *text );
+		void MessageDrawHint( client_textmessage_t *pMessage, float time );
 		void MessageDrawScan( client_textmessage_t *pMessage, float time );
 		void MessageScanStart( void );
 		void MessageScanNextChar( void );
@@ -682,6 +683,7 @@ public:
 
 private:
 	client_textmessage_t		*m_pMessages[maxHUDMessages];
+	bool						m_bHintMessage[maxHUDMessages];
 	float						m_startTime[maxHUDMessages];
 	message_parms_t				m_parms;
 	float						m_gameTitleTime;

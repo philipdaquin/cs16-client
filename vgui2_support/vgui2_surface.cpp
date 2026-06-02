@@ -12,28 +12,48 @@
 #include <string_view>
 
 static vgui2::HFont _consoleFont = NULL_HANDLE;
+static vgui2::HFont _hintFont = NULL_HANDLE;
 extern rgba_t g_color_table[8];
 
 extern "C" void EXPORT VGUI2_Draw_Init()
 {
-    if (_consoleFont != NULL_HANDLE)
-        return;
-
-    _consoleFont = vgui2::surface()->CreateFont();
     if (_consoleFont == NULL_HANDLE)
-        return;
+    {
+        _consoleFont = vgui2::surface()->CreateFont();
+        if (_consoleFont != NULL_HANDLE)
+        {
+            // Keep HUD/chat text on the bundled bold Verdana face.
+            vgui2::surface()->AddGlyphSetToFont(
+                _consoleFont,
+                "Verdana Bold",
+                18,
+                700,
+                0,
+                0,
+                vgui2::ISurface::FONTFLAG_ANTIALIAS,
+                0x0,
+                0xFFFF );
+        }
+    }
 
-    // Keep HUD/chat text on the bundled bold Verdana face.
-    vgui2::surface()->AddGlyphSetToFont(
-        _consoleFont,
-        "Verdana Bold",
-        18,
-        700,
-        0,
-        0,
-        vgui2::ISurface::FONTFLAG_ANTIALIAS,
-        0x0,
-        0xFFFF );
+    if (_hintFont == NULL_HANDLE)
+    {
+        _hintFont = vgui2::surface()->CreateFont();
+        if (_hintFont != NULL_HANDLE)
+        {
+            // Tutor / auto-help overlay.
+            vgui2::surface()->AddGlyphSetToFont(
+                _hintFont,
+                "Arial Bold",
+                40,
+                700,
+                0,
+                0,
+                vgui2::ISurface::FONTFLAG_ANTIALIAS,
+                0x0,
+                0xFFFF );
+        }
+    }
 }
 
 int VGUI2_GetFontWide( int ch, unsigned int font )
@@ -83,6 +103,16 @@ int VGUI2_Surface_GetCharHeight()
     return VGUI2_GetFontTall(_consoleFont);
 }
 
+int VGUI2_Surface_GetHintCharWidth(int ch)
+{
+    return VGUI2_GetFontWide(ch, _hintFont);
+}
+
+int VGUI2_Surface_GetHintCharHeight()
+{
+    return VGUI2_GetFontTall(_hintFont);
+}
+
 int VGUI2_Draw_StringLen( const char* psz, unsigned int font )
 {
     return VGUI2_Draw_StringLenW( VGUI2_Find_String( psz ), font );
@@ -107,6 +137,23 @@ int VGUI2_Surface_DrawChar(int x, int y, int ch, byte r, byte g, byte b, byte a)
     auto w = VGUI2_GetFontWide( ch, font );
 
     return w;
+}
+
+int VGUI2_Surface_DrawHintChar(int x, int y, int ch, byte r, byte g, byte b, byte a)
+{
+    auto font = _hintFont;
+
+    vgui2::surface()->DrawSetTextFont( font );
+    vgui2::surface()->DrawSetTextPos( x, y );
+    vgui2::surface()->DrawSetTextColor( r, g, b, a );
+
+    if( iswprint( ch ) )
+    {
+        vgui2::surface()->DrawUnicodeChar( ch );
+        vgui2::surface()->DrawFlushText();
+    }
+
+    return VGUI2_GetFontWide( ch, font );
 }
 
 void VGUI2_Surface_DrawStringLen( const char* pText, int* length, int* height )

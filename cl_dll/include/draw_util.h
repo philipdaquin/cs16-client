@@ -42,7 +42,10 @@ extern cvar_t *cl_charset;
 
 int VGUI2_Surface_GetCharWidth(int ch);
 int VGUI2_Surface_GetCharHeight();
+int VGUI2_Surface_GetHintCharWidth(int ch);
+int VGUI2_Surface_GetHintCharHeight();
 int VGUI2_Surface_DrawChar(int x, int y, int ch, byte r, byte g, byte b, byte a);
+int VGUI2_Surface_DrawHintChar(int x, int y, int ch, byte r, byte g, byte b, byte a);
 
 int Con_UtfProcessChar( int in );
 int Con_UtfProcessCharForce( int in );
@@ -153,11 +156,12 @@ public:
 			gEngfuncs.pfnDrawConsoleStringLen( szIt, width, height );
 	}
 
-	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f )
+	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f, bool hintFont = false, byte a = 255 )
 	{
 		int ret;
 		if ( gHUD.hud_textmode->value )
-			ret = VGUI2_Surface_DrawChar( x, y, number, (byte)r, (byte)g, (byte)b, 255 );
+			ret = hintFont ? VGUI2_Surface_DrawHintChar( x, y, number, (byte)r, (byte)g, (byte)b, a )
+				: VGUI2_Surface_DrawChar( x, y, number, (byte)r, (byte)g, (byte)b, a );
 		else if( scale && g_iMobileAPIVersion )
 			ret = gMobileAPI.pfnDrawScaledCharacter( x, y, number, r, g, b, scale ) / gHUD.m_flScale;
 		else

@@ -43,21 +43,30 @@ static void ApplyHintStyle( client_textmessage_t *message )
 	if ( !message )
 		return;
 
-	message->effect = 2;
-	message->r1 = 40;
-	message->g1 = 255;
-	message->b1 = 20;
-	message->a1 = 200;
-	message->r2 = 0;
-	message->g2 = 255;
-	message->b2 = 0;
-	message->a2 = 200;
+	message->effect = 0;
+	message->r1 = 50;
+	message->g1 = 250;
+	message->b1 = 50;
+	message->a1 = 125;
+	message->r2 = 50;
+	message->g2 = 250;
+	message->b2 = 50;
+	message->a2 = 125;
 	message->x = -1;
 	message->y = 0.7f;
 	message->fadein = 0.01f;
 	message->fadeout = 0.7f;
-	message->holdtime = 2.0f;
-	message->fxtime = 0.07f;
+	message->holdtime = 4.0f;
+}
+
+static inline int HintTextWidth( int ch )
+{
+	return gHUD.hud_textmode->value ? VGUI2_Surface_GetHintCharWidth( ch ) : gHUD.GetCharWidth( ch );
+}
+
+static inline int HintTextHeight()
+{
+	return gHUD.hud_textmode->value ? VGUI2_Surface_GetHintCharHeight() : gHUD.GetCharHeight();
 }
 
 int CHudMessage::Init(void)
@@ -87,6 +96,7 @@ int CHudMessage::VidInit( void )
 void CHudMessage::Reset( void )
 {
  	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
+	memset( m_bHintMessage, 0, sizeof( m_bHintMessage[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
 	
 	m_gameTitleTime = 0;
@@ -360,6 +370,112 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 }
 
 
+void CHudMessage::MessageDrawHint( client_textmessage_t *pMessage, float time )
+{
+	int i, j, length, width;
+	int visibleChars;
+	int charIndex;
+	byte alpha;
+	const char *pText;
+	unsigned char line[80];
+
+	pText = pMessage->pMessage;
+	m_parms.lines = 1;
+	m_parms.time = time;
+	m_parms.pMessage = pMessage;
+	length = 0;
+	width = 0;
+	m_parms.totalWidth = 0;
+	Con_UtfProcessChar( 0 );
+	while ( *pText )
+	{
+		if ( *pText == '\n' )
+		{
+			m_parms.lines++;
+			if ( width > m_parms.totalWidth )
+				m_parms.totalWidth = width;
+			width = 0;
+		}
+		else
+		{
+			int uch = Con_UtfProcessChar( (unsigned char)*pText );
+
+			if ( !uch )
+			{
+				pText++;
+				continue;
+			}
+			width += HintTextWidth( uch );
+		}
+		pText++;
+		length++;
+	}
+
+	m_parms.length = length;
+	m_parms.totalHeight = (m_parms.lines * HintTextHeight());
+	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
+	pText = pMessage->pMessage;
+	Con_UtfProcessChar( 0 );
+	visibleChars = pMessage->fadein > 0.0f ? (int)(time / pMessage->fadein) + 1 : length;
+	charIndex = 0;
+	alpha = (byte)pMessage->a1;
+
+	float fadeStart = (pMessage->fadein * length) + pMessage->holdtime;
+	if ( pMessage->fadeout > 0.0f && time > fadeStart )
+	{
+		float fade = 1.0f - ((time - fadeStart) / pMessage->fadeout);
+		if ( fade < 0.0f )
+			fade = 0.0f;
+		alpha = (byte)(pMessage->a1 * fade);
+	}
+
+	for ( i = 0; i < m_parms.lines; i++ )
+	{
+		m_parms.lineLength = 0;
+		m_parms.width = 0;
+		while ( *pText && *pText != '\n' && m_parms.lineLength < sizeof (line) - 1)
+		{
+			unsigned char c = *pText;
+			line[m_parms.lineLength] = c;
+			m_parms.lineLength++;
+			int uch = Con_UtfProcessChar( c );
+
+			if ( !uch )
+			{
+				pText++;
+				continue;
+			}
+			m_parms.width += HintTextWidth( uch );
+			pText++;
+		}
+		pText++;
+		line[m_parms.lineLength] = 0;
+
+		m_parms.x = XPosition( pMessage->x, m_parms.width, m_parms.totalWidth );
+
+		for ( j = 0; j < m_parms.lineLength; j++ )
+		{
+			m_parms.text = line[j];
+			int uch = Con_UtfProcessChar( m_parms.text );
+
+			if ( !uch )
+				continue;
+
+			int charWidth = HintTextWidth( uch );
+			int next = m_parms.x + charWidth;
+
+			if ( charIndex < visibleChars && m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
+				DrawUtils::TextMessageDrawChar( m_parms.x, m_parms.y, uch, 0, 255, 0, 0.0f, true, alpha );
+
+			m_parms.x += charWidth;
+			charIndex++;
+		}
+
+		m_parms.y += HintTextHeight();
+	}
+}
+
+
 int CHudMessage::Draw( float fTime )
 {
 	int i, drawn;
@@ -419,30 +535,44 @@ int CHudMessage::Draw( float fTime )
 			pMessage = m_pMessages[i];
 
 			// This is when the message is over
-			switch( pMessage->effect )
+			if ( m_bHintMessage[i] )
 			{
-			// TODO: HACK to prevent crashing
-			default:
-			case 0:
-			case 1:
-				endTime = m_startTime[i] + pMessage->fadein + pMessage->fadeout + pMessage->holdtime;
-				break;
-			
-			// Fade in is per character in scanning messages
-			case 2:
-				endTime = m_startTime[i] + (pMessage->fadein * strlen( pMessage->pMessage )) + pMessage->fadeout + pMessage->holdtime;
-				break;
+				endTime = m_startTime[i] + (pMessage->fadein * strlen( pMessage->pMessage )) + pMessage->holdtime + pMessage->fadeout;
+			}
+			else
+			{
+				switch( pMessage->effect )
+				{
+				// TODO: HACK to prevent crashing
+				default:
+				case 0:
+				case 1:
+					endTime = m_startTime[i] + pMessage->fadein + pMessage->fadeout + pMessage->holdtime;
+					break;
+
+				// Fade in is per character in scanning messages
+				case 2:
+					endTime = m_startTime[i] + (pMessage->fadein * strlen( pMessage->pMessage )) + pMessage->fadeout + pMessage->holdtime;
+					break;
+				}
 			}
 
 			if ( fTime <= endTime )
 			{
 				float messageTime = fTime - m_startTime[i];
 
-				// Draw the message
-				// effect 0 is fade in/fade out
-				// effect 1 is flickery credits
-				// effect 2 is write out (training room)
-				MessageDrawScan( pMessage, messageTime );
+				if ( m_bHintMessage[i] )
+				{
+					MessageDrawHint( pMessage, messageTime );
+				}
+				else
+				{
+					// Draw the message
+					// effect 0 is fade in/fade out
+					// effect 1 is flickery credits
+					// effect 2 is write out (training room)
+					MessageDrawScan( pMessage, messageTime );
+				}
 
 				drawn++;
 			}
@@ -564,6 +694,7 @@ void CHudMessage::MessageAdd( const char *pName, float time, bool isHint )
 			}
 
 			m_pMessages[i] = message;
+			m_bHintMessage[i] = isHint;
 			m_startTime[i] = time;
 			return;
 		}
@@ -572,7 +703,7 @@ void CHudMessage::MessageAdd( const char *pName, float time, bool isHint )
 
 void CHudMessage::DebugShowMessage( const char *text )
 {
-	MessageAdd( text, gHUD.m_flTime );
+	MessageAdd( text, gHUD.m_flTime, true );
 	m_iFlags |= HUD_DRAW;
 }
 
@@ -631,6 +762,7 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 		if ( !m_pMessages[i] )
 		{
 			m_pMessages[i] = message;
+			m_bHintMessage[i] = false;
 			m_startTime[i] = gHUD.m_flTime;
 			return;
 		}
