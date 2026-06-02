@@ -44,14 +44,14 @@ static void ApplyHintStyle( client_textmessage_t *message )
 		return;
 
 	message->effect = 0;
-	message->r1 = 50;
-	message->g1 = 250;
-	message->b1 = 50;
-	message->a1 = 125;
-	message->r2 = 50;
-	message->g2 = 250;
-	message->b2 = 50;
-	message->a2 = 125;
+	message->r1 = 100;
+	message->g1 = 255;
+	message->b1 = 120;
+	message->a1 = 200;
+	message->r2 = 100;
+	message->g2 = 255;
+	message->b2 = 120;
+	message->a2 = 200;
 	message->x = -1;
 	message->y = 0.7f;
 	message->fadein = 0.01f;
