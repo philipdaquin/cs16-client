@@ -37,6 +37,8 @@ extern int g_VoiceLabelIcon;
 class CVoiceLabel
 {
 public:
+	enum { kVoiceLabelIconSize = 20 };
+
 	CVoiceLabel()
 	{
 		// m_pLabel = new VoiceVGUILabel( /*NULL,*/ "VoiceLabel", "" );
@@ -70,7 +72,7 @@ public:
 		if ( tall < 32 )
 			tall = 32;
 
-		wide += tall - 2;
+		wide += kVoiceLabelIconSize;
 	}
 
 	void SetBounds( int x, int y )
@@ -90,7 +92,9 @@ public:
 			return;
 
 		int offset = 1;
-		int iconsize = tall - offset * 2;
+		int iconsize = kVoiceLabelIconSize;
+		if ( iconsize > tall - offset * 2 )
+			iconsize = tall - offset * 2;
 
 		gEngfuncs.pfnFillRGBABlend( x, y, wide, tall, m_bgColor.r, m_bgColor.g, m_bgColor.b, m_bgColor.a );
 
