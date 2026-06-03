@@ -85,10 +85,18 @@ int VGUI2_Draw_StringLenW( std::basic_string_view<uchar32> wsv, unsigned int fon
 
     for( size_t i = 0; i < wsv.length(); ++i )
     {
-        if (wsv[i] == U'^' && wsv[i + 1] >= U'1' && wsv[i + 1] <= U'7')
-            i += 2;
+        if (wsv[i] == U'^' && i + 1 < wsv.length() && wsv[i + 1] >= U'1' && wsv[i + 1] <= U'7')
+        {
+            ++i;
+            continue;
+        }
+
         if (wsv[i] >= U'\x01' && wsv[i] <= U'\x07')
-            i += 1;
+            continue;
+
+        if (wsv[i] == U'\n')
+            break;
+
         len += VGUI2_GetFontWide( wsv[ i ], font );
     }
 
@@ -160,10 +168,41 @@ int VGUI2_Surface_DrawHintChar(int x, int y, int ch, byte r, byte g, byte b, byt
 
 void VGUI2_Surface_DrawStringLen( const char* pText, int* length, int* height )
 {
-    if(length)
-        *length = VGUI2_Draw_StringLenW( VGUI2_Find_String( pText ), _consoleFont );
-    if(height)
-        *height = VGUI2_GetFontTall(_consoleFont);
+    auto wsv = VGUI2_Find_String( pText );
+    int line_width = 0;
+    int max_width = 0;
+    int lines = 1;
+
+    for ( size_t i = 0; i < wsv.length(); ++i )
+    {
+        if ( wsv[i] == U'^' && i + 1 < wsv.length() && wsv[i + 1] >= U'1' && wsv[i + 1] <= U'7' )
+        {
+            ++i;
+            continue;
+        }
+
+        if ( wsv[i] >= U'\x01' && wsv[i] <= U'\x07' )
+            continue;
+
+        if ( wsv[i] == U'\n' )
+        {
+            if ( line_width > max_width )
+                max_width = line_width;
+            line_width = 0;
+            ++lines;
+            continue;
+        }
+
+        line_width += VGUI2_GetFontWide( wsv[i], _consoleFont );
+    }
+
+    if ( line_width > max_width )
+        max_width = line_width;
+
+    if ( length )
+        *length = max_width;
+    if ( height )
+        *height = lines * VGUI2_GetFontTall( _consoleFont );
 }
 
 int VGUI2_Surface_DrawConsoleString(int x0, int y0, const char* string, byte r, byte g, byte b, byte a)

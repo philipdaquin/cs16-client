@@ -46,6 +46,8 @@ int VGUI2_Surface_GetHintCharWidth(int ch);
 int VGUI2_Surface_GetHintCharHeight();
 int VGUI2_Surface_DrawChar(int x, int y, int ch, byte r, byte g, byte b, byte a);
 int VGUI2_Surface_DrawHintChar(int x, int y, int ch, byte r, byte g, byte b, byte a);
+int VGUI2_Surface_DrawConsoleString(int x0, int y0, const char* string, byte r, byte g, byte b, byte a = 255);
+void VGUI2_Surface_DrawStringLen( const char* pText, int* length, int* height );
 
 int Con_UtfProcessChar( int in );
 int Con_UtfProcessCharForce( int in );
@@ -101,65 +103,37 @@ public:
 
 	static inline int DrawConsoleString(int x, int y, const char *string)
 	{
-		if ( gHUD.hud_textmode->value )
-		{
-			int ret  = DrawHudString( x, y, 9999, (char *)string, color[0] * 255, color[1] * 255, color[2] * 255 );
-			color[0] = color[1] = color[2] = 1.0f;
-			return ret;
-		}
-		else
-			return gEngfuncs.pfnDrawConsoleString( x, y, (char *)string );
+		return gEngfuncs.pfnDrawConsoleString( x, y, (char *)string );
 	}
 
 	static inline void SetConsoleTextColor( float r, float g, float b )
 	{
-		if ( gHUD.hud_textmode->value )
-			color[0] = r, color[1] = g, color[2] = b;
-		else
-			gEngfuncs.pfnDrawSetTextColor( r, g, b );
+		gEngfuncs.pfnDrawSetTextColor( r, g, b );
 	}
 
 	static inline void SetConsoleTextColor( unsigned char r, unsigned char g, unsigned char b )
 	{
-		if ( gHUD.hud_textmode->value )
-			color[0] = r / 255.0f, color[1] = g / 255.0f, color[2] = b / 255.0f;
-		else
-			gEngfuncs.pfnDrawSetTextColor( r / 255.0f, g / 255.0f, b / 255.0f );
+		gEngfuncs.pfnDrawSetTextColor( r / 255.0f, g / 255.0f, b / 255.0f );
 	}
 
 	static inline int ConsoleStringLen(  const char *szIt )
 	{
-		if ( gHUD.hud_textmode->value )
-		{
-			return HudStringLen( (char *)szIt );
-		}
-		else
-		{
-			int _width;
-			int _height;
+		int _width;
+		int _height;
 
-			gEngfuncs.pfnDrawConsoleStringLen( szIt, &_width, &_height );
-			return _width;
-		}
+		gEngfuncs.pfnDrawConsoleStringLen( szIt, &_width, &_height );
+		return _width;
 	}
 
 	static inline void ConsoleStringSize( const char *szIt, int *width, int *height )
 	{
-		if ( gHUD.hud_textmode->value )
-		{
-			if ( height )
-				*height = VGUI2_Surface_GetCharHeight();
-			if ( width )
-				*width = HudStringLen( (char *)szIt );
-		}
-		else
-			gEngfuncs.pfnDrawConsoleStringLen( szIt, width, height );
+		gEngfuncs.pfnDrawConsoleStringLen( szIt, width, height );
 	}
 
 	static inline int TextMessageDrawChar( int x, int y, int number, int r, int g, int b, float scale = 0.0f, bool hintFont = false, byte a = 255, bool vguiConsoleFont = false )
 	{
 		int ret;
-		if ( gHUD.hud_textmode->value || vguiConsoleFont )
+		if ( hintFont || vguiConsoleFont )
 			ret = hintFont ? VGUI2_Surface_DrawHintChar( x, y, number, (byte)r, (byte)g, (byte)b, a )
 				: VGUI2_Surface_DrawChar( x, y, number, (byte)r, (byte)g, (byte)b, a );
 		else if( scale && g_iMobileAPIVersion )
@@ -201,11 +175,6 @@ public:
 	static void Draw2DQuad( float x1, float y1, float x2, float y2 );
 	static void DrawStretchPic( float x, float y, float w, float h,
 								float s1 = 0, float t1 = 0, float s2 = 1, float t2 = 1);
-
-
-private:
-	// console string color
-	static float color[3];
 };
 
 #endif // DRAW_UTIL_H

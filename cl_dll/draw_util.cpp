@@ -35,8 +35,6 @@ version.
 #include <ctype.h>
 #include "utflib.h"
 
-float DrawUtils::color[3];
-
 #define IsColorString( p )	( p && *( p ) == '^' && *(( p ) + 1) && *(( p ) + 1) >= '0' && *(( p ) + 1 ) <= '9' )
 #define ColorIndex( c )	((( c ) - '0' ) & 7 )
 
@@ -61,9 +59,6 @@ cvar_t *cl_charset;
 
 static inline int GetHudTextCharWidth( int ch )
 {
-	if ( gHUD.hud_textmode->value )
-		return VGUI2_Surface_GetCharWidth( ch );
-
 	return gHUD.GetCharWidth( ch );
 }
 
@@ -393,7 +388,7 @@ int DrawUtils::HudStringLen( const char *szIt, float scale )
 		if ( !uch )
 			continue;
 
-		l += GetHudTextCharWidth( uch );
+		l += gHUD.GetCharWidth( uch );
 	}
 
 	return l;
