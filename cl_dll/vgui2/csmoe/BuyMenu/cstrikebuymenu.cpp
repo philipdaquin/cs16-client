@@ -33,14 +33,18 @@ CCSBuyMenu_CT::CCSBuyMenu_CT(IViewport *pViewPort)
 		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		m_pMainMenu->SetVisible( false );
+
 }
 
 CCSBuyMenu_TER::CCSBuyMenu_TER(IViewport *pViewPort)
 	: CCSBaseBuyMenu(pViewPort, TEAM_TERRORIST)
 {
-			LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
+		LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
 
 		m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
+		m_pMainMenu->SetVisible( false );
+
 }
 
 CCSBaseBuyMenu::CCSBaseBuyMenu(IViewport *pViewPort)

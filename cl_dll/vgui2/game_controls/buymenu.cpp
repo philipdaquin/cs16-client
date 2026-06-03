@@ -24,6 +24,8 @@ CBuyMenu::CBuyMenu(IViewport *pViewPort) : WizardPanel(NULL, PANEL_BUY), m_pView
 	// SetPaintTitleWhenTitleBarHidden(true);
 	SetAutoDelete(false);
 
+	m_pViewPort = pViewPort;
+
 	m_pMainMenu = new CBuySubMenu(this, "BuySubMenu");
 
 	LoadControlSettings(vgui2::resource_paths::kMenuBuy, "GAME");
@@ -71,10 +73,10 @@ void CBuyMenu::ShowPanel(bool bShow)
 		// 	m_pMainMenu->LoadControlSettings(vgui2::resource_paths::kMenuBuyMain, "GAME");
 		// }
 
-		// Update();
+		Update();
 
 		Run(m_pMainMenu);
-		m_pMainMenu->InvalidateLayout();
+		// m_pMainMenu->InvalidateLayout();
 
 		Activate();
 		SetMouseInputEnabled(true);
