@@ -27,8 +27,8 @@ extern "C" void EXPORT VGUI2_Draw_Init()
             // Keep HUD/chat text on the bundled bold Verdana face.
             vgui2::surface()->AddGlyphSetToFont(
                 _consoleFont,
-                "Verdana Bold",
-                24,
+                "Verdana",
+                20,
                 600,
                 0,
                 0,
