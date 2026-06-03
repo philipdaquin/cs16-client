@@ -770,7 +770,7 @@ void CScheme::ReloadFontGlyphs()
 			}
 			else
 			{
-				const char *fontFace = fontdata->GetString("name", "Tahoma");
+				const char *fontFace = fontdata->GetString("name", "Verdana");
 				const int weight = fontdata->GetInt("weight");
 				const bool symbol = ( flags & ISurface::FONTFLAG_SYMBOL ) != 0;
 				int lowRange = 0x0;

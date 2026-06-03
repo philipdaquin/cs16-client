@@ -538,7 +538,7 @@ FallbackFont_t g_FallbackFonts[] =
 	{ "Verdana", "Arial" },
 	{ "Trebuchet MS", "Arial" },
 	{ "Tahoma", NULL },
-	{ NULL, "Tahoma" },		// every other font falls back to this
+	{ NULL, "Verdana" },		// every other font falls back to this
 };
 #elif defined(OSX)
 static const char *g_szValidAsianFonts[] = { "Apple Symbols", "PingFangSC-Regular", NULL };
@@ -550,7 +550,7 @@ FallbackFont_t g_FallbackFonts[] =
 	{ "Tahoma", "Helvetica" },
 	{ "Helvetica", "Monaco" },
 	{ "Monaco", NULL },
-	{ NULL, "Monaco" }		// every other font falls back to this
+	{ NULL, "Verdana" }		// every other font falls back to this
 };
 
 #elif defined(LINUX)
@@ -560,13 +560,13 @@ static const char *g_szValidAsianFonts[] = { "Marlett", "unifont", NULL };
 FallbackFont_t g_FallbackFonts[] =
 {
 	{ "Tahoma", NULL },
-	{ NULL, "Tahoma" },		// every other font falls back to the bundled UI font
+	{ NULL, "Verdana" },		// every other font falls back to the bundled UI font
 };
 #elif defined(_PS3)
 // list of how fonts fallback
 FallbackFont_t g_FallbackFonts[] =
 {
-	{ NULL, "Tahoma" },		// every other font falls back to this
+	{ NULL, "Verdana" },		// every other font falls back to this
 };
 #else
 #error

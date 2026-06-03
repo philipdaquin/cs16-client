@@ -56,15 +56,6 @@ static int DrawChatSegmentVGUI( int x, int y, const char *text, int r, int g, in
 {
 	for ( const unsigned char *p = (const unsigned char *)text; *p; ++p )
 	{
-		const byte shadow_r = (byte)( r * 0.55f );
-		const byte shadow_g = (byte)( g * 0.34f );
-		const byte shadow_b = (byte)( b * 0.11f );
-
-		DrawUtils::TextMessageDrawChar( x - 1, y - 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
-		DrawUtils::TextMessageDrawChar( x - 1, y + 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
-		DrawUtils::TextMessageDrawChar( x + 1, y - 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
-		DrawUtils::TextMessageDrawChar( x + 1, y + 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
-		DrawUtils::TextMessageDrawChar( x + 2, y + 2, *p, 0, 0, 0, 0.0f, false, 255, true );
 		DrawUtils::TextMessageDrawChar( x, y, *p, r, g, b, 0.0f, false, 255, true );
 		x += VGUI2_Surface_GetCharWidth( *p );
 	}

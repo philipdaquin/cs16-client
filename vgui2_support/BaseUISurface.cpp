@@ -316,19 +316,19 @@ static const char *KnownFontFileForFace( const std::string &normalizedFace, bool
     };
 
     static const KnownFont kKnownFonts[] = {
-        { "default", "Tahoma.ttf" },
-        { "defaultsmall", "Tahoma.ttf" },
-        { "default very small", "Tahoma.ttf" },
-        { "defaultverysmall", "Tahoma.ttf" },
-        { "default very small fallback", "Tahoma.ttf" },
-        { "defaultverysmallfallback", "Tahoma.ttf" },
-        { "menutitle", "Tahoma.ttf" },
-        { "brightcontroltext", "Tahoma.ttf" },
-        { "basetext", "Tahoma.ttf" },
-        { "label.textcolor", "Tahoma.ttf" },
-        { "label.textbrightcolor", "Tahoma.ttf" },
-        { "label textcolor", "Tahoma.ttf" },
-        { "label textbrightcolor", "Tahoma.ttf" },
+        { "default", "Verdana.ttf" },
+        { "defaultsmall", "Verdana.ttf" },
+        { "default very small", "Verdana.ttf" },
+        { "defaultverysmall", "Verdana.ttf" },
+        { "default very small fallback", "Verdana.ttf" },
+        { "defaultverysmallfallback", "Verdana.ttf" },
+        { "menutitle", "Verdana.ttf" },
+        { "brightcontroltext", "Verdana.ttf" },
+        { "basetext", "Verdana.ttf" },
+        { "label.textcolor", "Verdana.ttf" },
+        { "label.textbrightcolor", "Verdana.ttf" },
+        { "label textcolor", "Verdana.ttf" },
+        { "label textbrightcolor", "Verdana.ttf" },
         { "tahoma", "Tahoma.ttf" },
         { "tahoma regular", "Tahoma.ttf" },
         { "tahoma bold", "TahomaBd.ttf" },
@@ -391,7 +391,7 @@ static const char *StyledKnownFontFileForFace( const std::string &normalizedFace
         normalizedFace == "label.textbrightcolor" || normalizedFace == "label textcolor" ||
         normalizedFace == "label textbrightcolor" || normalizedFace == "trebuchet ms" )
     {
-        return bold ? "TahomaBd.ttf" : "Tahoma.ttf";
+        return bold ? "VerdanaBd.ttf" : "Verdana.ttf";
     }
 
     if ( normalizedFace == "arial" || normalizedFace == "arial regular" )
