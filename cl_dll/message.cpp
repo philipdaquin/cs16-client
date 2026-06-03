@@ -61,12 +61,12 @@ static void ApplyHintStyle( client_textmessage_t *message )
 
 static inline int HintTextWidth( int ch )
 {
-	return gHUD.hud_textmode->value ? VGUI2_Surface_GetHintCharWidth( ch ) : gHUD.GetCharWidth( ch );
+	return VGUI2_Surface_GetHintCharWidth( ch );
 }
 
 static inline int HintTextHeight()
 {
-	return gHUD.hud_textmode->value ? VGUI2_Surface_GetHintCharHeight() : gHUD.GetCharHeight();
+	return VGUI2_Surface_GetHintCharHeight();
 }
 
 static inline int MessageTextWidth( int ch, bool useVGUIFont )

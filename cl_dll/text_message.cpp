@@ -216,7 +216,7 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 		ConvertCRtoNL( psz );
 
-		int len = DrawUtils::ConsoleStringLen( psz );
+		VGUI2_Surface_DrawStringLen( psz, nullptr, nullptr );
 
 		static char s_centerPrintText[MAX_TEXTMSG_STRING];
 		static client_textmessage_t s_centerPrintMessage = {};
