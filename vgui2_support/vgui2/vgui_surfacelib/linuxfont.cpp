@@ -723,7 +723,7 @@ void CLinuxFont::GetCharRGBA( uchar32 ch, int rgbaWide, int rgbaTall, unsigned c
 
 	if ( m_face->glyph->bitmap.width == 0 )
 	{
-		FontLog( "[VGUI2-TRACE] m_face->glyph->bitmap.width is 0 for ch:%d %s\n", (int)ch, m_face->family_name ? m_face->family_name : "??" );
+		// FontLog( "[VGUI2-TRACE] m_face->glyph->bitmap.width is 0 for ch:%d %s\n", (int)ch, m_face->family_name ? m_face->family_name : "??" );
 		return;
 	}
 #ifndef DISABLE_MOE_VGUI2_EXT

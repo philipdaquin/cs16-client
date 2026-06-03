@@ -151,17 +151,19 @@ void CClassMenu::Reset(void)
 
 	// Turn the first button back on again (so we have a default description shown)
 	Assert( m_mouseoverButtons.Count() );
-	for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
-	{
-		if ( i == 0 )
-		{
-			m_mouseoverButtons[i]->ShowPage();	// Show the first page
-		}
-		else
-		{
-			m_mouseoverButtons[i]->HidePage();	// Hide the rest
-		}
-	}
+	// for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
+	// {
+	// 	if ( i == 0 )
+	// 	{
+	// 		m_mouseoverButtons[i]->ShowPage();	// Show the first page
+	// 	}
+	// 	else
+	// 	{
+	// 		m_mouseoverButtons[i]->HidePage();	// Hide the rest
+	// 	}
+	// }
+	for (int i = 0; i < m_mouseoverButtons.Count(); ++i)
+		m_mouseoverButtons[i]->HidePage();
 }
 
 void CClassMenu::OnCommand(const char *command)
@@ -173,10 +175,8 @@ void CClassMenu::OnCommand(const char *command)
 		gEngfuncs.pfnClientCmd(command);
 		m_pViewPort->HideAllVGUIMenu();
 	}
-	else
-	{
-		Close();
-	}
+	Close();
+
 
 	m_pViewPort->ShowBackGround(false);
 

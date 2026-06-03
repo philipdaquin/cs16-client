@@ -251,32 +251,32 @@ public:
 
 			wchar_t key = m_cHotkey;
 
-			if (key)
-			{
-				if (m_iKeyOffset > 0 && m_iKeySize > 0)
-				{
-					int keyWide = m_iKeySize;
-					int keyTall = m_iKeySize;
-
-					int keyX = m_iKeyOffset;
-					int keyY = (tall - keyTall) / 2;
-
-					vgui2::HFont font = GetFont();
-
-					int charWide, charTall;
-					charTall = vgui2::surface()->GetFontTall(font);
-
-					int a, b, c;
-					vgui2::surface()->GetCharABCwide(font, key, a, b, c);
-					charWide = a + b + c;
-
-					vgui2::surface()->DrawSetTextColor({ 255,255,255,255 });
-					vgui2::surface()->DrawSetTextFont(font);
-					vgui2::surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
-					vgui2::surface()->DrawUnicodeChar(key);
-					vgui2::surface()->DrawFlushText();
-				}
-			}
+			// if (key)
+			// {
+			// 	if (m_iKeyOffset > 0 && m_iKeySize > 0)
+			// 	{
+			// 		int keyWide = m_iKeySize;
+			// 		int keyTall = m_iKeySize;
+			//
+			// 		int keyX = m_iKeyOffset;
+			// 		int keyY = (tall - keyTall) / 2;
+			//
+			// 		vgui2::HFont font = GetFont();
+			//
+			// 		int charWide, charTall;
+			// 		charTall = vgui2::surface()->GetFontTall(font);
+			//
+			// 		int a, b, c;
+			// 		vgui2::surface()->GetCharABCwide(font, key, a, b, c);
+			// 		charWide = a + b + c;
+			//
+			// 		vgui2::surface()->DrawSetTextColor({ 255,255,255,255 });
+			// 		vgui2::surface()->DrawSetTextFont(font);
+			// 		vgui2::surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
+			// 		vgui2::surface()->DrawUnicodeChar(key);
+			// 		vgui2::surface()->DrawFlushText();
+			// 	}
+			// }
 		}
 	}
 

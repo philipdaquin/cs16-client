@@ -247,32 +247,32 @@ void BuyPresetButton::Paint(void)
 
 		wchar_t key = m_cHotkey;
 
-		if (key)
-		{
-			if (m_iKeyOffset > 0 && m_iKeySize > 0)
-			{
-				int keyWide = m_iKeySize;
-				int keyTall = m_iKeySize;
-
-				int keyX = m_iKeyOffset;
-				int keyY = (tall - keyTall) / 2;
-
-				HFont font = GetFont();
-
-				int charWide, charTall;
-				charTall = surface()->GetFontTall(font);
-
-				int a, b, c;
-				surface()->GetCharABCwide(font, key, a, b, c);
-				charWide = a + b + c;
-
-				surface()->DrawSetTextColor(GetFgColor());
-				surface()->DrawSetTextFont(font);
-				surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
-				surface()->DrawUnicodeChar(key);
-				surface()->DrawFlushText();
-			}
-		}
+		// if (key)
+		// {
+		// 	if (m_iKeyOffset > 0 && m_iKeySize > 0)
+		// 	{
+		// 		int keyWide = m_iKeySize;
+		// 		int keyTall = m_iKeySize;
+		//
+		// 		int keyX = m_iKeyOffset;
+		// 		int keyY = (tall - keyTall) / 2;
+		//
+		// 		HFont font = GetFont();
+		//
+		// 		int charWide, charTall;
+		// 		charTall = surface()->GetFontTall(font);
+		//
+		// 		int a, b, c;
+		// 		surface()->GetCharABCwide(font, key, a, b, c);
+		// 		charWide = a + b + c;
+		//
+		// 		surface()->DrawSetTextColor(GetFgColor());
+		// 		surface()->DrawSetTextFont(font);
+		// 		surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
+		// 		surface()->DrawUnicodeChar(key);
+		// 		surface()->DrawFlushText();
+		// 	}
+		// }
 	}
 }
 
