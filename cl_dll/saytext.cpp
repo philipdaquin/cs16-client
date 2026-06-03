@@ -47,6 +47,31 @@ static float flScrollTime = 0;  // the time at which the lines next scroll up
 static int Y_START = 0;
 static int line_height = 0;
 
+static int ChatColorToByte( float c )
+{
+	return bound( 0, (int)( c * 255.0f ), 255 );
+}
+
+static int DrawChatSegmentVGUI( int x, int y, const char *text, int r, int g, int b )
+{
+	for ( const unsigned char *p = (const unsigned char *)text; *p; ++p )
+	{
+		const byte shadow_r = (byte)( r * 0.55f );
+		const byte shadow_g = (byte)( g * 0.34f );
+		const byte shadow_b = (byte)( b * 0.11f );
+
+		DrawUtils::TextMessageDrawChar( x - 1, y - 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
+		DrawUtils::TextMessageDrawChar( x - 1, y + 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
+		DrawUtils::TextMessageDrawChar( x + 1, y - 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
+		DrawUtils::TextMessageDrawChar( x + 1, y + 1, *p, shadow_r, shadow_g, shadow_b, 0.0f, false, 255, true );
+		DrawUtils::TextMessageDrawChar( x + 2, y + 2, *p, 0, 0, 0, 0.0f, false, 255, true );
+		DrawUtils::TextMessageDrawChar( x, y, *p, r, g, b, 0.0f, false, 255, true );
+		x += VGUI2_Surface_GetCharWidth( *p );
+	}
+
+	return x;
+}
+
 int CHudSayText :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -127,11 +152,11 @@ int CHudSayText :: Draw( float flTime )
 			continue;
 
 		int current_x = LINE_START;
+		int current_r = ChatColorToByte( g_ColorYellow[0] );
+		int current_g = ChatColorToByte( g_ColorYellow[1] );
+		int current_b = ChatColorToByte( g_ColorYellow[2] );
 		const char* text = g_szLineBuffer[i];
 		size_t length = strlen(text);
-
-		// default color if not set
-		DrawUtils::SetConsoleTextColor(g_ColorYellow[0], g_ColorYellow[1], g_ColorYellow[2]);
 
 		// buffer for accumulating characters of the same color
 		char color_buffer[256] = {0};
@@ -147,7 +172,7 @@ int CHudSayText :: Draw( float flTime )
 				if (buffer_pos > 0)
 				{
 					color_buffer[buffer_pos] = '\x00';
-					current_x = DrawUtils::DrawConsoleString(current_x, y, color_buffer);
+					current_x = DrawChatSegmentVGUI( current_x, y, color_buffer, current_r, current_g, current_b );
 					buffer_pos = 0;
 				}
 
@@ -156,16 +181,22 @@ int CHudSayText :: Draw( float flTime )
 				switch (color_code)
 				{
 					case '\x01': // yellow normal
-						DrawUtils::SetConsoleTextColor(g_ColorYellow[0], g_ColorYellow[1], g_ColorYellow[2]);
+						current_r = ChatColorToByte( g_ColorYellow[0] );
+						current_g = ChatColorToByte( g_ColorYellow[1] );
+						current_b = ChatColorToByte( g_ColorYellow[2] );
 						break;
 					case '\x03': // team color
 						if (g_pflNameColors[i])
 						{
-							DrawUtils::SetConsoleTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
+							current_r = ChatColorToByte( g_pflNameColors[i][0] );
+							current_g = ChatColorToByte( g_pflNameColors[i][1] );
+							current_b = ChatColorToByte( g_pflNameColors[i][2] );
 						}
 						break;
 					case '\x04': // green
-						DrawUtils::SetConsoleTextColor(g_ColorGreen[0], g_ColorGreen[1], g_ColorGreen[2]);
+						current_r = ChatColorToByte( g_ColorGreen[0] );
+						current_g = ChatColorToByte( g_ColorGreen[1] );
+						current_b = ChatColorToByte( g_ColorGreen[2] );
 						break;
 				}
 				continue;
@@ -182,7 +213,7 @@ int CHudSayText :: Draw( float flTime )
 		if (buffer_pos > 0)
 		{
 			color_buffer[buffer_pos] = '\x00';
-			DrawUtils::DrawConsoleString(current_x, y, color_buffer);
+			DrawChatSegmentVGUI( current_x, y, color_buffer, current_r, current_g, current_b );
 		}
 
 		y += line_height;
@@ -451,7 +482,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 {
 	int line_width = 0;
-	DrawUtils::ConsoleStringSize(g_szLineBuffer[line], &line_width, &line_height );
+	VGUI2_Surface_DrawStringLen( g_szLineBuffer[line], &line_width, &line_height );
 
 	if ( (line_width + LINE_START) > MAX_LINE_WIDTH )
 	{ // string is too long to fit on line
@@ -483,7 +514,7 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 				last_break = x;
 
 			buf[0] = *x;  // get the length of the current character
-			DrawUtils::ConsoleStringSize( buf, &tmp_len, &line_height );
+			VGUI2_Surface_DrawStringLen( buf, &tmp_len, &line_height );
 			length += tmp_len;
 
 			if ( length > MAX_LINE_WIDTH )
