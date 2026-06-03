@@ -98,24 +98,39 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 		return pNewPage;
 	};
 
-	pageIndex = static_cast<int>( m_PageList.size() ) - 1;
-	page_t *pPage = ( pageIndex >= 0 ) ? &m_PageList[pageIndex] : nullptr;
-
-	if( !pPage || pPage->fontHeight != iHeight )
+	// Search for an existing page that matches height and has room
+	pageIndex = -1;
+	for (int i = (int)m_PageList.size() - 1; i >= 0; --i)
 	{
-		pPage = CreatePage();
+		if (m_PageList[i].fontHeight == iHeight)
+		{
+			pageIndex = i;
+			break;
+		}
 	}
 
-	if( pPage->nextX + iWidth > pPage->wide )
+	page_t *pPage = (pageIndex >= 0) ? &m_PageList[pageIndex] : nullptr;
+
+	if (!pPage)
+	{
+		pPage = CreatePage();  // CreatePage sets pageIndex
+	}
+
+	// Check if current row is full
+	if (pPage->nextX + iWidth > pPage->wide)
 	{
 		pPage->nextX = 0;
 		pPage->nextY += pPage->fontHeight;
 	}
 
-	if( pPage->nextY + iHeight > pPage->tall )
+	// Check if page is full — need a new one
+	if (pPage->nextY + iHeight > pPage->tall)
 	{
-		pPage = CreatePage();
+		pPage = CreatePage();  // CreatePage sets pageIndex
 	}
+
+	// Re-fetch pointer AFTER any potential reallocation
+	pPage = &m_PageList[pageIndex];
 
 	drawX = pPage->nextX;
 	drawY = pPage->nextY;
@@ -130,6 +145,11 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* textureID, float* texCoords)
 {
 	auto index = m_CharCache.find(std::make_pair(font, wch));
+	if (index != m_CharCache.end() && !FontManager().GetFontForChar(font, wch))
+	{
+		m_CharCache.erase(index);
+		index = m_CharCache.end();
+	}
 
 	if (index == m_CharCache.end())
 	{

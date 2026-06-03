@@ -365,6 +365,83 @@ static const char *KnownFontFileForFace( const std::string &normalizedFace, bool
     return nullptr;
 }
 
+static bool IsBoldWeight( int weight )
+{
+    return weight >= 600;
+}
+
+static const char *StyledKnownFontFileForFace( const std::string &normalizedFace, int weight, int flags, bool symbol )
+{
+    if ( symbol || normalizedFace == "marlett" )
+        return "marlett.ttf";
+
+    const bool bold = IsBoldWeight( weight ) || normalizedFace.find( "bold" ) != std::string::npos;
+    const bool italic = ( flags & vgui2::ISurface::FONTFLAG_ITALIC ) != 0 ||
+        normalizedFace.find( "italic" ) != std::string::npos;
+
+    if ( normalizedFace == "tahoma" || normalizedFace == "tahoma regular" ||
+        normalizedFace == "default" || normalizedFace == "defaultsmall" ||
+        normalizedFace == "defaultbold" || normalizedFace == "defaulttitle" ||
+        normalizedFace == "defaultlarge" || normalizedFace == "defaultmedium" ||
+        normalizedFace == "defaultverylarge" || normalizedFace == "defaultunderline" ||
+        normalizedFace == "default very small" || normalizedFace == "defaultverysmall" ||
+        normalizedFace == "default very small fallback" || normalizedFace == "defaultverysmallfallback" ||
+        normalizedFace == "menutitle" || normalizedFace == "brightcontroltext" ||
+        normalizedFace == "basetext" || normalizedFace == "label.textcolor" ||
+        normalizedFace == "label.textbrightcolor" || normalizedFace == "label textcolor" ||
+        normalizedFace == "label textbrightcolor" || normalizedFace == "trebuchet ms" )
+    {
+        return bold ? "TahomaBd.ttf" : "Tahoma.ttf";
+    }
+
+    if ( normalizedFace == "arial" || normalizedFace == "arial regular" )
+    {
+        if ( bold && italic )
+            return "ArialBdIt.ttf";
+        if ( bold )
+            return "ArialBd.ttf";
+        if ( italic )
+            return "ArialIt.ttf";
+        return "Arial.ttf";
+    }
+
+    if ( normalizedFace == "verdana" || normalizedFace == "verdana regular" )
+    {
+        if ( bold && italic )
+            return "VerdanaBdIt.ttf";
+        if ( bold )
+            return "VerdanaBd.ttf";
+        if ( italic )
+            return "VerdanaIt.ttf";
+        return "Verdana.ttf";
+    }
+
+    if ( normalizedFace == "firasans" || normalizedFace == "fira sans" ||
+        normalizedFace == "firasans regular" || normalizedFace == "fira sans regular" )
+    {
+        if ( bold && italic )
+            return "FiraSans-BoldItalic.ttf";
+        if ( bold )
+            return "FiraSans-Bold.ttf";
+        if ( italic )
+            return "FiraSans-Italic.ttf";
+        return "FiraSans-Regular.ttf";
+    }
+
+    return KnownFontFileForFace( normalizedFace, symbol );
+}
+
+static std::string FontFaceCacheKey( const char *faceName, int weight, int flags )
+{
+    const std::string normalizedFace = NormalizeFaceName( faceName );
+    const bool symbol = ( flags & vgui2::ISurface::FONTFLAG_SYMBOL ) != 0;
+    const bool italic = ( flags & vgui2::ISurface::FONTFLAG_ITALIC ) != 0;
+    return "face:" + normalizedFace +
+        ":w" + std::to_string( weight ) +
+        ":i" + ( italic ? "1" : "0" ) +
+        ":s" + ( symbol ? "1" : "0" );
+}
+
 static bool FindIndexedFont( const std::unordered_map<std::string, std::string> &index, const char *filename, std::string &path )
 {
     if ( !filename || !filename[0] )
@@ -452,7 +529,7 @@ static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, in
         weight,
         symbol ? 1 : 0 );
 
-    const char *knownFile = KnownFontFileForFace( normalizedFace, symbol );
+    const char *knownFile = StyledKnownFontFileForFace( normalizedFace, weight, flags, symbol );
     if ( knownFile )
     {
         if ( FindBundledFont( knownFile, path ) )
@@ -475,7 +552,7 @@ static bool ResolveFontFaceToFile( const char *requestedFaceName, int weight, in
         return true;
     }
 
-    const char *fallbackFile = symbol ? "marlett.ttf" : "Tahoma.ttf";
+    const char *fallbackFile = symbol ? "marlett.ttf" : StyledKnownFontFileForFace( "tahoma", weight, flags, false );
     if ( FindBundledFont( fallbackFile, path ) )
     {
         std::fprintf( stderr,
@@ -2001,7 +2078,7 @@ void BaseUISurface::DrawQuadArray(int quadCount, vpoint_t *pVerts, int *pColor)
         if (!ClipRect(ul, lr, &ulc, &lrc))
             continue;
 
-        g_api->DrawQuad(&ul, &lr);
+        g_api->DrawQuad(&ulc, &lrc);
     }
 #endif
 }
@@ -2105,7 +2182,7 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         insertCacheAlias( std::string( "path:" ) + ToLowerAscii( path ), entry );
         insertCacheAlias( std::string( "file:" ) + FontFileNameKey( path ), entry );
         if ( requestedFaceName && requestedFaceName[0] )
-            insertCacheAlias( std::string( "face:" ) + NormalizeFaceName( requestedFaceName ), entry );
+            insertCacheAlias( FontFaceCacheKey( requestedFaceName, weight, flags ), entry );
 
         std::fprintf( stderr, "[VGUI2-FONT] cached font path=%s family=%s size=%d\n",
             path ? path : "<null>",
@@ -2150,7 +2227,7 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         insertCacheAlias( std::string( "embedded:" ) + FontFileNameKey( embeddedFont->filename ), entry );
         insertCacheAlias( std::string( "file:" ) + FontFileNameKey( embeddedFont->filename ), entry );
         if ( requestedFaceName && requestedFaceName[0] )
-            insertCacheAlias( std::string( "face:" ) + NormalizeFaceName( requestedFaceName ), entry );
+            insertCacheAlias( FontFaceCacheKey( requestedFaceName, weight, flags ), entry );
 
         std::fprintf( stderr, "[VGUI2-FONT] loaded embedded bundled font: %s family=%s size=%d\n",
             embeddedFont->filename ? embeddedFont->filename : "<null>",
@@ -2171,7 +2248,7 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
         return loadEmbeddedFontFile( fontFileName, pathCacheKey, pchFontName );
     }
 
-    const std::string faceCacheKey = std::string( "face:" ) + NormalizeFaceName( pchFontName );
+    const std::string faceCacheKey = FontFaceCacheKey( pchFontName, weight, flags );
     if ( const void *cached = findCachedFont( faceCacheKey ) )
         return cached;
 
@@ -2187,7 +2264,7 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
 
     const bool symbol = ( flags & vgui2::ISurface::FONTFLAG_SYMBOL ) != 0;
     const std::string normalizedFace = NormalizeFaceName( pchFontName );
-    if ( const char *knownFile = KnownFontFileForFace( normalizedFace, symbol ) )
+    if ( const char *knownFile = StyledKnownFontFileForFace( normalizedFace, weight, flags, symbol ) )
     {
         if ( const void *embedded = loadEmbeddedFontFile( knownFile, faceCacheKey, pchFontName ) )
             return embedded;
@@ -2197,7 +2274,7 @@ const void *BaseUISurface::FontDataHelper( const char *pchFontName, int &size, c
     if ( const void *embedded = loadEmbeddedFontFile( faceFile.c_str(), faceCacheKey, pchFontName ) )
         return embedded;
 
-    const char *fallbackFile = symbol ? "marlett.ttf" : "Tahoma.ttf";
+    const char *fallbackFile = symbol ? "marlett.ttf" : StyledKnownFontFileForFace( "tahoma", weight, flags, false );
     if ( const void *embedded = loadEmbeddedFontFile( fallbackFile, faceCacheKey, pchFontName ) )
     {
         std::fprintf( stderr, "[VGUI2-FONT] fallback to embedded bundled font: %s\n", fallbackFile );
