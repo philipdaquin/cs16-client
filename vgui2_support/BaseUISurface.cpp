@@ -1407,8 +1407,10 @@ vgui2::HFont BaseUISurface::CreateFont() {
 
 bool BaseUISurface::AddGlyphSetToFont(vgui2::HFont font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange) {
     BootstrapFontFiles();
-    m_FontTextureCache.InvalidateFont(font);
-    return FontManager().SetFontGlyphSet(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
+    const bool added = FontManager().SetFontGlyphSet(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
+    if (added)
+        m_FontTextureCache.InvalidateFont(font);
+    return added;
 }
 
 bool BaseUISurface::AddCustomFontFile(const char *fontFileName) {

@@ -102,12 +102,28 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 	pageIndex = -1;
 	for (int i = (int)m_PageList.size() - 1; i >= 0; --i)
 	{
-		if (m_PageList[i].fontHeight == iHeight)
+		page_t& candidate = m_PageList[i];
+		if (candidate.fontHeight != iHeight)
+			continue;
+
+		// Check if there's room on the current row, or a next row fits
+		int testX = candidate.nextX;
+		int testY = candidate.nextY;
+
+		if (testX + iWidth > candidate.wide)
+		{
+			testX = 0;
+			testY += iHeight;
+		}
+
+		if (testY + iHeight <= candidate.tall)
 		{
 			pageIndex = i;
 			break;
 		}
+		// Page is full, keep searching
 	}
+
 
 	page_t *pPage = (pageIndex >= 0) ? &m_PageList[pageIndex] : nullptr;
 
@@ -123,11 +139,14 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 		pPage->nextY += pPage->fontHeight;
 	}
 
-	// Check if page is full — need a new one
+	// Check if page is full - need a new one
 	if (pPage->nextY + iHeight > pPage->tall)
 	{
 		pPage = CreatePage();  // CreatePage sets pageIndex
 	}
+
+	if (pageIndex < 0 || pageIndex >= static_cast<int>(m_PageList.size()))
+		return false;
 
 	// Re-fetch pointer AFTER any potential reallocation
 	pPage = &m_PageList[pageIndex];
@@ -171,6 +190,9 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 			fontWide = a + b + c;
 		}
 
+		if (fontWide <= 0 || fontTall <= 0)
+			return false;
+
 		const int paddedWide = fontWide + FONT_GLYPH_PADDING * 2;
 		const int paddedTall = fontTall + FONT_GLYPH_PADDING * 2;
 
@@ -184,6 +206,15 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 
 		auto pDest = reinterpret_cast<byte*>(MemAlloc_AllocAligned(size, 16));
 		auto pPaddedDest = reinterpret_cast<byte*>(MemAlloc_AllocAligned(paddedSize, 16));
+
+		if (!pDest || !pPaddedDest)
+		{
+			if (pDest)
+				MemAlloc_FreeAligned(pDest);
+			if (pPaddedDest)
+				MemAlloc_FreeAligned(pPaddedDest);
+			return false;
+		}
 
 		if (size >= 4)
 			memset(pDest, 0, size);
@@ -199,6 +230,13 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 				pDest + 4 * y * fontWide,
 				4 * fontWide
 			);
+		}
+
+		if (page < 0 || page >= static_cast<int>(m_PageList.size()))
+		{
+			MemAlloc_FreeAligned(pDest);
+			MemAlloc_FreeAligned(pPaddedDest);
+			return false;
 		}
 
 		auto& pageData = m_PageList[page];
@@ -230,6 +268,9 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 	}
 
 	const auto& cacheData = index->second;
+	if (cacheData.page < 0 || cacheData.page >= static_cast<int>(m_PageList.size()))
+		return false;
+
 	const auto& pageData = m_PageList[cacheData.page];
 
 	*textureID = pageData.textureID;

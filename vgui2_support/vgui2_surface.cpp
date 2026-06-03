@@ -28,8 +28,8 @@ extern "C" void EXPORT VGUI2_Draw_Init()
             vgui2::surface()->AddGlyphSetToFont(
                 _consoleFont,
                 "Verdana Bold",
-                20,
-                700,
+                24,
+                600,
                 0,
                 0,
                 vgui2::ISurface::FONTFLAG_ANTIALIAS | ( kConsoleFontDropShadow ? vgui2::ISurface::FONTFLAG_DROPSHADOW : 0 ),
@@ -47,8 +47,8 @@ extern "C" void EXPORT VGUI2_Draw_Init()
             vgui2::surface()->AddGlyphSetToFont(
                 _hintFont,
                 "Arial Bold",
-                40,
-                700,
+                35,
+                500,
                 0,
                 0,
                 vgui2::ISurface::FONTFLAG_ANTIALIAS | ( kHintFontDropShadow ? vgui2::ISurface::FONTFLAG_DROPSHADOW : 0 ),

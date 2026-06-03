@@ -236,22 +236,22 @@ IViewportPanel* CHudViewport::CreatePanelByName(const char* pszName)
 	// }
 	else if (Q_strcmp(PANEL_BUY_CT, pszName) == 0)
 	{
-		// if (!m_pBuyMenuCT)
-		// {
+		if (!m_pBuyMenuCT)
+		{
 			gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreatePanelByName creating PANEL_BUY_CT this=%p\n",
 				this);
 			m_pBuyMenuCT = new CCSBuyMenu_CT(this);
-		// }
+		}
 		pPanel = m_pBuyMenuCT;
 	}
 	else if (Q_strcmp(PANEL_BUY_TER, pszName) == 0)
 	{
-		// if (!m_pBuyMenuTER)
-		// {
+		if (!m_pBuyMenuTER)
+		{
 			gEngfuncs.Con_Printf("[PANEL_BUY] CHudViewport::CreatePanelByName creating PANEL_BUY_TER this=%p\n",
 				this);
 			m_pBuyMenuTER = new CCSBuyMenu_TER(this);
-		// }
+		}
 		pPanel = m_pBuyMenuTER;
 	}
 	else if (Q_strcmp(PANEL_BUY_EQUIP_CT, pszName) == 0)
