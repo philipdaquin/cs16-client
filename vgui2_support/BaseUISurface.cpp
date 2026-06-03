@@ -1853,8 +1853,8 @@ void BaseUISurface::DrawSetSubTextureRGBA(int textureID, int drawX, int drawY, c
 		g_api->BindTexture(textureID);
 		m_iCurrentTexture = textureID;
 
-		std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetSubTextureRGBA upload texture=%d dst=%d,%d size=%dx%d rgba=%p\n",
-			textureID, drawX, drawY, subTextureWide, subTextureTall, (const void *)rgba);
+		// std::fprintf(stderr, "[VGUI2-TRACE] BaseUISurface::DrawSetSubTextureRGBA upload texture=%d dst=%d,%d size=%dx%d rgba=%p\n",
+		// 	textureID, drawX, drawY, subTextureWide, subTextureTall, (const void *)rgba);
 		g_api->UploadTextureBlock(textureID, drawX, drawY, rgba, subTextureWide, subTextureTall);
 	}
 }

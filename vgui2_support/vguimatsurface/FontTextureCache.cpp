@@ -163,14 +163,15 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 
 bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* textureID, float* texCoords)
 {
-	auto index = m_CharCache.find(std::make_pair(font, wch));
-	if (index != m_CharCache.end() && !FontManager().GetFontForChar(font, wch))
-	{
-		m_CharCache.erase(index);
-		index = m_CharCache.end();
-	}
-
-	if (index == m_CharCache.end())
+	// Cache bypass diagnostics:
+	// auto index = m_CharCache.find(std::make_pair(font, wch));
+	// if (index != m_CharCache.end() && !FontManager().GetFontForChar(font, wch))
+	// {
+	// 	m_CharCache.erase(index);
+	// 	index = m_CharCache.end();
+	// }
+	//
+	// if (index == m_CharCache.end())
 	{
 		auto pFont = FontManager().GetFontForChar(font, wch);
 
@@ -248,37 +249,29 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 			paddedWide, paddedTall
 		);
 
-        MemAlloc_FreeAligned(pDest);
-        MemAlloc_FreeAligned(pPaddedDest);
+		MemAlloc_FreeAligned(pDest);
+		MemAlloc_FreeAligned(pPaddedDest);
 
-        cacheentry_t cacheitem;
+		// Cache bypass diagnostics:
+		// cacheentry_t cacheitem;
+		// memset(&cacheitem, 0, sizeof(cacheitem));
+		// cacheitem.font = font;
+		// cacheitem.wch = wch;
+		// cacheitem.page = page;
+		// cacheitem.texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
+		// cacheitem.texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
+		// cacheitem.texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
+		// cacheitem.texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
+		// index = m_CharCache.emplace(std::make_pair(font, wch), cacheitem).first;
 
-        memset(&cacheitem, 0, sizeof(cacheitem));
+		*textureID = pageData.textureID;
+		texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
+		texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
+		texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
+		texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
 
-        cacheitem.font = font;
-        cacheitem.wch = wch;
-		cacheitem.page = page;
-
-		cacheitem.texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
-		cacheitem.texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
-		cacheitem.texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
-		cacheitem.texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
-
-		index = m_CharCache.emplace(std::make_pair(font, wch), cacheitem).first;
+		return true;
 	}
 
-	const auto& cacheData = index->second;
-	if (cacheData.page < 0 || cacheData.page >= static_cast<int>(m_PageList.size()))
-		return false;
-
-	const auto& pageData = m_PageList[cacheData.page];
-
-	*textureID = pageData.textureID;
-
-	texCoords[0] = cacheData.texCoords[0];
-	texCoords[1] = cacheData.texCoords[1];
-	texCoords[2] = cacheData.texCoords[2];
-	texCoords[3] = cacheData.texCoords[3];
-
-	return true;
+	return false;
 }
