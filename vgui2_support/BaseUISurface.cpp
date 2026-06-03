@@ -1508,23 +1508,23 @@ bool BaseUISurface::RecreateContext(vgui2::VPANEL) {
 }
 
 void BaseUISurface::AddPanel(vgui2::VPANEL panel) {
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::AddPanel panel=%p embedded=%p popup=%d parent=%p client=%p\n",
-        (void *)panel,
-        (void *)GetEmbeddedPanel(),
-        vgui2::ipanel()->IsPopup(panel),
-        (void *)vgui2::ipanel()->GetParent(panel),
-        (void *)vgui2::ipanel()->Client(panel));
+    // gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::AddPanel panel=%p embedded=%p popup=%d parent=%p client=%p\n",
+    //     (void *)panel,
+    //     (void *)GetEmbeddedPanel(),
+    //     vgui2::ipanel()->IsPopup(panel),
+    //     (void *)vgui2::ipanel()->GetParent(panel),
+    //     (void *)vgui2::ipanel()->Client(panel));
 	if (vgui2::ipanel()->IsPopup(panel)) {
 		CreatePopup(panel, false, false, false, true, true);
 	}
 }
 
 void BaseUISurface::ReleasePanel(vgui2::VPANEL panel) {
-    gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::ReleasePanel panel=%p embedded=%p popup=%d parent=%p\n",
-        (void *)panel,
-        (void *)GetEmbeddedPanel(),
-        vgui2::ipanel()->IsPopup(panel),
-        (void *)vgui2::ipanel()->GetParent(panel));
+    // gEngfuncs.Con_Printf("[VGUI2-TRACE] BaseUISurface::ReleasePanel panel=%p embedded=%p popup=%d parent=%p\n",
+    //     (void *)panel,
+    //     (void *)GetEmbeddedPanel(),
+    //     vgui2::ipanel()->IsPopup(panel),
+    //     (void *)vgui2::ipanel()->GetParent(panel));
 	// TODO: implement vgui2::Dar
 	std::vector<vgui2::VPANEL>::iterator it = std::find(staticPopupList.begin(), staticPopupList.end(), panel);
 
