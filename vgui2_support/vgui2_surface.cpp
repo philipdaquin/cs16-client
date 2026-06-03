@@ -16,6 +16,7 @@ static vgui2::HFont _hintFont = NULL_HANDLE;
 extern rgba_t g_color_table[8];
 static constexpr bool kConsoleFontDropShadow = true;
 static constexpr bool kHintFontDropShadow = false;
+static constexpr float kHintTextOpacityScale = 0.70f;
 
 extern "C" void EXPORT VGUI2_Draw_Init()
 {
@@ -47,8 +48,8 @@ extern "C" void EXPORT VGUI2_Draw_Init()
             vgui2::surface()->AddGlyphSetToFont(
                 _hintFont,
                 "Arial Bold",
-                35,
-                500,
+                40,
+                600,
                 0,
                 0,
                 vgui2::ISurface::FONTFLAG_ANTIALIAS | ( kHintFontDropShadow ? vgui2::ISurface::FONTFLAG_DROPSHADOW : 0 ),
@@ -152,10 +153,11 @@ int VGUI2_Surface_DrawChar(int x, int y, int ch, byte r, byte g, byte b, byte a)
 int VGUI2_Surface_DrawHintChar(int x, int y, int ch, byte r, byte g, byte b, byte a)
 {
     auto font = _hintFont;
+    auto hintAlpha = static_cast<byte>(a * kHintTextOpacityScale);
 
     vgui2::surface()->DrawSetTextFont( font );
     vgui2::surface()->DrawSetTextPos( x, y );
-    vgui2::surface()->DrawSetTextColor( r, g, b, a );
+    vgui2::surface()->DrawSetTextColor( r, g, b, hintAlpha );
 
     if( iswprint( ch ) )
     {
