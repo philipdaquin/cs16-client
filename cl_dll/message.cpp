@@ -47,11 +47,11 @@ static void ApplyHintStyle( client_textmessage_t *message )
 	message->r1 = 100;
 	message->g1 = 255;
 	message->b1 = 120;
-	message->a1 = 200;
+	message->a1 = 230;
 	message->r2 = 100;
 	message->g2 = 255;
 	message->b2 = 120;
-	message->a2 = 200;
+	message->a2 = 230;
 	message->x = -1;
 	message->y = 0.7f;
 	message->fadein = 0.01f;
