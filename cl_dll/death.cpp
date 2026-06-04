@@ -21,6 +21,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <vgui/ISurface.h>
+#include "../vgui2_support/vgui_controls/controls.h"
 #include "draw_util.h"
 
 float color[3];
@@ -42,6 +44,74 @@ struct DeathNoticeItem {
 static int DEATHNOTICE_DISPLAY_TIME = 6;
 
 #define DEATHNOTICE_TOP		32
+static const int DEATHNOTICE_ROW_HEIGHT = 24;
+static const int DEATHNOTICE_RIGHT_MARGIN = 35;
+static vgui2::HFont g_DeathNoticeFont = vgui2::INVALID_FONT;
+
+static void EnsureDeathNoticeFont()
+{
+	if ( g_DeathNoticeFont != vgui2::INVALID_FONT )
+		return;
+
+	g_DeathNoticeFont = vgui2::surface()->CreateFont();
+	if ( g_DeathNoticeFont != vgui2::INVALID_FONT )
+	{
+		vgui2::surface()->AddGlyphSetToFont( g_DeathNoticeFont, "Verdana", 20, 600, 0, 0,
+			vgui2::ISurface::FONTFLAG_ANTIALIAS | vgui2::ISurface::FONTFLAG_DROPSHADOW, 0x0, 0xFFFF );
+	}
+}
+
+static int DeathNoticeTextWidth( const char *text )
+{
+	EnsureDeathNoticeFont();
+
+	if ( g_DeathNoticeFont == vgui2::INVALID_FONT )
+	{
+		int width = 0;
+		int height = 0;
+		VGUI2_Surface_DrawStringLen( text, &width, &height );
+		return width;
+	}
+
+	uchar32 utf32[256];
+	const int utf32Bytes = Q_UTF8ToUTF32( text, utf32, sizeof( utf32 ), STRINGCONVERT_REPLACE );
+	const int len = utf32Bytes > 0 ? utf32Bytes / (int)sizeof( uchar32 ) - 1 : 0;
+	if ( len <= 0 )
+		return 0;
+
+	int width = 0;
+	int height = 0;
+	vgui2::surface()->GetTextSize( g_DeathNoticeFont, utf32, width, height );
+	return width;
+}
+
+static int DeathNoticeDrawText( int x, int y, const char *text, const float *color )
+{
+	const int r = color ? (int)( color[0] * 255.0f ) : 255;
+	const int g = color ? (int)( color[1] * 255.0f ) : 255;
+	const int b = color ? (int)( color[2] * 255.0f ) : 255;
+
+	EnsureDeathNoticeFont();
+
+	if ( g_DeathNoticeFont == vgui2::INVALID_FONT )
+		return x + VGUI2_Surface_DrawConsoleString( x, y, text, (byte)r, (byte)g, (byte)b, 255 );
+
+	uchar32 utf32[256];
+	const int utf32Bytes = Q_UTF8ToUTF32( text, utf32, sizeof( utf32 ), STRINGCONVERT_REPLACE );
+	const int len = utf32Bytes > 0 ? utf32Bytes / (int)sizeof( uchar32 ) - 1 : 0;
+	if ( len <= 0 )
+		return x;
+
+	vgui2::surface()->DrawSetTextFont( g_DeathNoticeFont );
+	vgui2::surface()->DrawSetTextColor( r, g, b, 255 );
+	vgui2::surface()->DrawSetTextPos( x, y );
+	vgui2::surface()->DrawPrintText( utf32, len );
+
+	int width = 0;
+	int height = 0;
+	vgui2::surface()->GetTextSize( g_DeathNoticeFont, utf32, width, height );
+	return x + width;
+}
 
 DeathNoticeItem rgDeathNoticeList[ MAX_DEATHNOTICES + 1 ];
 
@@ -66,6 +136,8 @@ void CHudDeathNotice :: InitHUDData( void )
 
 int CHudDeathNotice :: VidInit( void )
 {
+	EnsureDeathNoticeFont();
+
 	m_HUD_d_skull = gHUD.GetSpriteIndex( "d_skull" );
 	m_HUD_d_headshot = gHUD.GetSpriteIndex("d_headshot");
 
@@ -98,26 +170,22 @@ int CHudDeathNotice :: Draw( float flTime )
 			// Draw the death notice
 			if( !g_iUser1 )
 			{
-				y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
+				y = YRES(DEATHNOTICE_TOP) + 2 + (DEATHNOTICE_ROW_HEIGHT * i);  //!!!
 			}
 			else
 			{
-				y = ScreenHeight / 5 + 2 + (20 * i);
+				y = ScreenHeight / 5 + 2 + (DEATHNOTICE_ROW_HEIGHT * i);
 			}
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - DrawUtils::ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).Width());
+			x = ScreenWidth - DEATHNOTICE_RIGHT_MARGIN - DeathNoticeTextWidth( rgDeathNoticeList[i].szVictim ) - (gHUD.GetSpriteRect(id).Width());
 			if( rgDeathNoticeList[i].iHeadShotId )
 				x -= gHUD.GetSpriteRect(m_HUD_d_headshot).Width();
 
 			if ( !rgDeathNoticeList[i].bSuicide )
 			{
-				x -= (5 + DrawUtils::ConsoleStringLen( rgDeathNoticeList[i].szKiller ) );
-
-				// Draw killers name
-				if ( rgDeathNoticeList[i].KillerColor )
-					DrawUtils::SetConsoleTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
-				x = 5 + DrawUtils::DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
+				x -= (5 + DeathNoticeTextWidth( rgDeathNoticeList[i].szKiller ) );
+				x = 5 + DeathNoticeDrawText( x, y, rgDeathNoticeList[i].szKiller, rgDeathNoticeList[i].KillerColor );
 			}
 
 			r = 255;  g = 80;	b = 0;
@@ -142,9 +210,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			// Draw victims name (if it was a player that was killed)
 			if (!rgDeathNoticeList[i].bNonPlayerKill)
 			{
-				if ( rgDeathNoticeList[i].VictimColor )
-					DrawUtils::SetConsoleTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
-				x = DrawUtils::DrawConsoleString( x, y, rgDeathNoticeList[i].szVictim );
+				x = DeathNoticeDrawText( x, y, rgDeathNoticeList[i].szVictim, rgDeathNoticeList[i].VictimColor );
 			}
 		}
 	}
@@ -303,7 +369,3 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	return 1;
 }
-
-
-
-
