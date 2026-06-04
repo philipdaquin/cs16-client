@@ -38,6 +38,8 @@
 #include "Menu.h"
 #include "MenuItem.h"
 
+
+#include "debug.h"
 #include "tier0/vprof.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -1054,13 +1056,16 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 	}
 
 	// draw the border last
-	// if ( repaint && _flags.IsFlagSet( PAINT_BORDER_ENABLED ) && ( _border != nullptr ) )
-	// {
-	// 	// Paint the border over the background with no inset
-	// 	surface()->PushMakeCurrent( vpanel, false );
-	// 	PaintBorder();
-	// 	surface()->PopMakeCurrent( vpanel );
-	// }
+	if (g_bDebug) { 
+		if ( repaint && _flags.IsFlagSet( PAINT_BORDER_ENABLED ) && ( _border != nullptr ) )
+		{
+			// Paint the border over the background with no inset
+			surface()->PushMakeCurrent( vpanel, false );
+			PaintBorder();
+			surface()->PopMakeCurrent( vpanel );
+		}
+	}
+
 
 	if ( repaint && IsBuildGroupEnabled() ) //&& HasFocus() )
 	{
@@ -3231,19 +3236,22 @@ void Panel::SetBorder(IBorder *border)
 
 
 	// Temporarily Disabled
-	// if (border)
-	// {
-	// 	int x, y, x2, y2;
-	// 	border->GetInset(x, y, x2, y2);
-	// 	ipanel()->SetInset(GetVPanel(), x, y, x2, y2);
-	//
-	// 	// update our background type based on the bord
-	// 	SetPaintBackgroundType(border->GetBackgroundType());
-	// }
-	// else
-	// {
-	// 	ipanel()->SetInset(GetVPanel(), 0, 0, 0, 0);
-	// }
+	if (g_bDebug) { 
+		if (border)
+		{
+			int x, y, x2, y2;
+			border->GetInset(x, y, x2, y2);
+			ipanel()->SetInset(GetVPanel(), x, y, x2, y2);
+		
+			// update our background type based on the bord
+			SetPaintBackgroundType(border->GetBackgroundType());
+		}
+		else
+		{
+			ipanel()->SetInset(GetVPanel(), 0, 0, 0, 0);
+		}
+	}
+
 }
 
 IBorder *Panel::GetBorder()
@@ -3563,8 +3571,12 @@ void Panel::ApplySchemeSettings(IScheme *pScheme)
 #if defined( VGUI_USEDRAGDROP )
 	// Disable drag/drop highlight overlays entirely. The old fallback colors
 	// rendered a visible green outline when drag-drop painting was active.
-	// m_clrDragFrame = pScheme->GetColor("DragDrop.DragFrame", Color(255, 255, 255, 192));
-	// m_clrDropFrame = pScheme->GetColor("DragDrop.DropFrame", Color(150, 255, 150, 255));
+
+	if (g_bDebug) {
+		m_clrDragFrame = pScheme->GetColor("DragDrop.DragFrame", Color(255, 255, 255, 192));
+		m_clrDropFrame = pScheme->GetColor("DragDrop.DropFrame", Color(150, 255, 150, 255));
+	}
+
 	m_clrDragFrame = Color(0, 0, 0, 0);
 	m_clrDropFrame = Color(0, 0, 0, 0);
 
@@ -6307,34 +6319,37 @@ Panel *Panel::FindDropTargetPanel()
 //-----------------------------------------------------------------------------
 void Panel::OnDraggablePanelPaint()
 {
-	// #if defined( VGUI_USEDRAGDROP )
-	// 	int sw, sh;
-	// 	GetSize( sw, sh );
-	//
-	// 	int x, y;
-	// 	input()->GetCursorPos( x, y );
-	// 	int w, h;
-	//
-	// 	w = min( sw, 80 );
-	// 	h = min( sh, 80 );
-	// 	x -= ( w >> 1 );
-	// 	y -= ( h >> 1 );
-	//
-	// 	surface()->DrawSetColor( m_clrDragFrame );
-	// 	surface()->DrawOutlinedRect( x, y, x + w, y + h );
-	//
-	// 	if ( m_pDragDrop->m_DragPanels.Count() > 1 )
-	// 	{
-	// 		surface()->DrawSetTextColor( m_clrDragFrame );
-	// 		surface()->DrawSetTextFont( m_infoFont );
-	// 		surface()->DrawSetTextPos( x + 5, y + 2 );
-	//
-	// 		wchar_t sz[ 64 ];
-	// 		_snwprintf( sz, 64, L"[ %i ]", m_pDragDrop->m_DragPanels.Count() );
-	//
-	// 		surface()->DrawPrintText( sz, wcslen( sz ) );
-	// 	}
-	// #endif
+	if (g_bDebug) { 
+		#if defined( VGUI_USEDRAGDROP )
+			int sw, sh;
+			GetSize( sw, sh );
+		
+			int x, y;
+			input()->GetCursorPos( x, y );
+			int w, h;
+		
+			w = min( sw, 80 );
+			h = min( sh, 80 );
+			x -= ( w >> 1 );
+			y -= ( h >> 1 );
+		
+			surface()->DrawSetColor( m_clrDragFrame );
+			surface()->DrawOutlinedRect( x, y, x + w, y + h );
+		
+			if ( m_pDragDrop->m_DragPanels.Count() > 1 )
+			{
+				surface()->DrawSetTextColor( m_clrDragFrame );
+				surface()->DrawSetTextFont( m_infoFont );
+				surface()->DrawSetTextPos( x + 5, y + 2 );
+		
+				wchar_t sz[ 64 ];
+				_snwprintf( sz, 64, L"[ %i ]", m_pDragDrop->m_DragPanels.Count() );
+		
+				surface()->DrawPrintText( sz, wcslen( sz ) );
+			}
+		#endif
+	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -6343,23 +6358,25 @@ void Panel::OnDraggablePanelPaint()
 //-----------------------------------------------------------------------------
 void Panel::OnDroppablePanelPaint( CUtlVector< KeyValues * >& msglist, CUtlVector< Panel * >& dragPanels )
 {
-	// #if defined( VGUI_USEDRAGDROP )
-	// 	if ( !dragPanels.Count() )
-	// 		return;
-	//
-	// 	// Convert this panel's bounds to screen space
-	// 	int w, h;
-	// 	GetSize( w, h );
-	//
-	// 	int x, y;
-	// 	x = y = 0;
-	// 	LocalToScreen( x, y );
-	//
-	// 	surface()->DrawSetColor( m_clrDropFrame );
-	// 	// Draw 2 pixel frame
-	// 	surface()->DrawOutlinedRect( x, y, x + w, y + h );
-	// 	surface()->DrawOutlinedRect( x+1, y+1, x + w-1, y + h-1 );
-	// #endif
+	if (g_bDebug) { 
+		#if defined( VGUI_USEDRAGDROP )
+			if ( !dragPanels.Count() )
+				return;
+		
+			// Convert this panel's bounds to screen space
+			int w, h;
+			GetSize( w, h );
+		
+			int x, y;
+			x = y = 0;
+			LocalToScreen( x, y );
+		
+			surface()->DrawSetColor( m_clrDropFrame );
+			// Draw 2 pixel frame
+			surface()->DrawOutlinedRect( x, y, x + w, y + h );
+			surface()->DrawOutlinedRect( x+1, y+1, x + w-1, y + h-1 );
+		#endif
+	}
 }
 
 //-----------------------------------------------------------------------------

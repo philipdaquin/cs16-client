@@ -120,6 +120,39 @@ public:
 		LoadClassPage();
 	}
 
+	virtual void PerformLayout(void)
+	{
+		BaseClass::PerformLayout();
+
+		const char *name = GetName();
+		const int textSuffixLen = Q_strlen("-text");
+		if (!name || strncmp(name, "wpn-button-", 11) || Q_strlen(name) <= textSuffixLen)
+			return;
+
+		const int nameLen = Q_strlen(name);
+		if (strcmp(name + nameLen - textSuffixLen, "-text"))
+			return;
+
+		char backgroundName[64];
+		Q_strncpy(backgroundName, name, sizeof(backgroundName));
+		backgroundName[nameLen - textSuffixLen] = 0;
+		Q_strncat(backgroundName, "-bg", sizeof(backgroundName), COPY_ALL_CHARACTERS);
+
+		vgui2::Panel *parent = GetParent();
+		vgui2::Panel *background = parent ? parent->FindChildByName(backgroundName) : NULL;
+		if (!background)
+			return;
+
+		int x, y, wide, tall;
+		background->GetBounds(x, y, wide, tall);
+		SetBounds(x, y, wide, tall);
+
+		int pinX = 0;
+		int pinY = 0;
+		background->GetPinOffset(pinX, pinY);
+		SetAutoResize(background->GetPinCorner(), AUTORESIZE_NO, pinX, pinY, 0, 0);
+	}
+
 	auto *GetClassPanel(void) { return m_pPanel; }
 
 	virtual void OnCursorExited(void)
