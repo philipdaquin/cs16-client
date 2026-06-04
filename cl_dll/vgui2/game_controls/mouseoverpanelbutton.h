@@ -107,6 +107,16 @@ public:
 	{
 		BaseClass::ApplySettings(resourceData);
 
+		// Main buy menu buttons should keep the authored resource width/height instead of stretching with the layout.
+		const char *name = GetName();
+		if (name && !strncmp(name, "wpn-button-", 11))
+		{
+			int pinX = 0;
+			int pinY = 0;
+			GetPinOffset(pinX, pinY);
+			SetAutoResize(GetPinCorner(), AUTORESIZE_NO, pinX, pinY, 0, 0);
+		}
+
 		LoadClassPage();
 	}
 
