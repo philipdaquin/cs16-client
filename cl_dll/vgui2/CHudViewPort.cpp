@@ -86,7 +86,7 @@ void CHudViewport::Start()
 	gEngfuncs.pfnAddCommand("buymenu", Cmd_ShowBuyMenu);
 	gEngfuncs.pfnAddCommand("buyequip", Cmd_ShowBuyEquipMenu);
 	gEngfuncs.pfnAddCommand("chooseteam", Cmd_ChooseTeam);
-	RegisterBuyPresetCommands();
+	// RegisterBuyPresetCommands();
 }
 
 int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)

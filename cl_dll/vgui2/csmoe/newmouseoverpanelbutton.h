@@ -234,7 +234,7 @@ public:
 					m_pKeyboard->SetSize(keyWide, keyTall);
 					m_pKeyboard->Paint();
 
-					SetTextInset(keyX + keyWide + keyX, 0);
+					// SetTextInset(keyX + keyWide + keyX, 0);
 				}
 			}
 		}
