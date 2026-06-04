@@ -18,7 +18,7 @@
 #include <vgui/IVGui.h>
 #include <vgui/MouseCode.h>
 #include <vgui/KeyCode.h>
-
+#include "debug.h"
 #include "Button.h"
 #include "FocusNavGroup.h"
 
@@ -294,14 +294,20 @@ void Button::Paint(void)
 
 	BaseClass::Paint();
 	
-	if ( HasFocus() && IsEnabled() && IsDrawingFocusBox() )
+
+	if (g_bDebug)
 	{
-		// int x0, y0, x1, y1;
-		// int wide, tall;
-		// GetSize(wide, tall);
-		// x0 = 3, y0 = 3, x1 = wide - 4 , y1 = tall - 2;
-		// DrawFocusBorder(x0, y0, x1, y1);
+		if ( HasFocus() && IsEnabled() && IsDrawingFocusBox() )
+		{
+			int x0, y0, x1, y1;
+			int wide, tall;
+			GetSize(wide, tall);
+			x0 = 3, y0 = 3, x1 = wide - 4 , y1 = tall - 2;
+			DrawFocusBorder(x0, y0, x1, y1);
+		}
 	}
+
+	
 }
 
 void Button::PaintBackground(void)
@@ -346,7 +352,11 @@ void Button::PerformLayout()
 
 	// set our color
 	SetFgColor(GetButtonFgColor());
-	// SetBgColor(GetButtonBgColor());
+	
+	if (g_bDebug) { 
+		SetBgColor(GetButtonBgColor()); 
+	}
+	
 
 	BaseClass::PerformLayout();
 }

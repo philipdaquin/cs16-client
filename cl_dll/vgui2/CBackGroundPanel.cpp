@@ -11,7 +11,7 @@
 #include <vgui_controls/BitmapImagePanel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/BuildGroup.h>
-
+#include "debug.h"
 using namespace vgui2;
 
 #define DEBUG_WINDOW_RESIZING 0
@@ -48,7 +48,11 @@ void CBackGroundPanel::ApplySchemeSettings(vgui2::IScheme* pScheme)
 
 	const auto color = pScheme->GetColor("ViewportBG", Color(0, 0, 0, 0));
 
-	// SetBgColor(color);
+	if (g_bDebug)
+	{
+		SetBgColor(color);
+	}
+
 }
 
 void CBackGroundPanel::PerformLayout()

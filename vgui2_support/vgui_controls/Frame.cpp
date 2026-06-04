@@ -37,6 +37,7 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
+#include "debug.h"
 
 using namespace vgui2;
 
@@ -1202,29 +1203,32 @@ void Frame::OnFrameFocusChanged(bool bHasFocus)
 		_title->SetColor(_titleBarDisabledFgColor);
 	}
 
-	// set our background color
-	if (bHasFocus)
-	{
-		if (m_flFocusTransitionEffectTime)
+	if (g_bDebug) { 
+		// set our background color
+		if (bHasFocus)
 		{
-			// GetAnimationController()->RunAnimationCommand(this, "BgColor", m_InFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
+			if (m_flFocusTransitionEffectTime)
+			{
+				GetAnimationController()->RunAnimationCommand(this, "BgColor", m_InFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
+			}
+			else
+			{
+				SetBgColor(m_InFocusBgColor);
+			}
 		}
 		else
 		{
-			// SetBgColor(m_InFocusBgColor);
+			if (m_flFocusTransitionEffectTime)
+			{
+				GetAnimationController()->RunAnimationCommand(this, "BgColor", m_OutOfFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
+			}
+			else
+			{
+				SetBgColor(m_OutOfFocusBgColor);
+			}
 		}
 	}
-	else
-	{
-		if (m_flFocusTransitionEffectTime)
-		{
-			// GetAnimationController()->RunAnimationCommand(this, "BgColor", m_OutOfFocusBgColor, 0.0f, m_flTransitionEffectTime, AnimationController::INTERPOLATOR_LINEAR);
-		}
-		else
-		{
-			// SetBgColor(m_OutOfFocusBgColor);
-		}
-	}
+
 
 	// Stop flashing when we get focus
 	if (bHasFocus && _flashWindow)
@@ -1852,7 +1856,9 @@ void Frame::ApplySchemeSettings(IScheme *pScheme)
 	}
 	
 
-	// SetBgColor(m_InFocusBgColor);
+	if (g_bDebug) { 
+		SetBgColor(m_InFocusBgColor);
+	}
 	SetBorder(pScheme->GetBorder("FrameBorder"));
 
 	resourceString = pScheme->GetResourceString("Frame/TopLeft");

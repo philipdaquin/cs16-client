@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 using namespace vgui2;
+#include "debug.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -41,7 +42,10 @@ WizardSubPanel::~WizardSubPanel()
 void WizardSubPanel::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	// SetBgColor(GetSchemeColor("WizardSubPanel.BgColor", GetSchemeColor("SubPanelBgColor", pScheme), pScheme));
+	if (g_bDebug)
+	{
+		SetBgColor(GetSchemeColor("WizardSubP anel.BgColor", GetSchemeColor("SubPanelBgColor", pScheme), pScheme));
+	}
 }
 
 //-----------------------------------------------------------------------------

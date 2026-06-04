@@ -23,7 +23,7 @@
 #include "shared_util.h"
 
 #include <string>
-
+#include "debug.h"
 using namespace vgui2;
 
 class BuyPresetImagePanel : public EditablePanel
@@ -195,21 +195,26 @@ void BuyPresetButton::DrawBox(int x, int y, int wide, int tall, Color color, flo
 
 	if (m_pBlankSlot && m_pSelect)
 	{
-		// if (IsDepressed())
-		// {
-		// 	m_pSelect->SetSize(wide, tall);
-		// 	m_pSelect->Paint();
-		// }
-		// else if (IsArmed())
-		// {
-		// 	m_pArmed->SetSize(wide, tall);
-		// 	m_pArmed->Paint();
-		// }
-		// else
-		// {
-		// 	m_pBlankSlot->SetSize(wide, tall);
-		// 	m_pBlankSlot->Paint();
-		// }
+
+		if (g_bDebug)
+		{
+			if (IsDepressed())
+			{
+				m_pSelect->SetSize(wide, tall);
+				m_pSelect->Paint();
+			}
+			else if (IsArmed())
+			{
+				m_pArmed->SetSize(wide, tall);
+				m_pArmed->Paint();
+			}
+			else
+			{
+				m_pBlankSlot->SetSize(wide, tall);
+				m_pBlankSlot->Paint();
+			}
+		}
+		
 	}
 
 	if (m_pKeyboard)
@@ -247,41 +252,47 @@ void BuyPresetButton::Paint(void)
 
 		wchar_t key = m_cHotkey;
 
-		// if (key)
-		// {
-		// 	if (m_iKeyOffset > 0 && m_iKeySize > 0)
-		// 	{
-		// 		int keyWide = m_iKeySize;
-		// 		int keyTall = m_iKeySize;
-		//
-		// 		int keyX = m_iKeyOffset;
-		// 		int keyY = (tall - keyTall) / 2;
-		//
-		// 		HFont font = GetFont();
-		//
-		// 		int charWide, charTall;
-		// 		charTall = surface()->GetFontTall(font);
-		//
-		// 		int a, b, c;
-		// 		surface()->GetCharABCwide(font, key, a, b, c);
-		// 		charWide = a + b + c;
-		//
-		// 		surface()->DrawSetTextColor(GetFgColor());
-		// 		surface()->DrawSetTextFont(font);
-		// 		surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
-		// 		surface()->DrawUnicodeChar(key);
-		// 		surface()->DrawFlushText();
-		// 	}
-		// }
+		if (g_bDebug) { 
+			if (key)
+			{
+				if (m_iKeyOffset > 0 && m_iKeySize > 0)
+				{
+					int keyWide = m_iKeySize;
+					int keyTall = m_iKeySize;
+			
+					int keyX = m_iKeyOffset;
+					int keyY = (tall - keyTall) / 2;
+			
+					HFont font = GetFont();
+			
+					int charWide, charTall;
+					charTall = surface()->GetFontTall(font);
+			
+					int a, b, c;
+					surface()->GetCharABCwide(font, key, a, b, c);
+					charWide = a + b + c;
+			
+					surface()->DrawSetTextColor(GetFgColor());
+					surface()->DrawSetTextFont(font);
+					surface()->DrawSetTextPos(keyX + (keyWide - charWide) / 2, keyY + (keyTall - charTall) / 2);
+					surface()->DrawUnicodeChar(key);
+					surface()->DrawFlushText();
+				}
+			}
+		}
 	}
 }
 
 void BuyPresetButton::PaintBackground(void)
 {
-	//BaseClass::PaintBackground();
-	// int x, y, w, h;
-	// GetBounds(x, y, w, h);
-	// DrawBox(x, y, w, h, { 255,255,255,255 }, 1.0, true);
+
+	if (g_bDebug) { 
+		BaseClass::PaintBackground();
+		int x, y, w, h;
+		GetBounds(x, y, w, h);
+		DrawBox(x, y, w, h, { 255,255,255,255 }, 1.0, true);
+	}
+	
 }
 
 void BuyPresetButton::FireActionSignal(void)
