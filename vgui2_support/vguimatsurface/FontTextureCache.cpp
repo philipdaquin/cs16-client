@@ -17,6 +17,11 @@ CFontTextureCache::~CFontTextureCache()
 {
 }
 
+void CFontTextureCache::Clear()
+{
+	m_CharCache.clear();
+	m_PageList.clear();
+}
 void CFontTextureCache::InvalidateFont(vgui2::HFont font)
 {
 	for (auto it = m_CharCache.begin(); it != m_CharCache.end(); )
@@ -197,11 +202,6 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 		const int paddedWide = fontWide + FONT_GLYPH_PADDING * 2;
 		const int paddedTall = fontTall + FONT_GLYPH_PADDING * 2;
 
-		int page, drawX, drawY, twide, ttall;
-
-		if (!AllocatePageForChar(paddedWide, paddedTall, page, drawX, drawY, twide, ttall))
-			return false;
-
 		const auto size = 4 * fontWide * fontTall;
 		const auto paddedSize = 4 * paddedWide * paddedTall;
 
@@ -233,20 +233,13 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 			);
 		}
 
-		if (page < 0 || page >= static_cast<int>(m_PageList.size()))
-		{
-			MemAlloc_FreeAligned(pDest);
-			MemAlloc_FreeAligned(pPaddedDest);
-			return false;
-		}
+		const int textureID = staticSurface->CreateNewTextureID(false);
 
-		auto& pageData = m_PageList[page];
-
-		staticSurface->DrawSetSubTextureRGBA(
-			pageData.textureID,
-			drawX, drawY,
+		staticSurface->DrawSetTextureRGBAWithAlphaChannel(
+			textureID,
 			pPaddedDest,
-			paddedWide, paddedTall
+			paddedWide, paddedTall,
+			false
 		);
 
 		MemAlloc_FreeAligned(pDest);
@@ -270,8 +263,26 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 		texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
 		texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
 
-		return true;
+        cacheitem.font = font;
+        cacheitem.wch = wch;
+		cacheitem.textureID = textureID;
+
+		cacheitem.texCoords[0] = static_cast<double>(FONT_GLYPH_PADDING) / paddedWide;
+		cacheitem.texCoords[1] = static_cast<double>(FONT_GLYPH_PADDING) / paddedTall;
+		cacheitem.texCoords[2] = static_cast<double>(FONT_GLYPH_PADDING + fontWide) / paddedWide;
+		cacheitem.texCoords[3] = static_cast<double>(FONT_GLYPH_PADDING + fontTall) / paddedTall;
+
+		index = m_CharCache.emplace(std::make_pair(font, wch), cacheitem).first;
 	}
 
-	return false;
+	const auto& cacheData = index->second;
+
+	*textureID = cacheData.textureID;
+
+	texCoords[0] = cacheData.texCoords[0];
+	texCoords[1] = cacheData.texCoords[1];
+	texCoords[2] = cacheData.texCoords[2];
+	texCoords[3] = cacheData.texCoords[3];
+
+	return true;
 }

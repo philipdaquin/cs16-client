@@ -16,28 +16,30 @@ private:
 	{
 		vgui2::HFont font;
 		uchar32 wch;
-		short page;
+		int textureID;
 		float texCoords[4];
 	};
 
 	struct page_t
 	{
-		short textureID;
-		short fontHeight;
-		short wide;
-		short tall;
-		short nextX;
-		short nextY;
+		int textureID;
+		int fontHeight;
+		int wide;
+		int tall;
+		int nextX;
+		int nextY;
 	};
 
 public:
 	CFontTextureCache();
 	~CFontTextureCache();
 
+	void Clear();
+	void InvalidateFont(vgui2::HFont font);
+
 	bool AllocatePageForChar(int charWide, int charTall, int& pageIndex, int& drawX, int& drawY, int& twide, int& ttall);
 
 	bool GetTextureForChar(vgui2::HFont font, uchar32 wch, int* textureID, float* texCoords);
-	void InvalidateFont(vgui2::HFont font);
 
 private:
 	static bool CacheEntryLessFunc(const cacheentry_t& lhs, const cacheentry_t& rhs);

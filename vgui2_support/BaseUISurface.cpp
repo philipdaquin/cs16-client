@@ -675,6 +675,7 @@ void BaseUISurface::Shutdown() {
 	if (m_pChromeController) {
 		m_pChromeController->Shutdown();
 	}
+    m_FontTextureCache.Clear();
     FontManager().ClearAllFonts();
 }
 
@@ -1409,7 +1410,9 @@ bool BaseUISurface::AddGlyphSetToFont(vgui2::HFont font, const char *windowsFont
     BootstrapFontFiles();
     const bool added = FontManager().SetFontGlyphSet(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
     if (added)
+    {
         m_FontTextureCache.InvalidateFont(font);
+    }
     return added;
 }
 
