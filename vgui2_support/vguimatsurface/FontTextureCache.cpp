@@ -22,6 +22,7 @@ void CFontTextureCache::Clear()
 	m_CharCache.clear();
 	m_PageList.clear();
 }
+
 void CFontTextureCache::InvalidateFont(vgui2::HFont font)
 {
 	for (auto it = m_CharCache.begin(); it != m_CharCache.end(); )
@@ -168,15 +169,9 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int& pag
 
 bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* textureID, float* texCoords)
 {
-	// Cache bypass diagnostics:
-	// auto index = m_CharCache.find(std::make_pair(font, wch));
-	// if (index != m_CharCache.end() && !FontManager().GetFontForChar(font, wch))
-	// {
-	// 	m_CharCache.erase(index);
-	// 	index = m_CharCache.end();
-	// }
-	//
-	// if (index == m_CharCache.end())
+	auto index = m_CharCache.find(std::make_pair(font, wch));
+
+	if (index == m_CharCache.end())
 	{
 		auto pFont = FontManager().GetFontForChar(font, wch);
 
@@ -245,26 +240,12 @@ bool CFontTextureCache::GetTextureForChar(vgui2::HFont font, uchar32 wch, int* t
 		MemAlloc_FreeAligned(pDest);
 		MemAlloc_FreeAligned(pPaddedDest);
 
-		// Cache bypass diagnostics:
-		// cacheentry_t cacheitem;
-		// memset(&cacheitem, 0, sizeof(cacheitem));
-		// cacheitem.font = font;
-		// cacheitem.wch = wch;
-		// cacheitem.page = page;
-		// cacheitem.texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
-		// cacheitem.texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
-		// cacheitem.texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
-		// cacheitem.texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
-		// index = m_CharCache.emplace(std::make_pair(font, wch), cacheitem).first;
+		cacheentry_t cacheitem;
 
-		*textureID = pageData.textureID;
-		texCoords[0] = static_cast<double>(drawX + FONT_GLYPH_PADDING) / twide;
-		texCoords[1] = static_cast<double>(drawY + FONT_GLYPH_PADDING) / ttall;
-		texCoords[2] = static_cast<double>(drawX + FONT_GLYPH_PADDING + fontWide) / twide;
-		texCoords[3] = static_cast<double>(drawY + FONT_GLYPH_PADDING + fontTall) / ttall;
+		memset(&cacheitem, 0, sizeof(cacheitem));
 
-        cacheitem.font = font;
-        cacheitem.wch = wch;
+		cacheitem.font = font;
+		cacheitem.wch = wch;
 		cacheitem.textureID = textureID;
 
 		cacheitem.texCoords[0] = static_cast<double>(FONT_GLYPH_PADDING) / paddedWide;
