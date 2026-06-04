@@ -20,7 +20,116 @@ GNU General Public License for more details.
 #include "YesNoMessageBox.h"
 #include "Utils.h"
 
+#include <stdio.h>
+
 static void ToggleInactiveInternalCb( CMenuBaseItem *pSelf, void *pExtra );
+
+static const char *UI_SkipWhitespace( const char *text )
+{
+	if( !text )
+		return "";
+
+	while( *text == ' ' || *text == '\t' || *text == '\r' || *text == '\n' )
+		text++;
+
+	return text;
+}
+
+static bool UI_LineEquals( const char *text, const char *line )
+{
+	size_t len;
+
+	if( !text || !line )
+		return false;
+
+	len = strlen( line );
+	if( strncmp( text, line, len ) != 0 )
+		return false;
+
+	return text[len] == '\0' || text[len] == '\r' || text[len] == '\n';
+}
+
+static const char *UI_SkipLine( const char *text )
+{
+	if( !text )
+		return "";
+
+	while( *text && *text != '\r' && *text != '\n' )
+		text++;
+
+	if( *text == '\r' )
+		text++;
+
+	if( *text == '\n' )
+		text++;
+
+	return text;
+}
+
+static bool UI_IsServerDisconnectMessage( const char *text )
+{
+	if( !text )
+		return false;
+
+	return strstr( text, "Server message" ) != NULL
+		|| strstr( text, "Server was killed due to an error" ) != NULL
+		|| strstr( text, "Host_Error" ) != NULL;
+}
+
+static void UI_FormatServerDisconnectMessage( char *out, size_t outSize, const char *text )
+{
+	const char *body;
+	const char *title;
+	const char *truncated = "\n\n^3(message truncated)^7";
+	int written;
+
+	if( !out || !outSize )
+		return;
+
+	body = UI_SkipWhitespace( text );
+	if( UI_LineEquals( body, "Server message" ) )
+		body = UI_SkipWhitespace( UI_SkipLine( body ) );
+
+	if( !body[0] )
+		body = "Disconnected from server.";
+
+	title = strstr( body, "Server was killed due to an error" ) || strstr( body, "Host_Error" )
+		? "^1Server error^7"
+		: "^3Server message^7";
+
+	written = snprintf( out, outSize, "%s\n\n%s", title, body );
+	if( written < 0 )
+	{
+		out[0] = '\0';
+		return;
+	}
+
+	if( (size_t)written >= outSize )
+	{
+		size_t markLen = strlen( truncated );
+
+		if( outSize > markLen + 1 )
+			Q_strncpy( out + outSize - markLen - 1, truncated, markLen + 1 );
+	}
+}
+
+static void UI_ConfigureMessageBoxLayout( CMenuYesNoMessageBox &msgBox, bool serverMessage )
+{
+	msgBox.Init();
+	msgBox.SetPositiveButton( L( "GameUI_OK" ), PC_OK );
+
+	if( serverMessage )
+	{
+		msgBox.dlgMessage1.SetRect( 40, 28, 560, 160 );
+		msgBox.dlgMessage1.SetCharSize( QM_SMALLFONT );
+		msgBox.dlgMessage1.eTextAlignment = QM_TOPLEFT;
+		return;
+	}
+
+	msgBox.dlgMessage1.SetRect( 0, 24, 640, 256 - 24 );
+	msgBox.dlgMessage1.SetCharSize( QM_DEFAULTFONT );
+	msgBox.dlgMessage1.eTextAlignment = QM_TOP;
+}
 
 CMenuYesNoMessageBox::CMenuYesNoMessageBox( bool alert ) : BaseClass( "YesNoMessageBox")
 {
@@ -226,10 +335,12 @@ static void ToggleInactiveInternalCb( CMenuBaseItem *pSelf, void * )
 
 void UI_ShowMessageBox( const char *text )
 {
+	static char rawMsg[1024];
 	static char msg[1024];
 	static CMenuYesNoMessageBox msgBox( true );
+	bool serverMessage;
 
-	Q_strncpy( msg, text, sizeof( msg ));
+	Q_strncpy( rawMsg, text && text[0] ? text : "Disconnected from server.", sizeof( rawMsg ));
 
 	if( !UI_IsVisible() )
 	{
@@ -237,7 +348,7 @@ void UI_ShowMessageBox( const char *text )
 		UI_SetActiveMenu( TRUE );
 	}
 
-	if( strstr( msg, "m_ignore") || strstr( msg, "touch_enable" ) || strstr( msg, "joy_enable" ) )
+	if( strstr( rawMsg, "m_ignore") || strstr( rawMsg, "touch_enable" ) || strstr( rawMsg, "joy_enable" ) )
 	{
 		static CMenuYesNoMessageBox msgBoxInputDev( false );
 		static bool init;
@@ -252,12 +363,19 @@ void UI_ShowMessageBox( const char *text )
 			init = true;
 		}
 
-		msgBoxInputDev.SetMessage( msg );
+		msgBoxInputDev.SetMessage( rawMsg );
 		msgBoxInputDev.Show();
 		msgBoxInputDev.yes.SetCoord( 200, 204 );
 		return;
 	}
 
+	serverMessage = UI_IsServerDisconnectMessage( rawMsg );
+	if( serverMessage )
+		UI_FormatServerDisconnectMessage( msg, sizeof( msg ), rawMsg );
+	else
+		Q_strncpy( msg, rawMsg, sizeof( msg ));
+
+	UI_ConfigureMessageBoxLayout( msgBox, serverMessage );
 	msgBox.SetMessage( msg );
 	msgBox.Show();
 }
