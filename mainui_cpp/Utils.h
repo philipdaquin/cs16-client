@@ -80,6 +80,7 @@ void UI_ConnectionProgress_Precache( void );
 void UI_ConnectionProgress_Connect( const char *server );
 void UI_ConnectionProgress_ChangeLevel( void );
 void UI_ConnectionProgress_ParseServerInfo( const char *server );
+void UI_RestartBackGroundMap( void );
 
 // defined as exported to keep compatibility with old interface
 extern "C" EXPORT void AddTouchButtonToList( const char *name, const char *texture, const char *command, unsigned char *color, int flags );
