@@ -87,7 +87,7 @@ static void UI_FormatServerDisconnectMessage( char *out, size_t outSize, const c
 		return;
 
 	body = UI_SkipWhitespace( text );
-	if( UI_LineEquals( body, "Server message" ) )
+	while( UI_LineEquals( body, "Server message" ) )
 		body = UI_SkipWhitespace( UI_SkipLine( body ) );
 
 	if( !body[0] )
@@ -371,9 +371,14 @@ void UI_ShowMessageBox( const char *text )
 
 	serverMessage = UI_IsServerDisconnectMessage( rawMsg );
 	if( serverMessage )
+	{
+		UI_RestartBackGroundMap();
 		UI_FormatServerDisconnectMessage( msg, sizeof( msg ), rawMsg );
+	}
 	else
+	{
 		Q_strncpy( msg, rawMsg, sizeof( msg ));
+	}
 
 	UI_ConfigureMessageBoxLayout( msgBox, serverMessage );
 	msgBox.SetMessage( msg );

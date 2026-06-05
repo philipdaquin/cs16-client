@@ -340,6 +340,7 @@ ADD_MENU3( menu_connectionprogress, CMenuConnectionProgress, UI_ConnectionProgre
 // exports
 void UI_ConnectionProgress_Disconnect( void )
 {
+	UI_RestartBackGroundMap();
 	menu_connectionprogress->HandleDisconnect();
 }
 

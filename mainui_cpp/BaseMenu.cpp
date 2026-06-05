@@ -556,13 +556,13 @@ void UI_DrawMouseCursor( void )
 UI_StartBackGroundMap
 =================
 */
+static bool uiBackgroundMapStarted = false;
+
 bool UI_StartBackGroundMap( void )
 {
-	static bool	first = TRUE;
+	if( uiBackgroundMapStarted ) return FALSE;
 
-	if( !first ) return FALSE;
-
-	first = FALSE;
+	uiBackgroundMapStarted = true;
 
 	// some map is already running
 	if( uiStatic.bgmaps.IsEmpty() || CL_IsActive() || gpGlobals->demoplayback )
@@ -578,6 +578,15 @@ bool UI_StartBackGroundMap( void )
 	EngFuncs::ClientCmd( FALSE, cmd );
 
 	return TRUE;
+}
+
+void UI_RestartBackGroundMap( void )
+{
+	uiBackgroundMapStarted = false;
+	uiStatic.firstDraw = true;
+
+	if( uiStatic.background )
+		uiStatic.background->VidInit();
 }
 
 // =====================================================================
