@@ -184,6 +184,7 @@ HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWin
 {
 	m_iHTMLTextureID = 0;
 	m_iComboBoxTextureID = 0;
+	m_Serializer = nullptr;
 	m_bCanGoBack = false;
 	m_bCanGoForward = false;
 	m_bInFind = false;
@@ -253,7 +254,7 @@ HTML::~HTML()
 {
 	m_pContextMenu->MarkForDeletion();
 
-	if (surface()->AccessChromeHTMLController())
+	if ( m_Serializer && surface()->AccessChromeHTMLController() )
 	{
 		surface()->AccessChromeHTMLController()->RemoveBrowser( m_Serializer->GetResponseTarget() );
 		m_Serializer = NULL;
@@ -284,11 +285,10 @@ void HTML::OnSetCursorVGUI( int cursor )
 void HTML::ApplySchemeSettings(IScheme *pScheme)
 {
     BaseClass::ApplySchemeSettings(pScheme);
-	if (m_Serializer)
-	{
-		BrowserResize();
-	}
-	//BrowserResize();
+	if ( !HasBrowser() )
+		return;
+
+	BrowserResize();
 }
 
 
@@ -411,6 +411,9 @@ void HTML::PerformLayout()
 void HTML::OnMove()
 {
 	BaseClass::OnMove();
+
+	if ( !HasBrowser() )
+		return;
 
 	// tell cef where we are on the screen so plugins can correctly render
 	int nPanelAbsX, nPanelAbsY;
@@ -560,6 +563,9 @@ void HTML::OpenURL(const char *URL, const char *postData, bool force)
 //-----------------------------------------------------------------------------
 void HTML::PostURL(const char *URL, const char *pchPostData/*, bool force*/)
 {
+	if ( !HasBrowser() )
+		return;
+
 	if ( m_Serializer->BrowserGetIndex() < 0 )
 	{
 		m_sPendingURLLoad = URL;
@@ -622,6 +628,9 @@ void HTML::PostURL(const char *URL, const char *pchPostData/*, bool force*/)
 //-----------------------------------------------------------------------------
 bool HTML::StopLoading()
 {
+	if ( !HasBrowser() )
+		return false;
+
 	m_Serializer->StopLoad();
 	return true;
 }
@@ -632,6 +641,9 @@ bool HTML::StopLoading()
 //-----------------------------------------------------------------------------
 bool HTML::Refresh()
 {
+	if ( !HasBrowser() )
+		return false;
+
 	m_Serializer->Reload();
 	return true;
 }
@@ -642,6 +654,9 @@ bool HTML::Refresh()
 //-----------------------------------------------------------------------------
 void HTML::GoBack()
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->GoBack();
 }
 
@@ -651,6 +666,9 @@ void HTML::GoBack()
 //-----------------------------------------------------------------------------
 void HTML::GoForward()
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->GoForward();
 }
 
@@ -679,8 +697,11 @@ bool HTML::BCanGoFoward()
 void HTML::OnSizeChanged(int wide,int tall)
 {
 	BaseClass::OnSizeChanged(wide,tall);
-	//UpdateSizeAndScrollBars();
-	//UpdateCachedHTMLValues();
+	if ( !HasBrowser() )
+		return;
+
+	UpdateSizeAndScrollBars();
+	UpdateCachedHTMLValues();
 //#ifdef WIN32
 //	// under windows we get stuck in the windows message loop pushing out WM_WINDOWPOSCHANGED without returning in the windproc loop
 //	// so we need to manually pump the html dispatching of messages here
@@ -699,7 +720,7 @@ void HTML::OnSizeChanged(int wide,int tall)
 
 	InvalidateLayout();
 
-	//m_Serializer->RequestBrowserSizes();
+	m_Serializer->RequestBrowserSizes();
 }
 
 
@@ -708,6 +729,9 @@ void HTML::OnSizeChanged(int wide,int tall)
 //-----------------------------------------------------------------------------
 void HTML::RunJavascript( const char *pchScript )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->RunJavaScript( pchScript );
 }
 
@@ -740,6 +764,9 @@ int ConvertMouseCodeToCEFCode( MouseCode code )
 //-----------------------------------------------------------------------------
 void HTML::OnMousePressed(MouseCode code)
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_sDragURL = NULL;
 
 	// mouse4 = back button
@@ -795,6 +822,9 @@ void HTML::OnMousePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseReleased(MouseCode code)
 {
+	if ( !HasBrowser() )
+		return;
+
 	if ( code == MOUSE_LEFT )
 	{
 		input()->SetMouseCapture( NULL_HANDLE );
@@ -825,6 +855,9 @@ void HTML::OnMouseReleased(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnCursorMoved(int x,int y)
 {
+	if ( !HasBrowser() )
+		return;
+
 	// Only do this when we are over the current panel
 	if ( vgui2::input()->GetMouseOver() == GetVPanel() )
 	{
@@ -862,6 +895,9 @@ void HTML::OnCursorMoved(int x,int y)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseDoublePressed(MouseCode code)
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->MouseDoubleClick( ConvertMouseCodeToCEFCode( code ) );
 }
 
@@ -871,6 +907,9 @@ void HTML::OnMouseDoublePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnKeyTyped(uchar32 unichar)
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->KeyChar( unichar );
 }
 
@@ -973,6 +1012,9 @@ int GetKeyModifiers()
 //-----------------------------------------------------------------------------
 void HTML::OnKeyCodeTyped(KeyCode code)
 {
+	if ( !HasBrowser() )
+		return;
+
 	switch( code )
 	{
 	case KEY_PAGEDOWN:
@@ -1041,6 +1083,9 @@ void HTML::OnKeyCodeTyped(KeyCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnKeyCodeReleased(KeyCode code)
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->KeyUp( KeyCode_VGUIToVirtualKey( code ), GetKeyModifiers() );
 }
 
@@ -1050,6 +1095,9 @@ void HTML::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 void HTML::OnMouseWheeled(int delta)
 {	
+	if ( !HasBrowser() )
+		return;
+
 	if (_vbar && ( ( m_pComboBoxHost && !m_pComboBoxHost->IsVisible() ) ) )
 	{
 		int val = _vbar->GetValue();
@@ -1077,10 +1125,8 @@ void HTML::AddCustomURLHandler(const char *customProtocolName, vgui2::Panel *tar
 //-----------------------------------------------------------------------------
 void HTML::BrowserResize()
 {
-	if (!m_Serializer)
-	{
+	if ( !HasBrowser() )
 		return;
-	}
 
 	int w,h;
 	GetSize( w, h );
@@ -1105,17 +1151,15 @@ void HTML::BrowserResize()
 			m_iTalLastHTMLSize = 64 - bottom;
 		}
 
-		/*
-			m_Serializer->BrowserSize( m_iWideLastHTMLSize, m_iTalLastHTMLSize );
+		m_Serializer->BrowserSize( m_iWideLastHTMLSize, m_iTalLastHTMLSize );
 
-			// webkit forgets the scroll offset when you resize (it saves the scroll in a DC and a resize throws away the DC)
-			// so just tell it after the resize
-			int scrollV = _vbar->GetValue();
-			int scrollH = _hbar->GetValue();
+		// webkit forgets the scroll offset when you resize (it saves the scroll in a DC and a resize throws away the DC)
+		// so just tell it after the resize
+		int scrollV = _vbar->GetValue();
+		int scrollH = _hbar->GetValue();
 
-			m_Serializer->SetHorizontalScroll( scrollH );
-			m_Serializer->SetVerticalScroll( scrollV );
-		*/
+		m_Serializer->SetHorizontalScroll( scrollH );
+		m_Serializer->SetVerticalScroll( scrollV );
 	}
 }
 
@@ -1125,6 +1169,9 @@ void HTML::BrowserResize()
 //-----------------------------------------------------------------------------
 void HTML::OnSliderMoved()
 {
+	if ( !HasBrowser() )
+		return;
+
 	if(_hbar->IsVisible())
 	{
 		int scrollX =_hbar->GetValue();
@@ -1204,7 +1251,6 @@ void HTML::NewWindowsOnly( bool state )
 //-----------------------------------------------------------------------------
 void HTML::PostChildPaint()
 {
-	// Restore the embedded browser paint path after children have finished drawing.
 	BaseClass::PostChildPaint();
 	// TODO::STYLE
 	//m_pInteriorPanel->SetPaintAppearanceEnabled( true ); // turn painting back on so the IE hwnd can render this border
@@ -1216,6 +1262,9 @@ void HTML::PostChildPaint()
 //-----------------------------------------------------------------------------
 void HTML::AddHeader( const char *pchHeader, const char *pchValue )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->AddHeader( pchHeader, pchValue );
 }
 
@@ -1226,6 +1275,9 @@ void HTML::AddHeader( const char *pchHeader, const char *pchValue )
 void HTML::OnSetFocus()
 {
 	BaseClass::OnSetFocus();
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->SetFocus( true );
 }
 
@@ -1245,6 +1297,9 @@ void HTML::OnKillFocus()
 	if ( m_pComboBoxHost->HasFocus() )
 		return;
 
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->SetFocus( false );
 }
 
@@ -1254,6 +1309,12 @@ void HTML::OnKillFocus()
 //-----------------------------------------------------------------------------
 void HTML::OnCommand( const char *pchCommand )
 {
+	if ( !HasBrowser() )
+	{
+		BaseClass::OnCommand( pchCommand );
+		return;
+	}
+
 	if ( !Q_stricmp( pchCommand, "back" ) )
 	{
 		PostActionSignal( new KeyValues( "HTMLBackRequested" ) );
@@ -1421,6 +1482,9 @@ void HTMLComboBoxHost::OnMouseReleased(MouseCode code)
 //-----------------------------------------------------------------------------
 void HTMLComboBoxHost::OnCursorMoved(int x,int y)
 {
+	if ( !m_pParent->HasBrowser() )
+		return;
+
 	// Only do this when we are over the current panel
 	if ( vgui2::input()->GetMouseOver() == GetVPanel() )
 	{
@@ -1517,6 +1581,9 @@ void HTML::CHTMLFindBar::OnCommand( const char *pchCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserReady()
 {
+	if ( !HasBrowser() )
+		return;
+
 	/*
 	const char *pchTitle = vgui2::localize()->FindAsUTF8( "#cef_error_title" );
 	const char *pchHeader = vgui2::localize()->FindAsUTF8( "#cef_error_header" );
@@ -1554,6 +1621,9 @@ void HTML::BrowserNeedsPaint( int textureid,
 							  int updatex, int updatey, int updatewide, int updatetall, 
 							  int combobox_wide, int combobox_tall, const unsigned char* combobox_rgba )
 {
+	if ( !HasBrowser() )
+		return;
+
 	int tw = 0, tt = 0;
 	if ( m_iHTMLTextureID != 0 )
 	{
@@ -1646,6 +1716,9 @@ void HTML::BrowserNeedsPaint( int textureid,
 //-----------------------------------------------------------------------------
 bool HTML::OnStartRequest( const char *url, const char *target, const char *pchPostData, bool bIsRedirect )
 {
+	if ( !HasBrowser() )
+		return true;
+
 	if ( !url || !Q_stricmp( url, "about:blank") )
 		return true ; // this is just webkit loading a new frames contents inside an existing page
 
@@ -1701,6 +1774,9 @@ bool HTML::OnStartRequest( const char *url, const char *target, const char *pchP
 //-----------------------------------------------------------------------------
 void HTML::BrowserStartRequest( const char *url, const char *target, const char *postdata, bool isredirect )
 {
+	if ( !HasBrowser() )
+		return;
+
 	bool bRes = OnStartRequest( url, target, postdata, isredirect );
 
 	m_Serializer->StartRequestResponse( bRes );
@@ -1714,6 +1790,9 @@ void HTML::BrowserStartRequest( const char *url, const char *target, const char 
 //-----------------------------------------------------------------------------
 void HTML::BrowserURLChanged( const char *url, const char *postdata, bool isredirect )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_sCurrentURL = url;
 
 	KeyValues *pMessage = new KeyValues( "OnURLChanged" );
@@ -1732,6 +1811,9 @@ void HTML::BrowserURLChanged( const char *url, const char *postdata, bool isredi
 //-----------------------------------------------------------------------------
 void HTML::BrowserFinishedRequest( const char *url, const char *pagetitle )
 {
+	if ( !HasBrowser() )
+		return;
+
 	PostActionSignal( new KeyValues( "OnFinishRequest", "url", url ) );
 	if (  *pagetitle  )
 		PostActionSignal( new KeyValues( "PageTitleChange", "title", pagetitle ) );
@@ -1766,6 +1848,9 @@ void HTML::BrowserFinishedRequest( const char *url, const char *pagetitle )
 //-----------------------------------------------------------------------------
 void HTML::BrowserShowPopup()
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_pComboBoxHost->SetVisible( true );
 }
 
@@ -1775,6 +1860,9 @@ void HTML::BrowserShowPopup()
 //-----------------------------------------------------------------------------
 void HTML::HidePopup()
 { 
+	if ( !HasBrowser() )
+		return;
+
 	m_pComboBoxHost->SetVisible( false ); 
 }
 
@@ -1784,6 +1872,9 @@ void HTML::HidePopup()
 //-----------------------------------------------------------------------------
 void HTML::BrowserHidePopup()
 {
+	if ( !HasBrowser() )
+		return;
+
 	HidePopup();
 }
 
@@ -1793,6 +1884,9 @@ void HTML::BrowserHidePopup()
 //-----------------------------------------------------------------------------
 void HTML::BrowserSizePopup( int x, int y, int wide, int tall )
 {
+	if ( !HasBrowser() )
+		return;
+
 	int nAbsX, nAbsY;
 	ipanel()->GetAbsPos( GetVPanel(), nAbsX, nAbsY );
 	m_pComboBoxHost->SetBounds( x + 1 + nAbsX, y + nAbsY, wide, tall );
@@ -1804,6 +1898,9 @@ void HTML::BrowserSizePopup( int x, int y, int wide, int tall )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHorizontalScrollBarSizeResponse( int x, int y, int wide, int tall, int scroll, int scroll_max, float zoom )
 {
+	if ( !HasBrowser() )
+		return;
+
 	ScrollData_t scrollHorizontal;
 	scrollHorizontal.m_nX = x;
 	scrollHorizontal.m_nY = y;
@@ -1830,6 +1927,9 @@ void HTML::BrowserHorizontalScrollBarSizeResponse( int x, int y, int wide, int t
 //-----------------------------------------------------------------------------
 void HTML::BrowserVerticalScrollBarSizeResponse( int x, int y, int wide, int tall, int scroll, int scroll_max, float zoom )
 {
+	if ( !HasBrowser() )
+		return;
+
 	ScrollData_t scrollVertical;
 	scrollVertical.m_nX = x;
 	scrollVertical.m_nY = y;
@@ -1856,6 +1956,9 @@ void HTML::BrowserVerticalScrollBarSizeResponse( int x, int y, int wide, int tal
 //-----------------------------------------------------------------------------
 void HTML::BrowserGetZoomResponse( float flZoom )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_flZoom = flZoom;
 	if( m_flZoom == 0.0f )
 		m_flZoom = 100.0f;
@@ -1868,6 +1971,9 @@ void HTML::BrowserGetZoomResponse( float flZoom )
 //-----------------------------------------------------------------------------
 void HTML::BrowserCanGoBackandForward( bool bgoback, bool bgoforward )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_bCanGoBack = bgoback;
 	m_bCanGoForward = bgoforward;
 }
@@ -1878,6 +1984,9 @@ void HTML::BrowserCanGoBackandForward( bool bgoback, bool bgoforward )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSAlert( const char *message )
 {
+	if ( !HasBrowser() )
+		return;
+
 	MessageBox *pDlg = new MessageBox( m_sCurrentURL, message, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetCommand( new KeyValues( "DismissJSDialog", "result", false ) );
@@ -1890,6 +1999,9 @@ void HTML::BrowserJSAlert( const char *message )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSConfirm( const char *message )
 {
+	if ( !HasBrowser() )
+		return;
+
 	QueryBox *pDlg = new QueryBox( m_sCurrentURL, message, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetOKCommand( new KeyValues( "DismissJSDialog", "result", true ) );
@@ -1903,6 +2015,9 @@ void HTML::BrowserJSConfirm( const char *message )
 //-----------------------------------------------------------------------------
 void HTML::BrowserPopupHTMLWindow( const char *url, int wide, int tall, int x, int y )
 {
+	if ( !HasBrowser() )
+		return;
+
 	HTMLPopup *p = new HTMLPopup( this, url, "" );
 	//int wide = pCmd->wide();
 	//int tall = pCmd->tall();
@@ -1926,6 +2041,9 @@ void HTML::BrowserPopupHTMLWindow( const char *url, int wide, int tall, int x, i
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetHTMLTitle( const char *title )
 {
+	if ( !HasBrowser() )
+		return;
+
 	PostMessage( GetParent(), new KeyValues( "OnSetHTMLTitle", "title", title ) );
 	OnSetHTMLTitle( title );
 }
@@ -1936,6 +2054,9 @@ void HTML::BrowserSetHTMLTitle( const char *title )
 //-----------------------------------------------------------------------------
 void HTML::BrowserLoadingResource()
 {
+	if ( !HasBrowser() )
+		return;
+
 	UpdateCachedHTMLValues();
 }
 
@@ -1945,6 +2066,9 @@ void HTML::BrowserLoadingResource()
 //-----------------------------------------------------------------------------
 void HTML::BrowserStatusText( const char *text )
 {
+	if ( !HasBrowser() )
+		return;
+
 	PostActionSignal( new KeyValues( "OnSetStatusText", "status", text ) );
 }
 
@@ -1954,6 +2078,9 @@ void HTML::BrowserStatusText( const char *text )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetCursor( int in_cursor )
 {
+	if ( !HasBrowser() )
+		return;
+
 	// Mouse cursor value in CMsgSetCursor is set to one of EMouseCursor,
 	// by CChromePainter::OnSetCursor in html_chrome.cpp
 	// Code below relies on start of EMouseCursor being exactly same as vgui2::CursorCode  
@@ -1980,6 +2107,9 @@ void HTML::BrowserSetCursor( int in_cursor )
 //-----------------------------------------------------------------------------
 void HTML::BrowserFileLoadDialog()
 {
+	if ( !HasBrowser() )
+		return;
+
 	/*
 	// try and use the OS-specific file dialog first
 	char rgchFileName[MAX_UNICODE_PATH_IN_UTF8];
@@ -2013,6 +2143,9 @@ void HTML::BrowserFileLoadDialog()
 //-----------------------------------------------------------------------------
 void HTML::BrowserShowToolTip( const char *text )
 {
+	if ( !HasBrowser() )
+		return;
+
 	/*
 	BR FIXME
 	Tooltip *tip = GetTooltip();
@@ -2030,6 +2163,9 @@ void HTML::BrowserShowToolTip( const char *text )
 //-----------------------------------------------------------------------------
 void HTML::BrowserUpdateToolTip( const char *text )
 {
+	if ( !HasBrowser() )
+		return;
+
 //	GetTooltip()->SetText( text );
 }
 
@@ -2039,6 +2175,9 @@ void HTML::BrowserUpdateToolTip( const char *text )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHideToolTip()
 {
+	if ( !HasBrowser() )
+		return;
+
 //	GetTooltip()->HideTooltip();
 //	DeleteToolTip();
 }
@@ -2049,6 +2188,9 @@ void HTML::BrowserHideToolTip()
 //-----------------------------------------------------------------------------
 void HTML::BrowserClose()
 {
+	if ( !HasBrowser() )
+		return;
+
 	PostActionSignal( new KeyValues( "OnCloseWindow" ) );
 }
 
@@ -2058,6 +2200,9 @@ void HTML::BrowserClose()
 //-----------------------------------------------------------------------------
 void HTML::BrowserLinkAtPositionResponse( const char *url, int x, int y )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_LinkAtPos.m_sURL = url;
 	m_LinkAtPos.m_nX = x;
 	m_LinkAtPos.m_nY = y;
@@ -2092,6 +2237,9 @@ void HTML::BrowserLinkAtPositionResponse( const char *url, int x, int y )
 //-----------------------------------------------------------------------------
 void HTML::DismissJSDialog( int bResult )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->JSDialogResponse( bResult == 1 );
 }
 
@@ -2101,15 +2249,11 @@ void HTML::DismissJSDialog( int bResult )
 //-----------------------------------------------------------------------------
 void HTML::UpdateCachedHTMLValues()
 {
-	if (!m_Serializer)
-	{
+	if ( !HasBrowser() )
 		return;
-	}
 
 	// request scroll bar sizes
-	/*
 	m_Serializer->RequestBrowserSizes();
-	*/
 }
 
 
@@ -2118,6 +2262,9 @@ void HTML::UpdateCachedHTMLValues()
 //-----------------------------------------------------------------------------
 void HTML::GetLinkAtPosition( int x, int y )
 {
+	if ( !HasBrowser() )
+		return;
+
 	m_Serializer->GetLinkAtPosition( x, y );
 }
 
@@ -2126,6 +2273,9 @@ void HTML::GetLinkAtPosition( int x, int y )
 //-----------------------------------------------------------------------------
 void HTML::UpdateSizeAndScrollBars()
 {
+	if ( !HasBrowser() )
+		return;
+
 	// Tell IE
 	BrowserResize();
 
