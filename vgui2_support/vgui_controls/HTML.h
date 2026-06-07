@@ -147,6 +147,10 @@ public:
 #endif // DBGFLAG_VALIDATE
 
 	void PaintComboBox();
+	bool HasBrowser() const
+	{
+		return m_Serializer != nullptr;
+	}
 protected:
 	virtual void ApplySchemeSettings( IScheme *pScheme );
 

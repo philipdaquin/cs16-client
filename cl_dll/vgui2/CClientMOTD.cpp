@@ -28,6 +28,80 @@ public:
 	using vgui2::HTML::HTML;
 };
 
+#if defined( __EMSCRIPTEN__ )
+#include <emscripten.h>
+
+static void ShowWebMOTD( const char *title, const char *msg, int x, int y, int w, int h )
+{
+	EM_ASM({
+		const overlayId = "xash-web-motd-overlay";
+		let overlay = document.getElementById( overlayId );
+		if( !overlay )
+		{
+			overlay = document.createElement( "div" );
+			overlay.id = overlayId;
+			document.body.appendChild( overlay );
+		}
+
+		overlay.style.position = 'fixed';
+		const left = Number( $2 );
+		const top = Number( $3 );
+		const width = Number( $4 );
+		const height = Number( $5 );
+		overlay.style.left = left + "px";
+		overlay.style.top = top + "px";
+		overlay.style.width = width + "px";
+		overlay.style.height = height + "px";
+		overlay.style.zIndex = '2147483647';
+		overlay.style.background = '#101214';
+		overlay.style.border = '0';
+		overlay.style.margin = '0';
+		overlay.style.padding = '0';
+		overlay.style.overflow = 'hidden';
+		overlay.style.boxSizing = 'border-box';
+
+		overlay.innerHTML = "";
+
+		const iframe = document.createElement( "iframe" );
+		iframe.style.width = "100%";
+		iframe.style.height = "100%";
+		iframe.style.border = "0";
+		iframe.style.display = "block";
+
+		const content = UTF8ToString( $1 );
+		if( content.startsWith( "http://" ) || content.startsWith( "https://" ) )
+		{
+			iframe.src = content;
+		}
+		else
+		{
+			iframe.srcdoc = content;
+		}
+
+		if( $0 )
+		{
+			iframe.title = UTF8ToString( $0 );
+		}
+
+		overlay.appendChild( iframe );
+	}, title, msg, x, y, w, h );
+}
+
+static void HideWebMOTD()
+{
+	EM_ASM({
+		const overlay = document.getElementById( "xash-web-motd-overlay" );
+		if( overlay )
+		{
+			overlay.remove();
+		}
+	});
+}
+#else
+static void ShowWebMOTD( const char *, const char * ) {}
+static void HideWebMOTD() {}
+#endif
+
 CClientMOTD::CClientMOTD( IViewport* pParent )
 	: BaseClass( nullptr, "ClientMOTD" )
 	, m_pViewport( pParent )
@@ -56,6 +130,7 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 
 CClientMOTD::~CClientMOTD()
 {
+	HideWebMOTD();
 	RemoveTempFile();
 }
 
@@ -75,7 +150,7 @@ void CClientMOTD::SetLabelText( const char* textEntryName, const wchar_t* text )
 bool CClientMOTD::IsURL( const char* str )
 {
 	//TODO: https support
-	return strncmp( str, "http://", 7 ) == 0;
+	return strncmp( str, "http://", 7 ) == 0 || strncmp( str, "https://", 8 ) == 0;
 }
 
 // void CClientMOTD::PerformLayout()
@@ -168,6 +243,7 @@ void CClientMOTD::OnCommand( const char* command )
 
 void CClientMOTD::Close()
 {
+	HideWebMOTD();
 	if( auto *input = vgui2::input() )
 	{
 		if( input->GetAppModalSurface() == GetVPanel() )
@@ -186,6 +262,7 @@ void CClientMOTD::Close()
 
 void CClientMOTD::Activate( const char* title, const char* msg )
 {
+	HideWebMOTD();
 	m_pMessage->SetVisible(true);
 	m_pMessageHtml->SetVisible(false);
 	m_pViewport->ShowBackGround( true );
@@ -208,8 +285,7 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 
 void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 {
-	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
-
+	HideWebMOTD();
 	m_pMessage->SetVisible(false);
 	m_pMessageHtml->SetVisible(true);
 	BaseClass::Activate();
@@ -225,6 +301,35 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
+
+#if defined( __EMSCRIPTEN__ )
+	PerformLayout();
+	int htmlX = 0, htmlY = 0, htmlW = 0, htmlH = 0;
+	int frameX = 0, frameY = 0;
+	int childX = 0, childY = 0;
+	GetPos( frameX, frameY );
+	m_pMessageHtml->GetPos( childX, childY );
+	htmlX = frameX + childX;
+	htmlY = frameY + childY;
+	m_pMessageHtml->GetSize( htmlW, htmlH );
+	if( htmlW <= 0 || htmlH <= 0 )
+	{
+		htmlW = scheme()->GetProportionalScaledValue( 430 );
+		htmlH = scheme()->GetProportionalScaledValue( 360 );
+	}
+
+	ShowWebMOTD( title, msg, htmlX, htmlY, htmlW, htmlH );
+	return;
+#endif
+
+	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
+
+	if( !m_pMessageHtml || !m_pMessageHtml->HasBrowser() )
+	{
+		// The HTML browser backend is unavailable in this build.
+		Activate( title, msg );
+		return;
+	}
 
 	const char* pszURL = msg;
 
@@ -305,6 +410,7 @@ void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 
 void CClientMOTD::Reset()
 {
+	HideWebMOTD();
 	m_pMessageHtml->OpenURL( "", nullptr );
 	m_pMessage->SetText("");
 
@@ -317,6 +423,9 @@ void CClientMOTD::ShowPanel( bool state )
 {
 	if( BaseClass::IsVisible() == state )
 		return;
+
+	if( !state )
+		HideWebMOTD();
 
 	m_pViewport->ShowBackGround( state );
 
