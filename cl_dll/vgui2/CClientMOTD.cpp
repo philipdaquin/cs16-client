@@ -49,7 +49,11 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	LoadControlSettings( vgui2::resource_paths::kMenuMOTD, "GAME" );
 	InvalidateLayout();
 
-	m_pServerName = new vgui2::Label( this, "serverName", "" );
+	m_pServerName = dynamic_cast<vgui2::Label*>( FindChildByName( "serverName" ) );
+	if( !m_pServerName )
+	{
+		m_pServerName = new vgui2::Label( this, "serverName", "" );
+	}
 
 	SetVisible( false );
 }
@@ -201,7 +205,7 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 	RequestFocus();
 
 	SetTitle( title, false );
-	//SetControlString( "serverName", title );
+	m_pServerName->SetText( title ? title : "" );
 
 	m_pMessage->SetText(msg);
 }
@@ -224,7 +228,7 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	RequestFocus();
 
 	SetTitle( title, false );
-	//SetControlString( "serverName", title );
+	m_pServerName->SetText( title ? title : "" );
 
 	const char* pszURL = msg;
 
