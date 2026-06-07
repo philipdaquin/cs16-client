@@ -18,6 +18,21 @@
 #include "csmoe/cstrikeclassmenu.h"
 #include "hud.h"
 #include "parsemsg.h"
+#include "tier1/strtools.h"
+
+namespace
+{
+bool IsHtmlMOTD( const char *msg )
+{
+	return msg && (
+		Q_stristr( msg, "<!DOCTYPE HTML" ) ||
+		Q_stristr( msg, "<html" ) ||
+		Q_stristr( msg, "<head" ) ||
+		Q_stristr( msg, "<body" ) ||
+		Q_stristr( msg, "<style" ) ||
+		Q_stristr( msg, "<script" ) );
+}
+}
 
 static CHudViewport *s_pHudViewPort = nullptr;
 
@@ -106,7 +121,11 @@ int CHudViewport::MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 	if (panel)
 	{
 		m_bMOTDActive = true;
-		panel->Activate(gHUD.m_szServerName, m_szMOTD.c_str());
+		const char *msg = m_szMOTD.c_str();
+		if (IsHtmlMOTD(msg))
+			panel->ActivateHtml(gHUD.m_szServerName, msg);
+		else
+			panel->Activate(gHUD.m_szServerName, msg);
 	}
 	else
 		gEngfuncs.Con_Printf("MsgFunc_MOTD() : Error! CClientMOTD is nullptr\n");
