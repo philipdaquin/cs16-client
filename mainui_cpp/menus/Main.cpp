@@ -347,6 +347,12 @@ void CMenuMain::VidInit( bool connected )
 
 void CMenuMain::_VidInit()
 {
+	// Re-anchor the root window before positioning the menu items.
+	pos.x = uiStatic.xOffset;
+	pos.y = uiStatic.yOffset;
+	size.w = uiStatic.width;
+	size.h = 768;
+
 	VidInit( CL_IsActive() );
 }
 
