@@ -92,7 +92,7 @@ static void ShowWebMOTD( const char *title, const char *msg, int x, int y, int w
 		overlay.style.top = ( rectTop + ( top * scaleY ) ) + "px";
 		overlay.style.width = ( width * scaleX ) + "px";
 		overlay.style.height = ( height * scaleY ) + "px";
-		overlay.style.background = '#101214';
+		// overlay.style.background = '#101214';
 		overlay.style.border = '0';
 		overlay.style.margin = '0';
 		overlay.style.padding = '0';
@@ -107,6 +107,7 @@ static void ShowWebMOTD( const char *title, const char *msg, int x, int y, int w
 		iframe.style.height = "100%";
 		iframe.style.border = "0";
 		iframe.style.display = "block";
+		// iframe.style.background = "transparent";
 
 		const content = UTF8ToString( $1 );
 		if( content.startsWith( "http://" ) || content.startsWith( "https://" ) )
