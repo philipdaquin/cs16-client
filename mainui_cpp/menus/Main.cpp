@@ -59,6 +59,7 @@ private:
 	void Think() override;
 
 	void VidInit(bool connected);
+	void LeaveGameMenu();
 
 	void QuitDialogCb();
 	void DisconnectCb();
@@ -127,6 +128,13 @@ void CMenuMain::DisconnectDialogCb()
 	dialog.Show();
 }
 
+void CMenuMain::LeaveGameMenu()
+{
+	// Match the engine's in-game escape flow before closing the menu stack.
+	EngFuncs::KEY_SetDest( KEY_GAME );
+	UI_SetActiveMenu( FALSE );
+}
+
 void CMenuMain::HazardCourseDialogCb()
 {
 	dialog.onPositive = VoidCb( &CMenuMain::HazardCourseCb );;
@@ -146,7 +154,7 @@ bool CMenuMain::KeyDown( int key )
 		if ( CL_IsActive( ))
 		{
 			if( !dialog.IsVisible() )
-				UI_CloseMenu();
+				LeaveGameMenu();
 		}
 		else
 		{
@@ -209,7 +217,7 @@ void CMenuMain::_Init( void )
 	// resumeGame.SetTextHeight( 10 );
 	// resumeGame.SetTextHeight( 8 );
 	ApplyMainMenuTextStyle( resumeGame );
-	resumeGame.onReleased = UI_CloseMenu;
+	resumeGame.onReleased = VoidCb( &CMenuMain::LeaveGameMenu );
 
 	// disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), L( "Disconnect from server." ) );
 	disconnect.SetNameAndStatus( L( "GameUI_GameMenu_Disconnect" ), NULL );

@@ -600,7 +600,7 @@ void UI_CloseMenu( void )
 {
 	uiStatic.menu.Clean();
 
-//	EngFuncs::KEY_ClearStates ();
+	EngFuncs::KEY_ClearStates();
 	if( !uiStatic.client.IsActive() )
 		EngFuncs::KEY_SetDest( KEY_GAME );
 }
