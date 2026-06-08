@@ -156,8 +156,9 @@ int CHudSayText :: Draw( float flTime )
 		for (size_t c = 0; c < length; c++)
 		{
 			// color code parse
-			// '\x01' - normal (yellow); '\0x03' - teamcolor (R GREY B); '\x04' - green
-			if (text[c] == '\x01' || text[c] == '\x03' || text[c] == '\x04')
+			// '\x01' - normal (yellow); '\x02' - control/continuation marker;
+			// '\x03' - teamcolor (R GREY B); '\x04' - green
+			if (text[c] == '\x01' || text[c] == '\x02' || text[c] == '\x03' || text[c] == '\x04')
 			{
 				// if there are characters in the buffer, we draw them with the current color
 				if (buffer_pos > 0)
@@ -406,6 +407,17 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
+	if ( !pszBuf || !*pszBuf )
+		return;
+
+	// HUD_PRINTTALK / HUD_PRINTRADIO prefix the payload with a control byte.
+	// Keep it out of the visible chat buffer so the line aligns with normal saytext.
+	if ( pszBuf[0] == '\x02' )
+	{
+		++pszBuf;
+		--iBufSize;
+	}
+
 	// find an empty string slot
 	int i;
 	for ( i = 0; i < MAX_LINES; i++ )
