@@ -1,4 +1,5 @@
 
+#include <algorithm>
 
 #include <vgui_controls/HTML.h>
 #include <vgui_controls/Label.h>
@@ -34,31 +35,70 @@ public:
 static void ShowWebMOTD( const char *title, const char *msg, int x, int y, int w, int h )
 {
 	EM_ASM({
+		const rootId = "xash-web-motd-root";
 		const overlayId = "xash-web-motd-overlay";
+		let root = document.getElementById( rootId );
+		if( !root )
+		{
+			root = document.createElement( "div" );
+			root.id = rootId;
+			document.body.appendChild( root );
+		}
+
+		root.style.position = 'fixed';
+		root.style.left = '0';
+		root.style.top = '0';
+		root.style.width = '100%';
+		root.style.height = '100%';
+		root.style.pointerEvents = 'none';
+		root.style.zIndex = '2147483647';
+
 		let overlay = document.getElementById( overlayId );
 		if( !overlay )
 		{
 			overlay = document.createElement( "div" );
 			overlay.id = overlayId;
-			document.body.appendChild( overlay );
+			root.appendChild( overlay );
 		}
 
-		overlay.style.position = 'fixed';
-		const left = Number( $2 );
-		const top = Number( $3 );
-		const width = Number( $4 );
-		const height = Number( $5 );
-		overlay.style.left = left + "px";
-		overlay.style.top = top + "px";
-		overlay.style.width = width + "px";
-		overlay.style.height = height + "px";
-		overlay.style.zIndex = '2147483647';
+		var canvas = ( Module && Module.canvas ) ? Module.canvas : null;
+		var rectLeft = 0;
+		var rectTop = 0;
+		var rectWidth = window.innerWidth;
+		var rectHeight = window.innerHeight;
+		var canvasW = window.innerWidth;
+		var canvasH = window.innerHeight;
+
+		if( canvas )
+		{
+			var rect = canvas.getBoundingClientRect();
+			rectLeft = rect.left;
+			rectTop = rect.top;
+			rectWidth = rect.width;
+			rectHeight = rect.height;
+			canvasW = canvas.width;
+			canvasH = canvas.height;
+		}
+
+		var scaleX = canvasW > 0 ? rectWidth / canvasW : 1;
+		var scaleY = canvasH > 0 ? rectHeight / canvasH : 1;
+
+		var left = Number( $2 );
+		var top = Number( $3 );
+		var width = Number( $4 );
+		var height = Number( $5 );
+		overlay.style.position = 'absolute';
+		overlay.style.left = ( rectLeft + ( left * scaleX ) ) + "px";
+		overlay.style.top = ( rectTop + ( top * scaleY ) ) + "px";
+		overlay.style.width = ( width * scaleX ) + "px";
+		overlay.style.height = ( height * scaleY ) + "px";
 		overlay.style.background = '#101214';
 		overlay.style.border = '0';
 		overlay.style.margin = '0';
 		overlay.style.padding = '0';
 		overlay.style.overflow = 'hidden';
 		overlay.style.boxSizing = 'border-box';
+		overlay.style.pointerEvents = 'auto';
 
 		overlay.innerHTML = "";
 
@@ -306,6 +346,23 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	SetTitle( title, false );
 	m_pServerName->SetText( title ? title : "" );
 
+// // #if defined( __EMSCRIPTEN__ )
+// // 	PerformLayout();
+// 	int htmlX = 50, htmlY = 0, htmlW = 0, htmlH = 0;
+// 	m_pMessageHtml->GetPos( htmlX, htmlY );
+// 	m_pMessageHtml->LocalToScreen( htmlX, htmlY );
+// 	m_pMessageHtml->GetSize( htmlW, htmlH );
+// // 	if( htmlW <= 0 || htmlH <= 0 )
+// // 	{
+// // 		htmlW = scheme()->GetProportionalScaledValue( 430 );
+// // 		htmlH = scheme()->GetProportionalScaledValue( 360 );
+// // 	}
+
+// 	ShowWebMOTD( title, msg, htmlX, htmlY, htmlW, htmlH );
+// 	return;
+// // #endif
+
+
 #if defined( __EMSCRIPTEN__ )
 	PerformLayout();
 	int htmlX = 0, htmlY = 0, htmlW = 0, htmlH = 0;
@@ -325,6 +382,9 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	ShowWebMOTD( title, msg, htmlX, htmlY, htmlW, htmlH );
 	return;
 #endif
+
+
+
 
 	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
 
