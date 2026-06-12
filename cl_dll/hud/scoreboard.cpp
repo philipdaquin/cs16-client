@@ -93,8 +93,9 @@ static vgui2::HFont g_ScoreboardBodyFont = vgui2::INVALID_FONT;
 static vgui2::HFont g_ScoreboardTitleFont = vgui2::INVALID_FONT;
 static const int SCOREBOARD_DIVIDER_INSET_X = 8;
 static const int SCOREBOARD_DIVIDER_INSET_Y = 2;
-#define ROW_GAP  36
-#define ROW_FILL_HEIGHT 36
+static const int SCOREBOARD_ROW_FILL_HEIGHT_MAX = 36;
+static const int SCOREBOARD_ROW_FILL_HEIGHT_MIN = 30;
+static const int SCOREBOARD_ROW_FILL_HEIGHT_SWITCH_PLAYER_COUNT = 20;
 
 static void EnsureScoreboardFonts()
 {
@@ -161,7 +162,27 @@ static int ScoreboardTextWidth( vgui2::HFont font, const char *text )
 	return width;
 }
 
-static int ScoreboardRowTextY( vgui2::HFont font, int rowTopY )
+static int CountConnectedPlayers()
+{
+	int count = 0;
+
+	for ( int i = 1; i < MAX_PLAYERS; ++i )
+	{
+		if ( g_PlayerInfoList[i].name && g_PlayerInfoList[i].name[0] )
+			++count;
+	}
+
+	return count;
+}
+
+static int GetScoreboardRowFillHeight()
+{
+	return CountConnectedPlayers() > SCOREBOARD_ROW_FILL_HEIGHT_SWITCH_PLAYER_COUNT
+		? SCOREBOARD_ROW_FILL_HEIGHT_MIN
+		: SCOREBOARD_ROW_FILL_HEIGHT_MAX;
+}
+
+static int ScoreboardRowTextY( vgui2::HFont font, int rowTopY, int rowHeight )
 {
 	EnsureScoreboardFonts();
 
@@ -169,7 +190,7 @@ static int ScoreboardRowTextY( vgui2::HFont font, int rowTopY )
 		return rowTopY;
 
 	const int fontTall = vgui2::surface()->GetFontTall( font );
-	return rowTopY + ( ( ROW_FILL_HEIGHT - fontTall ) / 2 );
+	return rowTopY + ( ( rowHeight - fontTall ) / 2 );
 }
 
 static void DrawScoreboardText( vgui2::HFont font, int x, int y, const char *text, int r, int g, int b )
@@ -339,6 +360,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	const vgui2::HFont titleFont = g_ScoreboardTitleFont;
 	const int leftPad = 16;
 	const int rightPad = 16;
+	const int rowFillHeight = GetScoreboardRowFillHeight();
 
 	// calculate columns sizes
 	g_Columns[COL_PING].start = xend - rightPad;
@@ -370,7 +392,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	DrawRoundedBackground( bgColor, xstart, ystart, wide, tall );
 
-	int ypos = ystart + (list_slot * ROW_GAP) + 5;
+	int ypos = ystart + (list_slot * rowFillHeight) + 5;
 
 	if( gHUD.m_szServerName[0] )
 		// snprintf( ServerName, 80, "%s", (char*)(gHUD.m_Teamplay ? "TEAMS" : "PLAYERS"), gHUD.m_szServerName );
@@ -388,7 +410,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	// Controls the gap between the headers adn the playlist 
 	list_slot += 0.5; // default is 2 with the diviider line 
-	ypos = ystart + (list_slot * ROW_GAP);
+	ypos = ystart + (list_slot * rowFillHeight);
 	// Divider line 
 	// FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ypos + SCOREBOARD_DIVIDER_INSET_Y, wide - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, m_colors.r, m_colors.g, m_colors.b, m_colors.a );  // separator matches background
 
@@ -396,20 +418,20 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	if ( gHUD.m_Teamplay )
 	{
-		DrawTeams( list_slot );
+		DrawTeams( list_slot, rowFillHeight );
 	}
 	else
 	{
 		// it's not teamplay,  so just draw a simple player list
-		DrawPlayers( list_slot );
+		DrawPlayers( list_slot, rowFillHeight );
 	}
 	return 1;
 }
 
-int CHudScoreboard :: DrawTeams( float list_slot )
+int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
 {
 	int j;
-	int ypos = ystart + (list_slot * ROW_GAP) + 5;
+	int ypos = ystart + (list_slot * rowFillHeight) + 5;
 
 	// clear out team scores
 	for ( int i = 1; i <= m_iNumTeams; i++ )
@@ -502,7 +524,7 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 		if ( team_info->players <= 0 )
 			continue;
 
-		ypos = ystart + (list_slot * ROW_GAP);
+		ypos = ystart + (list_slot * rowFillHeight);
 
 		// check we haven't drawn too far down
 		if ( ypos > yend )  // don't draw to close to the lower border
@@ -559,22 +581,22 @@ int CHudScoreboard :: DrawTeams( float list_slot )
 
 		// draw underline
 		list_slot += 0.55f;
-		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * ROW_GAP) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
+		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * rowFillHeight) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
 
 		list_slot += 0.1f;
 		// draw all the players that belong to this team, indented slightly
-		list_slot = DrawPlayers( list_slot, 25, team_info->name );
+		list_slot = DrawPlayers( list_slot, rowFillHeight, 25, team_info->name );
 	}
 
 	// draw all the players who are not in a team
 	list_slot += 4.0f;
-	DrawPlayers( list_slot, 0, "" );
+	DrawPlayers( list_slot, rowFillHeight, 0, "" );
 
 	return 1;
 }
 
 // returns the ypos where it finishes drawing
-int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *team )
+int CHudScoreboard :: DrawPlayers( float list_slot, int rowFillHeight, int nameoffset, const char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while ( 1 )
@@ -606,7 +628,7 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		// draw out the best player
 		hud_player_info_t *pl_info = &g_PlayerInfoList[best_player];
 
-		int ypos = ystart + (list_slot * ROW_GAP);
+		int ypos = ystart + (list_slot * rowFillHeight);
 
 		// check we haven't drawn too far down
 		if ( ypos > yend )  // don't draw to close to the lower border
@@ -617,11 +639,11 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int nameoffset, const char *
 		r *= colors[0];
 		g *= colors[1];
 		b *= colors[2];
-		const int textY = ScoreboardRowTextY( g_ScoreboardBodyFont, ypos );
+		const int textY = ScoreboardRowTextY( g_ScoreboardBodyFont, ypos, rowFillHeight );
 
 		if(pl_info->thisplayer) // hey, it's me!
 		{
-			FillRGBABlend( xstart, ypos, xend - xstart, ROW_FILL_HEIGHT, 255, 255, 255, 15 );
+			FillRGBABlend( xstart, ypos, xend - xstart, rowFillHeight, 255, 255, 255, 15 );
 		}
 
 		DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + nameoffset, textY, g_Columns[COL_NAME].end, pl_info->name, r, g, b );
