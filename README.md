@@ -1,9 +1,16 @@
-# CS16Client [![Build Status](https://github.com/Velaron/cs16-client/actions/workflows/build.yml/badge.svg)](https://github.com/Velaron/cs16-client/actions) <img align="right" width="128" height="128" src="https://github.com/Velaron/cs16-client/raw/main/android/app/src/main/ic_launcher-playstore.png" alt="CS16Client" />
+# CS16Client <img align="right" width="128" height="128" src="https://github.com/Velaron/cs16-client/raw/main/android/app/src/main/ic_launcher-playstore.png" alt="CS16Client" />
 Fork notes:
-* Added VGUI2 integration.
-* The buy menu button mouseover panel still has issues.
-* There are still bugs in some buy submenus when opening them.
-* Full integration of the original Valve game UI is still incomplete.
+* Credits and references:
+  * VGUI2 integration work was built with reference to the original Valve UI implementation.
+  * We use a third-party Valve VDF parser.
+  * We also reference the original Source SDK, CSMOE source code, and the leaked Counter-Strike: Source SDK.
+* Future work:
+  * Fully support the mouseover panel for each buy menu button.
+  * Fix buy menu button fonts so they align with the original version and use the correct declension scheme.
+  * Make background panels adapt more dynamically to screen size.
+  * Finish support for the original Valve game menu behavior for Counter-Strike versions 47 and 48.
+  * Recreate the full Counter-Strike 1.6 v48 experience on this client.
+* Platform support: this fork currently focuses on WebAssembly.
 * To compile this fork, use `docker compose -f docker-compose.yml build` with `Dockerfile.test`.
 
 Reverse-engineered Counter Strike 1.6 client, designed for mobile platforms and other officially non-supported platforms.
