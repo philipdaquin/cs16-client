@@ -357,8 +357,8 @@ public:
 	int Draw( float flTime );
 
 	int DrawScoreboard( float flTime );
-	int DrawTeams( float listslot, int rowFillHeight );
-	int DrawPlayers( float listslot, int rowFillHeight, int nameoffset = 0, const char *team = NULL ); // returns the ypos where it finishes drawing
+	int DrawTeams( float listslot, int rowFillHeight, int maxRows );
+	int DrawPlayers( float listslot, int rowFillHeight, int nameoffset = 0, const char *team = NULL, int maxPlayerRows = -1 ); // returns the ypos where it finishes drawing
 
 	void DeathMsg( int killer, int victim );
 	void SetScoreboardDefaults( void );

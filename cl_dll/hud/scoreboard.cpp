@@ -182,6 +182,20 @@ static int GetScoreboardRowFillHeight()
 		: SCOREBOARD_ROW_FILL_HEIGHT_MAX;
 }
 
+static float EstimateTeamBlockRows( const team_info_t *teamInfo )
+{
+	if ( !teamInfo || teamInfo->players <= 0 )
+		return 0.0f;
+
+	// Header + underline/gap + player rows + trailing gap.
+	return (float)teamInfo->players + 4.0f;
+}
+
+static int GetScoreboardMaxRows( int rowFillHeight )
+{
+	return ( yend - ystart ) / rowFillHeight;
+}
+
 static int ScoreboardRowTextY( vgui2::HFont font, int rowTopY, int rowHeight )
 {
 	EnsureScoreboardFonts();
@@ -361,6 +375,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	const int leftPad = 16;
 	const int rightPad = 16;
 	const int rowFillHeight = GetScoreboardRowFillHeight();
+	const int maxRows = GetScoreboardMaxRows( rowFillHeight );
 
 	// calculate columns sizes
 	g_Columns[COL_PING].start = xend - rightPad;
@@ -418,7 +433,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 
 	if ( gHUD.m_Teamplay )
 	{
-		DrawTeams( list_slot, rowFillHeight );
+		DrawTeams( list_slot, rowFillHeight, maxRows );
 	}
 	else
 	{
@@ -428,7 +443,7 @@ int CHudScoreboard :: DrawScoreboard( float fTime )
 	return 1;
 }
 
-int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
+int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight, int maxRows )
 {
 	int j;
 	int ypos = ystart + (list_slot * rowFillHeight) + 5;
@@ -511,12 +526,20 @@ int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
 
 		// draw the best team on the scoreboard
 		if ( !best_team )
+			break;
+
+		if ( iSpectatorPos != -1 && g_TeamInfo[iSpectatorPos].players > 0 && g_TeamInfo[iSpectatorPos].already_drawn == FALSE && best_team != iSpectatorPos )
 		{
-			// if spectators is found and still not drawn
-			if( iSpectatorPos != -1 && g_TeamInfo[iSpectatorPos].already_drawn == FALSE )
-				best_team = iSpectatorPos;
-			else break;
+			const int rowsUsed = (int)ceilf( list_slot );
+			const int rowsLeft = maxRows - rowsUsed;
+			const int spectatorRows = (int)ceilf( EstimateTeamBlockRows( &g_TeamInfo[iSpectatorPos] ) );
+			const int reservedRows = min( spectatorRows, maxRows );
+
+			// Keep enough room for spectators instead of letting the last regular team consume the entire box.
+			if ( rowsLeft <= reservedRows )
+				break;
 		}
+
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
@@ -574,18 +597,52 @@ int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
 		{
 			char buf[32];
 			snprintf( buf, sizeof( buf ), "%d", team_info->sumping / team_info->players );
-			DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
+		DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
 		}
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
 
 		// draw underline
-		list_slot += 0.55f;
+		list_slot += 0.60f;
 		FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * rowFillHeight) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
 
 		list_slot += 0.1f;
 		// draw all the players that belong to this team, indented slightly
-		list_slot = DrawPlayers( list_slot, rowFillHeight, 25, team_info->name );
+		const int rowsUsed = (int)ceilf( list_slot );
+		const int rowsLeft = maxRows - rowsUsed;
+		const int spectatorRows = ( iSpectatorPos != -1 && g_TeamInfo[iSpectatorPos].players > 0 && g_TeamInfo[iSpectatorPos].already_drawn == FALSE )
+			? (int)ceilf( EstimateTeamBlockRows( &g_TeamInfo[iSpectatorPos] ) )
+			: 0;
+		const int maxPlayerRows = spectatorRows > 0 ? max( 0, rowsLeft - spectatorRows - 4 ) : -1;
+		list_slot = DrawPlayers( list_slot, rowFillHeight, 25, team_info->name, maxPlayerRows );
+	}
+
+	if ( iSpectatorPos != -1 && g_TeamInfo[iSpectatorPos].already_drawn == FALSE )
+	{
+		team_info_t *team_info = &g_TeamInfo[iSpectatorPos];
+		int ypos = ystart + (list_slot * rowFillHeight);
+
+		if ( ypos + rowFillHeight <= yend )
+		{
+			int r, g, b;
+			char teamName[64];
+
+			sprintf( teamName, "%s", Localize( "#Spectators" ) );
+			GetTeamColor( r, g, b, team_info->teamnumber );
+
+			DrawScoreboardTextClipped( g_ScoreboardBodyFont, g_Columns[COL_NAME].start + 25, ypos, g_Columns[COL_NAME].end, teamName, r, g, b );
+			{
+				char buf[32];
+				snprintf( buf, sizeof( buf ), "%d", team_info->sumping / team_info->players );
+				DrawScoreboardTextRight( g_ScoreboardBodyFont, g_Columns[COL_PING].start, ypos, buf, r, g, b );
+			}
+
+			team_info->already_drawn = TRUE;
+			list_slot += 0.60f;
+			FillRGBA( xstart + SCOREBOARD_DIVIDER_INSET_X, ystart + (list_slot * rowFillHeight) + SCOREBOARD_DIVIDER_INSET_Y, ( xend - xstart ) - ( SCOREBOARD_DIVIDER_INSET_X * 2 ), 1, r, g, b, 255);
+			list_slot += 0.1f;
+			DrawPlayers( list_slot, rowFillHeight, 25, team_info->name );
+		}
 	}
 
 	// draw all the players who are not in a team
@@ -596,11 +653,15 @@ int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
 }
 
 // returns the ypos where it finishes drawing
-int CHudScoreboard :: DrawPlayers( float list_slot, int rowFillHeight, int nameoffset, const char *team )
+int CHudScoreboard :: DrawPlayers( float list_slot, int rowFillHeight, int nameoffset, const char *team, int maxPlayerRows )
 {
 	// draw the players, in order,  and restricted to team if set
+	int playersDrawn = 0;
 	while ( 1 )
 	{
+		if ( maxPlayerRows >= 0 && playersDrawn >= maxPlayerRows )
+			break;
+
 		// Find the top ranking player
 		int highest_frags = -99999;	int lowest_deaths = 99999;
 		int best_player = 0;
@@ -722,9 +783,10 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int rowFillHeight, int nameo
 
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again
 		list_slot++;
+		playersDrawn++;
 	}
 
-	list_slot += 2.0f;
+	list_slot += 1.0f;
 
 	return list_slot;
 }
