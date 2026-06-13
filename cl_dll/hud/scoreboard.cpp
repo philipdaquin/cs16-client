@@ -526,8 +526,8 @@ int CHudScoreboard :: DrawTeams( float list_slot, int rowFillHeight )
 
 		ypos = ystart + (list_slot * rowFillHeight);
 
-		// check we haven't drawn too far down
-		if ( ypos > yend )  // don't draw to close to the lower border
+		// check the full row fits inside the rounded background
+		if ( ypos + rowFillHeight > yend )
 			break;
 
 		int r, g, b;
@@ -630,8 +630,8 @@ int CHudScoreboard :: DrawPlayers( float list_slot, int rowFillHeight, int nameo
 
 		int ypos = ystart + (list_slot * rowFillHeight);
 
-		// check we haven't drawn too far down
-		if ( ypos > yend )  // don't draw to close to the lower border
+		// check the full row fits inside the rounded background
+		if ( ypos + rowFillHeight > yend )
 			break;
 
 		int r = 255, g = 255, b = 255;
